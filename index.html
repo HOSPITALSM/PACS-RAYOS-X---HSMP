@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -67,7 +66,9 @@ button,input,select{
     object-fit:contain;
 }
 
-.brand{min-width:280px}
+.brand{
+    min-width:280px;
+}
 
 .brand-title{
     font-size:15px;
@@ -140,6 +141,23 @@ button,input,select{
     white-space:nowrap;
 }
 
+.new-study-button{
+    display:none;
+    height:34px;
+    padding:0 13px;
+    background:var(--green);
+    border:0;
+    border-radius:4px;
+    color:#07120d;
+    font-size:10px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.new-study-button:hover{
+    background:#55d99d;
+}
+
 .app{
     height:calc(100vh - 64px);
     display:grid;
@@ -182,7 +200,9 @@ button,input,select{
     overflow-y:auto;
 }
 
-.calendar{padding:12px}
+.calendar{
+    padding:12px;
+}
 
 .calendar-header{
     display:flex;
@@ -239,9 +259,17 @@ button,input,select{
     position:relative;
 }
 
-.day:hover{background:var(--hover)}
-.day.other-month{color:#3e4247}
-.day.today{border:1px solid #676d74}
+.day:hover{
+    background:var(--hover);
+}
+
+.day.other-month{
+    color:#3e4247;
+}
+
+.day.today{
+    border:1px solid #676d74;
+}
 
 .day.selected{
     background:#d3d7da;
@@ -281,7 +309,9 @@ button,input,select{
     cursor:pointer;
 }
 
-.patient:hover{background:var(--hover)}
+.patient:hover{
+    background:var(--hover);
+}
 
 .patient.active{
     background:var(--selected);
@@ -457,7 +487,9 @@ button,input,select{
     border-color:var(--green);
 }
 
-.info-panel{overflow-y:auto}
+.info-panel{
+    overflow-y:auto;
+}
 
 .info-section{
     padding:15px;
@@ -472,7 +504,9 @@ button,input,select{
     margin-bottom:13px;
 }
 
-.info-row{margin-bottom:11px}
+.info-row{
+    margin-bottom:11px;
+}
 
 .info-label{
     display:block;
@@ -617,12 +651,6 @@ button,input,select{
     border-color:var(--green);
 }
 
-.form-select option,
-.form-select optgroup{
-    background:#1a1d20;
-    color:#eee;
-}
-
 .file-input{
     width:100%;
     padding:10px;
@@ -679,8 +707,13 @@ button,input,select{
     line-height:1.5;
 }
 
-.status-success{color:var(--green)}
-.status-error{color:#e47777}
+.status-success{
+    color:var(--green);
+}
+
+.status-error{
+    color:#e47777;
+}
 
 .login-box{
     width:100%;
@@ -721,76 +754,30 @@ button,input,select{
     display:none;
 }
 
-.admin-new-study{
+/* ================= LATERALIDAD ================= */
+
+#lateralityGroup{
     display:none;
-    height:34px;
-    padding:0 13px;
-    background:var(--green);
-    border:0;
-    border-radius:4px;
-    color:#07120d;
-    font-size:10px;
-    font-weight:bold;
-    cursor:pointer;
 }
 
-.admin-new-study:hover{
-    background:#55d99d;
-}
-
-.study-preview{
-    margin-top:8px;
-    padding:10px;
-    background:#191c1f;
-    border:1px solid #2b2f34;
-    border-radius:5px;
-    color:#8f969d;
-    font-size:10px;
-    line-height:1.6;
-}
-
-.study-preview strong{
-    color:var(--green);
-}
-
-.hidden{
-    display:none !important;
-}
+/* ================= RESPONSIVE ================= */
 
 @media(max-width:1100px){
+
     .app{
         grid-template-columns:220px 220px 1fr 210px;
     }
 
-    .brand{min-width:250px}
+    .brand{
+        min-width:250px;
+    }
+
 }
 
 @media(max-width:800px){
-    body{overflow:auto}
 
-    .topbar{
-        height:auto;
-        min-height:64px;
-        flex-wrap:wrap;
-        padding:8px 12px;
-    }
-
-    .logo{
-        width:70px;
-        height:70px;
-    }
-
-    .brand{
-        min-width:0;
-        flex:1;
-    }
-
-    .brand-title{
-        font-size:12px;
-    }
-
-    .current-date{
-        display:none;
+    body{
+        overflow:auto;
     }
 
     .app{
@@ -817,382 +804,405 @@ button,input,select{
         display:none;
     }
 
-    .admin-new-study{
-        font-size:9px;
-        padding:0 8px;
-    }
 }
 </style>
-
 </head>
 
 <body>
 
 <header class="topbar">
 
-<div class="logo">
-    <img src="logorx.jpg" alt="Logo RX">
-</div>
-
-<div class="brand">
-    <div class="brand-title">
-        HOSPITAL SAN MARTÍN DE PANGOA - RAYOS X
+    <div class="logo">
+        <img src="logorx.jpg" alt="Logo RX">
     </div>
 
-```
-<div class="brand-subtitle">
-    VISOR DE IMÁGENES RADIOGRÁFICAS
-</div>
-```
+    <div class="brand">
+        <div class="brand-title">
+            HOSPITAL SAN MARTÍN DE PANGOA - RAYOS X
+        </div>
 
-</div>
+        <div class="brand-subtitle">
+            VISOR DE IMÁGENES RADIOGRÁFICAS
+        </div>
+    </div>
 
-<div class="search">
-    <input
-        id="search"
-        type="text"
-        placeholder="Buscar paciente..."
-        oninput="searchPatients()">
-</div>
+    <div class="search">
+        <input
+            id="search"
+            type="text"
+            placeholder="Buscar paciente..."
+            oninput="searchPatients()">
+    </div>
 
-<div class="current-date" id="currentDateLabel">
-    --
-</div>
+    <div
+        class="current-date"
+        id="currentDateLabel">
+        --
+    </div>
 
-<div class="auth-area">
+    <div class="auth-area">
 
-```
-<span
-    class="auth-user"
-    id="authUser">
-</span>
+        <span
+            class="auth-user"
+            id="authUser">
+        </span>
 
-<button
-    class="admin-new-study"
-    id="newStudyButton"
-    onclick="openAdmin()">
-    + NUEVO ESTUDIO
-</button>
+        <!-- ESTE BOTÓN APARECE SOLO CUANDO EL ADMIN ESTÁ LOGUEADO -->
+        <button
+            class="new-study-button"
+            id="newStudyButton"
+            onclick="openAdmin()">
+            + NUEVO ESTUDIO
+        </button>
 
-<button
-    class="auth-button"
-    id="loginButton"
-    onclick="openLogin()">
-    ADMINISTRADOR
-</button>
+        <button
+            class="auth-button"
+            id="loginButton"
+            onclick="openLogin()">
+            ADMINISTRADOR
+        </button>
 
-<button
-    class="auth-button logout-button"
-    id="logoutButton"
-    onclick="logoutAdmin()">
-    CERRAR SESIÓN
-</button>
-```
+        <button
+            class="auth-button logout-button"
+            id="logoutButton"
+            onclick="logoutAdmin()">
+            CERRAR SESIÓN
+        </button>
 
-</div>
+    </div>
 
 </header>
+
 
 <div class="app">
 
 <section class="panel">
 
-<div class="panel-header">
-    <span class="panel-title">Fecha</span>
-</div>
+    <div class="panel-header">
+        <span class="panel-title">Fecha</span>
+    </div>
 
-<div class="panel-body">
+    <div class="panel-body">
 
-```
-<div class="calendar">
+        <div class="calendar">
 
-    <div class="calendar-header">
+            <div class="calendar-header">
 
-        <button
-            class="calendar-button"
-            onclick="previousMonth()">‹</button>
+                <button
+                    class="calendar-button"
+                    onclick="previousMonth()">‹</button>
 
-        <div
-            class="calendar-month"
-            id="calendarMonth">
+                <div
+                    class="calendar-month"
+                    id="calendarMonth">
+                </div>
+
+                <button
+                    class="calendar-button"
+                    onclick="nextMonth()">›</button>
+
+            </div>
+
+            <div class="calendar-weekdays">
+                <div>L</div>
+                <div>M</div>
+                <div>M</div>
+                <div>J</div>
+                <div>V</div>
+                <div>S</div>
+                <div>D</div>
+            </div>
+
+            <div
+                class="calendar-days"
+                id="calendarDays">
+            </div>
+
+            <button
+                class="today-button"
+                onclick="goToday()">
+                IR A HOY
+            </button>
+
         </div>
 
-        <button
-            class="calendar-button"
-            onclick="nextMonth()">›</button>
-
     </div>
-
-    <div class="calendar-weekdays">
-        <div>L</div>
-        <div>M</div>
-        <div>M</div>
-        <div>J</div>
-        <div>V</div>
-        <div>S</div>
-        <div>D</div>
-    </div>
-
-    <div
-        class="calendar-days"
-        id="calendarDays">
-    </div>
-
-    <button
-        class="today-button"
-        onclick="goToday()">
-        IR A HOY
-    </button>
-
-</div>
-```
-
-</div>
 
 </section>
+
 
 <section class="panel">
 
-<div class="panel-header">
+    <div class="panel-header">
 
-```
-<span class="panel-title">
-    Pacientes
-</span>
+        <span class="panel-title">
+            Pacientes
+        </span>
 
-<span
-    class="panel-count"
-    id="patientCount">
-    0
-</span>
-```
+        <span
+            class="panel-count"
+            id="patientCount">
+            0
+        </span>
 
-</div>
+    </div>
 
-<div
-    class="panel-body"
-    id="patientList">
-</div>
+    <div
+        class="panel-body"
+        id="patientList">
+    </div>
 
 </section>
+
 
 <section class="viewer">
 
-<div class="viewer-header">
+    <div class="viewer-header">
 
-```
-<div>
+        <div>
 
-    <div
-        class="viewer-title"
-        id="viewerTitle">
-        Seleccione un estudio
+            <div
+                class="viewer-title"
+                id="viewerTitle">
+                Seleccione un estudio
+            </div>
+
+            <div
+                class="viewer-subtitle"
+                id="viewerSubtitle">
+                Conectando con Supabase...
+            </div>
+
+        </div>
+
+        <div
+            class="image-counter"
+            id="imageCounter">
+            --
+        </div>
+
     </div>
 
+
     <div
-        class="viewer-subtitle"
-        id="viewerSubtitle">
-        Conectando con Supabase...
+        class="viewport"
+        id="viewport">
+
+        <div class="overlay-left">
+            PACS RAYOS X · HSMP
+        </div>
+
+        <div
+            class="overlay-right"
+            id="overlayRight">
+            --
+        </div>
+
+        <div
+            class="empty-message"
+            id="emptyMessage">
+            Seleccione un paciente para visualizar sus estudios.
+        </div>
+
+        <div
+            class="image-wrapper"
+            id="imageWrapper"
+            style="display:none;">
+
+            <img
+                id="mainImage"
+                class="main-image"
+                alt="Imagen radiológica">
+
+        </div>
+
     </div>
 
-</div>
 
-<div
-    class="image-counter"
-    id="imageCounter">
-    --
-</div>
-```
+    <div class="toolbar">
 
-</div>
+        <button class="tool" onclick="zoomIn()">🔍+</button>
+        <button class="tool" onclick="zoomOut()">🔍−</button>
+        <button class="tool" onclick="resetView()">↺</button>
 
-<div
-    class="viewport"
-    id="viewport">
+        <div class="separator"></div>
 
-```
-<div class="overlay-left">
-    PACS RAYOS X · HSMP
-</div>
+        <button class="tool" onclick="rotateLeft()">↶</button>
+        <button class="tool" onclick="rotateRight()">↷</button>
+        <button class="tool" onclick="invertImage()">◐</button>
+        <button class="tool" onclick="contrastUp()">C+</button>
+        <button class="tool" onclick="contrastDown()">C−</button>
 
-<div
-    class="overlay-right"
-    id="overlayRight">
-    --
-</div>
+        <div class="separator"></div>
 
-<div
-    class="empty-message"
-    id="emptyMessage">
-    Seleccione un paciente para visualizar sus estudios.
-</div>
+        <button class="tool" onclick="previousImage()">◀</button>
+        <button class="tool" onclick="nextImage()">▶</button>
+        <button class="tool" onclick="openFullscreen()">⛶</button>
 
-<div
-    class="image-wrapper"
-    id="imageWrapper"
-    style="display:none;">
+    </div>
 
-    <img
-        id="mainImage"
-        class="main-image"
-        alt="Imagen radiológica">
 
-</div>
-```
-
-</div>
-
-<div class="toolbar">
-
-```
-<button class="tool" onclick="zoomIn()">🔍+</button>
-<button class="tool" onclick="zoomOut()">🔍−</button>
-<button class="tool" onclick="resetView()">↺</button>
-
-<div class="separator"></div>
-
-<button class="tool" onclick="rotateLeft()">↶</button>
-<button class="tool" onclick="rotateRight()">↷</button>
-<button class="tool" onclick="invertImage()">◐</button>
-<button class="tool" onclick="contrastUp()">C+</button>
-<button class="tool" onclick="contrastDown()">C−</button>
-
-<div class="separator"></div>
-
-<button class="tool" onclick="previousImage()">◀</button>
-<button class="tool" onclick="nextImage()">▶</button>
-<button class="tool" onclick="openFullscreen()">⛶</button>
-```
-
-</div>
-
-<div
-    class="thumbnails"
-    id="thumbnailList">
-</div>
+    <div
+        class="thumbnails"
+        id="thumbnailList">
+    </div>
 
 </section>
 
+
 <aside class="panel info-panel">
 
-<div class="panel-header">
-    <span class="panel-title">
-        Información
-    </span>
-</div>
-
-<div class="info-section">
-
-```
-<div class="info-heading">
-    Paciente
-</div>
-
-<div class="patient-card">
-
-    <div
-        class="patient-card-name"
-        id="infoPatientName">
-        --
+    <div class="panel-header">
+        <span class="panel-title">
+            Información
+        </span>
     </div>
 
-    <div
-        class="patient-card-meta"
-        id="infoPatientMeta">
-        --
+
+    <div class="info-section">
+
+        <div class="info-heading">
+            Paciente
+        </div>
+
+        <div class="patient-card">
+
+            <div
+                class="patient-card-name"
+                id="infoPatientName">
+                --
+            </div>
+
+            <div
+                class="patient-card-meta"
+                id="infoPatientMeta">
+                --
+            </div>
+
+        </div>
+
     </div>
 
-</div>
-```
 
-</div>
+    <div class="info-section">
 
-<div class="info-section">
+        <div class="info-heading">
+            Estudio
+        </div>
 
-```
-<div class="info-heading">
-    Estudio
-</div>
+        <div class="info-row">
 
-<div class="info-row">
-    <span class="info-label">DESCRIPCIÓN</span>
-    <span
-        class="info-value"
-        id="infoStudy">
-        --
-    </span>
-</div>
+            <span class="info-label">
+                DESCRIPCIÓN
+            </span>
 
-<div class="info-row">
-    <span class="info-label">FECHA</span>
-    <span
-        class="info-value"
-        id="infoDate">
-        --
-    </span>
-</div>
+            <span
+                class="info-value"
+                id="infoStudy">
+                --
+            </span>
 
-<div class="info-row">
-    <span class="info-label">MODALIDAD</span>
-    <span
-        class="info-value"
-        id="infoModality">
-        --
-    </span>
-</div>
+        </div>
 
-<div class="info-row">
-    <span class="info-label">IMÁGENES</span>
-    <span
-        class="info-value"
-        id="infoImages">
-        --
-    </span>
-</div>
-```
+        <div class="info-row">
 
-</div>
+            <span class="info-label">
+                FECHA
+            </span>
 
-<div class="info-section">
+            <span
+                class="info-value"
+                id="infoDate">
+                --
+            </span>
 
-```
-<div class="info-heading">
-    Visualización
-</div>
+        </div>
 
-<div class="info-row">
-    <span class="info-label">ZOOM</span>
-    <span
-        class="info-value"
-        id="infoZoom">
-        100%
-    </span>
-</div>
+        <div class="info-row">
 
-<div class="info-row">
-    <span class="info-label">ROTACIÓN</span>
-    <span
-        class="info-value"
-        id="infoRotation">
-        0°
-    </span>
-</div>
+            <span class="info-label">
+                MODALIDAD
+            </span>
 
-<div class="info-row">
-    <span class="info-label">IMAGEN</span>
-    <span
-        class="info-value"
-        id="infoCurrentImage">
-        --
-    </span>
-</div>
-```
+            <span
+                class="info-value"
+                id="infoModality">
+                --
+            </span>
 
-</div>
+        </div>
+
+        <div class="info-row">
+
+            <span class="info-label">
+                IMÁGENES
+            </span>
+
+            <span
+                class="info-value"
+                id="infoImages">
+                --
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <div class="info-section">
+
+        <div class="info-heading">
+            Visualización
+        </div>
+
+        <div class="info-row">
+
+            <span class="info-label">
+                ZOOM
+            </span>
+
+            <span
+                class="info-value"
+                id="infoZoom">
+                100%
+            </span>
+
+        </div>
+
+        <div class="info-row">
+
+            <span class="info-label">
+                ROTACIÓN
+            </span>
+
+            <span
+                class="info-value"
+                id="infoRotation">
+                0°
+            </span>
+
+        </div>
+
+        <div class="info-row">
+
+            <span class="info-label">
+                IMAGEN
+            </span>
+
+            <span
+                class="info-value"
+                id="infoCurrentImage">
+                --
+            </span>
+
+        </div>
+
+    </div>
 
 </aside>
 
 </div>
+
 
 <!-- ================= LOGIN ================= -->
 
@@ -1200,370 +1210,450 @@ button,input,select{
     class="admin-overlay"
     id="loginOverlay">
 
-<div class="login-box">
+    <div class="login-box">
 
-```
-<div class="login-header">
+        <div class="login-header">
 
-    <div class="login-title">
-        ACCESO ADMINISTRADOR
-    </div>
+            <div class="login-title">
+                ACCESO ADMINISTRADOR
+            </div>
 
-    <div class="login-subtitle">
-        Hospital San Martín de Pangoa - Rayos X
+            <div class="login-subtitle">
+                Hospital San Martín de Pangoa - Rayos X
+            </div>
+
+        </div>
+
+        <div class="login-body">
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    Correo electrónico
+                </label>
+
+                <input
+                    class="form-input"
+                    id="loginEmail"
+                    type="email"
+                    autocomplete="username"
+                    placeholder="Correo">
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    Contraseña
+                </label>
+
+                <input
+                    class="form-input"
+                    id="loginPassword"
+                    type="password"
+                    autocomplete="current-password"
+                    placeholder="Contraseña">
+
+            </div>
+
+
+            <div class="admin-actions">
+
+                <button
+                    class="admin-secondary"
+                    onclick="closeLogin()">
+                    CANCELAR
+                </button>
+
+                <button
+                    class="admin-primary"
+                    onclick="loginAdmin()">
+                    INGRESAR
+                </button>
+
+            </div>
+
+
+            <div
+                class="status-message"
+                id="loginStatus">
+            </div>
+
+        </div>
+
     </div>
 
 </div>
 
-<div class="login-body">
 
-    <div class="form-group">
-
-        <label class="form-label">
-            Correo electrónico
-        </label>
-
-        <input
-            class="form-input"
-            id="loginEmail"
-            type="email"
-            autocomplete="username"
-            placeholder="Correo">
-
-    </div>
-
-    <div class="form-group">
-
-        <label class="form-label">
-            Contraseña
-        </label>
-
-        <input
-            class="form-input"
-            id="loginPassword"
-            type="password"
-            autocomplete="current-password"
-            placeholder="Contraseña">
-
-    </div>
-
-    <div class="admin-actions">
-
-        <button
-            class="admin-secondary"
-            onclick="closeLogin()">
-            CANCELAR
-        </button>
-
-        <button
-            class="admin-primary"
-            onclick="loginAdmin()">
-            INGRESAR
-        </button>
-
-    </div>
-
-    <div
-        class="status-message"
-        id="loginStatus">
-    </div>
-
-</div>
-```
-
-</div>
-
-</div>
-
-<!-- ================= PANEL ADMINISTRADOR ================= -->
+<!-- ================= PANEL NUEVO ESTUDIO ================= -->
 
 <div
     class="admin-overlay"
     id="adminOverlay">
 
-<div class="admin-box">
+    <div class="admin-box">
 
-```
-<div class="admin-header">
+        <div class="admin-header">
 
-    <div class="admin-title">
-        NUEVO ESTUDIO RADIOGRÁFICO
-    </div>
+            <div class="admin-title">
+                NUEVO ESTUDIO RADIOGRÁFICO
+            </div>
 
-    <button
-        class="admin-close"
-        onclick="closeAdmin()">
-        ×
-    </button>
+            <button
+                class="admin-close"
+                onclick="closeAdmin()">
+                ×
+            </button>
 
-</div>
+        </div>
 
-<div class="admin-body">
 
-    <div class="form-group">
+        <div class="admin-body">
 
-        <label class="form-label">
-            Nombre completo del paciente
-        </label>
 
-        <input
-            class="form-input"
-            id="adminPatient"
-            type="text"
-            placeholder="Ej. JUAN PÉREZ GARCÍA">
+            <!-- PACIENTE -->
 
-    </div>
+            <div class="form-group">
 
-    <div class="form-group">
+                <label class="form-label">
+                    Nombre del paciente
+                </label>
 
-        <label class="form-label">
-            Fecha del estudio
-        </label>
+                <input
+                    class="form-input"
+                    id="adminPatient"
+                    type="text"
+                    placeholder="Ej. JUAN PÉREZ GARCÍA">
 
-        <input
-            class="form-input"
-            id="adminDate"
-            type="date">
+            </div>
 
-    </div>
 
-    <!-- ================= ESTRUCTURA ================= -->
+            <!-- FECHA -->
 
-    <div class="form-group">
+            <div class="form-group">
 
-        <label class="form-label">
-            Estructura anatómica
-        </label>
+                <label class="form-label">
+                    Fecha del estudio
+                </label>
 
-        <select
-            class="form-select"
-            id="adminStructure"
-            onchange="updateSideSelector();updateStudyPreview();">
+                <input
+                    class="form-input"
+                    id="adminDate"
+                    type="date">
 
-            <option value="">
-                Seleccionar estructura...
-            </option>
+            </div>
 
-            <optgroup label="Tórax y abdomen">
-                <option value="TÓRAX">Tórax</option>
-                <option value="ABDOMEN">Abdomen</option>
-                <option value="ABDOMEN SIMPLE">Abdomen simple</option>
-                <option value="ABDOMEN DE PIE">Abdomen de pie</option>
-                <option value="ABDOMEN DECÚBITO">Abdomen en decúbito</option>
-                <option value="PELVIS">Pelvis</option>
-            </optgroup>
 
-            <optgroup label="Columna vertebral">
-                <option value="COLUMNA CERVICAL">Columna cervical</option>
-                <option value="COLUMNA DORSAL">Columna dorsal</option>
-                <option value="COLUMNA LUMBAR">Columna lumbar</option>
-                <option value="COLUMNA SACRA">Columna sacra</option>
-                <option value="COLUMNA LUMBOSACRA">Columna lumbosacra</option>
-                <option value="SACROCOXÍGEA">Sacrocoxígea</option>
-            </optgroup>
+            <!-- ESTRUCTURA -->
 
-            <optgroup label="Cabeza y cara">
-                <option value="CRÁNEO">Cráneo</option>
-                <option value="SENOS PARANASALES">Senos paranasales</option>
-                <option value="HUESOS PROPIOS NASALES">Huesos propios nasales</option>
-                <option value="MACIZO FACIAL">Macizo facial</option>
-                <option value="MANDÍBULA">Mandíbula</option>
-                <option value="ATM">ATM</option>
-            </optgroup>
+            <div class="form-group">
 
-            <optgroup label="Miembro superior">
-                <option value="HOMBRO">Hombro</option>
-                <option value="BRAZO">Brazo</option>
-                <option value="CODO">Codo</option>
-                <option value="ANTEBRAZO">Antebrazo</option>
-                <option value="MUÑECA">Muñeca</option>
-                <option value="MANO">Mano</option>
-                <option value="DEDOS DE LA MANO">Dedos de la mano</option>
-                <option value="CLAVÍCULA">Clavícula</option>
-                <option value="ESCÁPULA">Escápula</option>
-            </optgroup>
+                <label class="form-label">
+                    Estructura anatómica
+                </label>
 
-            <optgroup label="Miembro inferior">
-                <option value="CADERA">Cadera</option>
-                <option value="FÉMUR">Fémur</option>
-                <option value="MUSLO">Muslo</option>
-                <option value="RODILLA">Rodilla</option>
-                <option value="TIBIA Y PERONÉ">Tibia y peroné</option>
-                <option value="PIERNA">Pierna</option>
-                <option value="TOBILLO">Tobillo</option>
-                <option value="PIE">Pie</option>
-                <option value="DEDOS DEL PIE">Dedos del pie</option>
-                <option value="CALCÁNEO">Calcáneo</option>
-            </optgroup>
+                <select
+                    class="form-select"
+                    id="adminStructure"
+                    onchange="updateLaterality()">
 
-            <optgroup label="Otras estructuras">
-                <option value="COSTILLAS">Costillas</option>
-                <option value="ESTERNÓN">Esternón</option>
-                <option value="ARTICULACIÓN SACROILÍACA">Articulación sacroilíaca</option>
-                <option value="OTRO">Otro</option>
-            </optgroup>
+                    <option value="">
+                        Seleccionar estructura
+                    </option>
 
-        </select>
+                    <optgroup label="Cabeza y cuello">
 
-    </div>
+                        <option value="CRÁNEO">
+                            Cráneo
+                        </option>
 
-    <!-- ================= LADO ================= -->
+                        <option value="SENOS PARANASALES">
+                            Senos paranasales
+                        </option>
 
-    <div
-        class="form-group hidden"
-        id="sideGroup">
+                        <option value="MACIZO FACIAL">
+                            Macizo facial
+                        </option>
 
-        <label class="form-label">
-            Lateralidad
-        </label>
+                        <option value="HUESOS NASALES">
+                            Huesos nasales
+                        </option>
 
-        <select
-            class="form-select"
-            id="adminSide"
-            onchange="updateStudyPreview()">
+                        <option value="MANDÍBULA">
+                            Mandíbula
+                        </option>
 
-            <option value="">
-                Seleccionar...
-            </option>
+                        <option value="ATM">
+                            ATM
+                        </option>
 
-            <option value="DERECHA">
-                Derecha
-            </option>
+                        <option value="COLUMNA CERVICAL">
+                            Columna cervical
+                        </option>
 
-            <option value="IZQUIERDA">
-                Izquierda
-            </option>
+                    </optgroup>
 
-        </select>
 
-    </div>
+                    <optgroup label="Tórax">
 
-    <!-- ================= PROYECCIONES ================= -->
+                        <option value="TÓRAX">
+                            Tórax
+                        </option>
 
-    <div class="form-group">
+                        <option value="COSTILLAS">
+                            Parrilla costal
+                        </option>
 
-        <label class="form-label">
-            Proyección / descripción adicional
-        </label>
+                        <option value="ESTERNÓN">
+                            Esternón
+                        </option>
 
-        <select
-            class="form-select"
-            id="adminProjection"
-            onchange="updateStudyPreview()">
+                        <option value="CLAVÍCULA">
+                            Clavícula
+                        </option>
 
-            <option value="">
-                Sin especificar
-            </option>
+                    </optgroup>
 
-            <option value="AP">
-                AP
-            </option>
 
-            <option value="PA">
-                PA
-            </option>
+                    <optgroup label="Columna vertebral">
 
-            <option value="LATERAL">
-                Lateral
-            </option>
+                        <option value="COLUMNA CERVICAL">
+                            Columna cervical
+                        </option>
 
-            <option value="AP Y LATERAL">
-                AP y lateral
-            </option>
+                        <option value="COLUMNA DORSAL">
+                            Columna dorsal
+                        </option>
 
-            <option value="OBLICUA">
-                Oblicua
-            </option>
+                        <option value="COLUMNA LUMBAR">
+                            Columna lumbar
+                        </option>
 
-            <option value="AP Y OBLICUA">
-                AP y oblicua
-            </option>
+                        <option value="COLUMNA LUMBOSACRA">
+                            Columna lumbosacra
+                        </option>
 
-            <option value="AP, LATERAL Y OBLICUA">
-                AP, lateral y oblicua
-            </option>
+                        <option value="SACROCOCCÍGEA">
+                            Sacrocoxígea
+                        </option>
 
-        </select>
+                    </optgroup>
 
-    </div>
 
-    <!-- ================= PREVISUALIZACIÓN ================= -->
+                    <optgroup label="Miembro superior">
 
-    <div class="study-preview">
-        <strong>Estudio que se registrará:</strong>
-        <br>
-        <span id="studyPreview">
-            Selecciona una estructura.
-        </span>
-    </div>
+                        <option value="HOMBRO">
+                            Hombro
+                        </option>
 
-    <div class="form-group" style="margin-top:15px;">
+                        <option value="HÚMERO">
+                            Húmero
+                        </option>
 
-        <label class="form-label">
-            Modalidad
-        </label>
+                        <option value="CODO">
+                            Codo
+                        </option>
 
-        <select
-            class="form-select"
-            id="adminModality">
+                        <option value="ANTEBRAZO">
+                            Antebrazo
+                        </option>
 
-            <option value="CR">CR</option>
-            <option value="DX">DX</option>
-            <option value="XR">XR</option>
+                        <option value="MUÑECA">
+                            Muñeca
+                        </option>
 
-        </select>
+                        <option value="MANO">
+                            Mano
+                        </option>
 
-    </div>
+                        <option value="DEDOS DE LA MANO">
+                            Dedos de la mano
+                        </option>
 
-    <div class="form-group">
+                    </optgroup>
 
-        <label class="form-label">
-            Imágenes JPG
-        </label>
 
-        <input
-            class="file-input"
-            id="adminFiles"
-            type="file"
-            accept=".jpg,.jpeg,image/jpeg"
-            multiple
-            onchange="showSelectedFiles()">
+                    <optgroup label="Pelvis y miembro inferior">
 
-        <div
-            class="file-list"
-            id="fileList">
-            Ningún archivo seleccionado.
+                        <option value="PELVIS">
+                            Pelvis
+                        </option>
+
+                        <option value="CADERA">
+                            Cadera
+                        </option>
+
+                        <option value="FÉMUR">
+                            Fémur
+                        </option>
+
+                        <option value="RODILLA">
+                            Rodilla
+                        </option>
+
+                        <option value="TIBIA Y PERONÉ">
+                            Tibia y peroné
+                        </option>
+
+                        <option value="TOBILLO">
+                            Tobillo
+                        </option>
+
+                        <option value="PIE">
+                            Pie
+                        </option>
+
+                        <option value="DEDOS DEL PIE">
+                            Dedos del pie
+                        </option>
+
+                        <option value="CALCÁNEO">
+                            Calcáneo
+                        </option>
+
+                    </optgroup>
+
+                </select>
+
+            </div>
+
+
+            <!-- LATERALIDAD -->
+
+            <div
+                class="form-group"
+                id="lateralityGroup">
+
+                <label class="form-label">
+                    Lateralidad
+                </label>
+
+                <select
+                    class="form-select"
+                    id="adminLaterality">
+
+                    <option value="">
+                        Seleccionar
+                    </option>
+
+                    <option value="DERECHA">
+                        Derecha
+                    </option>
+
+                    <option value="IZQUIERDA">
+                        Izquierda
+                    </option>
+
+                    <option value="BILATERAL">
+                        Bilateral
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- PROYECCIÓN -->
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    Proyección / descripción adicional
+                </label>
+
+                <input
+                    class="form-input"
+                    id="adminProjection"
+                    type="text"
+                    placeholder="Ej. AP y lateral">
+
+            </div>
+
+
+            <!-- MODALIDAD -->
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    Modalidad
+                </label>
+
+                <select
+                    class="form-select"
+                    id="adminModality">
+
+                    <option value="CR">
+                        CR
+                    </option>
+
+                    <option value="DX">
+                        DX
+                    </option>
+
+                    <option value="XR">
+                        XR
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- IMÁGENES -->
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    Imágenes JPG
+                </label>
+
+                <input
+                    class="file-input"
+                    id="adminFiles"
+                    type="file"
+                    accept=".jpg,.jpeg,image/jpeg"
+                    multiple
+                    onchange="showSelectedFiles()">
+
+                <div
+                    class="file-list"
+                    id="fileList">
+                    Ningún archivo seleccionado.
+                </div>
+
+            </div>
+
+
+            <div
+                class="status-message"
+                id="adminStatus">
+            </div>
+
+
+            <div class="admin-actions">
+
+                <button
+                    class="admin-secondary"
+                    onclick="closeAdmin()">
+                    CANCELAR
+                </button>
+
+                <button
+                    class="admin-primary"
+                    onclick="createStudyAndUpload()">
+                    CREAR ESTUDIO Y SUBIR IMÁGENES
+                </button>
+
+            </div>
+
         </div>
 
     </div>
 
-    <div
-        class="status-message"
-        id="adminStatus">
-    </div>
-
-    <div class="admin-actions">
-
-        <button
-            class="admin-secondary"
-            onclick="closeAdmin()">
-            CANCELAR
-        </button>
-
-        <button
-            class="admin-primary"
-            onclick="createStudyAndUpload()">
-            CREAR ESTUDIO Y SUBIR IMÁGENES
-        </button>
-
-    </div>
-
-</div>
-```
-
 </div>
 
-</div>
 
 <!-- ================= PANTALLA COMPLETA ================= -->
 
@@ -1571,19 +1661,18 @@ button,input,select{
     class="fullscreen"
     id="fullscreenViewer">
 
-```
-<div
-    class="close-fullscreen"
-    onclick="closeFullscreen()">
-    ×
-</div>
+    <div
+        class="close-fullscreen"
+        onclick="closeFullscreen()">
+        ×
+    </div>
 
-<img
-    id="fullscreenImage"
-    alt="Imagen">
-```
+    <img
+        id="fullscreenImage"
+        alt="Imagen">
 
 </div>
+
 
 <script>
 
@@ -1642,7 +1731,8 @@ let contrast = 1;
 
 function formatDate(dateString){
 
-    if(!dateString) return "--";
+    if(!dateString)
+        return "--";
 
     const parts =
         dateString.split("-");
@@ -1889,6 +1979,7 @@ function getStudiesForDate(){
 
 }
 
+
 function getPatientsForDate(){
 
     const result = [];
@@ -2084,7 +2175,9 @@ function renderCalendar(){
 
         };
 
-        container.appendChild(div);
+        container.appendChild(
+            div
+        );
 
     }
 
@@ -2120,6 +2213,7 @@ function selectDate(date){
 
 }
 
+
 function previousMonth(){
 
     calendarDate.setMonth(
@@ -2130,6 +2224,7 @@ function previousMonth(){
 
 }
 
+
 function nextMonth(){
 
     calendarDate.setMonth(
@@ -2139,6 +2234,7 @@ function nextMonth(){
     renderCalendar();
 
 }
+
 
 function goToday(){
 
@@ -2265,7 +2361,7 @@ function renderPatients(filter=""){
 
                     <span>
                         ${escapeHtml(
-                            first.study ||
+                            first.history ||
                             ""
                         )}
                     </span>
@@ -2333,6 +2429,7 @@ function showFirstStudy(){
     );
 
 }
+
 
 function getCurrentStudy(){
 
@@ -2633,6 +2730,7 @@ function nextImage(){
 
 }
 
+
 function previousImage(){
 
     const study =
@@ -2685,6 +2783,7 @@ function zoomIn(){
 
 }
 
+
 function zoomOut(){
 
     zoom -= .15;
@@ -2712,6 +2811,7 @@ function rotateRight(){
 
 }
 
+
 function rotateLeft(){
 
     rotation -= 90;
@@ -2736,6 +2836,7 @@ function invertImage(){
 
 }
 
+
 function contrastUp(){
 
     contrast += .15;
@@ -2746,6 +2847,7 @@ function contrastUp(){
     applyTransform();
 
 }
+
 
 function contrastDown(){
 
@@ -2805,6 +2907,7 @@ function applyTransform(){
         rotation + "°";
 
 }
+
 
 function resetView(){
 
@@ -2950,6 +3053,7 @@ function openFullscreen(){
 
 }
 
+
 function closeFullscreen(){
 
     document.getElementById(
@@ -3000,14 +3104,17 @@ function openLogin(){
 
     setTimeout(
         () => {
+
             document.getElementById(
                 "loginEmail"
             ).focus();
+
         },
         100
     );
 
 }
+
 
 function closeLogin(){
 
@@ -3091,7 +3198,14 @@ async function loginAdmin(){
             data.user
         );
 
-        openAdmin();
+        /*
+         * IMPORTANTE:
+         * YA NO SE ABRE AUTOMÁTICAMENTE
+         * EL FORMULARIO DE NUEVO ESTUDIO.
+         *
+         * El administrador queda logueado
+         * y utiliza el botón + NUEVO ESTUDIO.
+         */
 
     }
     catch(error){
@@ -3235,7 +3349,7 @@ function updateAuthInterface(user){
 
 
 /* =========================================================
-   ABRIR ADMIN
+   ABRIR ADMIN / NUEVO ESTUDIO
 ========================================================= */
 
 function openAdmin(){
@@ -3265,16 +3379,12 @@ function openAdmin(){
     ).value = "";
 
     document.getElementById(
-        "adminSide"
+        "adminLaterality"
     ).value = "";
 
     document.getElementById(
         "adminProjection"
     ).value = "";
-
-    document.getElementById(
-        "adminModality"
-    ).value = "CR";
 
     document.getElementById(
         "adminFiles"
@@ -3291,15 +3401,9 @@ function openAdmin(){
         "";
 
     document.getElementById(
-        "studyPreview"
-    ).textContent =
-        "Selecciona una estructura.";
-
-    document.getElementById(
-        "sideGroup"
-    ).classList.add(
-        "hidden"
-    );
+        "lateralityGroup"
+    ).style.display =
+        "none";
 
     document.getElementById(
         "adminOverlay"
@@ -3324,6 +3428,69 @@ function closeAdmin(){
 
 
 /* =========================================================
+   LATERALIDAD
+========================================================= */
+
+function updateLaterality(){
+
+    const structure =
+        document.getElementById(
+            "adminStructure"
+        ).value;
+
+    const lateralityGroup =
+        document.getElementById(
+            "lateralityGroup"
+        );
+
+    const upperAndLowerStructures = [
+
+        "HOMBRO",
+        "HÚMERO",
+        "CODO",
+        "ANTEBRAZO",
+        "MUÑECA",
+        "MANO",
+        "DEDOS DE LA MANO",
+
+        "CADERA",
+        "FÉMUR",
+        "RODILLA",
+        "TIBIA Y PERONÉ",
+        "TOBILLO",
+        "PIE",
+        "DEDOS DEL PIE",
+        "CALCÁNEO",
+
+        "CLAVÍCULA"
+
+    ];
+
+    if(
+        upperAndLowerStructures.includes(
+            structure
+        )
+    ){
+
+        lateralityGroup.style.display =
+            "block";
+
+    }
+    else{
+
+        lateralityGroup.style.display =
+            "none";
+
+        document.getElementById(
+            "adminLaterality"
+        ).value = "";
+
+    }
+
+}
+
+
+/* =========================================================
    CERRAR SESIÓN
 ========================================================= */
 
@@ -3334,156 +3501,6 @@ async function logoutAdmin(){
     updateAuthInterface(
         null
     );
-
-}
-
-
-/* =========================================================
-   ESTRUCTURAS QUE NECESITAN LATERALIDAD
-========================================================= */
-
-function requiresSide(structure){
-
-    const sideStructures = [
-
-        "HOMBRO",
-        "BRAZO",
-        "CODO",
-        "ANTEBRAZO",
-        "MUÑECA",
-        "MANO",
-        "DEDOS DE LA MANO",
-        "CLAVÍCULA",
-        "ESCÁPULA",
-
-        "CADERA",
-        "FÉMUR",
-        "MUSLO",
-        "RODILLA",
-        "TIBIA Y PERONÉ",
-        "PIERNA",
-        "TOBILLO",
-        "PIE",
-        "DEDOS DEL PIE",
-        "CALCÁNEO"
-
-    ];
-
-    return sideStructures.includes(
-        structure
-    );
-
-}
-
-
-/* =========================================================
-   MOSTRAR / OCULTAR LATERALIDAD
-========================================================= */
-
-function updateSideSelector(){
-
-    const structure =
-        document.getElementById(
-            "adminStructure"
-        ).value;
-
-    const sideGroup =
-        document.getElementById(
-            "sideGroup"
-        );
-
-    if(
-        requiresSide(structure)
-    ){
-
-        sideGroup.classList.remove(
-            "hidden"
-        );
-
-    }
-    else{
-
-        sideGroup.classList.add(
-            "hidden"
-        );
-
-        document.getElementById(
-            "adminSide"
-        ).value = "";
-
-    }
-
-    updateStudyPreview();
-
-}
-
-
-/* =========================================================
-   GENERAR DESCRIPCIÓN DEL ESTUDIO
-========================================================= */
-
-function buildStudyName(){
-
-    const structure =
-        document.getElementById(
-            "adminStructure"
-        ).value;
-
-    const side =
-        document.getElementById(
-            "adminSide"
-        ).value;
-
-    const projection =
-        document.getElementById(
-            "adminProjection"
-        ).value;
-
-    if(!structure)
-        return "";
-
-    let result =
-        "RADIOGRAFÍA DE " +
-        structure;
-
-    if(
-        requiresSide(structure) &&
-        side
-    ){
-
-        result +=
-            " " +
-            side;
-
-    }
-
-    if(projection){
-
-        result +=
-            " " +
-            projection;
-
-    }
-
-    return result;
-
-}
-
-
-/* =========================================================
-   PREVISUALIZAR ESTUDIO
-========================================================= */
-
-function updateStudyPreview(){
-
-    const result =
-        buildStudyName();
-
-    document.getElementById(
-        "studyPreview"
-    ).textContent =
-        result ||
-        "Selecciona una estructura.";
 
 }
 
@@ -3571,13 +3588,20 @@ async function createStudyAndUpload(){
             "adminDate"
         ).value;
 
-    const study =
-        buildStudyName();
-
     const structure =
         document.getElementById(
             "adminStructure"
         ).value;
+
+    const laterality =
+        document.getElementById(
+            "adminLaterality"
+        ).value;
+
+    const projection =
+        document.getElementById(
+            "adminProjection"
+        ).value.trim();
 
     const modality =
         document.getElementById(
@@ -3593,6 +3617,11 @@ async function createStudyAndUpload(){
         document.getElementById(
             "adminStatus"
         );
+
+
+    /* ===============================
+       VALIDACIONES
+    =============================== */
 
     if(
         !patient ||
@@ -3610,22 +3639,39 @@ async function createStudyAndUpload(){
 
     }
 
+
     if(
-        requiresSide(structure) &&
-        !document.getElementById(
-            "adminSide"
-        ).value
+        (
+            structure === "HOMBRO" ||
+            structure === "HÚMERO" ||
+            structure === "CODO" ||
+            structure === "ANTEBRAZO" ||
+            structure === "MUÑECA" ||
+            structure === "MANO" ||
+            structure === "DEDOS DE LA MANO" ||
+            structure === "CADERA" ||
+            structure === "FÉMUR" ||
+            structure === "RODILLA" ||
+            structure === "TIBIA Y PERONÉ" ||
+            structure === "TOBILLO" ||
+            structure === "PIE" ||
+            structure === "DEDOS DEL PIE" ||
+            structure === "CALCÁNEO" ||
+            structure === "CLAVÍCULA"
+        ) &&
+        !laterality
     ){
 
         status.className =
             "status-message status-error";
 
         status.textContent =
-            "Selecciona si corresponde a derecha o izquierda.";
+            "Selecciona la lateralidad.";
 
         return;
 
     }
+
 
     if(
         !fileInput.files ||
@@ -3642,10 +3688,12 @@ async function createStudyAndUpload(){
 
     }
 
+
     const {
         data:sessionData
     } =
         await supabaseClient.auth.getSession();
+
 
     if(
         !sessionData ||
@@ -3665,12 +3713,38 @@ async function createStudyAndUpload(){
 
     }
 
+
+    /* ===============================
+       CONSTRUIR NOMBRE DEL ESTUDIO
+    =============================== */
+
+    let study =
+        structure;
+
+    if(laterality){
+
+        study +=
+            " - " +
+            laterality;
+
+    }
+
+    if(projection){
+
+        study +=
+            " - " +
+            projection;
+
+    }
+
+
     const files =
         Array.from(
             fileInput.files
         );
 
     const uploadedPaths = [];
+
 
     try{
 
@@ -3680,10 +3754,17 @@ async function createStudyAndUpload(){
         status.textContent =
             "Subiendo imágenes...";
 
+
+        /*
+         * Se crea una carpeta única
+         * para cada estudio.
+         */
+
         const folder =
             date +
             "/" +
             crypto.randomUUID();
+
 
         for(
             let i=0;
@@ -3708,12 +3789,14 @@ async function createStudyAndUpload(){
 
             }
 
+
             const safeName =
                 file.name
                     .replace(
-                        /[^a-zA-Z0-9._-]/g,
+                        /[^a-zA-Z0-9.\_-]/g,
                         "_"
                     );
+
 
             const path =
                 folder +
@@ -3722,6 +3805,7 @@ async function createStudyAndUpload(){
                     .padStart(3,"0") +
                 "_" +
                 safeName;
+
 
             const {
                 error
@@ -3735,18 +3819,23 @@ async function createStudyAndUpload(){
                         {
                             cacheControl:
                                 "3600",
+
                             upsert:false,
+
                             contentType:
                                 "image/jpeg"
                         }
                     );
 
+
             if(error)
                 throw error;
+
 
             uploadedPaths.push(
                 path
             );
+
 
             status.textContent =
                 "Subiendo imagen " +
@@ -3757,6 +3846,10 @@ async function createStudyAndUpload(){
 
         }
 
+
+        /* ===============================
+           GUARDAR ESTUDIO
+        =============================== */
 
         status.textContent =
             "Guardando estudio...";
@@ -3769,16 +3862,27 @@ async function createStudyAndUpload(){
             await supabaseClient
                 .from("studies")
                 .insert({
+
                     date:date,
+
                     patient:patient,
+
                     study:study,
+
                     modality:modality,
+
                     images:uploadedPaths
+
                 })
                 .select();
 
 
         if(error){
+
+            /*
+             * Si falla el INSERT,
+             * eliminamos las imágenes.
+             */
 
             for(
                 const path of uploadedPaths
@@ -3796,53 +3900,31 @@ async function createStudyAndUpload(){
         }
 
 
+        /* ===============================
+           ÉXITO
+        =============================== */
+
         status.className =
             "status-message status-success";
 
         status.textContent =
             "Estudio creado correctamente.";
 
-        document.getElementById(
-            "adminPatient"
-        ).value = "";
 
-        document.getElementById(
-            "adminStructure"
-        ).value = "";
-
-        document.getElementById(
-            "adminSide"
-        ).value = "";
-
-        document.getElementById(
-            "adminProjection"
-        ).value = "";
-
-        document.getElementById(
-            "adminFiles"
-        ).value = "";
-
-        document.getElementById(
-            "fileList"
-        ).textContent =
-            "Ningún archivo seleccionado.";
-
-        document.getElementById(
-            "studyPreview"
-        ).textContent =
-            "Selecciona una estructura.";
-
-        document.getElementById(
-            "sideGroup"
-        ).classList.add(
-            "hidden"
-        );
-
+        /*
+         * Recargar estudios.
+         */
 
         await loadStudies();
 
 
-        selectedDate = date;
+        /*
+         * Seleccionar automáticamente
+         * el nuevo estudio.
+         */
+
+        selectedDate =
+            date;
 
         calendarDate =
             new Date(
@@ -3852,11 +3934,19 @@ async function createStudyAndUpload(){
         currentPatient =
             patient;
 
+        currentStudy =
+            0;
+
+        currentImage =
+            0;
+
+
         renderCalendar();
 
         renderPatients();
 
         showFirstStudy();
+
 
         setTimeout(
             () => {
@@ -3866,6 +3956,7 @@ async function createStudyAndUpload(){
             },
             1200
         );
+
 
     }
     catch(error){
@@ -3902,6 +3993,8 @@ document.addEventListener(
             closeFullscreen();
 
             closeLogin();
+
+            closeAdmin();
 
         }
 
