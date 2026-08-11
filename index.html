@@ -975,54 +975,41 @@ async function loadStudies(){
                 let imageList = [];
 
 
-                if(
-                    Array.isArray(item.image)
-                ){
+            if(Array.isArray(item.image)){
 
-                    imageList =
-                        item.image;
+                imageList = item.image;
 
-                }
-                else if(
-                    typeof item.image === "string"
-                ){
+            }
+            else if(typeof item.image === "string"){
 
-                    try{
+                let value = item.image.trim();
 
-                        const parsed =
-                            JSON.parse(
-                                item.image
-                            );
+                try{
 
-                        if(
-                            Array.isArray(parsed)
-                        ){
+                    const parsed = JSON.parse(value);
 
-                            imageList =
-                                parsed;
+                    if(Array.isArray(parsed)){
 
-                        }
-                        else{
-
-                            imageList =
-                                [item.image];
-
-                        }
+                        imageList = parsed;
 
                     }
-                    catch{
+                    else{
 
-                        imageList =
-                            item.image
-                            ? [item.image]
-                            : [];
+                        imageList = [value];
 
                     }
 
                 }
+                catch{
+
+                    imageList = [value];
+
+                }
+
+            }
 
 
-                return {
+            return {
 
                     date:
                         item.date,
