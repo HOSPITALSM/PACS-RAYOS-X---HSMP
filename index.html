@@ -977,41 +977,43 @@ async function loadStudies(){
                 let imageList = [];
 
 
-            if(Array.isArray(item.image)){
+        const imageValue = item.images;
 
-                imageList = item.image;
+        if(Array.isArray(imageValue)){
 
-            }
-            else if(typeof item.image === "string"){
+            imageList = imageValue;
 
-                let value = item.image.trim();
+        }
+        else if(typeof imageValue === "string"){
 
-                try{
+            let value = imageValue.trim();
 
-                    const parsed = JSON.parse(value);
+            try{
 
-                    if(Array.isArray(parsed)){
+                const parsed = JSON.parse(value);
 
-                        imageList = parsed;
+                if(Array.isArray(parsed)){
 
-                    }
-                    else{
-
-                        imageList = [value];
-
-                    }
+                    imageList = parsed;
 
                 }
-                catch{
+                else{
 
                     imageList = [value];
 
                 }
 
             }
+            catch{
+
+                imageList = [value];
+
+            }
+
+        }
 
 
-            return {
+        return {
 
                     date:
                         item.date,
