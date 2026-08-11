@@ -967,7 +967,9 @@ async function loadStudies(){
             "Estudios recibidos:",
             data
         );
-
+        
+        console.log("IMAGE REAL:", data[0].image);
+        console.log("TIPO IMAGE:", typeof data[0].image);
 
         studies =
             data.map(item => {
