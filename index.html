@@ -4,533 +4,1052 @@
 
 <head>
 
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
 
-    <title>PACS Rayos X - HSMP</title>
+<title>PACS RAYOS X - HSMP</title>
 
 
-    <style>
+<style>
 
-        /* =====================================================
-           CONFIGURACIÓN GENERAL
-        ===================================================== */
+/* =========================================================
+   VARIABLES
+========================================================= */
 
-        * {
-            box-sizing: border-box;
-        }
+:root{
 
-        body {
-            margin: 0;
-            background: #111111;
-            color: #eeeeee;
-            font-family: Arial, Helvetica, sans-serif;
-            overflow: hidden;
-        }
+    --bg:#0b0b0c;
 
+    --panel:#121315;
 
-        /* =====================================================
-           ENCABEZADO
-        ===================================================== */
+    --panel2:#18191b;
 
-        header {
+    --panel3:#202124;
 
-            height: 80px;
+    --border:#2c2e31;
 
-            background: #181818;
+    --text:#eeeeee;
 
-            border-bottom: 1px solid #333333;
+    --muted:#85888d;
 
-            display: flex;
+    --hover:#27292c;
 
-            align-items: center;
+    --active:#34373b;
 
-            padding: 0 20px;
-        }
+    --accent:#b9bdc2;
 
+}
 
-        /* ESPACIO PARA LOGO */
 
-        .logo {
+/* =========================================================
+   RESET
+========================================================= */
 
-            width: 170px;
+*{
 
-            height: 58px;
+    box-sizing:border-box;
 
-            border: 1px dashed #555555;
+}
 
-            display: flex;
 
-            align-items: center;
+html,
+body{
 
-            justify-content: center;
+    margin:0;
 
-            color: #777777;
+    width:100%;
 
-            font-size: 12px;
+    height:100%;
 
-            margin-right: 20px;
+    background:var(--bg);
 
-            overflow: hidden;
-        }
+    color:var(--text);
 
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
 
-        .logo img {
+}
 
-            width: 100%;
 
-            height: 100%;
+/* =========================================================
+   CUERPO
+========================================================= */
 
-            object-fit: contain;
-        }
+body{
 
+    overflow:hidden;
 
-        /* TÍTULO */
+}
 
-        .titulo {
 
-            flex: 1;
-        }
+/* =========================================================
+   CABECERA
+========================================================= */
 
+.topbar{
 
-        .titulo h1 {
+    height:64px;
 
-            margin: 0;
+    background:#111214;
 
-            font-size: 21px;
+    border-bottom:1px solid var(--border);
 
-            font-weight: 500;
-        }
+    display:flex;
 
+    align-items:center;
 
-        .titulo span {
+    padding:0 16px;
 
-            color: #888888;
+    gap:16px;
 
-            font-size: 12px;
-        }
+}
 
 
-        /* =====================================================
-           CONTENEDOR PRINCIPAL
-        ===================================================== */
+/* LOGO */
 
-        .contenedor {
+.logo{
 
-            display: flex;
+    width:150px;
 
-            height: calc(100vh - 80px);
-        }
+    height:44px;
 
+    border:1px dashed #505258;
 
-        /* =====================================================
-           PANEL DE PACIENTES
-        ===================================================== */
+    display:flex;
 
-        .pacientes {
+    align-items:center;
 
-            width: 280px;
+    justify-content:center;
 
-            background: #1b1b1b;
+    color:#70747a;
 
-            border-right: 1px solid #333333;
+    font-size:11px;
 
-            overflow-y: auto;
-        }
+    overflow:hidden;
 
+    flex-shrink:0;
 
-        .titulo-panel {
+}
 
-            padding: 15px;
 
-            border-bottom: 1px solid #333333;
+.logo img{
 
-            font-size: 13px;
+    width:100%;
 
-            color: #aaaaaa;
+    height:100%;
 
-            text-transform: uppercase;
+    object-fit:contain;
 
-            letter-spacing: 1px;
-        }
+}
 
 
-        .paciente {
+/* TITULO */
 
-            padding: 14px 16px;
+.brand{
 
-            border-bottom: 1px solid #292929;
+    min-width:210px;
 
-            cursor: pointer;
+}
 
-            transition: 0.2s;
-        }
 
+.brand-title{
 
-        .paciente:hover {
+    font-size:16px;
 
-            background: #252525;
-        }
+    font-weight:600;
 
+    letter-spacing:.5px;
 
-        .paciente.activo {
+}
 
-            background: #303030;
 
-            border-left: 4px solid #999999;
-        }
+.brand-subtitle{
 
+    color:var(--muted);
 
-        .nombre-paciente {
+    font-size:10px;
 
-            font-size: 15px;
+    margin-top:3px;
 
-            margin-bottom: 6px;
-        }
+}
 
 
-        .detalle-paciente {
+/* BUSCADOR */
 
-            color: #888888;
+.search{
 
-            font-size: 12px;
-        }
+    flex:1;
 
+    max-width:500px;
 
-        /* =====================================================
-           PANEL DE ESTUDIOS
-        ===================================================== */
+    margin-left:auto;
 
-        .estudios {
+}
 
-            width: 280px;
 
-            background: #151515;
+.search input{
 
-            border-right: 1px solid #333333;
+    width:100%;
 
-            overflow-y: auto;
-        }
+    height:36px;
 
+    background:#1b1c1f;
 
-        .estudio {
+    color:white;
 
-            padding: 14px;
+    border:1px solid #33363a;
 
-            border-bottom: 1px solid #292929;
+    border-radius:5px;
 
-            cursor: pointer;
-        }
+    padding:0 12px;
 
+    outline:none;
 
-        .estudio:hover {
+}
 
-            background: #222222;
-        }
 
+.search input:focus{
 
-        .estudio.activo {
+    border-color:#62666b;
 
-            background: #2c2c2c;
-        }
+}
 
 
-        .estudio-nombre {
+.status{
 
-            font-size: 14px;
+    color:#74777c;
 
-            margin-bottom: 6px;
-        }
+    font-size:11px;
 
+    white-space:nowrap;
 
-        .estudio-fecha {
+}
 
-            color: #777777;
 
-            font-size: 11px;
-        }
+/* =========================================================
+   LAYOUT PRINCIPAL
+========================================================= */
 
+.app{
 
-        /* =====================================================
-           VISOR
-        ===================================================== */
+    height:calc(100vh - 64px);
 
-        .visor {
+    display:grid;
 
-            flex: 1;
+    grid-template-columns:260px 300px 1fr 245px;
 
-            background: #050505;
+    min-width:950px;
 
-            display: flex;
+}
 
-            flex-direction: column;
 
-            min-width: 0;
-        }
+/* =========================================================
+   PANELES
+========================================================= */
 
+.panel{
 
-        /* INFORMACIÓN DEL ESTUDIO */
+    background:var(--panel);
 
-        .info-estudio {
+    border-right:1px solid var(--border);
 
-            height: 55px;
+    overflow:hidden;
 
-            background: #151515;
+    display:flex;
 
-            border-bottom: 1px solid #333333;
+    flex-direction:column;
 
-            display: flex;
+}
 
-            align-items: center;
 
-            padding: 0 18px;
-        }
+.panel-header{
 
+    height:52px;
 
-        .info-estudio strong {
+    padding:0 14px;
 
-            font-size: 14px;
-        }
+    display:flex;
 
+    align-items:center;
 
-        .info-estudio span {
+    justify-content:space-between;
 
-            margin-left: 15px;
+    border-bottom:1px solid var(--border);
 
-            color: #777777;
+    flex-shrink:0;
 
-            font-size: 12px;
-        }
+}
 
 
-        /* =====================================================
-           ÁREA DE IMAGEN
-        ===================================================== */
+.panel-title{
 
-        .area-imagen {
+    font-size:11px;
 
-            flex: 1;
+    color:#aeb1b6;
 
-            position: relative;
+    text-transform:uppercase;
 
-            display: flex;
+    letter-spacing:1px;
 
-            justify-content: center;
+}
 
-            align-items: center;
 
-            overflow: hidden;
-        }
+.panel-count{
 
+    color:#696c71;
 
-        .imagen-principal {
+    font-size:10px;
 
-            max-width: 90%;
+}
 
-            max-height: 88%;
 
-            object-fit: contain;
+.panel-body{
 
-            display: block;
+    flex:1;
 
-            cursor: zoom-in;
-        }
+    overflow-y:auto;
 
+}
 
-        .sin-imagen {
 
-            color: #555555;
+/* =========================================================
+   PACIENTES
+========================================================= */
 
-            font-size: 15px;
+.patient{
 
-            text-align: center;
-        }
+    padding:13px 14px;
 
+    border-bottom:1px solid #222427;
 
-        /* =====================================================
-           BARRA INFERIOR
-        ===================================================== */
+    cursor:pointer;
 
-        .controles {
+    transition:.15s;
 
-            height: 70px;
+}
 
-            background: #151515;
 
-            border-top: 1px solid #333333;
+.patient:hover{
 
-            display: flex;
+    background:var(--hover);
 
-            align-items: center;
+}
 
-            padding: 10px;
 
-            gap: 8px;
-        }
+.patient.active{
 
+    background:var(--active);
 
-        .boton {
+    box-shadow:
+        inset 3px 0 0 #bfc3c8;
+}
 
-            background: #292929;
 
-            border: 1px solid #444444;
+.patient-name{
 
-            color: #dddddd;
+    font-size:13px;
 
-            padding: 9px 13px;
+    font-weight:500;
 
-            border-radius: 4px;
+    margin-bottom:6px;
 
-            cursor: pointer;
-        }
+}
 
 
-        .boton:hover {
+.patient-meta{
 
-            background: #383838;
-        }
+    display:flex;
 
+    justify-content:space-between;
 
-        /* =====================================================
-           MINIATURAS
-        ===================================================== */
+    color:var(--muted);
 
-        .miniaturas {
+    font-size:10px;
 
-            flex: 1;
+}
 
-            display: flex;
 
-            gap: 8px;
+.badge{
 
-            overflow-x: auto;
+    background:#292b2f;
 
-            padding: 3px;
-        }
+    color:#bfc2c6;
 
+    padding:2px 6px;
 
-        .miniatura {
+    border-radius:10px;
 
-            width: 60px;
+}
 
-            height: 50px;
 
-            object-fit: cover;
+/* =========================================================
+   ESTUDIOS
+========================================================= */
 
-            border: 2px solid #444444;
+.study{
 
-            cursor: pointer;
+    padding:13px;
 
-            background: #000000;
-        }
+    border-bottom:1px solid #222427;
 
+    cursor:pointer;
 
-        .miniatura.activa {
+}
 
-            border-color: #aaaaaa;
-        }
 
+.study:hover{
 
-        /* =====================================================
-           VISOR DE PANTALLA COMPLETA
-        ===================================================== */
+    background:var(--hover);
 
-        .pantalla-completa {
+}
 
-            position: fixed;
 
-            inset: 0;
+.study.active{
 
-            background: #000000;
+    background:var(--active);
 
-            z-index: 999;
+}
 
-            display: none;
 
-            align-items: center;
+.study-date{
 
-            justify-content: center;
-        }
+    color:#8b8e93;
 
+    font-size:10px;
 
-        .pantalla-completa img {
+    margin-bottom:6px;
 
-            max-width: 95%;
+}
 
-            max-height: 95%;
 
-            object-fit: contain;
-        }
+.study-name{
 
+    font-size:13px;
 
-        .cerrar {
+    margin-bottom:5px;
 
-            position: absolute;
+}
 
-            top: 20px;
 
-            right: 25px;
+.study-meta{
 
-            font-size: 30px;
+    color:#686b70;
 
-            color: white;
+    font-size:10px;
 
-            cursor: pointer;
-        }
+}
 
 
-        /* =====================================================
-           ADAPTACIÓN PARA PANTALLAS PEQUEÑAS
-        ===================================================== */
+/* =========================================================
+   VISOR CENTRAL
+========================================================= */
 
-        @media (max-width: 900px) {
+.viewer{
 
-            .pacientes {
+    background:#050505;
 
-                width: 210px;
-            }
+    display:flex;
 
+    flex-direction:column;
 
-            .estudios {
+    min-width:0;
 
-                width: 220px;
-            }
+}
 
-        }
 
+/* INFORMACION SUPERIOR */
 
-        @media (max-width: 700px) {
+.viewer-header{
 
-            body {
+    height:52px;
 
-                overflow: auto;
-            }
+    background:#111214;
 
+    border-bottom:1px solid var(--border);
 
-            .contenedor {
+    display:flex;
 
-                height: auto;
+    align-items:center;
 
-                min-height: calc(100vh - 80px);
-            }
+    padding:0 15px;
 
+    justify-content:space-between;
 
-            .pacientes {
+    flex-shrink:0;
 
-                width: 180px;
-            }
+}
 
 
-            .estudios {
+.study-title{
 
-                width: 200px;
-            }
+    font-size:12px;
 
-        }
+}
 
-    </style>
+
+.study-subtitle{
+
+    color:#73767b;
+
+    font-size:10px;
+
+    margin-top:3px;
+
+}
+
+
+.image-counter{
+
+    color:#8d9095;
+
+    font-size:10px;
+
+}
+
+
+/* =========================================================
+   AREA DE IMAGEN
+========================================================= */
+
+.viewport{
+
+    flex:1;
+
+    position:relative;
+
+    overflow:hidden;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    background:
+
+        radial-gradient(
+            circle at center,
+            #101010 0%,
+            #050505 60%,
+            #000000 100%
+        );
+
+}
+
+
+/* INFORMACION SOBRE LA IMAGEN */
+
+.overlay{
+
+    position:absolute;
+
+    top:14px;
+
+    left:15px;
+
+    z-index:5;
+
+    font-size:10px;
+
+    color:#888;
+
+    pointer-events:none;
+
+}
+
+
+.overlay-right{
+
+    position:absolute;
+
+    top:14px;
+
+    right:15px;
+
+    z-index:5;
+
+    font-size:10px;
+
+    color:#888;
+
+    text-align:right;
+
+    pointer-events:none;
+
+}
+
+
+/* IMAGEN */
+
+.image-wrapper{
+
+    width:100%;
+
+    height:100%;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    transform-origin:center center;
+
+    transition:transform .12s ease;
+
+}
+
+
+.main-image{
+
+    max-width:85%;
+
+    max-height:85%;
+
+    object-fit:contain;
+
+    user-select:none;
+
+    -webkit-user-drag:none;
+
+    filter:
+        brightness(var(--brightness,1))
+        contrast(var(--contrast,1));
+
+    box-shadow:
+        0 0 0 1px #161616;
+
+}
+
+
+/* MENSAJE */
+
+.empty{
+
+    color:#555;
+
+    text-align:center;
+
+    font-size:12px;
+
+}
+
+
+/* =========================================================
+   BARRA DE HERRAMIENTAS
+========================================================= */
+
+.toolbar{
+
+    height:58px;
+
+    background:#111214;
+
+    border-top:1px solid var(--border);
+
+    display:flex;
+
+    align-items:center;
+
+    gap:6px;
+
+    padding:8px 10px;
+
+    flex-shrink:0;
+
+}
+
+
+.tool{
+
+    height:34px;
+
+    min-width:34px;
+
+    padding:0 10px;
+
+    background:#202225;
+
+    border:1px solid #34363a;
+
+    color:#d0d2d5;
+
+    border-radius:4px;
+
+    cursor:pointer;
+
+    font-size:11px;
+
+}
+
+
+.tool:hover{
+
+    background:#2b2d30;
+
+}
+
+
+.tool.active{
+
+    background:#3a3d41;
+
+    border-color:#62666b;
+
+}
+
+
+.toolbar-separator{
+
+    width:1px;
+
+    height:25px;
+
+    background:#303236;
+
+    margin:0 3px;
+
+}
+
+
+/* =========================================================
+   MINIATURAS
+========================================================= */
+
+.series{
+
+    height:92px;
+
+    background:#101113;
+
+    border-top:1px solid var(--border);
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    padding:8px;
+
+    overflow-x:auto;
+
+    flex-shrink:0;
+
+}
+
+
+.thumbnail{
+
+    height:72px;
+
+    width:82px;
+
+    object-fit:cover;
+
+    background:#000;
+
+    border:2px solid #303236;
+
+    border-radius:3px;
+
+    cursor:pointer;
+
+    flex-shrink:0;
+
+}
+
+
+.thumbnail:hover{
+
+    border-color:#686c72;
+
+}
+
+
+.thumbnail.active{
+
+    border-color:#c2c6ca;
+
+}
+
+
+/* =========================================================
+   PANEL DERECHO
+========================================================= */
+
+.info-panel{
+
+    background:var(--panel);
+
+    display:flex;
+
+    flex-direction:column;
+
+    overflow:hidden;
+
+}
+
+
+.info-section{
+
+    border-bottom:1px solid var(--border);
+
+    padding:15px;
+
+}
+
+
+.info-heading{
+
+    color:#8d9095;
+
+    font-size:10px;
+
+    text-transform:uppercase;
+
+    letter-spacing:1px;
+
+    margin-bottom:13px;
+
+}
+
+
+.info-row{
+
+    display:flex;
+
+    flex-direction:column;
+
+    margin-bottom:11px;
+
+}
+
+
+.info-label{
+
+    color:#65686d;
+
+    font-size:9px;
+
+    margin-bottom:3px;
+
+}
+
+
+.info-value{
+
+    color:#d4d6d9;
+
+    font-size:12px;
+
+    word-break:break-word;
+
+}
+
+
+.patient-summary{
+
+    background:#191a1d;
+
+    border:1px solid #292b2f;
+
+    border-radius:5px;
+
+    padding:12px;
+
+}
+
+
+.patient-summary-name{
+
+    font-size:14px;
+
+    margin-bottom:8px;
+
+}
+
+
+.patient-summary-meta{
+
+    color:#777a7f;
+
+    font-size:10px;
+
+    line-height:1.7;
+
+}
+
+
+/* =========================================================
+   SCROLLBAR
+========================================================= */
+
+::-webkit-scrollbar{
+
+    width:6px;
+
+    height:6px;
+
+}
+
+
+::-webkit-scrollbar-track{
+
+    background:#101113;
+
+}
+
+
+::-webkit-scrollbar-thumb{
+
+    background:#37393d;
+
+    border-radius:4px;
+
+}
+
+
+::-webkit-scrollbar-thumb:hover{
+
+    background:#4c4f54;
+
+}
+
+
+/* =========================================================
+   PANTALLA COMPLETA
+========================================================= */
+
+.fullscreen{
+
+    position:fixed;
+
+    inset:0;
+
+    background:#000;
+
+    z-index:9999;
+
+    display:none;
+
+    align-items:center;
+
+    justify-content:center;
+
+}
+
+
+.fullscreen img{
+
+    max-width:96%;
+
+    max-height:96%;
+
+    object-fit:contain;
+
+}
+
+
+.close-fullscreen{
+
+    position:absolute;
+
+    top:18px;
+
+    right:24px;
+
+    color:#fff;
+
+    font-size:30px;
+
+    cursor:pointer;
+
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media(max-width:1100px){
+
+    .app{
+
+        grid-template-columns:220px 250px 1fr 210px;
+
+        min-width:0;
+
+    }
+
+
+    .brand{
+
+        display:none;
+
+    }
+
+}
+
+
+@media(max-width:800px){
+
+    body{
+
+        overflow:auto;
+
+    }
+
+
+    .app{
+
+        display:flex;
+
+        flex-direction:column;
+
+        height:auto;
+
+        min-width:0;
+
+    }
+
+
+    .panel{
+
+        width:100%;
+
+        max-height:220px;
+
+    }
+
+
+    .viewer{
+
+        height:650px;
+
+    }
+
+
+    .info-panel{
+
+        width:100%;
+
+    }
+
+
+    .search{
+
+        display:none;
+
+    }
+
+}
+
+</style>
 
 </head>
 
@@ -538,935 +1057,1627 @@
 <body>
 
 
-    <!-- =====================================================
-         ENCABEZADO
-    ===================================================== -->
+<!-- =======================================================
+     CABECERA
+======================================================= -->
 
-    <header>
+<header class="topbar">
 
 
-        <!-- ESPACIO PARA LOGO -->
+    <div class="logo">
 
-        <div class="logo">
+        <!--
+        PARA COLOCAR EL LOGO:
 
-            LOGO / IMAGEN
+        Sube un archivo llamado:
 
-        </div>
+        logo.jpg
 
+        al repositorio.
 
-        <!-- TÍTULO -->
+        Luego cambia el contenido por:
 
-        <div class="titulo">
+        <img src="logo.jpg" alt="Logo">
 
-            <h1>
-                PACS RAYOS X - HSMP
-            </h1>
+        -->
 
-            <span>
-                Sistema de visualización de imágenes radiológicas
-            </span>
-
-        </div>
-
-
-    </header>
-
-
-    <!-- =====================================================
-         CONTENEDOR PRINCIPAL
-    ===================================================== -->
-
-    <div class="contenedor">
-
-
-        <!-- =================================================
-             PACIENTES
-        ================================================== -->
-
-        <aside class="pacientes">
-
-
-            <div class="titulo-panel">
-
-                Pacientes
-
-            </div>
-
-
-            <div id="listaPacientes">
-
-            </div>
-
-
-        </aside>
-
-
-
-        <!-- =================================================
-             ESTUDIOS
-        ================================================== -->
-
-        <aside class="estudios">
-
-
-            <div class="titulo-panel">
-
-                Estudios
-
-            </div>
-
-
-            <div id="listaEstudios">
-
-            </div>
-
-
-        </aside>
-
-
-
-        <!-- =================================================
-             VISOR
-        ================================================== -->
-
-        <main class="visor">
-
-
-            <!-- INFORMACIÓN -->
-
-            <div class="info-estudio">
-
-
-                <strong id="nombreEstudio">
-
-                    Seleccione un estudio
-
-                </strong>
-
-
-                <span id="infoImagen">
-
-                </span>
-
-
-            </div>
-
-
-
-            <!-- ÁREA DE IMAGEN -->
-
-            <div class="area-imagen">
-
-
-                <div
-                    class="sin-imagen"
-                    id="mensaje">
-
-                    Seleccione un paciente y un estudio
-
-                </div>
-
-
-                <img
-                    id="imagenPrincipal"
-                    class="imagen-principal"
-                    style="display:none;"
-                    alt="Imagen radiológica">
-
-
-            </div>
-
-
-
-            <!-- CONTROLES -->
-
-            <div class="controles">
-
-
-                <button
-                    class="boton"
-                    onclick="imagenAnterior()">
-
-                    ◀
-
-                </button>
-
-
-                <div
-                    class="miniaturas"
-                    id="miniaturas">
-
-                </div>
-
-
-                <button
-                    class="boton"
-                    onclick="imagenSiguiente()">
-
-                    ▶
-
-                </button>
-
-
-                <button
-                    class="boton"
-                    onclick="pantallaCompleta()">
-
-                    ⛶
-
-                </button>
-
-
-            </div>
-
-
-        </main>
-
+        LOGO / IMAGEN
 
     </div>
 
 
+    <div class="brand">
 
-    <!-- =====================================================
-         PANTALLA COMPLETA
-    ===================================================== -->
+        <div class="brand-title">
+
+            PACS RAYOS X - HSMP
+
+        </div>
+
+        <div class="brand-subtitle">
+
+            VISOR DE IMÁGENES RADIOGRÁFICAS
+
+        </div>
+
+    </div>
+
+
+    <div class="search">
+
+        <input
+            type="text"
+            id="search"
+            placeholder="Buscar paciente..."
+            oninput="buscarPaciente()">
+
+    </div>
+
+
+    <div class="status">
+
+        SISTEMA LOCAL · JPG
+
+    </div>
+
+
+</header>
+
+
+
+<!-- =======================================================
+     APLICACIÓN
+======================================================= -->
+
+<div class="app">
+
+
+<!-- =======================================================
+     PANEL PACIENTES
+======================================================= -->
+
+<section class="panel">
+
+
+    <div class="panel-header">
+
+        <span class="panel-title">
+
+            Pacientes
+
+        </span>
+
+        <span
+            class="panel-count"
+            id="patientCount">
+
+        </span>
+
+    </div>
+
 
     <div
-        class="pantalla-completa"
-        id="visorCompleto">
+        class="panel-body"
+        id="patientList">
+
+    </div>
+
+
+</section>
+
+
+
+<!-- =======================================================
+     PANEL ESTUDIOS
+======================================================= -->
+
+<section class="panel">
+
+
+    <div class="panel-header">
+
+        <span class="panel-title">
+
+            Estudios
+
+        </span>
+
+        <span
+            class="panel-count"
+            id="studyCount">
+
+        </span>
+
+    </div>
+
+
+    <div
+        class="panel-body"
+        id="studyList">
+
+    </div>
+
+
+</section>
+
+
+
+<!-- =======================================================
+     VISOR
+======================================================= -->
+
+<section class="viewer">
+
+
+    <div class="viewer-header">
+
+
+        <div>
+
+            <div
+                class="study-title"
+                id="viewerTitle">
+
+                Seleccione un estudio
+
+            </div>
+
+
+            <div
+                class="study-subtitle"
+                id="viewerSubtitle">
+
+                --
+
+            </div>
+
+        </div>
 
 
         <div
-            class="cerrar"
-            onclick="cerrarPantallaCompleta()">
+            class="image-counter"
+            id="imageCounter">
 
-            ×
+            --
 
         </div>
-
-
-        <img
-            id="imagenCompleta"
-            alt="Imagen ampliada">
 
 
     </div>
 
 
 
-    <!-- =====================================================
-         JAVASCRIPT
-    ===================================================== -->
+    <!-- VIEWPORT -->
 
-    <script>
-
-
-        /* =================================================
-           DATOS DE PRUEBA
-
-           AQUÍ SE DEFINEN:
-
-           PACIENTE
-           ↓
-           ESTUDIOS
-           ↓
-           IMÁGENES
-        ================================================= */
+    <div
+        class="viewport"
+        id="viewport">
 
 
-        const pacientes = [
+        <div class="overlay">
+
+            PACS RAYOS X
+
+        </div>
 
 
-            /* =============================================
-               PACIENTE 1
-            ============================================= */
+        <div
+            class="overlay-right"
+            id="overlayInfo">
+
+            --
+
+        </div>
+
+
+        <div
+            class="empty"
+            id="emptyMessage">
+
+            Seleccione un paciente y un estudio
+
+        </div>
+
+
+        <div
+            class="image-wrapper"
+            id="imageWrapper"
+            style="display:none;">
+
+
+            <img
+                id="mainImage"
+                class="main-image"
+                alt="Imagen radiológica">
+
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- TOOLBAR -->
+
+    <div class="toolbar">
+
+
+        <button
+            class="tool"
+            onclick="zoomIn()">
+
+            🔍+
+
+        </button>
+
+
+        <button
+            class="tool"
+            onclick="zoomOut()">
+
+            🔍−
+
+        </button>
+
+
+        <button
+            class="tool"
+            onclick="resetView()">
+
+            ↺
+
+        </button>
+
+
+        <div class="toolbar-separator"></div>
+
+
+        <button
+            class="tool"
+            onclick="rotateLeft()">
+
+            ↶
+
+        </button>
+
+
+        <button
+            class="tool"
+            onclick="rotateRight()">
+
+            ↷
+
+        </button>
+
+
+        <button
+            class="tool"
+            onclick="invertImage()">
+
+            ◐
+
+        </button>
+
+
+        <button
+            class="tool"
+            onclick="increaseContrast()">
+
+            C+
+
+        </button>
+
+
+        <button
+            class="tool"
+            onclick="decreaseContrast()">
+
+            C−
+
+        </button>
+
+
+        <div class="toolbar-separator"></div>
+
+
+        <button
+            class="tool"
+            onclick="previousImage()">
+
+            ◀
+
+        </button>
+
+
+        <button
+            class="tool"
+            onclick="nextImage()">
+
+            ▶
+
+        </button>
+
+
+        <button
+            class="tool"
+            onclick="openFullscreen()">
+
+            ⛶
+
+        </button>
+
+
+    </div>
+
+
+
+    <!-- MINIATURAS -->
+
+    <div
+        class="series"
+        id="thumbnailList">
+
+    </div>
+
+
+</section>
+
+
+
+<!-- =======================================================
+     INFORMACIÓN
+======================================================= -->
+
+<aside class="info-panel">
+
+
+    <div class="info-section">
+
+
+        <div class="info-heading">
+
+            Paciente
+
+        </div>
+
+
+        <div class="patient-summary">
+
+
+            <div
+                class="patient-summary-name"
+                id="infoPatientName">
+
+                --
+
+            </div>
+
+
+            <div
+                class="patient-summary-meta"
+                id="infoPatientMeta">
+
+                --
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+
+    <div class="info-section">
+
+
+        <div class="info-heading">
+
+            Estudio
+
+        </div>
+
+
+        <div class="info-row">
+
+
+            <span class="info-label">
+
+                Descripción
+
+            </span>
+
+
+            <span
+                class="info-value"
+                id="infoStudy">
+
+                --
+
+            </span>
+
+
+        </div>
+
+
+        <div class="info-row">
+
+
+            <span class="info-label">
+
+                Fecha
+
+            </span>
+
+
+            <span
+                class="info-value"
+                id="infoDate">
+
+                --
+
+            </span>
+
+
+        </div>
+
+
+        <div class="info-row">
+
+
+            <span class="info-label">
+
+                Imágenes
+
+            </span>
+
+
+            <span
+                class="info-value"
+                id="infoImages">
+
+                --
+
+            </span>
+
+
+        </div>
+
+
+    </div>
+
+
+
+    <div class="info-section">
+
+
+        <div class="info-heading">
+
+            Visualización
+
+        </div>
+
+
+        <div class="info-row">
+
+
+            <span class="info-label">
+
+                Zoom
+
+            </span>
+
+
+            <span
+                class="info-value"
+                id="infoZoom">
+
+                100%
+
+            </span>
+
+
+        </div>
+
+
+        <div class="info-row">
+
+
+            <span class="info-label">
+
+                Rotación
+
+            </span>
+
+
+            <span
+                class="info-value"
+                id="infoRotation">
+
+                0°
+
+            </span>
+
+
+        </div>
+
+
+        <div class="info-row">
+
+
+            <span class="info-label">
+
+                Imagen
+
+            </span>
+
+
+            <span
+                class="info-value"
+                id="infoCurrentImage">
+
+                --
+
+            </span>
+
+
+        </div>
+
+
+    </div>
+
+
+</aside>
+
+
+</div>
+
+
+
+<!-- =======================================================
+     PANTALLA COMPLETA
+======================================================= -->
+
+<div
+    class="fullscreen"
+    id="fullscreenViewer">
+
+
+    <div
+        class="close-fullscreen"
+        onclick="closeFullscreen()">
+
+        ×
+
+    </div>
+
+
+    <img
+        id="fullscreenImage"
+        alt="Imagen ampliada">
+
+
+</div>
+
+
+
+<script>
+
+
+/* =========================================================
+   DATOS DE PRUEBA
+=========================================================
+
+   ESTRUCTURA:
+
+   PACIENTE
+       ↓
+   ESTUDIO
+       ↓
+   IMÁGENES
+
+========================================================= */
+
+
+const patients = [
+
+
+    {
+
+        name:"Juan Pérez",
+
+        history:"HC-0001",
+
+        birth:"15/04/1985",
+
+        sex:"Masculino",
+
+        studies:[
 
             {
 
-                nombre: "Juan Pérez",
+                name:"Radiografía de tórax",
 
-                historia: "HC-0001",
+                date:"11/08/2026",
 
+                modality:"CR",
 
-                estudios: [
+                images:[
 
-                    {
+                    "images.jfif",
 
-                        nombre: "Radiografía de tórax",
-
-                        fecha: "11/08/2026",
-
-
-                        imagenes: [
-
-                            "images.jfif",
-
-                            "images (2).jfif"
-
-                        ]
-
-                    }
-
-                ]
-
-            },
-
-
-
-            /* =============================================
-               PACIENTE 2
-            ============================================= */
-
-            {
-
-                nombre: "María López",
-
-                historia: "HC-0002",
-
-
-                estudios: [
-
-                    {
-
-                        nombre: "Radiografía de columna",
-
-                        fecha: "11/08/2026",
-
-
-                        imagenes: [
-
-                            "images.jfif"
-
-                        ]
-
-                    }
-
-                ]
-
-            },
-
-
-
-            /* =============================================
-               PACIENTE 3
-            ============================================= */
-
-            {
-
-                nombre: "Carlos Ruiz",
-
-                historia: "HC-0003",
-
-
-                estudios: [
-
-                    {
-
-                        nombre: "Radiografía de cráneo",
-
-                        fecha: "11/08/2026",
-
-
-                        imagenes: [
-
-                            "images (2).jfif"
-
-                        ]
-
-                    }
+                    "images (2).jfif"
 
                 ]
 
             }
 
+        ]
 
+    },
+
+
+    {
+
+        name:"María López",
+
+        history:"HC-0002",
+
+        birth:"22/09/1990",
+
+        sex:"Femenino",
+
+        studies:[
+
+            {
+
+                name:"Radiografía de columna",
+
+                date:"10/08/2026",
+
+                modality:"CR",
+
+                images:[
+
+                    "images.jfif"
+
+                ]
+
+            }
+
+        ]
+
+    },
+
+
+    {
+
+        name:"Carlos Ruiz",
+
+        history:"HC-0003",
+
+        birth:"03/02/1978",
+
+        sex:"Masculino",
+
+        studies:[
+
+            {
+
+                name:"Radiografía de cráneo",
+
+                date:"08/08/2026",
+
+                modality:"CR",
+
+                images:[
+
+                    "images (2).jfif"
+
+                ]
+
+            }
+
+        ]
+
+    }
+
+];
+
+
+
+/* =========================================================
+   ESTADO
+========================================================= */
+
+let currentPatient = 0;
+
+let currentStudy = 0;
+
+let currentImage = 0;
+
+let zoom = 1;
+
+let rotation = 0;
+
+let inverted = false;
+
+let contrast = 1;
+
+
+
+/* =========================================================
+   MOSTRAR PACIENTES
+========================================================= */
+
+function renderPatients(filter=""){
+
+
+    const list =
+        document.getElementById(
+            "patientList"
+        );
+
+
+    list.innerHTML="";
+
+
+    const filtered =
+        patients.filter(
+            patient =>
+                patient.name
+                    .toLowerCase()
+                    .includes(
+                        filter.toLowerCase()
+                    )
+        );
+
+
+    document.getElementById(
+        "patientCount"
+    ).textContent =
+        filtered.length;
+
+
+    filtered.forEach(
+        patient => {
+
+
+            const originalIndex =
+                patients.indexOf(
+                    patient
+                );
+
+
+            const element =
+                document.createElement(
+                    "div"
+                );
+
+
+            element.className =
+                "patient";
+
+
+            if(
+                originalIndex ===
+                currentPatient
+            ){
+
+                element.classList.add(
+                    "active"
+                );
+
+            }
+
+
+            const studies =
+                patient.studies.length;
+
+
+            element.innerHTML=`
+
+                <div class="patient-name">
+
+                    ${patient.name}
+
+                </div>
+
+
+                <div class="patient-meta">
+
+                    <span>
+
+                        ${patient.history}
+
+                    </span>
+
+
+                    <span class="badge">
+
+                        ${studies}
+
+                    </span>
+
+                </div>
+
+            `;
+
+
+            element.onclick=()=>{
+
+                currentPatient =
+                    originalIndex;
+
+                currentStudy=0;
+
+                currentImage=0;
+
+                resetImageSettings();
+
+                renderPatients(
+                    document.getElementById(
+                        "search"
+                    ).value
+                );
+
+                renderStudies();
+
+                renderImage();
+
+            };
+
+
+            list.appendChild(
+                element
+            );
+
+        }
+    );
+
+}
+
+
+
+/* =========================================================
+   MOSTRAR ESTUDIOS
+========================================================= */
+
+function renderStudies(){
+
+
+    const list =
+        document.getElementById(
+            "studyList"
+        );
+
+
+    list.innerHTML="";
+
+
+    const patient =
+        patients[
+            currentPatient
         ];
 
 
-
-        /* =================================================
-           VARIABLES
-        ================================================= */
-
-        let pacienteActual = 0;
-
-        let estudioActual = 0;
-
-        let imagenActual = 0;
+    document.getElementById(
+        "studyCount"
+    ).textContent =
+        patient.studies.length;
 
 
-
-        /* =================================================
-           MOSTRAR PACIENTES
-        ================================================= */
-
-        function mostrarPacientes() {
+    patient.studies.forEach(
+        (study,index)=>{
 
 
-            const lista =
-
-                document.getElementById(
-                    "listaPacientes"
+            const element =
+                document.createElement(
+                    "div"
                 );
 
 
-            lista.innerHTML = "";
+            element.className =
+                "study";
 
 
-            pacientes.forEach(
-                (paciente, index) => {
+            if(
+                index ===
+                currentStudy
+            ){
+
+                element.classList.add(
+                    "active"
+                );
+
+            }
 
 
-                    const elemento =
+            element.innerHTML=`
 
-                        document.createElement(
-                            "div"
-                        );
+                <div class="study-date">
 
+                    ${study.date}
 
-                    elemento.className =
-                        "paciente";
+                </div>
 
 
-                    if (
-                        index ===
-                        pacienteActual
-                    ) {
+                <div class="study-name">
 
-                        elemento.classList.add(
-                            "activo"
-                        );
+                    ${study.name}
 
-                    }
+                </div>
 
 
-                    elemento.innerHTML = `
+                <div class="study-meta">
 
-                        <div class="nombre-paciente">
+                    ${study.modality}
+                    ·
+                    ${study.images.length}
+                    imagen(es)
 
-                            ${paciente.nombre}
+                </div>
 
-                        </div>
-
-
-                        <div class="detalle-paciente">
-
-                            ${paciente.historia}
-
-                            ·
-
-                            ${paciente.estudios.length}
-
-                            estudio(s)
-
-                        </div>
-
-                    `;
+            `;
 
 
-                    elemento.onclick =
-                        function () {
+            element.onclick=()=>{
+
+                currentStudy =
+                    index;
+
+                currentImage=0;
+
+                resetImageSettings();
+
+                renderStudies();
+
+                renderImage();
+
+            };
 
 
-                            pacienteActual =
-                                index;
-
-
-                            estudioActual =
-                                0;
-
-
-                            imagenActual =
-                                0;
-
-
-                            mostrarPacientes();
-
-                            mostrarEstudios();
-
-                            mostrarImagen();
-
-
-                        };
-
-
-                    lista.appendChild(
-                        elemento
-                    );
-
-
-                }
+            list.appendChild(
+                element
             );
 
         }
+    );
+
+}
 
 
 
-        /* =================================================
-           MOSTRAR ESTUDIOS
-        ================================================= */
+/* =========================================================
+   MOSTRAR IMAGEN
+========================================================= */
 
-        function mostrarEstudios() {
+function renderImage(){
 
 
-            const lista =
+    const patient =
+        patients[
+            currentPatient
+        ];
 
-                document.getElementById(
-                    "listaEstudios"
+
+    const study =
+        patient.studies[
+            currentStudy
+        ];
+
+
+    const image =
+        study.images[
+            currentImage
+        ];
+
+
+    const mainImage =
+        document.getElementById(
+            "mainImage"
+        );
+
+
+    const wrapper =
+        document.getElementById(
+            "imageWrapper"
+        );
+
+
+    const empty =
+        document.getElementById(
+            "emptyMessage"
+        );
+
+
+    if(
+        !study ||
+        !study.images ||
+        study.images.length===0
+    ){
+
+        wrapper.style.display =
+            "none";
+
+        empty.style.display =
+            "block";
+
+        return;
+
+    }
+
+
+    empty.style.display =
+        "none";
+
+
+    wrapper.style.display =
+        "flex";
+
+
+    mainImage.src =
+        image;
+
+
+    document.getElementById(
+        "viewerTitle"
+    ).textContent =
+        study.name;
+
+
+    document.getElementById(
+        "viewerSubtitle"
+    ).textContent =
+        patient.name +
+        " · " +
+        patient.history +
+        " · " +
+        study.date;
+
+
+    document.getElementById(
+        "imageCounter"
+    ).textContent =
+
+        "Imagen " +
+        (currentImage+1) +
+        " / " +
+        study.images.length;
+
+
+    document.getElementById(
+        "overlayInfo"
+    ).innerHTML =
+
+        patient.name +
+        "<br>" +
+        study.name;
+
+
+    document.getElementById(
+        "infoPatientName"
+    ).textContent =
+        patient.name;
+
+
+    document.getElementById(
+        "infoPatientMeta"
+    ).innerHTML =
+
+        "Historia: " +
+        patient.history +
+        "<br>" +
+
+        "Sexo: " +
+        patient.sex +
+        "<br>" +
+
+        "Nacimiento: " +
+        patient.birth;
+
+
+    document.getElementById(
+        "infoStudy"
+    ).textContent =
+        study.name;
+
+
+    document.getElementById(
+        "infoDate"
+    ).textContent =
+        study.date;
+
+
+    document.getElementById(
+        "infoImages"
+    ).textContent =
+        study.images.length;
+
+
+    document.getElementById(
+        "infoCurrentImage"
+    ).textContent =
+
+        (currentImage+1) +
+        " / " +
+        study.images.length;
+
+
+    renderThumbnails();
+
+    applyImageTransform();
+
+}
+
+
+
+/* =========================================================
+   MINIATURAS
+========================================================= */
+
+function renderThumbnails(){
+
+
+    const container =
+        document.getElementById(
+            "thumbnailList"
+        );
+
+
+    container.innerHTML="";
+
+
+    const study =
+        patients[
+            currentPatient
+        ]
+        .studies[
+            currentStudy
+        ];
+
+
+    study.images.forEach(
+        (src,index)=>{
+
+
+            const img =
+                document.createElement(
+                    "img"
                 );
 
 
-            lista.innerHTML = "";
+            img.src=src;
 
 
-            const paciente =
-
-                pacientes[
-                    pacienteActual
-                ];
+            img.className =
+                "thumbnail";
 
 
-            paciente.estudios.forEach(
-                (estudio, index) => {
+            if(
+                index ===
+                currentImage
+            ){
+
+                img.classList.add(
+                    "active"
+                );
+
+            }
 
 
-                    const elemento =
+            img.onclick=()=>{
 
-                        document.createElement(
-                            "div"
-                        );
+                currentImage =
+                    index;
 
+                renderImage();
 
-                    elemento.className =
-                        "estudio";
-
-
-                    if (
-                        index ===
-                        estudioActual
-                    ) {
-
-                        elemento.classList.add(
-                            "activo"
-                        );
-
-                    }
+            };
 
 
-                    elemento.innerHTML = `
-
-                        <div class="estudio-nombre">
-
-                            ${estudio.nombre}
-
-                        </div>
-
-
-                        <div class="estudio-fecha">
-
-                            ${estudio.fecha}
-
-                            ·
-
-                            ${estudio.imagenes.length}
-
-                            imagen(es)
-
-                        </div>
-
-                    `;
-
-
-                    elemento.onclick =
-                        function () {
-
-
-                            estudioActual =
-                                index;
-
-
-                            imagenActual =
-                                0;
-
-
-                            mostrarEstudios();
-
-                            mostrarImagen();
-
-
-                        };
-
-
-                    lista.appendChild(
-                        elemento
-                    );
-
-
-                }
+            container.appendChild(
+                img
             );
 
         }
+    );
 
+}
 
 
-        /* =================================================
-           MOSTRAR IMAGEN
-        ================================================= */
 
-        function mostrarImagen() {
+/* =========================================================
+   ZOOM
+========================================================= */
 
+function zoomIn(){
 
-            const paciente =
+    zoom += .15;
 
-                pacientes[
-                    pacienteActual
-                ];
+    if(zoom>4){
 
+        zoom=4;
 
-            const estudio =
+    }
 
-                paciente.estudios[
-                    estudioActual
-                ];
+    applyImageTransform();
 
+}
 
-            const imagen =
 
-                document.getElementById(
-                    "imagenPrincipal"
-                );
 
+function zoomOut(){
 
-            const mensaje =
+    zoom -= .15;
 
-                document.getElementById(
-                    "mensaje"
-                );
+    if(zoom<.25){
 
+        zoom=.25;
 
-            const titulo =
+    }
 
-                document.getElementById(
-                    "nombreEstudio"
-                );
+    applyImageTransform();
 
+}
 
-            const info =
 
-                document.getElementById(
-                    "infoImagen"
-                );
 
+/* =========================================================
+   ROTACIÓN
+========================================================= */
 
-            const miniaturas =
+function rotateRight(){
 
-                document.getElementById(
-                    "miniaturas"
-                );
+    rotation += 90;
 
+    if(rotation>=360){
 
+        rotation=0;
 
-            titulo.textContent =
+    }
 
-                paciente.nombre +
-                " — " +
-                estudio.nombre;
+    applyImageTransform();
 
+}
 
 
-            info.textContent =
 
-                "Imagen " +
+function rotateLeft(){
 
-                (imagenActual + 1) +
+    rotation -= 90;
 
-                " de " +
+    if(rotation<0){
 
-                estudio.imagenes.length;
+        rotation=270;
 
+    }
 
+    applyImageTransform();
 
-            if (
-                estudio.imagenes.length === 0
-            ) {
+}
 
 
-                imagen.style.display =
-                    "none";
 
+/* =========================================================
+   INVERSIÓN
+========================================================= */
 
-                mensaje.style.display =
-                    "block";
+function invertImage(){
 
+    inverted =
+        !inverted;
 
-                mensaje.textContent =
+    applyImageTransform();
 
-                    "Este estudio no tiene imágenes.";
+}
 
 
-                return;
 
-            }
+/* =========================================================
+   CONTRASTE
+========================================================= */
 
+function increaseContrast(){
 
+    contrast += .15;
 
-            const ruta =
+    if(contrast>2.5){
 
-                estudio.imagenes[
-                    imagenActual
-                ];
+        contrast=2.5;
 
+    }
 
+    applyImageTransform();
 
-            imagen.src = ruta;
+}
 
 
-            imagen.style.display =
-                "block";
 
+function decreaseContrast(){
 
-            mensaje.style.display =
-                "none";
+    contrast -= .15;
 
+    if(contrast<.4){
 
+        contrast=.4;
 
-            /* MINIATURAS */
+    }
 
-            miniaturas.innerHTML = "";
+    applyImageTransform();
 
+}
 
 
-            estudio.imagenes.forEach(
-                (rutaImagen, index) => {
 
+/* =========================================================
+   APLICAR TRANSFORMACIONES
+========================================================= */
 
-                    const miniatura =
+function applyImageTransform(){
 
-                        document.createElement(
-                            "img"
-                        );
 
+    const wrapper =
+        document.getElementById(
+            "imageWrapper"
+        );
 
-                    miniatura.src =
-                        rutaImagen;
 
+    const image =
+        document.getElementById(
+            "mainImage"
+        );
 
-                    miniatura.className =
-                        "miniatura";
 
+    wrapper.style.transform =
 
-                    if (
-                        index ===
-                        imagenActual
-                    ) {
+        "scale(" +
+        zoom +
+        ") rotate(" +
+        rotation +
+        "deg)";
 
-                        miniatura.classList.add(
-                            "activa"
-                        );
 
-                    }
+    image.style.filter =
 
+        "brightness(1) " +
 
-                    miniatura.onclick =
-                        function () {
+        "contrast(" +
+        contrast +
+        ") " +
 
+        (
+            inverted
+            ?
+            "invert(1)"
+            :
+            "invert(0)"
+        );
 
-                            imagenActual =
-                                index;
 
+    document.getElementById(
+        "infoZoom"
+    ).textContent =
 
-                            mostrarImagen();
+        Math.round(
+            zoom*100
+        ) +
+        "%";
 
 
-                        };
+    document.getElementById(
+        "infoRotation"
+    ).textContent =
 
+        rotation +
+        "°";
 
-                    miniaturas.appendChild(
-                        miniatura
-                    );
+}
 
 
-                }
-            );
 
-        }
+/* =========================================================
+   RESTABLECER
+========================================================= */
 
+function resetImageSettings(){
 
+    zoom=1;
 
-        /* =================================================
-           IMAGEN ANTERIOR
-        ================================================= */
+    rotation=0;
 
-        function imagenAnterior() {
+    inverted=false;
 
+    contrast=1;
 
-            const estudio =
+}
 
-                pacientes[
-                    pacienteActual
-                ]
-                .estudios[
-                    estudioActual
-                ];
 
 
-            if (
-                estudio.imagenes.length === 0
-            ) {
+/* =========================================================
+   SIGUIENTE IMAGEN
+========================================================= */
 
-                return;
+function nextImage(){
 
-            }
 
+    const study =
+        patients[
+            currentPatient
+        ]
+        .studies[
+            currentStudy
+        ];
 
-            imagenActual--;
 
+    if(
+        study.images.length===0
+    ){
 
-            if (
-                imagenActual < 0
-            ) {
+        return;
 
+    }
 
-                imagenActual =
 
-                    estudio.imagenes.length - 1;
+    currentImage++;
 
-            }
 
+    if(
+        currentImage >=
+        study.images.length
+    ){
 
-            mostrarImagen();
+        currentImage=0;
 
-        }
+    }
 
 
+    renderImage();
 
-        /* =================================================
-           IMAGEN SIGUIENTE
-        ================================================= */
+}
 
-        function imagenSiguiente() {
 
 
-            const estudio =
+/* =========================================================
+   IMAGEN ANTERIOR
+========================================================= */
 
-                pacientes[
-                    pacienteActual
-                ]
-                .estudios[
-                    estudioActual
-                ];
+function previousImage(){
 
 
-            if (
-                estudio.imagenes.length === 0
-            ) {
+    const study =
+        patients[
+            currentPatient
+        ]
+        .studies[
+            currentStudy
+        ];
 
-                return;
 
-            }
+    if(
+        study.images.length===0
+    ){
 
+        return;
 
-            imagenActual++;
+    }
 
 
-            if (
-                imagenActual >=
-                estudio.imagenes.length
-            ) {
+    currentImage--;
 
 
-                imagenActual = 0;
+    if(
+        currentImage<0
+    ){
 
-            }
+        currentImage =
+            study.images.length-1;
 
+    }
 
-            mostrarImagen();
 
-        }
+    renderImage();
 
+}
 
 
-        /* =================================================
-           PANTALLA COMPLETA
-        ================================================= */
 
-        function pantallaCompleta() {
+/* =========================================================
+   BUSCAR PACIENTE
+========================================================= */
 
+function buscarPaciente(){
 
-            const imagen =
+    const value =
+        document.getElementById(
+            "search"
+        ).value;
 
-                document.getElementById(
-                    "imagenPrincipal"
-                );
 
+    renderPatients(
+        value
+    );
 
-            const visor =
+}
 
-                document.getElementById(
-                    "visorCompleto"
-                );
 
 
-            const imagenCompleta =
+/* =========================================================
+   PANTALLA COMPLETA
+========================================================= */
 
-                document.getElementById(
-                    "imagenCompleta"
-                );
+function openFullscreen(){
 
 
-            if (
-                imagen.style.display ===
-                "none"
-            ) {
+    const study =
+        patients[
+            currentPatient
+        ]
+        .studies[
+            currentStudy
+        ];
 
-                return;
 
-            }
+    if(
+        !study ||
+        !study.images.length
+    ){
 
+        return;
 
-            imagenCompleta.src =
-                imagen.src;
+    }
 
 
-            visor.style.display =
-                "flex";
+    const viewer =
+        document.getElementById(
+            "fullscreenViewer"
+        );
 
-        }
 
+    const image =
+        document.getElementById(
+            "fullscreenImage"
+        );
 
 
-        /* =================================================
-           CERRAR PANTALLA COMPLETA
-        ================================================= */
+    image.src =
+        study.images[
+            currentImage
+        ];
 
-        function cerrarPantallaCompleta() {
 
+    viewer.style.display =
+        "flex";
 
-            document
+}
 
-                .getElementById(
-                    "visorCompleto"
-                )
 
-                .style.display =
-                    "none";
 
-        }
+function closeFullscreen(){
 
+    document.getElementById(
+        "fullscreenViewer"
+    ).style.display =
+        "none";
 
+}
 
-        /* =================================================
-           INICIAR SISTEMA
-        ================================================= */
 
-        mostrarPacientes();
 
-        mostrarEstudios();
+/* =========================================================
+   INICIO
+========================================================= */
 
-        mostrarImagen();
+renderPatients();
 
+renderStudies();
 
-    </script>
+renderImage();
+
+
+</script>
 
 
 </body>
