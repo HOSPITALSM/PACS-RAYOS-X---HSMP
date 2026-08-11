@@ -617,6 +617,12 @@ button,input,select{
     border-color:var(--green);
 }
 
+.form-select option,
+.form-select optgroup{
+    background:#1a1d20;
+    color:#eee;
+}
+
 .file-input{
     width:100%;
     padding:10px;
@@ -711,28 +717,110 @@ button,input,select{
     display:none;
 }
 
+.admin-only{
+    display:none;
+}
+
+.admin-new-study{
+    display:none;
+    height:34px;
+    padding:0 13px;
+    background:var(--green);
+    border:0;
+    border-radius:4px;
+    color:#07120d;
+    font-size:10px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.admin-new-study:hover{
+    background:#55d99d;
+}
+
+.study-preview{
+    margin-top:8px;
+    padding:10px;
+    background:#191c1f;
+    border:1px solid #2b2f34;
+    border-radius:5px;
+    color:#8f969d;
+    font-size:10px;
+    line-height:1.6;
+}
+
+.study-preview strong{
+    color:var(--green);
+}
+
+.hidden{
+    display:none !important;
+}
+
 @media(max-width:1100px){
     .app{
         grid-template-columns:220px 220px 1fr 210px;
     }
+
     .brand{min-width:250px}
 }
 
 @media(max-width:800px){
     body{overflow:auto}
+
+    .topbar{
+        height:auto;
+        min-height:64px;
+        flex-wrap:wrap;
+        padding:8px 12px;
+    }
+
+    .logo{
+        width:70px;
+        height:70px;
+    }
+
+    .brand{
+        min-width:0;
+        flex:1;
+    }
+
+    .brand-title{
+        font-size:12px;
+    }
+
+    .current-date{
+        display:none;
+    }
+
     .app{
         display:flex;
         flex-direction:column;
         height:auto;
         min-width:0;
     }
+
     .panel{
         width:100%;
         max-height:300px;
     }
-    .viewer{height:650px}
-    .info-panel{width:100%}
-    .search{display:none}
+
+    .viewer{
+        height:650px;
+    }
+
+    .info-panel{
+        width:100%;
+    }
+
+    .search{
+        display:none;
+    }
+
+    .admin-new-study{
+        font-size:9px;
+        padding:0 8px;
+    }
 }
 </style>
 
@@ -778,6 +866,13 @@ button,input,select{
     class="auth-user"
     id="authUser">
 </span>
+
+<button
+    class="admin-new-study"
+    id="newStudyButton"
+    onclick="openAdmin()">
+    + NUEVO ESTUDIO
+</button>
 
 <button
     class="auth-button"
@@ -1192,7 +1287,7 @@ button,input,select{
 <div class="admin-header">
 
     <div class="admin-title">
-        ADMINISTRACIÓN DE ESTUDIOS
+        NUEVO ESTUDIO RADIOGRÁFICO
     </div>
 
     <button
@@ -1208,7 +1303,7 @@ button,input,select{
     <div class="form-group">
 
         <label class="form-label">
-            Nombre del paciente
+            Nombre completo del paciente
         </label>
 
         <input
@@ -1232,6 +1327,8 @@ button,input,select{
 
     </div>
 
+    <!-- ================= ESTRUCTURA ================= -->
+
     <div class="form-group">
 
         <label class="form-label">
@@ -1241,58 +1338,68 @@ button,input,select{
         <select
             class="form-select"
             id="adminStructure"
-            onchange="updateLateralityVisibility()">
+            onchange="updateSideSelector();updateStudyPreview();">
 
-            <option value="">Seleccionar estructura...</option>
+            <option value="">
+                Seleccionar estructura...
+            </option>
 
-            <optgroup label="Tórax">
+            <optgroup label="Tórax y abdomen">
                 <option value="TÓRAX">Tórax</option>
-                <option value="COSTILLAS">Costillas</option>
-                <option value="ESTERNÓN">Esternón</option>
-                <option value="CLAVÍCULA">Clavícula</option>
+                <option value="ABDOMEN">Abdomen</option>
+                <option value="ABDOMEN SIMPLE">Abdomen simple</option>
+                <option value="ABDOMEN DE PIE">Abdomen de pie</option>
+                <option value="ABDOMEN DECÚBITO">Abdomen en decúbito</option>
+                <option value="PELVIS">Pelvis</option>
             </optgroup>
 
-            <optgroup label="Columna">
+            <optgroup label="Columna vertebral">
                 <option value="COLUMNA CERVICAL">Columna cervical</option>
                 <option value="COLUMNA DORSAL">Columna dorsal</option>
                 <option value="COLUMNA LUMBAR">Columna lumbar</option>
+                <option value="COLUMNA SACRA">Columna sacra</option>
                 <option value="COLUMNA LUMBOSACRA">Columna lumbosacra</option>
-                <option value="SACROCOCCÍGEA">Columna sacrococcígea</option>
+                <option value="SACROCOXÍGEA">Sacrocoxígea</option>
+            </optgroup>
+
+            <optgroup label="Cabeza y cara">
+                <option value="CRÁNEO">Cráneo</option>
+                <option value="SENOS PARANASALES">Senos paranasales</option>
+                <option value="HUESOS PROPIOS NASALES">Huesos propios nasales</option>
+                <option value="MACIZO FACIAL">Macizo facial</option>
+                <option value="MANDÍBULA">Mandíbula</option>
+                <option value="ATM">ATM</option>
             </optgroup>
 
             <optgroup label="Miembro superior">
                 <option value="HOMBRO">Hombro</option>
-                <option value="HÚMERO">Húmero</option>
+                <option value="BRAZO">Brazo</option>
                 <option value="CODO">Codo</option>
                 <option value="ANTEBRAZO">Antebrazo</option>
                 <option value="MUÑECA">Muñeca</option>
                 <option value="MANO">Mano</option>
                 <option value="DEDOS DE LA MANO">Dedos de la mano</option>
+                <option value="CLAVÍCULA">Clavícula</option>
+                <option value="ESCÁPULA">Escápula</option>
             </optgroup>
 
-            <optgroup label="Pelvis y miembro inferior">
-                <option value="PELVIS">Pelvis</option>
+            <optgroup label="Miembro inferior">
                 <option value="CADERA">Cadera</option>
                 <option value="FÉMUR">Fémur</option>
+                <option value="MUSLO">Muslo</option>
                 <option value="RODILLA">Rodilla</option>
                 <option value="TIBIA Y PERONÉ">Tibia y peroné</option>
+                <option value="PIERNA">Pierna</option>
                 <option value="TOBILLO">Tobillo</option>
                 <option value="PIE">Pie</option>
                 <option value="DEDOS DEL PIE">Dedos del pie</option>
                 <option value="CALCÁNEO">Calcáneo</option>
             </optgroup>
 
-            <optgroup label="Cabeza y cara">
-                <option value="CRÁNEO">Cráneo</option>
-                <option value="SENOS PARANASALES">Senos paranasales</option>
-                <option value="HUESOS PROPIOS DE LA NARIZ">Huesos propios de la nariz</option>
-                <option value="MACIZO FACIAL">Macizo facial</option>
-                <option value="MANDÍBULA">Mandíbula</option>
-                <option value="ARTICULACIÓN TEMPOROMANDIBULAR">Articulación temporomandibular</option>
-            </optgroup>
-
-            <optgroup label="Otros">
-                <option value="ABDOMEN">Abdomen</option>
+            <optgroup label="Otras estructuras">
+                <option value="COSTILLAS">Costillas</option>
+                <option value="ESTERNÓN">Esternón</option>
+                <option value="ARTICULACIÓN SACROILÍACA">Articulación sacroilíaca</option>
                 <option value="OTRO">Otro</option>
             </optgroup>
 
@@ -1300,10 +1407,11 @@ button,input,select{
 
     </div>
 
+    <!-- ================= LADO ================= -->
+
     <div
-        class="form-group"
-        id="lateralityGroup"
-        style="display:none;">
+        class="form-group hidden"
+        id="sideGroup">
 
         <label class="form-label">
             Lateralidad
@@ -1311,35 +1419,85 @@ button,input,select{
 
         <select
             class="form-select"
-            id="adminLaterality">
+            id="adminSide"
+            onchange="updateStudyPreview()">
 
-            <option value="">Seleccionar...</option>
-            <option value="DERECHA">Derecha</option>
-            <option value="IZQUIERDA">Izquierda</option>
-            <option value="BILATERAL">Bilateral</option>
+            <option value="">
+                Seleccionar...
+            </option>
+
+            <option value="DERECHA">
+                Derecha
+            </option>
+
+            <option value="IZQUIERDA">
+                Izquierda
+            </option>
 
         </select>
 
     </div>
 
+    <!-- ================= PROYECCIONES ================= -->
+
     <div class="form-group">
 
         <label class="form-label">
-            Proyección / detalle del estudio
-            <span style="color:#666;text-transform:none;">
-                (opcional)
-            </span>
+            Proyección / descripción adicional
         </label>
 
-        <input
-            class="form-input"
+        <select
+            class="form-select"
             id="adminProjection"
-            type="text"
-            placeholder="Ej. AP Y LATERAL">
+            onchange="updateStudyPreview()">
+
+            <option value="">
+                Sin especificar
+            </option>
+
+            <option value="AP">
+                AP
+            </option>
+
+            <option value="PA">
+                PA
+            </option>
+
+            <option value="LATERAL">
+                Lateral
+            </option>
+
+            <option value="AP Y LATERAL">
+                AP y lateral
+            </option>
+
+            <option value="OBLICUA">
+                Oblicua
+            </option>
+
+            <option value="AP Y OBLICUA">
+                AP y oblicua
+            </option>
+
+            <option value="AP, LATERAL Y OBLICUA">
+                AP, lateral y oblicua
+            </option>
+
+        </select>
 
     </div>
 
-    <div class="form-group">
+    <!-- ================= PREVISUALIZACIÓN ================= -->
+
+    <div class="study-preview">
+        <strong>Estudio que se registrará:</strong>
+        <br>
+        <span id="studyPreview">
+            Selecciona una estructura.
+        </span>
+    </div>
+
+    <div class="form-group" style="margin-top:15px;">
 
         <label class="form-label">
             Modalidad
@@ -1375,30 +1533,6 @@ button,input,select{
             class="file-list"
             id="fileList">
             Ningún archivo seleccionado.
-        </div>
-
-    </div>
-
-    <div
-        style="
-            background:#191c1f;
-            border:1px solid #2b2f34;
-            border-radius:5px;
-            padding:10px;
-            margin-top:5px;
-            color:#777;
-            font-size:9px;
-            line-height:1.6;
-        ">
-
-        <strong style="color:#3ecf8e;">
-            Vista previa del estudio:
-        </strong>
-
-        <div
-            id="studyPreview"
-            style="color:#ddd;margin-top:4px;">
-            Selecciona una estructura.
         </div>
 
     </div>
@@ -1950,9 +2084,7 @@ function renderCalendar(){
 
         };
 
-        container.appendChild(
-            div
-        );
+        container.appendChild(div);
 
     }
 
@@ -2868,11 +3000,9 @@ function openLogin(){
 
     setTimeout(
         () => {
-
             document.getElementById(
                 "loginEmail"
             ).focus();
-
         },
         100
     );
@@ -3063,12 +3193,20 @@ function updateAuthInterface(user){
             "authUser"
         );
 
+    const newStudyButton =
+        document.getElementById(
+            "newStudyButton"
+        );
+
     if(user){
 
         loginButton.style.display =
             "none";
 
         logoutButton.style.display =
+            "inline-block";
+
+        newStudyButton.style.display =
             "inline-block";
 
         authUser.textContent =
@@ -3081,6 +3219,9 @@ function updateAuthInterface(user){
             "inline-block";
 
         logoutButton.style.display =
+            "none";
+
+        newStudyButton.style.display =
             "none";
 
         authUser.textContent =
@@ -3124,12 +3265,16 @@ function openAdmin(){
     ).value = "";
 
     document.getElementById(
-        "adminLaterality"
+        "adminSide"
     ).value = "";
 
     document.getElementById(
         "adminProjection"
     ).value = "";
+
+    document.getElementById(
+        "adminModality"
+    ).value = "CR";
 
     document.getElementById(
         "adminFiles"
@@ -3150,7 +3295,11 @@ function openAdmin(){
     ).textContent =
         "Selecciona una estructura.";
 
-    updateLateralityVisibility();
+    document.getElementById(
+        "sideGroup"
+    ).classList.add(
+        "hidden"
+    );
 
     document.getElementById(
         "adminOverlay"
@@ -3190,78 +3339,77 @@ async function logoutAdmin(){
 
 
 /* =========================================================
-   ESTRUCTURA Y LATERALIDAD
+   ESTRUCTURAS QUE NECESITAN LATERALIDAD
 ========================================================= */
 
-function structureNeedsLaterality(structure){
+function requiresSide(structure){
 
-    const structuresWithLaterality = [
-
-        "CLAVÍCULA",
+    const sideStructures = [
 
         "HOMBRO",
-        "HÚMERO",
+        "BRAZO",
         "CODO",
         "ANTEBRAZO",
         "MUÑECA",
         "MANO",
         "DEDOS DE LA MANO",
+        "CLAVÍCULA",
+        "ESCÁPULA",
 
         "CADERA",
         "FÉMUR",
+        "MUSLO",
         "RODILLA",
         "TIBIA Y PERONÉ",
+        "PIERNA",
         "TOBILLO",
         "PIE",
         "DEDOS DEL PIE",
-        "CALCÁNEO",
-
-        "HUESOS PROPIOS DE LA NARIZ",
-        "ARTICULACIÓN TEMPOROMANDIBULAR"
+        "CALCÁNEO"
 
     ];
 
-    return structuresWithLaterality.includes(
+    return sideStructures.includes(
         structure
     );
 
 }
 
 
-function updateLateralityVisibility(){
+/* =========================================================
+   MOSTRAR / OCULTAR LATERALIDAD
+========================================================= */
+
+function updateSideSelector(){
 
     const structure =
         document.getElementById(
             "adminStructure"
         ).value;
 
-    const group =
+    const sideGroup =
         document.getElementById(
-            "lateralityGroup"
-        );
-
-    const laterality =
-        document.getElementById(
-            "adminLaterality"
+            "sideGroup"
         );
 
     if(
-        structureNeedsLaterality(
-            structure
-        )
+        requiresSide(structure)
     ){
 
-        group.style.display =
-            "block";
+        sideGroup.classList.remove(
+            "hidden"
+        );
 
     }
     else{
 
-        group.style.display =
-            "none";
+        sideGroup.classList.add(
+            "hidden"
+        );
 
-        laterality.value =
-            "";
+        document.getElementById(
+            "adminSide"
+        ).value = "";
 
     }
 
@@ -3271,25 +3419,25 @@ function updateLateralityVisibility(){
 
 
 /* =========================================================
-   GENERAR NOMBRE DEL ESTUDIO
+   GENERAR DESCRIPCIÓN DEL ESTUDIO
 ========================================================= */
 
-function generateStudyName(){
+function buildStudyName(){
 
     const structure =
         document.getElementById(
             "adminStructure"
         ).value;
 
-    const laterality =
+    const side =
         document.getElementById(
-            "adminLaterality"
+            "adminSide"
         ).value;
 
     const projection =
         document.getElementById(
             "adminProjection"
-        ).value.trim();
+        ).value;
 
     if(!structure)
         return "";
@@ -3299,15 +3447,13 @@ function generateStudyName(){
         structure;
 
     if(
-        structureNeedsLaterality(
-            structure
-        ) &&
-        laterality
+        requiresSide(structure) &&
+        side
     ){
 
         result +=
             " " +
-            laterality;
+            side;
 
     }
 
@@ -3315,7 +3461,7 @@ function generateStudyName(){
 
         result +=
             " " +
-            projection.toUpperCase();
+            projection;
 
     }
 
@@ -3324,18 +3470,19 @@ function generateStudyName(){
 }
 
 
+/* =========================================================
+   PREVISUALIZAR ESTUDIO
+========================================================= */
+
 function updateStudyPreview(){
 
-    const preview =
-        document.getElementById(
-            "studyPreview"
-        );
+    const result =
+        buildStudyName();
 
-    const study =
-        generateStudyName();
-
-    preview.textContent =
-        study ||
+    document.getElementById(
+        "studyPreview"
+    ).textContent =
+        result ||
         "Selecciona una estructura.";
 
 }
@@ -3424,28 +3571,18 @@ async function createStudyAndUpload(){
             "adminDate"
         ).value;
 
+    const study =
+        buildStudyName();
+
     const structure =
         document.getElementById(
             "adminStructure"
         ).value;
 
-    const laterality =
-        document.getElementById(
-            "adminLaterality"
-        ).value;
-
-    const projection =
-        document.getElementById(
-            "adminProjection"
-        ).value.trim();
-
     const modality =
         document.getElementById(
             "adminModality"
         ).value;
-
-    const study =
-        generateStudyName();
 
     const fileInput =
         document.getElementById(
@@ -3467,24 +3604,24 @@ async function createStudyAndUpload(){
             "status-message status-error";
 
         status.textContent =
-            "Completa paciente, fecha y estructura.";
+            "Completa nombre, fecha y estructura.";
 
         return;
 
     }
 
     if(
-        structureNeedsLaterality(
-            structure
-        ) &&
-        !laterality
+        requiresSide(structure) &&
+        !document.getElementById(
+            "adminSide"
+        ).value
     ){
 
         status.className =
             "status-message status-error";
 
         status.textContent =
-            "Selecciona la lateralidad: derecha, izquierda o bilateral.";
+            "Selecciona si corresponde a derecha o izquierda.";
 
         return;
 
@@ -3574,7 +3711,7 @@ async function createStudyAndUpload(){
             const safeName =
                 file.name
                     .replace(
-                        /[^a-zA-Z0-9.\_-]/g,
+                        /[^a-zA-Z0-9._-]/g,
                         "_"
                     );
 
@@ -3665,10 +3802,47 @@ async function createStudyAndUpload(){
         status.textContent =
             "Estudio creado correctamente.";
 
+        document.getElementById(
+            "adminPatient"
+        ).value = "";
+
+        document.getElementById(
+            "adminStructure"
+        ).value = "";
+
+        document.getElementById(
+            "adminSide"
+        ).value = "";
+
+        document.getElementById(
+            "adminProjection"
+        ).value = "";
+
+        document.getElementById(
+            "adminFiles"
+        ).value = "";
+
+        document.getElementById(
+            "fileList"
+        ).textContent =
+            "Ningún archivo seleccionado.";
+
+        document.getElementById(
+            "studyPreview"
+        ).textContent =
+            "Selecciona una estructura.";
+
+        document.getElementById(
+            "sideGroup"
+        ).classList.add(
+            "hidden"
+        );
+
+
         await loadStudies();
 
-        selectedDate =
-            date;
+
+        selectedDate = date;
 
         calendarDate =
             new Date(
@@ -3677,10 +3851,6 @@ async function createStudyAndUpload(){
 
         currentPatient =
             patient;
-
-        currentStudy = 0;
-
-        currentImage = 0;
 
         renderCalendar();
 
