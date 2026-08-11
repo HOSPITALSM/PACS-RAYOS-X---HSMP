@@ -1,9 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>PACS RAYOS X - HSMP</title>
+<title>Hospital San Martín de Pangoa - Rayos X</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 :root{
@@ -15,6 +18,9 @@
     --muted:#858a91;
     --selected:#30353a;
     --hover:#25292d;
+    --green:#3ecf8e;
+    --green-dark:#2fb477;
+    --danger:#a84b4b;
 }
 
 *{box-sizing:border-box}
@@ -29,6 +35,10 @@ html,body{
 }
 
 body{overflow:hidden}
+
+button,input,select{
+    font-family:Arial,Helvetica,sans-serif;
+}
 
 .topbar{
     height:64px;
@@ -57,16 +67,17 @@ body{overflow:hidden}
     object-fit:contain;
 }
 
-.brand{min-width:210px}
+.brand{min-width:280px}
 
 .brand-title{
-    font-size:16px;
+    font-size:15px;
     font-weight:bold;
     letter-spacing:.5px;
+    color:var(--green);
 }
 
 .brand-subtitle{
-    color:var(--muted);
+    color:var(--green);
     font-size:10px;
     margin-top:4px;
 }
@@ -88,9 +99,44 @@ body{overflow:hidden}
     outline:none;
 }
 
+.search input:focus{
+    border-color:var(--green);
+}
+
 .current-date{
     color:#a9adb2;
     font-size:11px;
+    white-space:nowrap;
+}
+
+.auth-area{
+    display:flex;
+    align-items:center;
+    gap:7px;
+}
+
+.auth-button{
+    height:34px;
+    padding:0 12px;
+    background:#202328;
+    border:1px solid #34383d;
+    border-radius:4px;
+    color:#d0d4d8;
+    font-size:10px;
+    cursor:pointer;
+}
+
+.auth-button:hover{
+    border-color:var(--green);
+    color:var(--green);
+}
+
+.auth-user{
+    color:var(--green);
+    font-size:9px;
+    max-width:130px;
+    overflow:hidden;
+    text-overflow:ellipsis;
     white-space:nowrap;
 }
 
@@ -123,7 +169,7 @@ body{overflow:hidden}
     font-size:10px;
     text-transform:uppercase;
     letter-spacing:1px;
-    color:#a8adb3;
+    color:var(--green);
 }
 
 .panel-count{
@@ -196,6 +242,7 @@ body{overflow:hidden}
 .day:hover{background:var(--hover)}
 .day.other-month{color:#3e4247}
 .day.today{border:1px solid #676d74}
+
 .day.selected{
     background:#d3d7da;
     color:#111;
@@ -212,7 +259,9 @@ body{overflow:hidden}
     bottom:4px;
 }
 
-.day.selected.has-studies::after{background:#111}
+.day.selected.has-studies::after{
+    background:#111;
+}
 
 .today-button{
     width:100%;
@@ -236,7 +285,7 @@ body{overflow:hidden}
 
 .patient.active{
     background:var(--selected);
-    box-shadow:inset 3px 0 0 #d0d4d8;
+    box-shadow:inset 3px 0 0 var(--green);
 }
 
 .patient-name{
@@ -276,7 +325,10 @@ body{overflow:hidden}
     flex-shrink:0;
 }
 
-.viewer-title{font-size:12px}
+.viewer-title{
+    font-size:12px;
+    color:var(--green);
+}
 
 .viewer-subtitle{
     color:#70757b;
@@ -366,6 +418,11 @@ body{overflow:hidden}
     cursor:pointer;
 }
 
+.tool:hover{
+    background:#2a2e33;
+    border-color:#555b61;
+}
+
 .separator{
     width:1px;
     height:25px;
@@ -396,7 +453,9 @@ body{overflow:hidden}
     flex-shrink:0;
 }
 
-.thumbnail.active{border-color:#d0d4d8}
+.thumbnail.active{
+    border-color:var(--green);
+}
 
 .info-panel{overflow-y:auto}
 
@@ -406,7 +465,7 @@ body{overflow:hidden}
 }
 
 .info-heading{
-    color:#858a90;
+    color:var(--green);
     font-size:9px;
     text-transform:uppercase;
     letter-spacing:1px;
@@ -478,11 +537,189 @@ body{overflow:hidden}
     cursor:pointer;
 }
 
+/* ================= ADMIN ================= */
+
+.admin-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.78);
+    z-index:50000;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+}
+
+.admin-box{
+    width:100%;
+    max-width:650px;
+    max-height:90vh;
+    overflow-y:auto;
+    background:#111315;
+    border:1px solid #30353a;
+    border-radius:8px;
+    box-shadow:0 20px 60px rgba(0,0,0,.6);
+}
+
+.admin-header{
+    padding:18px 20px;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+
+.admin-title{
+    color:var(--green);
+    font-size:15px;
+    font-weight:bold;
+}
+
+.admin-close{
+    background:none;
+    border:0;
+    color:#888;
+    font-size:25px;
+    cursor:pointer;
+}
+
+.admin-body{
+    padding:20px;
+}
+
+.form-group{
+    margin-bottom:15px;
+}
+
+.form-label{
+    display:block;
+    color:#969ba1;
+    font-size:10px;
+    margin-bottom:6px;
+    text-transform:uppercase;
+    letter-spacing:.6px;
+}
+
+.form-input,
+.form-select{
+    width:100%;
+    height:40px;
+    background:#1a1d20;
+    border:1px solid #34383d;
+    border-radius:5px;
+    color:#eee;
+    padding:0 11px;
+    outline:none;
+}
+
+.form-input:focus,
+.form-select:focus{
+    border-color:var(--green);
+}
+
+.file-input{
+    width:100%;
+    padding:10px;
+    background:#1a1d20;
+    border:1px dashed #454b51;
+    border-radius:5px;
+    color:#aaa;
+    font-size:10px;
+}
+
+.file-list{
+    margin-top:8px;
+    color:#777;
+    font-size:9px;
+    line-height:1.7;
+    max-height:100px;
+    overflow-y:auto;
+}
+
+.admin-actions{
+    display:flex;
+    gap:8px;
+    margin-top:20px;
+}
+
+.admin-primary{
+    flex:1;
+    height:40px;
+    background:var(--green);
+    border:0;
+    color:#07120d;
+    border-radius:5px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.admin-primary:hover{
+    background:#55d99d;
+}
+
+.admin-secondary{
+    height:40px;
+    padding:0 18px;
+    background:#202328;
+    border:1px solid #34383d;
+    color:#ccc;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+.status-message{
+    margin-top:12px;
+    font-size:10px;
+    line-height:1.5;
+}
+
+.status-success{color:var(--green)}
+.status-error{color:#e47777}
+
+.login-box{
+    width:100%;
+    max-width:390px;
+    background:#111315;
+    border:1px solid #30353a;
+    border-radius:8px;
+    box-shadow:0 20px 60px rgba(0,0,0,.6);
+}
+
+.login-header{
+    padding:24px 24px 18px;
+    text-align:center;
+    border-bottom:1px solid var(--border);
+}
+
+.login-title{
+    color:var(--green);
+    font-size:16px;
+    font-weight:bold;
+}
+
+.login-subtitle{
+    color:#777d83;
+    font-size:10px;
+    margin-top:6px;
+}
+
+.login-body{
+    padding:24px;
+}
+
+.logout-button{
+    display:none;
+}
+
+.admin-only{
+    display:none;
+}
+
 @media(max-width:1100px){
     .app{
         grid-template-columns:220px 220px 1fr 210px;
     }
-    .brand{display:none}
+    .brand{min-width:250px}
 }
 
 @media(max-width:800px){
@@ -502,32 +739,63 @@ body{overflow:hidden}
     .search{display:none}
 }
 </style>
+
 </head>
 
 <body>
 
 <header class="topbar">
 
-    <div class="logo">
-        <img src="logorx.jpg" alt="Logo RX">
+```
+<div class="logo">
+    <img src="logorx.jpg" alt="Logo RX">
+</div>
+
+<div class="brand">
+    <div class="brand-title">
+        HOSPITAL SAN MARTÍN DE PANGOA - RAYOS X
     </div>
 
-    <div class="brand">
-        <div class="brand-title">PACS RAYOS X - HSMP</div>
-        <div class="brand-subtitle">
-            VISOR DE IMÁGENES RADIOGRÁFICAS
-        </div>
+    <div class="brand-subtitle">
+        VISOR DE IMÁGENES RADIOGRÁFICAS
     </div>
+</div>
 
-    <div class="search">
-        <input
-            id="search"
-            type="text"
-            placeholder="Buscar paciente..."
-            oninput="searchPatients()">
-    </div>
+<div class="search">
+    <input
+        id="search"
+        type="text"
+        placeholder="Buscar paciente..."
+        oninput="searchPatients()">
+</div>
 
-    <div class="current-date" id="currentDateLabel">--</div>
+<div class="current-date" id="currentDateLabel">
+    --
+</div>
+
+<div class="auth-area">
+
+    <span
+        class="auth-user"
+        id="authUser">
+    </span>
+
+    <button
+        class="auth-button"
+        id="loginButton"
+        onclick="openLogin()">
+        ADMINISTRADOR
+    </button>
+
+    <button
+        class="auth-button logout-button"
+        id="logoutButton"
+        onclick="logoutAdmin()">
+        CERRAR SESIÓN
+    </button>
+
+</div>
+```
 
 </header>
 
@@ -535,300 +803,527 @@ body{overflow:hidden}
 
 <section class="panel">
 
-    <div class="panel-header">
-        <span class="panel-title">Fecha</span>
-    </div>
+```
+<div class="panel-header">
+    <span class="panel-title">Fecha</span>
+</div>
 
-    <div class="panel-body">
+<div class="panel-body">
 
-        <div class="calendar">
+    <div class="calendar">
 
-            <div class="calendar-header">
+        <div class="calendar-header">
 
-                <button
-                    class="calendar-button"
-                    onclick="previousMonth()">‹</button>
-
-                <div
-                    class="calendar-month"
-                    id="calendarMonth">
-                </div>
-
-                <button
-                    class="calendar-button"
-                    onclick="nextMonth()">›</button>
-
-            </div>
-
-            <div class="calendar-weekdays">
-                <div>L</div>
-                <div>M</div>
-                <div>M</div>
-                <div>J</div>
-                <div>V</div>
-                <div>S</div>
-                <div>D</div>
-            </div>
+            <button
+                class="calendar-button"
+                onclick="previousMonth()">‹</button>
 
             <div
-                class="calendar-days"
-                id="calendarDays">
+                class="calendar-month"
+                id="calendarMonth">
             </div>
 
             <button
-                class="today-button"
-                onclick="goToday()">
-                IR A HOY
+                class="calendar-button"
+                onclick="nextMonth()">›</button>
+
+        </div>
+
+        <div class="calendar-weekdays">
+            <div>L</div>
+            <div>M</div>
+            <div>M</div>
+            <div>J</div>
+            <div>V</div>
+            <div>S</div>
+            <div>D</div>
+        </div>
+
+        <div
+            class="calendar-days"
+            id="calendarDays">
+        </div>
+
+        <button
+            class="today-button"
+            onclick="goToday()">
+            IR A HOY
+        </button>
+
+    </div>
+
+</div>
+```
+
+</section>
+
+<section class="panel">
+
+```
+<div class="panel-header">
+
+    <span class="panel-title">
+        Pacientes
+    </span>
+
+    <span
+        class="panel-count"
+        id="patientCount">
+        0
+    </span>
+
+</div>
+
+<div
+    class="panel-body"
+    id="patientList">
+</div>
+```
+
+</section>
+
+<section class="viewer">
+
+```
+<div class="viewer-header">
+
+    <div>
+
+        <div
+            class="viewer-title"
+            id="viewerTitle">
+            Seleccione un estudio
+        </div>
+
+        <div
+            class="viewer-subtitle"
+            id="viewerSubtitle">
+            Conectando con Supabase...
+        </div>
+
+    </div>
+
+    <div
+        class="image-counter"
+        id="imageCounter">
+        --
+    </div>
+
+</div>
+
+<div
+    class="viewport"
+    id="viewport">
+
+    <div class="overlay-left">
+        PACS RAYOS X · HSMP
+    </div>
+
+    <div
+        class="overlay-right"
+        id="overlayRight">
+        --
+    </div>
+
+    <div
+        class="empty-message"
+        id="emptyMessage">
+        Seleccione un paciente para visualizar sus estudios.
+    </div>
+
+    <div
+        class="image-wrapper"
+        id="imageWrapper"
+        style="display:none;">
+
+        <img
+            id="mainImage"
+            class="main-image"
+            alt="Imagen radiológica">
+
+    </div>
+
+</div>
+
+<div class="toolbar">
+
+    <button class="tool" onclick="zoomIn()">🔍+</button>
+    <button class="tool" onclick="zoomOut()">🔍−</button>
+    <button class="tool" onclick="resetView()">↺</button>
+
+    <div class="separator"></div>
+
+    <button class="tool" onclick="rotateLeft()">↶</button>
+    <button class="tool" onclick="rotateRight()">↷</button>
+    <button class="tool" onclick="invertImage()">◐</button>
+    <button class="tool" onclick="contrastUp()">C+</button>
+    <button class="tool" onclick="contrastDown()">C−</button>
+
+    <div class="separator"></div>
+
+    <button class="tool" onclick="previousImage()">◀</button>
+    <button class="tool" onclick="nextImage()">▶</button>
+    <button class="tool" onclick="openFullscreen()">⛶</button>
+
+</div>
+
+<div
+    class="thumbnails"
+    id="thumbnailList">
+</div>
+```
+
+</section>
+
+<aside class="panel info-panel">
+
+```
+<div class="panel-header">
+    <span class="panel-title">
+        Información
+    </span>
+</div>
+
+<div class="info-section">
+
+    <div class="info-heading">
+        Paciente
+    </div>
+
+    <div class="patient-card">
+
+        <div
+            class="patient-card-name"
+            id="infoPatientName">
+            --
+        </div>
+
+        <div
+            class="patient-card-meta"
+            id="infoPatientMeta">
+            --
+        </div>
+
+    </div>
+
+</div>
+
+<div class="info-section">
+
+    <div class="info-heading">
+        Estudio
+    </div>
+
+    <div class="info-row">
+        <span class="info-label">DESCRIPCIÓN</span>
+        <span
+            class="info-value"
+            id="infoStudy">
+            --
+        </span>
+    </div>
+
+    <div class="info-row">
+        <span class="info-label">FECHA</span>
+        <span
+            class="info-value"
+            id="infoDate">
+            --
+        </span>
+    </div>
+
+    <div class="info-row">
+        <span class="info-label">MODALIDAD</span>
+        <span
+            class="info-value"
+            id="infoModality">
+            --
+        </span>
+    </div>
+
+    <div class="info-row">
+        <span class="info-label">IMÁGENES</span>
+        <span
+            class="info-value"
+            id="infoImages">
+            --
+        </span>
+    </div>
+
+</div>
+
+<div class="info-section">
+
+    <div class="info-heading">
+        Visualización
+    </div>
+
+    <div class="info-row">
+        <span class="info-label">ZOOM</span>
+        <span
+            class="info-value"
+            id="infoZoom">
+            100%
+        </span>
+    </div>
+
+    <div class="info-row">
+        <span class="info-label">ROTACIÓN</span>
+        <span
+            class="info-value"
+            id="infoRotation">
+            0°
+        </span>
+    </div>
+
+    <div class="info-row">
+        <span class="info-label">IMAGEN</span>
+        <span
+            class="info-value"
+            id="infoCurrentImage">
+            --
+        </span>
+    </div>
+
+</div>
+```
+
+</aside>
+
+</div>
+
+<!-- ================= LOGIN ================= -->
+
+<div
+    class="admin-overlay"
+    id="loginOverlay">
+
+```
+<div class="login-box">
+
+    <div class="login-header">
+
+        <div class="login-title">
+            ACCESO ADMINISTRADOR
+        </div>
+
+        <div class="login-subtitle">
+            Hospital San Martín de Pangoa - Rayos X
+        </div>
+
+    </div>
+
+    <div class="login-body">
+
+        <div class="form-group">
+
+            <label class="form-label">
+                Correo electrónico
+            </label>
+
+            <input
+                class="form-input"
+                id="loginEmail"
+                type="email"
+                autocomplete="username"
+                placeholder="Correo">
+
+        </div>
+
+        <div class="form-group">
+
+            <label class="form-label">
+                Contraseña
+            </label>
+
+            <input
+                class="form-input"
+                id="loginPassword"
+                type="password"
+                autocomplete="current-password"
+                placeholder="Contraseña">
+
+        </div>
+
+        <div class="admin-actions">
+
+            <button
+                class="admin-secondary"
+                onclick="closeLogin()">
+                CANCELAR
+            </button>
+
+            <button
+                class="admin-primary"
+                onclick="loginAdmin()">
+                INGRESAR
+            </button>
+
+        </div>
+
+        <div
+            class="status-message"
+            id="loginStatus">
+        </div>
+
+    </div>
+
+</div>
+```
+
+</div>
+
+<!-- ================= PANEL ADMINISTRADOR ================= -->
+
+<div
+    class="admin-overlay"
+    id="adminOverlay">
+
+```
+<div class="admin-box">
+
+    <div class="admin-header">
+
+        <div class="admin-title">
+            ADMINISTRACIÓN DE ESTUDIOS
+        </div>
+
+        <button
+            class="admin-close"
+            onclick="closeAdmin()">
+            ×
+        </button>
+
+    </div>
+
+    <div class="admin-body">
+
+        <div class="form-group">
+
+            <label class="form-label">
+                Nombre completo del paciente
+            </label>
+
+            <input
+                class="form-input"
+                id="adminPatient"
+                type="text"
+                placeholder="Ej. JUAN PÉREZ GARCÍA">
+
+        </div>
+
+        <div class="form-group">
+
+            <label class="form-label">
+                Fecha del estudio
+            </label>
+
+            <input
+                class="form-input"
+                id="adminDate"
+                type="date">
+
+        </div>
+
+        <div class="form-group">
+
+            <label class="form-label">
+                Estudio
+            </label>
+
+            <input
+                class="form-input"
+                id="adminStudy"
+                type="text"
+                placeholder="Ej. RADIOGRAFÍA DE TÓRAX AP Y LATERAL">
+
+        </div>
+
+        <div class="form-group">
+
+            <label class="form-label">
+                Modalidad
+            </label>
+
+            <select
+                class="form-select"
+                id="adminModality">
+
+                <option value="CR">CR</option>
+                <option value="DX">DX</option>
+                <option value="XR">XR</option>
+
+            </select>
+
+        </div>
+
+        <div class="form-group">
+
+            <label class="form-label">
+                Imágenes JPG
+            </label>
+
+            <input
+                class="file-input"
+                id="adminFiles"
+                type="file"
+                accept=".jpg,.jpeg,image/jpeg"
+                multiple
+                onchange="showSelectedFiles()">
+
+            <div
+                class="file-list"
+                id="fileList">
+                Ningún archivo seleccionado.
+            </div>
+
+        </div>
+
+        <div
+            class="status-message"
+            id="adminStatus">
+        </div>
+
+        <div class="admin-actions">
+
+            <button
+                class="admin-secondary"
+                onclick="closeAdmin()">
+                CANCELAR
+            </button>
+
+            <button
+                class="admin-primary"
+                onclick="createStudyAndUpload()">
+                CREAR ESTUDIO Y SUBIR IMÁGENES
             </button>
 
         </div>
 
     </div>
 
-</section>
-
-<section class="panel">
-
-    <div class="panel-header">
-
-        <span class="panel-title">
-            Pacientes
-        </span>
-
-        <span
-            class="panel-count"
-            id="patientCount">
-            0
-        </span>
-
-    </div>
-
-    <div
-        class="panel-body"
-        id="patientList">
-    </div>
-
-</section>
-
-<section class="viewer">
-
-    <div class="viewer-header">
-
-        <div>
-
-            <div
-                class="viewer-title"
-                id="viewerTitle">
-                Seleccione un estudio
-            </div>
-
-            <div
-                class="viewer-subtitle"
-                id="viewerSubtitle">
-                Conectando con Supabase...
-            </div>
-
-        </div>
-
-        <div
-            class="image-counter"
-            id="imageCounter">
-            --
-        </div>
-
-    </div>
-
-    <div
-        class="viewport"
-        id="viewport">
-
-        <div class="overlay-left">
-            PACS RAYOS X · HSMP
-        </div>
-
-        <div
-            class="overlay-right"
-            id="overlayRight">
-            --
-        </div>
-
-        <div
-            class="empty-message"
-            id="emptyMessage">
-            Seleccione un paciente para visualizar sus estudios.
-        </div>
-
-        <div
-            class="image-wrapper"
-            id="imageWrapper"
-            style="display:none;">
-
-            <img
-                id="mainImage"
-                class="main-image"
-                alt="Imagen radiológica">
-
-        </div>
-
-    </div>
-
-    <div class="toolbar">
-
-        <button class="tool" onclick="zoomIn()">🔍+</button>
-        <button class="tool" onclick="zoomOut()">🔍−</button>
-        <button class="tool" onclick="resetView()">↺</button>
-
-        <div class="separator"></div>
-
-        <button class="tool" onclick="rotateLeft()">↶</button>
-        <button class="tool" onclick="rotateRight()">↷</button>
-        <button class="tool" onclick="invertImage()">◐</button>
-        <button class="tool" onclick="contrastUp()">C+</button>
-        <button class="tool" onclick="contrastDown()">C−</button>
-
-        <div class="separator"></div>
-
-        <button class="tool" onclick="previousImage()">◀</button>
-        <button class="tool" onclick="nextImage()">▶</button>
-        <button class="tool" onclick="openFullscreen()">⛶</button>
-
-    </div>
-
-    <div
-        class="thumbnails"
-        id="thumbnailList">
-    </div>
-
-</section>
-
-<aside class="panel info-panel">
-
-    <div class="panel-header">
-        <span class="panel-title">
-            Información
-        </span>
-    </div>
-
-    <div class="info-section">
-
-        <div class="info-heading">
-            Paciente
-        </div>
-
-        <div class="patient-card">
-
-            <div
-                class="patient-card-name"
-                id="infoPatientName">
-                --
-            </div>
-
-            <div
-                class="patient-card-meta"
-                id="infoPatientMeta">
-                --
-            </div>
-
-        </div>
-
-    </div>
-
-    <div class="info-section">
-
-        <div class="info-heading">
-            Estudio
-        </div>
-
-        <div class="info-row">
-            <span class="info-label">DESCRIPCIÓN</span>
-            <span
-                class="info-value"
-                id="infoStudy">
-                --
-            </span>
-        </div>
-
-        <div class="info-row">
-            <span class="info-label">FECHA</span>
-            <span
-                class="info-value"
-                id="infoDate">
-                --
-            </span>
-        </div>
-
-        <div class="info-row">
-            <span class="info-label">MODALIDAD</span>
-            <span
-                class="info-value"
-                id="infoModality">
-                --
-            </span>
-        </div>
-
-        <div class="info-row">
-            <span class="info-label">IMÁGENES</span>
-            <span
-                class="info-value"
-                id="infoImages">
-                --
-            </span>
-        </div>
-
-    </div>
-
-    <div class="info-section">
-
-        <div class="info-heading">
-            Visualización
-        </div>
-
-        <div class="info-row">
-            <span class="info-label">ZOOM</span>
-            <span
-                class="info-value"
-                id="infoZoom">
-                100%
-            </span>
-        </div>
-
-        <div class="info-row">
-            <span class="info-label">ROTACIÓN</span>
-            <span
-                class="info-value"
-                id="infoRotation">
-                0°
-            </span>
-        </div>
-
-        <div class="info-row">
-            <span class="info-label">IMAGEN</span>
-            <span
-                class="info-value"
-                id="infoCurrentImage">
-                --
-            </span>
-        </div>
-
-    </div>
-
-</aside>
+</div>
+```
 
 </div>
+
+<!-- ================= PANTALLA COMPLETA ================= -->
 
 <div
     class="fullscreen"
     id="fullscreenViewer">
 
-    <div
-        class="close-fullscreen"
-        onclick="closeFullscreen()">
-        ×
-    </div>
+```
+<div
+    class="close-fullscreen"
+    onclick="closeFullscreen()">
+    ×
+</div>
 
-    <img
-        id="fullscreenImage"
-        alt="Imagen">
+<img
+    id="fullscreenImage"
+    alt="Imagen">
+```
 
 </div>
 
@@ -844,12 +1339,27 @@ const SUPABASE_URL =
 const SUPABASE_KEY =
     "sb_publishable_5L4-txz5pZzI6dU6UAw86w_5gXbHZr0";
 
+const supabaseClient =
+    window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+    );
+
 
 /* =========================================================
-   CONFIGURACIÓN
+   ADMINISTRADOR
 ========================================================= */
 
-const STORAGE_BUCKET = "IMAGENES";
+const ADMIN_UID =
+    "622de888-2abd-4f4c-b1ba-488c7472b767";
+
+const STORAGE_BUCKET =
+    "IMAGENES";
+
+
+/* =========================================================
+   VARIABLES
+========================================================= */
 
 let studies = [];
 
@@ -879,6 +1389,9 @@ function formatDate(dateString){
     const parts =
         dateString.split("-");
 
+    if(parts.length !== 3)
+        return dateString;
+
     return (
         parts[2] + "/" +
         parts[1] + "/" +
@@ -888,7 +1401,7 @@ function formatDate(dateString){
 
 
 /* =========================================================
-   URL DE IMAGEN
+   URL IMAGEN
 ========================================================= */
 
 function getImageUrl(file){
@@ -916,7 +1429,13 @@ function getImageUrl(file){
         "/storage/v1/object/public/" +
         STORAGE_BUCKET +
         "/" +
-        encodeURIComponent(file)
+        file
+            .split("/")
+            .map(
+                part =>
+                    encodeURIComponent(part)
+            )
+            .join("/")
     );
 }
 
@@ -974,11 +1493,7 @@ function normalizeImages(value){
             }
 
         }
-        catch(error){
-
-            /* El valor puede ser simplemente "SWN.jpg" */
-
-        }
+        catch(error){}
 
         return [
             getImageUrl(text)
@@ -992,7 +1507,7 @@ function normalizeImages(value){
 
 
 /* =========================================================
-   CARGAR ESTUDIOS DESDE SUPABASE
+   CARGAR ESTUDIOS
 ========================================================= */
 
 async function loadStudies(){
@@ -1004,25 +1519,20 @@ async function loadStudies(){
         ).textContent =
             "Conectando con Supabase...";
 
-
         const response =
             await fetch(
                 SUPABASE_URL +
                 "/rest/v1/studies?select=*",
                 {
                     method:"GET",
-
                     headers:{
-                        "apikey":
-                            SUPABASE_KEY,
-
+                        "apikey":SUPABASE_KEY,
                         "Authorization":
                             "Bearer " +
                             SUPABASE_KEY
                     }
                 }
             );
-
 
         if(!response.ok){
 
@@ -1033,84 +1543,48 @@ async function loadStudies(){
 
         }
 
-
         const data =
             await response.json();
-
-
-        console.log(
-            "ESTUDIOS RECIBIDOS:",
-            data
-        );
-
 
         studies =
             data.map(
                 item => {
 
-                    const imageList =
-                        normalizeImages(
-                            item.images
-                        );
+                    return {
 
+                        id:item.id,
 
-                    const study = {
+                        date:item.date,
 
-                        id:
-                            item.id,
+                        patient:item.patient,
 
-                        date:
-                            item.date,
+                        history:"",
 
-                        patient:
-                            item.patient,
+                        birth:"",
 
-                        history:
-                            "",
+                        sex:"",
 
-                        birth:
-                            "",
-
-                        sex:
-                            "",
-
-                        study:
-                            item.study,
+                        study:item.study,
 
                         modality:
                             item.modality ||
                             "CR",
 
                         images:
-                            imageList
+                            normalizeImages(
+                                item.images
+                            )
 
                     };
 
-
-                    console.log(
-                        "ESTUDIO PROCESADO:",
-                        study
-                    );
-
-
-                    return study;
-
                 }
             );
-
-
-        console.log(
-            "STUDIES FINALES:",
-            studies
-        );
-
 
         renderCalendar();
 
         renderPatients();
 
         clearViewer();
-
 
         document.getElementById(
             "currentDateLabel"
@@ -1119,15 +1593,10 @@ async function loadStudies(){
                 selectedDate
             );
 
-
     }
     catch(error){
 
-        console.error(
-            "ERROR:",
-            error
-        );
-
+        console.error(error);
 
         document.getElementById(
             "patientList"
@@ -1150,7 +1619,7 @@ async function loadStudies(){
 
 
 /* =========================================================
-   ESTUDIOS POR FECHA
+   PACIENTES
 ========================================================= */
 
 function getStudiesForDate(){
@@ -1161,11 +1630,6 @@ function getStudiesForDate(){
     );
 
 }
-
-
-/* =========================================================
-   PACIENTES
-========================================================= */
 
 function getPatientsForDate(){
 
@@ -1227,14 +1691,12 @@ function renderCalendar(){
         " " +
         year;
 
-
     const container =
         document.getElementById(
             "calendarDays"
         );
 
     container.innerHTML = "";
-
 
     let firstDay =
         new Date(
@@ -1243,12 +1705,10 @@ function renderCalendar(){
             1
         ).getDay();
 
-
     firstDay =
         firstDay === 0
         ? 6
         : firstDay - 1;
-
 
     const daysInMonth =
         new Date(
@@ -1256,7 +1716,6 @@ function renderCalendar(){
             month + 1,
             0
         ).getDate();
-
 
     for(
         let i=firstDay-1;
@@ -1283,7 +1742,6 @@ function renderCalendar(){
 
     }
 
-
     for(
         let day=1;
         day<=daysInMonth;
@@ -1295,7 +1753,8 @@ function renderCalendar(){
                 "div"
             );
 
-        div.className = "day";
+        div.className =
+            "day";
 
         const dateString =
             year +
@@ -1306,9 +1765,8 @@ function renderCalendar(){
             String(day)
                 .padStart(2,"0");
 
-
-        div.textContent = day;
-
+        div.textContent =
+            day;
 
         if(
             studies.some(
@@ -1324,7 +1782,6 @@ function renderCalendar(){
 
         }
 
-
         if(
             dateString ===
             selectedDate
@@ -1335,7 +1792,6 @@ function renderCalendar(){
             );
 
         }
-
 
         const today =
             new Date();
@@ -1351,7 +1807,6 @@ function renderCalendar(){
                 today.getDate()
             ).padStart(2,"0");
 
-
         if(
             dateString ===
             todayString
@@ -1363,7 +1818,6 @@ function renderCalendar(){
 
         }
 
-
         div.onclick = () => {
 
             selectDate(
@@ -1371,7 +1825,6 @@ function renderCalendar(){
             );
 
         };
-
 
         container.appendChild(div);
 
@@ -1381,7 +1834,7 @@ function renderCalendar(){
 
 
 /* =========================================================
-   SELECCIONAR FECHA
+   FECHA
 ========================================================= */
 
 function selectDate(date){
@@ -1409,11 +1862,6 @@ function selectDate(date){
 
 }
 
-
-/* =========================================================
-   MES
-========================================================= */
-
 function previousMonth(){
 
     calendarDate.setMonth(
@@ -1424,7 +1872,6 @@ function previousMonth(){
 
 }
 
-
 function nextMonth(){
 
     calendarDate.setMonth(
@@ -1434,7 +1881,6 @@ function nextMonth(){
     renderCalendar();
 
 }
-
 
 function goToday(){
 
@@ -1476,10 +1922,8 @@ function renderPatients(filter=""){
 
     list.innerHTML = "";
 
-
     let patients =
         getPatientsForDate();
-
 
     if(filter){
 
@@ -1495,12 +1939,10 @@ function renderPatients(filter=""){
 
     }
 
-
     document.getElementById(
         "patientCount"
     ).textContent =
         patients.length;
-
 
     if(
         patients.length === 0
@@ -1522,7 +1964,6 @@ function renderPatients(filter=""){
 
     }
 
-
     patients.forEach(
         name => {
 
@@ -1534,10 +1975,8 @@ function renderPatients(filter=""){
                         name
                 );
 
-
             const first =
                 patientStudies[0];
-
 
             const element =
                 document.createElement(
@@ -1546,7 +1985,6 @@ function renderPatients(filter=""){
 
             element.className =
                 "patient";
-
 
             if(
                 currentPatient ===
@@ -1558,7 +1996,6 @@ function renderPatients(filter=""){
                 );
 
             }
-
 
             element.innerHTML = `
 
@@ -1583,7 +2020,6 @@ function renderPatients(filter=""){
 
             `;
 
-
             element.onclick = () => {
 
                 currentPatient =
@@ -1605,7 +2041,6 @@ function renderPatients(filter=""){
 
             };
 
-
             list.appendChild(
                 element
             );
@@ -1617,7 +2052,7 @@ function renderPatients(filter=""){
 
 
 /* =========================================================
-   MOSTRAR PRIMER ESTUDIO
+   ESTUDIO
 ========================================================= */
 
 function showFirstStudy(){
@@ -1640,11 +2075,6 @@ function showFirstStudy(){
     );
 
 }
-
-
-/* =========================================================
-   OBTENER ESTUDIO ACTUAL
-========================================================= */
 
 function getCurrentStudy(){
 
@@ -1670,12 +2100,10 @@ function renderStudy(study){
     if(!study)
         return;
 
-
     document.getElementById(
         "viewerTitle"
     ).textContent =
         study.study || "Estudio";
-
 
     document.getElementById(
         "viewerSubtitle"
@@ -1685,7 +2113,6 @@ function renderStudy(study){
         formatDate(
             study.date
         );
-
 
     document.getElementById(
         "overlayRight"
@@ -1698,24 +2125,20 @@ function renderStudy(study){
             study.study || ""
         );
 
-
     document.getElementById(
         "infoPatientName"
     ).textContent =
         study.patient;
-
 
     document.getElementById(
         "infoPatientMeta"
     ).textContent =
         "";
 
-
     document.getElementById(
         "infoStudy"
     ).textContent =
         study.study || "--";
-
 
     document.getElementById(
         "infoDate"
@@ -1724,26 +2147,21 @@ function renderStudy(study){
             study.date
         );
 
-
     document.getElementById(
         "infoModality"
     ).textContent =
         study.modality || "CR";
-
 
     document.getElementById(
         "infoImages"
     ).textContent =
         study.images.length;
 
-
     currentImage = 0;
-
 
     renderThumbnails(
         study
     );
-
 
     if(
         study.images.length > 0
@@ -1773,7 +2191,6 @@ function renderStudy(study){
 
     }
 
-
     updateImageInformation(
         study
     );
@@ -1787,47 +2204,25 @@ function renderStudy(study){
 
 function showImage(src){
 
-    if(!src){
-
-        console.error(
-            "URL DE IMAGEN VACÍA"
-        );
-
+    if(!src)
         return;
-
-    }
-
-
-    console.log(
-        "CARGANDO IMAGEN:",
-        src
-    );
-
 
     document.getElementById(
         "emptyMessage"
     ).style.display =
         "none";
 
-
     document.getElementById(
         "imageWrapper"
     ).style.display =
         "flex";
-
 
     const image =
         document.getElementById(
             "mainImage"
         );
 
-
     image.onerror = () => {
-
-        console.error(
-            "NO SE PUDO CARGAR LA IMAGEN:",
-            src
-        );
 
         document.getElementById(
             "emptyMessage"
@@ -1841,19 +2236,7 @@ function showImage(src){
 
     };
 
-
-    image.onload = () => {
-
-        console.log(
-            "IMAGEN CARGADA CORRECTAMENTE:",
-            src
-        );
-
-    };
-
-
     image.src = src;
-
 
     applyTransform();
 
@@ -1873,7 +2256,6 @@ function renderThumbnails(study){
 
     container.innerHTML = "";
 
-
     study.images.forEach(
         (src,index) => {
 
@@ -1887,7 +2269,6 @@ function renderThumbnails(study){
             img.className =
                 "thumbnail";
 
-
             if(
                 index === currentImage
             ){
@@ -1897,7 +2278,6 @@ function renderThumbnails(study){
                 );
 
             }
-
 
             img.onclick = () => {
 
@@ -1914,7 +2294,6 @@ function renderThumbnails(study){
                 );
 
             };
-
 
             container.appendChild(
                 img
@@ -1944,7 +2323,6 @@ function updateImageInformation(
           study.images.length
         : "--";
 
-
     document.getElementById(
         "infoCurrentImage"
     ).textContent =
@@ -1958,7 +2336,7 @@ function updateImageInformation(
 
 
 /* =========================================================
-   SIGUIENTE / ANTERIOR
+   NAVEGACIÓN
 ========================================================= */
 
 function nextImage(){
@@ -1972,9 +2350,7 @@ function nextImage(){
     )
         return;
 
-
     currentImage++;
-
 
     if(
         currentImage >=
@@ -1985,23 +2361,19 @@ function nextImage(){
 
     }
 
-
     showImage(
         study.images[currentImage]
     );
 
-
     renderThumbnails(
         study
     );
-
 
     updateImageInformation(
         study
     );
 
 }
-
 
 function previousImage(){
 
@@ -2014,9 +2386,7 @@ function previousImage(){
     )
         return;
 
-
     currentImage--;
-
 
     if(
         currentImage < 0
@@ -2027,16 +2397,13 @@ function previousImage(){
 
     }
 
-
     showImage(
         study.images[currentImage]
     );
 
-
     renderThumbnails(
         study
     );
-
 
     updateImageInformation(
         study
@@ -2059,7 +2426,6 @@ function zoomIn(){
     applyTransform();
 
 }
-
 
 function zoomOut(){
 
@@ -2088,7 +2454,6 @@ function rotateRight(){
 
 }
 
-
 function rotateLeft(){
 
     rotation -= 90;
@@ -2102,7 +2467,7 @@ function rotateLeft(){
 
 
 /* =========================================================
-   INVERSIÓN
+   INVERSIÓN / CONTRASTE
 ========================================================= */
 
 function invertImage(){
@@ -2112,11 +2477,6 @@ function invertImage(){
     applyTransform();
 
 }
-
-
-/* =========================================================
-   CONTRASTE
-========================================================= */
 
 function contrastUp(){
 
@@ -2128,7 +2488,6 @@ function contrastUp(){
     applyTransform();
 
 }
-
 
 function contrastDown(){
 
@@ -2158,14 +2517,12 @@ function applyTransform(){
             "mainImage"
         );
 
-
     wrapper.style.transform =
         "scale(" +
         zoom +
         ") rotate(" +
         rotation +
         "deg)";
-
 
     image.style.filter =
         "contrast(" +
@@ -2177,7 +2534,6 @@ function applyTransform(){
             : " invert(0)"
         );
 
-
     document.getElementById(
         "infoZoom"
     ).textContent =
@@ -2185,14 +2541,12 @@ function applyTransform(){
             zoom * 100
         ) + "%";
 
-
     document.getElementById(
         "infoRotation"
     ).textContent =
         rotation + "°";
 
 }
-
 
 function resetView(){
 
@@ -2217,7 +2571,6 @@ function clearViewer(){
     ).textContent =
         "Sin estudio seleccionado";
 
-
     document.getElementById(
         "viewerSubtitle"
     ).textContent =
@@ -2226,60 +2579,50 @@ function clearViewer(){
             selectedDate
         );
 
-
     document.getElementById(
         "imageCounter"
     ).textContent =
         "--";
-
 
     document.getElementById(
         "overlayRight"
     ).innerHTML =
         "--";
 
-
     document.getElementById(
         "imageWrapper"
     ).style.display =
         "none";
-
 
     document.getElementById(
         "emptyMessage"
     ).textContent =
         "Seleccione un paciente para visualizar sus estudios.";
 
-
     document.getElementById(
         "emptyMessage"
     ).style.display =
         "block";
-
 
     document.getElementById(
         "thumbnailList"
     ).innerHTML =
         "";
 
-
     document.getElementById(
         "infoPatientName"
     ).textContent =
         "--";
-
 
     document.getElementById(
         "infoPatientMeta"
     ).textContent =
         "--";
 
-
     document.getElementById(
         "infoStudy"
     ).textContent =
         "--";
-
 
     document.getElementById(
         "infoDate"
@@ -2288,18 +2631,15 @@ function clearViewer(){
             selectedDate
         );
 
-
     document.getElementById(
         "infoModality"
     ).textContent =
         "--";
 
-
     document.getElementById(
         "infoImages"
     ).textContent =
         "--";
-
 
     document.getElementById(
         "infoCurrentImage"
@@ -2340,12 +2680,10 @@ function openFullscreen(){
     )
         return;
 
-
     document.getElementById(
         "fullscreenImage"
     ).src =
         study.images[currentImage];
-
 
     document.getElementById(
         "fullscreenViewer"
@@ -2353,7 +2691,6 @@ function openFullscreen(){
         "flex";
 
 }
-
 
 function closeFullscreen(){
 
@@ -2366,7 +2703,7 @@ function closeFullscreen(){
 
 
 /* =========================================================
-   SEGURIDAD BÁSICA DE TEXTO
+   ESCAPE HTML
 ========================================================= */
 
 function escapeHtml(value){
@@ -2388,6 +2725,732 @@ function escapeHtml(value){
 
 
 /* =========================================================
+   LOGIN
+========================================================= */
+
+function openLogin(){
+
+    document.getElementById(
+        "loginStatus"
+    ).textContent =
+        "";
+
+    document.getElementById(
+        "loginOverlay"
+    ).style.display =
+        "flex";
+
+    setTimeout(
+        () => {
+            document.getElementById(
+                "loginEmail"
+            ).focus();
+        },
+        100
+    );
+
+}
+
+function closeLogin(){
+
+    document.getElementById(
+        "loginOverlay"
+    ).style.display =
+        "none";
+
+}
+
+
+/* =========================================================
+   LOGIN ADMIN
+========================================================= */
+
+async function loginAdmin(){
+
+    const email =
+        document.getElementById(
+            "loginEmail"
+        ).value.trim();
+
+    const password =
+        document.getElementById(
+            "loginPassword"
+        ).value;
+
+    const status =
+        document.getElementById(
+            "loginStatus"
+        );
+
+    if(!email || !password){
+
+        status.className =
+            "status-message status-error";
+
+        status.textContent =
+            "Ingresa el correo y la contraseña.";
+
+        return;
+
+    }
+
+    status.className =
+        "status-message";
+
+    status.textContent =
+        "Verificando acceso...";
+
+    try{
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient.auth.signInWithPassword({
+                email:email,
+                password:password
+            });
+
+        if(error)
+            throw error;
+
+        if(
+            !data.user ||
+            data.user.id !== ADMIN_UID
+        ){
+
+            await supabaseClient.auth.signOut();
+
+            throw new Error(
+                "Esta cuenta no tiene permisos de administrador."
+            );
+
+        }
+
+        closeLogin();
+
+        updateAuthInterface(
+            data.user
+        );
+
+        openAdmin();
+
+    }
+    catch(error){
+
+        status.className =
+            "status-message status-error";
+
+        status.textContent =
+            error.message ||
+            "No se pudo iniciar sesión.";
+
+    }
+
+}
+
+
+/* =========================================================
+   ESTADO DE SESIÓN
+========================================================= */
+
+async function checkAuth(){
+
+    const {
+        data
+    } =
+        await supabaseClient.auth.getSession();
+
+    if(
+        data &&
+        data.session &&
+        data.session.user
+    ){
+
+        if(
+            data.session.user.id ===
+            ADMIN_UID
+        ){
+
+            updateAuthInterface(
+                data.session.user
+            );
+
+        }
+        else{
+
+            await supabaseClient.auth.signOut();
+
+        }
+
+    }
+
+    supabaseClient.auth.onAuthStateChange(
+        async (event,session) => {
+
+            if(
+                session &&
+                session.user &&
+                session.user.id ===
+                ADMIN_UID
+            ){
+
+                updateAuthInterface(
+                    session.user
+                );
+
+            }
+            else{
+
+                updateAuthInterface(
+                    null
+                );
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   INTERFAZ ADMIN
+========================================================= */
+
+function updateAuthInterface(user){
+
+    const loginButton =
+        document.getElementById(
+            "loginButton"
+        );
+
+    const logoutButton =
+        document.getElementById(
+            "logoutButton"
+        );
+
+    const authUser =
+        document.getElementById(
+            "authUser"
+        );
+
+    if(user){
+
+        loginButton.style.display =
+            "none";
+
+        logoutButton.style.display =
+            "inline-block";
+
+        authUser.textContent =
+            user.email || "Administrador";
+
+    }
+    else{
+
+        loginButton.style.display =
+            "inline-block";
+
+        logoutButton.style.display =
+            "none";
+
+        authUser.textContent =
+            "";
+
+        closeAdmin();
+
+    }
+
+}
+
+
+/* =========================================================
+   ABRIR ADMIN
+========================================================= */
+
+function openAdmin(){
+
+    const today =
+        new Date();
+
+    document.getElementById(
+        "adminDate"
+    ).value =
+        today.getFullYear() +
+        "-" +
+        String(
+            today.getMonth()+1
+        ).padStart(2,"0") +
+        "-" +
+        String(
+            today.getDate()
+        ).padStart(2,"0");
+
+    document.getElementById(
+        "adminStatus"
+    ).textContent =
+        "";
+
+    document.getElementById(
+        "adminOverlay"
+    ).style.display =
+        "flex";
+
+}
+
+
+/* =========================================================
+   CERRAR ADMIN
+========================================================= */
+
+function closeAdmin(){
+
+    document.getElementById(
+        "adminOverlay"
+    ).style.display =
+        "none";
+
+}
+
+
+/* =========================================================
+   CERRAR SESIÓN
+========================================================= */
+
+async function logoutAdmin(){
+
+    await supabaseClient.auth.signOut();
+
+    updateAuthInterface(
+        null
+    );
+
+}
+
+
+/* =========================================================
+   ARCHIVOS SELECCIONADOS
+========================================================= */
+
+function showSelectedFiles(){
+
+    const input =
+        document.getElementById(
+            "adminFiles"
+        );
+
+    const list =
+        document.getElementById(
+            "fileList"
+        );
+
+    if(
+        !input.files ||
+        input.files.length === 0
+    ){
+
+        list.textContent =
+            "Ningún archivo seleccionado.";
+
+        return;
+
+    }
+
+    const files =
+        Array.from(
+            input.files
+        );
+
+    const invalid =
+        files.filter(
+            file =>
+                !file.type.includes(
+                    "jpeg"
+                )
+        );
+
+    if(invalid.length){
+
+        list.innerHTML =
+            '<span style="color:#e47777">' +
+            "Solo se permiten imágenes JPG/JPEG." +
+            "</span>";
+
+        return;
+
+    }
+
+    list.innerHTML =
+        files
+        .map(
+            (file,index) =>
+                (index+1) +
+                ". " +
+                escapeHtml(
+                    file.name
+                )
+        )
+        .join("<br>");
+
+}
+
+
+/* =========================================================
+   CREAR ESTUDIO + SUBIR IMÁGENES
+========================================================= */
+
+async function createStudyAndUpload(){
+
+    const patient =
+        document.getElementById(
+            "adminPatient"
+        ).value.trim();
+
+    const date =
+        document.getElementById(
+            "adminDate"
+        ).value;
+
+    const study =
+        document.getElementById(
+            "adminStudy"
+        ).value.trim();
+
+    const modality =
+        document.getElementById(
+            "adminModality"
+        ).value;
+
+    const fileInput =
+        document.getElementById(
+            "adminFiles"
+        );
+
+    const status =
+        document.getElementById(
+            "adminStatus"
+        );
+
+    if(
+        !patient ||
+        !date ||
+        !study
+    ){
+
+        status.className =
+            "status-message status-error";
+
+        status.textContent =
+            "Completa paciente, fecha y estudio.";
+
+        return;
+
+    }
+
+    if(
+        !fileInput.files ||
+        fileInput.files.length === 0
+    ){
+
+        status.className =
+            "status-message status-error";
+
+        status.textContent =
+            "Selecciona al menos una imagen JPG.";
+
+        return;
+
+    }
+
+    const {
+        data:sessionData
+    } =
+        await supabaseClient.auth.getSession();
+
+    if(
+        !sessionData ||
+        !sessionData.session ||
+        !sessionData.session.user ||
+        sessionData.session.user.id !==
+        ADMIN_UID
+    ){
+
+        status.className =
+            "status-message status-error";
+
+        status.textContent =
+            "La sesión de administrador no es válida.";
+
+        return;
+
+    }
+
+    const files =
+        Array.from(
+            fileInput.files
+        );
+
+    const uploadedPaths = [];
+
+    try{
+
+        status.className =
+            "status-message";
+
+        status.textContent =
+            "Subiendo imágenes...";
+
+        /*
+         * Se crea una carpeta única para cada estudio.
+         */
+
+        const folder =
+            date +
+            "/" +
+            crypto.randomUUID();
+
+        for(
+            let i=0;
+            i<files.length;
+            i++
+        ){
+
+            const file =
+                files[i];
+
+            if(
+                !file.type.includes(
+                    "jpeg"
+                )
+            ){
+
+                throw new Error(
+                    "El archivo " +
+                    file.name +
+                    " no es JPG/JPEG."
+                );
+
+            }
+
+            const safeName =
+                file.name
+                    .replace(
+                        /[^a-zA-Z0-9._-]/g,
+                        "_"
+                    );
+
+            const path =
+                folder +
+                "/" +
+                String(i+1)
+                    .padStart(3,"0") +
+                "_" +
+                safeName;
+
+            const {
+                error
+            } =
+                await supabaseClient
+                    .storage
+                    .from(STORAGE_BUCKET)
+                    .upload(
+                        path,
+                        file,
+                        {
+                            cacheControl:
+                                "3600",
+                            upsert:false,
+                            contentType:
+                                "image/jpeg"
+                        }
+                    );
+
+            if(error)
+                throw error;
+
+            uploadedPaths.push(
+                path
+            );
+
+            status.textContent =
+                "Subiendo imagen " +
+                (i+1) +
+                " de " +
+                files.length +
+                "...";
+
+        }
+
+
+        status.textContent =
+            "Guardando estudio...";
+
+
+        /*
+         * Guardamos las rutas de Storage
+         * en la columna images.
+         */
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from("studies")
+                .insert({
+                    date:date,
+                    patient:patient,
+                    study:study,
+                    modality:modality,
+                    images:uploadedPaths
+                })
+                .select();
+
+
+        if(error){
+
+            /*
+             * Si falla el INSERT, intentamos
+             * eliminar las imágenes recién subidas.
+             */
+
+            for(
+                const path of uploadedPaths
+            ){
+
+                await supabaseClient
+                    .storage
+                    .from(STORAGE_BUCKET)
+                    .remove([path]);
+
+            }
+
+            throw error;
+
+        }
+
+
+        status.className =
+            "status-message status-success";
+
+        status.textContent =
+            "Estudio creado correctamente.";
+
+        document.getElementById(
+            "adminPatient"
+        ).value = "";
+
+        document.getElementById(
+            "adminStudy"
+        ).value = "";
+
+        document.getElementById(
+            "adminFiles"
+        ).value = "";
+
+        document.getElementById(
+            "fileList"
+        ).textContent =
+            "Ningún archivo seleccionado.";
+
+
+        /*
+         * Recargamos los estudios.
+         */
+
+        await loadStudies();
+
+
+        /*
+         * Seleccionamos automáticamente
+         * la fecha recién creada.
+         */
+
+        selectedDate = date;
+
+        calendarDate =
+            new Date(
+                date + "T00:00:00"
+            );
+
+        currentPatient =
+            patient;
+
+        renderCalendar();
+
+        renderPatients();
+
+        showFirstStudy();
+
+        setTimeout(
+            () => {
+
+                closeAdmin();
+
+            },
+            1200
+        );
+
+    }
+    catch(error){
+
+        console.error(
+            "ERROR AL CREAR ESTUDIO:",
+            error
+        );
+
+        status.className =
+            "status-message status-error";
+
+        status.textContent =
+            error.message ||
+            "No se pudo crear el estudio.";
+
+    }
+
+}
+
+
+/* =========================================================
+   TECLADO
+========================================================= */
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if(
+            event.key === "Escape"
+        ){
+
+            closeFullscreen();
+
+            closeLogin();
+
+        }
+
+        if(
+            event.key === "ArrowRight"
+        ){
+
+            nextImage();
+
+        }
+
+        if(
+            event.key === "ArrowLeft"
+        ){
+
+            previousImage();
+
+        }
+
+    }
+);
+
+
+/* =========================================================
    INICIO
 ========================================================= */
 
@@ -2401,6 +3464,8 @@ document.getElementById(
     formatDate(
         selectedDate
     );
+
+checkAuth();
 
 loadStudies();
 
