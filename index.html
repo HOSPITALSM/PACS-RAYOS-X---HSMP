@@ -711,10 +711,6 @@ button,input,select{
     display:none;
 }
 
-.admin-only{
-    display:none;
-}
-
 @media(max-width:1100px){
     .app{
         grid-template-columns:220px 220px 1fr 210px;
@@ -746,7 +742,6 @@ button,input,select{
 
 <header class="topbar">
 
-```
 <div class="logo">
     <img src="logorx.jpg" alt="Logo RX">
 </div>
@@ -756,9 +751,12 @@ button,input,select{
         HOSPITAL SAN MARTÍN DE PANGOA - RAYOS X
     </div>
 
-    <div class="brand-subtitle">
-        VISOR DE IMÁGENES RADIOGRÁFICAS
-    </div>
+```
+<div class="brand-subtitle">
+    VISOR DE IMÁGENES RADIOGRÁFICAS
+</div>
+```
+
 </div>
 
 <div class="search">
@@ -775,27 +773,28 @@ button,input,select{
 
 <div class="auth-area">
 
-    <span
-        class="auth-user"
-        id="authUser">
-    </span>
+```
+<span
+    class="auth-user"
+    id="authUser">
+</span>
 
-    <button
-        class="auth-button"
-        id="loginButton"
-        onclick="openLogin()">
-        ADMINISTRADOR
-    </button>
+<button
+    class="auth-button"
+    id="loginButton"
+    onclick="openLogin()">
+    ADMINISTRADOR
+</button>
 
-    <button
-        class="auth-button logout-button"
-        id="logoutButton"
-        onclick="logoutAdmin()">
-        CERRAR SESIÓN
-    </button>
+<button
+    class="auth-button logout-button"
+    id="logoutButton"
+    onclick="logoutAdmin()">
+    CERRAR SESIÓN
+</button>
+```
 
 </div>
-```
 
 </header>
 
@@ -803,74 +802,75 @@ button,input,select{
 
 <section class="panel">
 
-```
 <div class="panel-header">
     <span class="panel-title">Fecha</span>
 </div>
 
 <div class="panel-body">
 
-    <div class="calendar">
+```
+<div class="calendar">
 
-        <div class="calendar-header">
+    <div class="calendar-header">
 
-            <button
-                class="calendar-button"
-                onclick="previousMonth()">‹</button>
-
-            <div
-                class="calendar-month"
-                id="calendarMonth">
-            </div>
-
-            <button
-                class="calendar-button"
-                onclick="nextMonth()">›</button>
-
-        </div>
-
-        <div class="calendar-weekdays">
-            <div>L</div>
-            <div>M</div>
-            <div>M</div>
-            <div>J</div>
-            <div>V</div>
-            <div>S</div>
-            <div>D</div>
-        </div>
+        <button
+            class="calendar-button"
+            onclick="previousMonth()">‹</button>
 
         <div
-            class="calendar-days"
-            id="calendarDays">
+            class="calendar-month"
+            id="calendarMonth">
         </div>
 
         <button
-            class="today-button"
-            onclick="goToday()">
-            IR A HOY
-        </button>
+            class="calendar-button"
+            onclick="nextMonth()">›</button>
 
     </div>
 
+    <div class="calendar-weekdays">
+        <div>L</div>
+        <div>M</div>
+        <div>M</div>
+        <div>J</div>
+        <div>V</div>
+        <div>S</div>
+        <div>D</div>
+    </div>
+
+    <div
+        class="calendar-days"
+        id="calendarDays">
+    </div>
+
+    <button
+        class="today-button"
+        onclick="goToday()">
+        IR A HOY
+    </button>
+
 </div>
 ```
+
+</div>
 
 </section>
 
 <section class="panel">
 
-```
 <div class="panel-header">
 
-    <span class="panel-title">
-        Pacientes
-    </span>
+```
+<span class="panel-title">
+    Pacientes
+</span>
 
-    <span
-        class="panel-count"
-        id="patientCount">
-        0
-    </span>
+<span
+    class="panel-count"
+    id="patientCount">
+    0
+</span>
+```
 
 </div>
 
@@ -878,36 +878,36 @@ button,input,select{
     class="panel-body"
     id="patientList">
 </div>
-```
 
 </section>
 
 <section class="viewer">
 
-```
 <div class="viewer-header">
 
-    <div>
+```
+<div>
 
-        <div
-            class="viewer-title"
-            id="viewerTitle">
-            Seleccione un estudio
-        </div>
-
-        <div
-            class="viewer-subtitle"
-            id="viewerSubtitle">
-            Conectando con Supabase...
-        </div>
-
+    <div
+        class="viewer-title"
+        id="viewerTitle">
+        Seleccione un estudio
     </div>
 
     <div
-        class="image-counter"
-        id="imageCounter">
-        --
+        class="viewer-subtitle"
+        id="viewerSubtitle">
+        Conectando con Supabase...
     </div>
+
+</div>
+
+<div
+    class="image-counter"
+    id="imageCounter">
+    --
+</div>
+```
 
 </div>
 
@@ -915,55 +915,59 @@ button,input,select{
     class="viewport"
     id="viewport">
 
-    <div class="overlay-left">
-        PACS RAYOS X · HSMP
-    </div>
+```
+<div class="overlay-left">
+    PACS RAYOS X · HSMP
+</div>
 
-    <div
-        class="overlay-right"
-        id="overlayRight">
-        --
-    </div>
+<div
+    class="overlay-right"
+    id="overlayRight">
+    --
+</div>
 
-    <div
-        class="empty-message"
-        id="emptyMessage">
-        Seleccione un paciente para visualizar sus estudios.
-    </div>
+<div
+    class="empty-message"
+    id="emptyMessage">
+    Seleccione un paciente para visualizar sus estudios.
+</div>
 
-    <div
-        class="image-wrapper"
-        id="imageWrapper"
-        style="display:none;">
+<div
+    class="image-wrapper"
+    id="imageWrapper"
+    style="display:none;">
 
-        <img
-            id="mainImage"
-            class="main-image"
-            alt="Imagen radiológica">
+    <img
+        id="mainImage"
+        class="main-image"
+        alt="Imagen radiológica">
 
-    </div>
+</div>
+```
 
 </div>
 
 <div class="toolbar">
 
-    <button class="tool" onclick="zoomIn()">🔍+</button>
-    <button class="tool" onclick="zoomOut()">🔍−</button>
-    <button class="tool" onclick="resetView()">↺</button>
+```
+<button class="tool" onclick="zoomIn()">🔍+</button>
+<button class="tool" onclick="zoomOut()">🔍−</button>
+<button class="tool" onclick="resetView()">↺</button>
 
-    <div class="separator"></div>
+<div class="separator"></div>
 
-    <button class="tool" onclick="rotateLeft()">↶</button>
-    <button class="tool" onclick="rotateRight()">↷</button>
-    <button class="tool" onclick="invertImage()">◐</button>
-    <button class="tool" onclick="contrastUp()">C+</button>
-    <button class="tool" onclick="contrastDown()">C−</button>
+<button class="tool" onclick="rotateLeft()">↶</button>
+<button class="tool" onclick="rotateRight()">↷</button>
+<button class="tool" onclick="invertImage()">◐</button>
+<button class="tool" onclick="contrastUp()">C+</button>
+<button class="tool" onclick="contrastDown()">C−</button>
 
-    <div class="separator"></div>
+<div class="separator"></div>
 
-    <button class="tool" onclick="previousImage()">◀</button>
-    <button class="tool" onclick="nextImage()">▶</button>
-    <button class="tool" onclick="openFullscreen()">⛶</button>
+<button class="tool" onclick="previousImage()">◀</button>
+<button class="tool" onclick="nextImage()">▶</button>
+<button class="tool" onclick="openFullscreen()">⛶</button>
+```
 
 </div>
 
@@ -971,13 +975,11 @@ button,input,select{
     class="thumbnails"
     id="thumbnailList">
 </div>
-```
 
 </section>
 
 <aside class="panel info-panel">
 
-```
 <div class="panel-header">
     <span class="panel-title">
         Información
@@ -986,107 +988,112 @@ button,input,select{
 
 <div class="info-section">
 
-    <div class="info-heading">
-        Paciente
-    </div>
-
-    <div class="patient-card">
-
-        <div
-            class="patient-card-name"
-            id="infoPatientName">
-            --
-        </div>
-
-        <div
-            class="patient-card-meta"
-            id="infoPatientMeta">
-            --
-        </div>
-
-    </div>
-
+```
+<div class="info-heading">
+    Paciente
 </div>
 
-<div class="info-section">
+<div class="patient-card">
 
-    <div class="info-heading">
-        Estudio
+    <div
+        class="patient-card-name"
+        id="infoPatientName">
+        --
     </div>
 
-    <div class="info-row">
-        <span class="info-label">DESCRIPCIÓN</span>
-        <span
-            class="info-value"
-            id="infoStudy">
-            --
-        </span>
-    </div>
-
-    <div class="info-row">
-        <span class="info-label">FECHA</span>
-        <span
-            class="info-value"
-            id="infoDate">
-            --
-        </span>
-    </div>
-
-    <div class="info-row">
-        <span class="info-label">MODALIDAD</span>
-        <span
-            class="info-value"
-            id="infoModality">
-            --
-        </span>
-    </div>
-
-    <div class="info-row">
-        <span class="info-label">IMÁGENES</span>
-        <span
-            class="info-value"
-            id="infoImages">
-            --
-        </span>
-    </div>
-
-</div>
-
-<div class="info-section">
-
-    <div class="info-heading">
-        Visualización
-    </div>
-
-    <div class="info-row">
-        <span class="info-label">ZOOM</span>
-        <span
-            class="info-value"
-            id="infoZoom">
-            100%
-        </span>
-    </div>
-
-    <div class="info-row">
-        <span class="info-label">ROTACIÓN</span>
-        <span
-            class="info-value"
-            id="infoRotation">
-            0°
-        </span>
-    </div>
-
-    <div class="info-row">
-        <span class="info-label">IMAGEN</span>
-        <span
-            class="info-value"
-            id="infoCurrentImage">
-            --
-        </span>
+    <div
+        class="patient-card-meta"
+        id="infoPatientMeta">
+        --
     </div>
 
 </div>
 ```
+
+</div>
+
+<div class="info-section">
+
+```
+<div class="info-heading">
+    Estudio
+</div>
+
+<div class="info-row">
+    <span class="info-label">DESCRIPCIÓN</span>
+    <span
+        class="info-value"
+        id="infoStudy">
+        --
+    </span>
+</div>
+
+<div class="info-row">
+    <span class="info-label">FECHA</span>
+    <span
+        class="info-value"
+        id="infoDate">
+        --
+    </span>
+</div>
+
+<div class="info-row">
+    <span class="info-label">MODALIDAD</span>
+    <span
+        class="info-value"
+        id="infoModality">
+        --
+    </span>
+</div>
+
+<div class="info-row">
+    <span class="info-label">IMÁGENES</span>
+    <span
+        class="info-value"
+        id="infoImages">
+        --
+    </span>
+</div>
+```
+
+</div>
+
+<div class="info-section">
+
+```
+<div class="info-heading">
+    Visualización
+</div>
+
+<div class="info-row">
+    <span class="info-label">ZOOM</span>
+    <span
+        class="info-value"
+        id="infoZoom">
+        100%
+    </span>
+</div>
+
+<div class="info-row">
+    <span class="info-label">ROTACIÓN</span>
+    <span
+        class="info-value"
+        id="infoRotation">
+        0°
+    </span>
+</div>
+
+<div class="info-row">
+    <span class="info-label">IMAGEN</span>
+    <span
+        class="info-value"
+        id="infoCurrentImage">
+        --
+    </span>
+</div>
+```
+
+</div>
 
 </aside>
 
@@ -1098,78 +1105,78 @@ button,input,select{
     class="admin-overlay"
     id="loginOverlay">
 
-```
 <div class="login-box">
 
-    <div class="login-header">
+```
+<div class="login-header">
 
-        <div class="login-title">
-            ACCESO ADMINISTRADOR
-        </div>
+    <div class="login-title">
+        ACCESO ADMINISTRADOR
+    </div>
 
-        <div class="login-subtitle">
-            Hospital San Martín de Pangoa - Rayos X
-        </div>
+    <div class="login-subtitle">
+        Hospital San Martín de Pangoa - Rayos X
+    </div>
+
+</div>
+
+<div class="login-body">
+
+    <div class="form-group">
+
+        <label class="form-label">
+            Correo electrónico
+        </label>
+
+        <input
+            class="form-input"
+            id="loginEmail"
+            type="email"
+            autocomplete="username"
+            placeholder="Correo">
 
     </div>
 
-    <div class="login-body">
+    <div class="form-group">
 
-        <div class="form-group">
+        <label class="form-label">
+            Contraseña
+        </label>
 
-            <label class="form-label">
-                Correo electrónico
-            </label>
+        <input
+            class="form-input"
+            id="loginPassword"
+            type="password"
+            autocomplete="current-password"
+            placeholder="Contraseña">
 
-            <input
-                class="form-input"
-                id="loginEmail"
-                type="email"
-                autocomplete="username"
-                placeholder="Correo">
+    </div>
 
-        </div>
+    <div class="admin-actions">
 
-        <div class="form-group">
+        <button
+            class="admin-secondary"
+            onclick="closeLogin()">
+            CANCELAR
+        </button>
 
-            <label class="form-label">
-                Contraseña
-            </label>
+        <button
+            class="admin-primary"
+            onclick="loginAdmin()">
+            INGRESAR
+        </button>
 
-            <input
-                class="form-input"
-                id="loginPassword"
-                type="password"
-                autocomplete="current-password"
-                placeholder="Contraseña">
+    </div>
 
-        </div>
-
-        <div class="admin-actions">
-
-            <button
-                class="admin-secondary"
-                onclick="closeLogin()">
-                CANCELAR
-            </button>
-
-            <button
-                class="admin-primary"
-                onclick="loginAdmin()">
-                INGRESAR
-            </button>
-
-        </div>
-
-        <div
-            class="status-message"
-            id="loginStatus">
-        </div>
-
+    <div
+        class="status-message"
+        id="loginStatus">
     </div>
 
 </div>
 ```
+
+</div>
 
 </div>
 
@@ -1179,131 +1186,248 @@ button,input,select{
     class="admin-overlay"
     id="adminOverlay">
 
-```
 <div class="admin-box">
 
-    <div class="admin-header">
+```
+<div class="admin-header">
 
-        <div class="admin-title">
-            ADMINISTRACIÓN DE ESTUDIOS
-        </div>
+    <div class="admin-title">
+        ADMINISTRACIÓN DE ESTUDIOS
+    </div>
 
-        <button
-            class="admin-close"
-            onclick="closeAdmin()">
-            ×
-        </button>
+    <button
+        class="admin-close"
+        onclick="closeAdmin()">
+        ×
+    </button>
+
+</div>
+
+<div class="admin-body">
+
+    <div class="form-group">
+
+        <label class="form-label">
+            Nombre del paciente
+        </label>
+
+        <input
+            class="form-input"
+            id="adminPatient"
+            type="text"
+            placeholder="Ej. JUAN PÉREZ GARCÍA">
 
     </div>
 
-    <div class="admin-body">
+    <div class="form-group">
 
-        <div class="form-group">
+        <label class="form-label">
+            Fecha del estudio
+        </label>
 
-            <label class="form-label">
-                Nombre completo del paciente
-            </label>
+        <input
+            class="form-input"
+            id="adminDate"
+            type="date">
 
-            <input
-                class="form-input"
-                id="adminPatient"
-                type="text"
-                placeholder="Ej. JUAN PÉREZ GARCÍA">
+    </div>
 
-        </div>
+    <div class="form-group">
 
-        <div class="form-group">
+        <label class="form-label">
+            Estructura anatómica
+        </label>
 
-            <label class="form-label">
-                Fecha del estudio
-            </label>
+        <select
+            class="form-select"
+            id="adminStructure"
+            onchange="updateLateralityVisibility()">
 
-            <input
-                class="form-input"
-                id="adminDate"
-                type="date">
+            <option value="">Seleccionar estructura...</option>
 
-        </div>
+            <optgroup label="Tórax">
+                <option value="TÓRAX">Tórax</option>
+                <option value="COSTILLAS">Costillas</option>
+                <option value="ESTERNÓN">Esternón</option>
+                <option value="CLAVÍCULA">Clavícula</option>
+            </optgroup>
 
-        <div class="form-group">
+            <optgroup label="Columna">
+                <option value="COLUMNA CERVICAL">Columna cervical</option>
+                <option value="COLUMNA DORSAL">Columna dorsal</option>
+                <option value="COLUMNA LUMBAR">Columna lumbar</option>
+                <option value="COLUMNA LUMBOSACRA">Columna lumbosacra</option>
+                <option value="SACROCOCCÍGEA">Columna sacrococcígea</option>
+            </optgroup>
 
-            <label class="form-label">
-                Estudio
-            </label>
+            <optgroup label="Miembro superior">
+                <option value="HOMBRO">Hombro</option>
+                <option value="HÚMERO">Húmero</option>
+                <option value="CODO">Codo</option>
+                <option value="ANTEBRAZO">Antebrazo</option>
+                <option value="MUÑECA">Muñeca</option>
+                <option value="MANO">Mano</option>
+                <option value="DEDOS DE LA MANO">Dedos de la mano</option>
+            </optgroup>
 
-            <input
-                class="form-input"
-                id="adminStudy"
-                type="text"
-                placeholder="Ej. RADIOGRAFÍA DE TÓRAX AP Y LATERAL">
+            <optgroup label="Pelvis y miembro inferior">
+                <option value="PELVIS">Pelvis</option>
+                <option value="CADERA">Cadera</option>
+                <option value="FÉMUR">Fémur</option>
+                <option value="RODILLA">Rodilla</option>
+                <option value="TIBIA Y PERONÉ">Tibia y peroné</option>
+                <option value="TOBILLO">Tobillo</option>
+                <option value="PIE">Pie</option>
+                <option value="DEDOS DEL PIE">Dedos del pie</option>
+                <option value="CALCÁNEO">Calcáneo</option>
+            </optgroup>
 
-        </div>
+            <optgroup label="Cabeza y cara">
+                <option value="CRÁNEO">Cráneo</option>
+                <option value="SENOS PARANASALES">Senos paranasales</option>
+                <option value="HUESOS PROPIOS DE LA NARIZ">Huesos propios de la nariz</option>
+                <option value="MACIZO FACIAL">Macizo facial</option>
+                <option value="MANDÍBULA">Mandíbula</option>
+                <option value="ARTICULACIÓN TEMPOROMANDIBULAR">Articulación temporomandibular</option>
+            </optgroup>
 
-        <div class="form-group">
+            <optgroup label="Otros">
+                <option value="ABDOMEN">Abdomen</option>
+                <option value="OTRO">Otro</option>
+            </optgroup>
 
-            <label class="form-label">
-                Modalidad
-            </label>
+        </select>
 
-            <select
-                class="form-select"
-                id="adminModality">
+    </div>
 
-                <option value="CR">CR</option>
-                <option value="DX">DX</option>
-                <option value="XR">XR</option>
+    <div
+        class="form-group"
+        id="lateralityGroup"
+        style="display:none;">
 
-            </select>
+        <label class="form-label">
+            Lateralidad
+        </label>
 
-        </div>
+        <select
+            class="form-select"
+            id="adminLaterality">
 
-        <div class="form-group">
+            <option value="">Seleccionar...</option>
+            <option value="DERECHA">Derecha</option>
+            <option value="IZQUIERDA">Izquierda</option>
+            <option value="BILATERAL">Bilateral</option>
 
-            <label class="form-label">
-                Imágenes JPG
-            </label>
+        </select>
 
-            <input
-                class="file-input"
-                id="adminFiles"
-                type="file"
-                accept=".jpg,.jpeg,image/jpeg"
-                multiple
-                onchange="showSelectedFiles()">
+    </div>
 
-            <div
-                class="file-list"
-                id="fileList">
-                Ningún archivo seleccionado.
-            </div>
+    <div class="form-group">
 
-        </div>
+        <label class="form-label">
+            Proyección / detalle del estudio
+            <span style="color:#666;text-transform:none;">
+                (opcional)
+            </span>
+        </label>
+
+        <input
+            class="form-input"
+            id="adminProjection"
+            type="text"
+            placeholder="Ej. AP Y LATERAL">
+
+    </div>
+
+    <div class="form-group">
+
+        <label class="form-label">
+            Modalidad
+        </label>
+
+        <select
+            class="form-select"
+            id="adminModality">
+
+            <option value="CR">CR</option>
+            <option value="DX">DX</option>
+            <option value="XR">XR</option>
+
+        </select>
+
+    </div>
+
+    <div class="form-group">
+
+        <label class="form-label">
+            Imágenes JPG
+        </label>
+
+        <input
+            class="file-input"
+            id="adminFiles"
+            type="file"
+            accept=".jpg,.jpeg,image/jpeg"
+            multiple
+            onchange="showSelectedFiles()">
 
         <div
-            class="status-message"
-            id="adminStatus">
+            class="file-list"
+            id="fileList">
+            Ningún archivo seleccionado.
         </div>
 
-        <div class="admin-actions">
+    </div>
 
-            <button
-                class="admin-secondary"
-                onclick="closeAdmin()">
-                CANCELAR
-            </button>
+    <div
+        style="
+            background:#191c1f;
+            border:1px solid #2b2f34;
+            border-radius:5px;
+            padding:10px;
+            margin-top:5px;
+            color:#777;
+            font-size:9px;
+            line-height:1.6;
+        ">
 
-            <button
-                class="admin-primary"
-                onclick="createStudyAndUpload()">
-                CREAR ESTUDIO Y SUBIR IMÁGENES
-            </button>
+        <strong style="color:#3ecf8e;">
+            Vista previa del estudio:
+        </strong>
 
+        <div
+            id="studyPreview"
+            style="color:#ddd;margin-top:4px;">
+            Selecciona una estructura.
         </div>
+
+    </div>
+
+    <div
+        class="status-message"
+        id="adminStatus">
+    </div>
+
+    <div class="admin-actions">
+
+        <button
+            class="admin-secondary"
+            onclick="closeAdmin()">
+            CANCELAR
+        </button>
+
+        <button
+            class="admin-primary"
+            onclick="createStudyAndUpload()">
+            CREAR ESTUDIO Y SUBIR IMÁGENES
+        </button>
 
     </div>
 
 </div>
 ```
+
+</div>
 
 </div>
 
@@ -1826,7 +1950,9 @@ function renderCalendar(){
 
         };
 
-        container.appendChild(div);
+        container.appendChild(
+            div
+        );
 
     }
 
@@ -2007,7 +2133,7 @@ function renderPatients(filter=""){
 
                     <span>
                         ${escapeHtml(
-                            first.history ||
+                            first.study ||
                             ""
                         )}
                     </span>
@@ -2742,9 +2868,11 @@ function openLogin(){
 
     setTimeout(
         () => {
+
             document.getElementById(
                 "loginEmail"
             ).focus();
+
         },
         100
     );
@@ -2988,9 +3116,41 @@ function openAdmin(){
         ).padStart(2,"0");
 
     document.getElementById(
+        "adminPatient"
+    ).value = "";
+
+    document.getElementById(
+        "adminStructure"
+    ).value = "";
+
+    document.getElementById(
+        "adminLaterality"
+    ).value = "";
+
+    document.getElementById(
+        "adminProjection"
+    ).value = "";
+
+    document.getElementById(
+        "adminFiles"
+    ).value = "";
+
+    document.getElementById(
+        "fileList"
+    ).textContent =
+        "Ningún archivo seleccionado.";
+
+    document.getElementById(
         "adminStatus"
     ).textContent =
         "";
+
+    document.getElementById(
+        "studyPreview"
+    ).textContent =
+        "Selecciona una estructura.";
+
+    updateLateralityVisibility();
 
     document.getElementById(
         "adminOverlay"
@@ -3025,6 +3185,158 @@ async function logoutAdmin(){
     updateAuthInterface(
         null
     );
+
+}
+
+
+/* =========================================================
+   ESTRUCTURA Y LATERALIDAD
+========================================================= */
+
+function structureNeedsLaterality(structure){
+
+    const structuresWithLaterality = [
+
+        "CLAVÍCULA",
+
+        "HOMBRO",
+        "HÚMERO",
+        "CODO",
+        "ANTEBRAZO",
+        "MUÑECA",
+        "MANO",
+        "DEDOS DE LA MANO",
+
+        "CADERA",
+        "FÉMUR",
+        "RODILLA",
+        "TIBIA Y PERONÉ",
+        "TOBILLO",
+        "PIE",
+        "DEDOS DEL PIE",
+        "CALCÁNEO",
+
+        "HUESOS PROPIOS DE LA NARIZ",
+        "ARTICULACIÓN TEMPOROMANDIBULAR"
+
+    ];
+
+    return structuresWithLaterality.includes(
+        structure
+    );
+
+}
+
+
+function updateLateralityVisibility(){
+
+    const structure =
+        document.getElementById(
+            "adminStructure"
+        ).value;
+
+    const group =
+        document.getElementById(
+            "lateralityGroup"
+        );
+
+    const laterality =
+        document.getElementById(
+            "adminLaterality"
+        );
+
+    if(
+        structureNeedsLaterality(
+            structure
+        )
+    ){
+
+        group.style.display =
+            "block";
+
+    }
+    else{
+
+        group.style.display =
+            "none";
+
+        laterality.value =
+            "";
+
+    }
+
+    updateStudyPreview();
+
+}
+
+
+/* =========================================================
+   GENERAR NOMBRE DEL ESTUDIO
+========================================================= */
+
+function generateStudyName(){
+
+    const structure =
+        document.getElementById(
+            "adminStructure"
+        ).value;
+
+    const laterality =
+        document.getElementById(
+            "adminLaterality"
+        ).value;
+
+    const projection =
+        document.getElementById(
+            "adminProjection"
+        ).value.trim();
+
+    if(!structure)
+        return "";
+
+    let result =
+        "RADIOGRAFÍA DE " +
+        structure;
+
+    if(
+        structureNeedsLaterality(
+            structure
+        ) &&
+        laterality
+    ){
+
+        result +=
+            " " +
+            laterality;
+
+    }
+
+    if(projection){
+
+        result +=
+            " " +
+            projection.toUpperCase();
+
+    }
+
+    return result;
+
+}
+
+
+function updateStudyPreview(){
+
+    const preview =
+        document.getElementById(
+            "studyPreview"
+        );
+
+    const study =
+        generateStudyName();
+
+    preview.textContent =
+        study ||
+        "Selecciona una estructura.";
 
 }
 
@@ -3112,15 +3424,28 @@ async function createStudyAndUpload(){
             "adminDate"
         ).value;
 
-    const study =
+    const structure =
         document.getElementById(
-            "adminStudy"
+            "adminStructure"
+        ).value;
+
+    const laterality =
+        document.getElementById(
+            "adminLaterality"
+        ).value;
+
+    const projection =
+        document.getElementById(
+            "adminProjection"
         ).value.trim();
 
     const modality =
         document.getElementById(
             "adminModality"
         ).value;
+
+    const study =
+        generateStudyName();
 
     const fileInput =
         document.getElementById(
@@ -3135,14 +3460,31 @@ async function createStudyAndUpload(){
     if(
         !patient ||
         !date ||
-        !study
+        !structure
     ){
 
         status.className =
             "status-message status-error";
 
         status.textContent =
-            "Completa paciente, fecha y estudio.";
+            "Completa paciente, fecha y estructura.";
+
+        return;
+
+    }
+
+    if(
+        structureNeedsLaterality(
+            structure
+        ) &&
+        !laterality
+    ){
+
+        status.className =
+            "status-message status-error";
+
+        status.textContent =
+            "Selecciona la lateralidad: derecha, izquierda o bilateral.";
 
         return;
 
@@ -3201,10 +3543,6 @@ async function createStudyAndUpload(){
         status.textContent =
             "Subiendo imágenes...";
 
-        /*
-         * Se crea una carpeta única para cada estudio.
-         */
-
         const folder =
             date +
             "/" +
@@ -3236,7 +3574,7 @@ async function createStudyAndUpload(){
             const safeName =
                 file.name
                     .replace(
-                        /[^a-zA-Z0-9._-]/g,
+                        /[^a-zA-Z0-9.\_-]/g,
                         "_"
                     );
 
@@ -3287,11 +3625,6 @@ async function createStudyAndUpload(){
             "Guardando estudio...";
 
 
-        /*
-         * Guardamos las rutas de Storage
-         * en la columna images.
-         */
-
         const {
             data,
             error
@@ -3309,11 +3642,6 @@ async function createStudyAndUpload(){
 
 
         if(error){
-
-            /*
-             * Si falla el INSERT, intentamos
-             * eliminar las imágenes recién subidas.
-             */
 
             for(
                 const path of uploadedPaths
@@ -3337,37 +3665,10 @@ async function createStudyAndUpload(){
         status.textContent =
             "Estudio creado correctamente.";
 
-        document.getElementById(
-            "adminPatient"
-        ).value = "";
-
-        document.getElementById(
-            "adminStudy"
-        ).value = "";
-
-        document.getElementById(
-            "adminFiles"
-        ).value = "";
-
-        document.getElementById(
-            "fileList"
-        ).textContent =
-            "Ningún archivo seleccionado.";
-
-
-        /*
-         * Recargamos los estudios.
-         */
-
         await loadStudies();
 
-
-        /*
-         * Seleccionamos automáticamente
-         * la fecha recién creada.
-         */
-
-        selectedDate = date;
+        selectedDate =
+            date;
 
         calendarDate =
             new Date(
@@ -3376,6 +3677,10 @@ async function createStudyAndUpload(){
 
         currentPatient =
             patient;
+
+        currentStudy = 0;
+
+        currentImage = 0;
 
         renderCalendar();
 
