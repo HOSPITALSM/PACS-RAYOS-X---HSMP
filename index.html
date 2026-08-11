@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -894,9 +893,15 @@ function formatDate(dateString){
 
 function getImageUrl(file){
 
-    if(!file) return "";
+    if(!file)
+        return "";
 
     if(typeof file !== "string")
+        return "";
+
+    file = file.trim();
+
+    if(!file)
         return "";
 
     if(
@@ -911,8 +916,78 @@ function getImageUrl(file){
         "/storage/v1/object/public/" +
         STORAGE_BUCKET +
         "/" +
-        file
+        encodeURIComponent(file)
     );
+}
+
+
+/* =========================================================
+   NORMALIZAR IMÁGENES
+========================================================= */
+
+function normalizeImages(value){
+
+    if(!value)
+        return [];
+
+    if(Array.isArray(value)){
+
+        return value
+            .filter(
+                item =>
+                    typeof item === "string" &&
+                    item.trim() !== ""
+            )
+            .map(
+                item =>
+                    getImageUrl(item)
+            );
+
+    }
+
+    if(typeof value === "string"){
+
+        const text =
+            value.trim();
+
+        if(!text)
+            return [];
+
+        try{
+
+            const parsed =
+                JSON.parse(text);
+
+            if(Array.isArray(parsed)){
+
+                return parsed
+                    .filter(
+                        item =>
+                            typeof item === "string" &&
+                            item.trim() !== ""
+                    )
+                    .map(
+                        item =>
+                            getImageUrl(item)
+                    );
+
+            }
+
+        }
+        catch(error){
+
+            /* El valor puede ser simplemente "SWN.jpg" */
+
+        }
+
+        return [
+            getImageUrl(text)
+        ];
+
+    }
+
+    return [];
+
 }
 
 
@@ -964,87 +1039,70 @@ async function loadStudies(){
 
 
         console.log(
-            "Estudios recibidos:",
+            "ESTUDIOS RECIBIDOS:",
             data
         );
-        
-        console.log("IMAGE REAL:", data[0].image);
-        console.log("TIPO IMAGE:", typeof data[0].image);
+
 
         studies =
-            data.map(item => {
+            data.map(
+                item => {
 
-                let imageList = [];
+                    const imageList =
+                        normalizeImages(
+                            item.images
+                        );
 
 
-        const imageValue = item.images;
+                    const study = {
 
-        if(Array.isArray(imageValue)){
+                        id:
+                            item.id,
 
-            imageList = imageValue;
+                        date:
+                            item.date,
 
-        }
-        else if(typeof imageValue === "string"){
+                        patient:
+                            item.patient,
 
-            let value = imageValue.trim();
+                        history:
+                            "",
 
-            try{
+                        birth:
+                            "",
 
-                const parsed = JSON.parse(value);
+                        sex:
+                            "",
 
-                if(Array.isArray(parsed)){
+                        study:
+                            item.study,
 
-                    imageList = parsed;
+                        modality:
+                            item.modality ||
+                            "CR",
+
+                        images:
+                            imageList
+
+                    };
+
+
+                    console.log(
+                        "ESTUDIO PROCESADO:",
+                        study
+                    );
+
+
+                    return study;
 
                 }
-                else{
-
-                    imageList = [value];
-
-                }
-
-            }
-            catch{
-
-                imageList = [value];
-
-            }
-
-        }
+            );
 
 
-        return {
-
-                    date:
-                        item.date,
-
-                    patient:
-                        item.patient,
-
-                    history:
-                        "",
-
-                    birth:
-                        "",
-
-                    sex:
-                        "",
-
-                    study:
-                        item.study,
-
-                    modality:
-                        item.modalities ||
-                        "CR",
-
-                    images:
-                        imageList.map(
-                            getImageUrl
-                        )
-
-                };
-
-            });
+        console.log(
+            "STUDIES FINALES:",
+            studies
+        );
 
 
         renderCalendar();
@@ -1609,6 +1667,10 @@ function getCurrentStudy(){
 
 function renderStudy(study){
 
+    if(!study)
+        return;
+
+
     document.getElementById(
         "viewerTitle"
     ).textContent =
@@ -1684,7 +1746,7 @@ function renderStudy(study){
 
 
     if(
-        study.images.length
+        study.images.length > 0
     ){
 
         showImage(
@@ -1698,6 +1760,11 @@ function renderStudy(study){
             "imageWrapper"
         ).style.display =
             "none";
+
+        document.getElementById(
+            "emptyMessage"
+        ).textContent =
+            "No hay imágenes asociadas a este estudio.";
 
         document.getElementById(
             "emptyMessage"
@@ -1720,8 +1787,21 @@ function renderStudy(study){
 
 function showImage(src){
 
-    if(!src)
+    if(!src){
+
+        console.error(
+            "URL DE IMAGEN VACÍA"
+        );
+
         return;
+
+    }
+
+
+    console.log(
+        "CARGANDO IMAGEN:",
+        src
+    );
 
 
     document.getElementById(
@@ -1742,13 +1822,10 @@ function showImage(src){
         );
 
 
-    image.src = src;
-
-
     image.onerror = () => {
 
         console.error(
-            "No se pudo cargar:",
+            "NO SE PUDO CARGAR LA IMAGEN:",
             src
         );
 
@@ -1763,6 +1840,19 @@ function showImage(src){
             "block";
 
     };
+
+
+    image.onload = () => {
+
+        console.log(
+            "IMAGEN CARGADA CORRECTAMENTE:",
+            src
+        );
+
+    };
+
+
+    image.src = src;
 
 
     applyTransform();
@@ -2157,6 +2247,12 @@ function clearViewer(){
 
     document.getElementById(
         "emptyMessage"
+    ).textContent =
+        "Seleccione un paciente para visualizar sus estudios.";
+
+
+    document.getElementById(
+        "emptyMessage"
     ).style.display =
         "block";
 
@@ -2312,4 +2408,3 @@ loadStudies();
 
 </body>
 </html>
-```
