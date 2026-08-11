@@ -1588,28 +1588,27 @@ function renderPatients(filter=""){
 function showFirstStudy(){
 
     const list =
-        getStudiesForDate()
-        .filter(
+        getStudiesForDate().filter(
             item =>
-                item.patient ===
-                currentPatient
+                item.patient === currentPatient
         );
 
+    console.log("Paciente seleccionado:", currentPatient);
+    console.log("Estudios encontrados:", list);
 
-    if(!list.length)
+    if(!list.length){
+
+        console.log(
+            "No se encontró ningún estudio para este paciente."
+        );
+
         return;
-
+    }
 
     currentStudy = 0;
 
-    renderStudy(
-        list[0]
-    );
-
+    renderStudy(list[0]);
 }
-
-
-function getCurrentStudy(){
 
     const list =
         getStudiesForDate()
