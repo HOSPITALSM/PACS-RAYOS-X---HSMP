@@ -1607,151 +1607,120 @@ const SUPABASE_KEY = "sb_publishable_5L4-txz5pZzI6dU6UAw86w_5gXbHZr0";
    ========================================================= */
 
 
-const studies = [
+let studies = [];
 
 
-    /* =====================================================
-       11 AGOSTO 2026
-    ===================================================== */
+/* =========================================================
+   CARGAR ESTUDIOS DESDE SUPABASE
+========================================================= */
 
+async function loadStudies(){
 
-    {
+    try{
 
-        date:"2026-08-11",
+        const response = await fetch(
+            SUPABASE_URL + "/rest/v1/studies?select=*",
+            {
+                method:"GET",
 
-        patient:"Juan Pérez",
+                headers:{
+                    "apikey":SUPABASE_KEY,
+                    "Authorization":"Bearer " + SUPABASE_KEY
+                }
+            }
+        );
 
-        history:"HC-0001",
 
-        birth:"15/04/1985",
+        if(!response.ok){
 
-        sex:"Masculino",
+            throw new Error(
+                "Error al consultar Supabase: " +
+                response.status
+            );
 
-        study:"Radiografía de tórax",
+        }
 
-        modality:"CR",
 
-        images:[
+        const data =
+            await response.json();
 
-            "images.jfif",
 
-            "images (2).jfif"
+        studies =
+            data.map(item => ({
 
-        ]
+                date:item.date,
 
-    },
+                patient:item.patient,
 
+                history:"",
 
-    {
+                birth:"",
 
-        date:"2026-08-11",
+                sex:"",
 
-        patient:"María López",
+                study:item.study,
 
-        history:"HC-0002",
+                modality:item.modality || "CR",
 
-        birth:"22/09/1990",
+                images:
+                    Array.isArray(item.images)
+                    ? item.images.map(
+                        image => {
 
-        sex:"Femenino",
+                            if(
+                                image.startsWith("http")
+                            ){
 
-        study:"Radiografía de columna",
+                                return image;
 
-        modality:"CR",
+                            }
 
-        images:[
+                            return(
+                                SUPABASE_URL +
+                                "/storage/v1/object/public/imagenes/" +
+                                image
+                            );
 
-            "images.jfif"
+                        }
+                    )
+                    : []
 
-        ]
+            }));
 
-    },
 
+        /* Actualizar página */
 
-    /* =====================================================
-       10 AGOSTO 2026
-    ===================================================== */
+        renderCalendar();
 
+        renderPatients();
 
-    {
+        clearViewer();
 
-        date:"2026-08-10",
 
-        patient:"Carlos Ruiz",
+       loadStudies();
 
-        history:"HC-0003",
 
-        birth:"03/02/1978",
+    }catch(error){
 
-        sex:"Masculino",
+        console.error(error);
 
-        study:"Radiografía de cráneo",
 
-        modality:"CR",
+        document.getElementById(
+            "patientList"
+        ).innerHTML = `
 
-        images:[
+            <div class="no-results">
 
-            "images (2).jfif"
+                Error al conectar con<br>
+                Supabase.
 
-        ]
+            </div>
 
-    },
-
-
-    {
-
-        date:"2026-08-10",
-
-        patient:"Ana Torres",
-
-        history:"HC-0004",
-
-        birth:"11/06/1988",
-
-        sex:"Femenino",
-
-        study:"Radiografía de pelvis",
-
-        modality:"CR",
-
-        images:[
-
-            "images.jfif"
-
-        ]
-
-    },
-
-
-    /* =====================================================
-       8 AGOSTO 2026
-    ===================================================== */
-
-
-    {
-
-        date:"2026-08-08",
-
-        patient:"Pedro Sánchez",
-
-        history:"HC-0005",
-
-        birth:"19/01/1975",
-
-        sex:"Masculino",
-
-        study:"Radiografía de hombro",
-
-        modality:"CR",
-
-        images:[
-
-            "images (2).jfif"
-
-        ]
+        `;
 
     }
 
-];
+}
 
 
 
