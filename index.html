@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -482,15 +481,22 @@ button,input,select{
 }
 
 .thumbnails{
-    height:88px;
+    height:105px;
     background:#101214;
     border-top:1px solid var(--border);
     display:flex;
-    align-items:center;
+    align-items:flex-start;
     gap:7px;
     padding:7px;
     overflow-x:auto;
     flex-shrink:0;
+}
+
+.thumbnail-item{
+    width:80px;
+    height:88px;
+    flex-shrink:0;
+    position:relative;
 }
 
 .thumbnail{
@@ -501,11 +507,34 @@ button,input,select{
     border:2px solid #30343a;
     border-radius:3px;
     cursor:pointer;
-    flex-shrink:0;
+    display:block;
 }
 
 .thumbnail.active{
     border-color:var(--green);
+}
+
+.thumbnail-delete{
+    position:absolute;
+    right:-4px;
+    bottom:0;
+    width:18px;
+    height:18px;
+    padding:0;
+    border:1px solid #555;
+    border-radius:50%;
+    background:#191c1f;
+    color:#d96b6b;
+    font-size:12px;
+    line-height:16px;
+    cursor:pointer;
+    z-index:3;
+}
+
+.thumbnail-delete:hover{
+    background:#8b3535;
+    color:#fff;
+    border-color:#d66565;
 }
 
 .info-panel{overflow-y:auto}
@@ -603,8 +632,6 @@ button,input,select{
     font-size:30px;
     cursor:pointer;
 }
-
-/* ================= ADMIN ================= */
 
 .admin-overlay{
     position:fixed;
@@ -820,14 +847,12 @@ button,input,select{
     }
 }
 </style>
-
 </head>
 
 <body>
 
 <header class="topbar">
 
-```
 <div class="logo">
     <img src="logorx.jpg" alt="Logo RX">
 </div>
@@ -850,16 +875,11 @@ button,input,select{
         oninput="searchPatients()">
 </div>
 
-<div class="current-date" id="currentDateLabel">
-    --
-</div>
+<div class="current-date" id="currentDateLabel">--</div>
 
 <div class="auth-area">
 
-    <span
-        class="auth-user"
-        id="authUser">
-    </span>
+    <span class="auth-user" id="authUser"></span>
 
     <button
         class="admin-top-button"
@@ -883,7 +903,6 @@ button,input,select{
     </button>
 
 </div>
-```
 
 </header>
 
@@ -891,74 +910,68 @@ button,input,select{
 
 <section class="panel">
 
-```
 <div class="panel-header">
     <span class="panel-title">Fecha</span>
 </div>
 
 <div class="panel-body">
 
-    <div class="calendar">
+<div class="calendar">
 
-        <div class="calendar-header">
+<div class="calendar-header">
 
-            <button
-                class="calendar-button"
-                onclick="previousMonth()">‹</button>
+<button
+    class="calendar-button"
+    onclick="previousMonth()">‹</button>
 
-            <div
-                class="calendar-month"
-                id="calendarMonth">
-            </div>
+<div
+    class="calendar-month"
+    id="calendarMonth"></div>
 
-            <button
-                class="calendar-button"
-                onclick="nextMonth()">›</button>
-
-        </div>
-
-        <div class="calendar-weekdays">
-            <div>L</div>
-            <div>M</div>
-            <div>M</div>
-            <div>J</div>
-            <div>V</div>
-            <div>S</div>
-            <div>D</div>
-        </div>
-
-        <div
-            class="calendar-days"
-            id="calendarDays">
-        </div>
-
-        <button
-            class="today-button"
-            onclick="goToday()">
-            IR A HOY
-        </button>
-
-    </div>
+<button
+    class="calendar-button"
+    onclick="nextMonth()">›</button>
 
 </div>
-```
 
+<div class="calendar-weekdays">
+    <div>L</div>
+    <div>M</div>
+    <div>M</div>
+    <div>J</div>
+    <div>V</div>
+    <div>S</div>
+    <div>D</div>
+</div>
+
+<div
+    class="calendar-days"
+    id="calendarDays"></div>
+
+<button
+    class="today-button"
+    onclick="goToday()">
+    IR A HOY
+</button>
+
+</div>
+
+</div>
 </section>
 
 <section class="panel">
 
-```
 <div class="panel-header">
 
-    <span class="panel-title">
-        Pacientes
-    </span>
+<span class="panel-title">
+    Pacientes
+</span>
 
-    <span
-        class="panel-count"
-        id="patientCount">
-        0
-    </span>
+<span
+    class="panel-count"
+    id="patientCount">
+    0
+</span>
 
 </div>
 
@@ -966,52 +979,52 @@ button,input,select{
     class="panel-body"
     id="patientList">
 </div>
-```
 
 </section>
 
 <section class="viewer">
 
-```
 <div class="viewer-header">
 
-    <div class="viewer-header-left">
+<div class="viewer-header-left">
 
-        <div
-            class="viewer-title"
-            id="viewerTitle">
-            Seleccione un estudio
-        </div>
+<div
+    class="viewer-title"
+    id="viewerTitle">
+    Seleccione un estudio
+</div>
 
-        <div
-            class="viewer-subtitle"
-            id="viewerSubtitle">
-            Conectando con Supabase...
-        </div>
+<div
+    class="viewer-subtitle"
+    id="viewerSubtitle">
+    Conectando con Supabase...
+</div>
 
-    </div>
+</div>
 
-    <div class="viewer-admin-actions" id="viewerAdminActions">
+<div
+    class="viewer-admin-actions"
+    id="viewerAdminActions">
 
-        <button
-            class="viewer-admin-button"
-            onclick="addImagesToCurrentStudy()">
-            + AÑADIR IMÁGENES
-        </button>
+<button
+    class="viewer-admin-button"
+    onclick="addImagesToCurrentStudy()">
+    + AÑADIR IMÁGENES
+</button>
 
-        <button
-            class="viewer-admin-button danger"
-            onclick="deleteCurrentStudy()">
-            🗑 ELIMINAR ESTUDIO
-        </button>
+<button
+    class="viewer-admin-button danger"
+    onclick="deleteCurrentStudy()">
+    🗑 ELIMINAR ESTUDIO
+</button>
 
-    </div>
+</div>
 
-    <div
-        class="image-counter"
-        id="imageCounter">
-        --
-    </div>
+<div
+    class="image-counter"
+    id="imageCounter">
+    --
+</div>
 
 </div>
 
@@ -1019,55 +1032,55 @@ button,input,select{
     class="viewport"
     id="viewport">
 
-    <div class="overlay-left">
-        PACS RAYOS X · HSMP
-    </div>
+<div class="overlay-left">
+    PACS RAYOS X · HSMP
+</div>
 
-    <div
-        class="overlay-right"
-        id="overlayRight">
-        --
-    </div>
+<div
+    class="overlay-right"
+    id="overlayRight">
+    --
+</div>
 
-    <div
-        class="empty-message"
-        id="emptyMessage">
-        Seleccione un paciente para visualizar sus estudios.
-    </div>
+<div
+    class="empty-message"
+    id="emptyMessage">
+    Seleccione un paciente para visualizar sus estudios.
+</div>
 
-    <div
-        class="image-wrapper"
-        id="imageWrapper"
-        style="display:none;">
+<div
+    class="image-wrapper"
+    id="imageWrapper"
+    style="display:none;">
 
-        <img
-            id="mainImage"
-            class="main-image"
-            alt="Imagen radiológica">
+<img
+    id="mainImage"
+    class="main-image"
+    alt="Imagen radiológica">
 
-    </div>
+</div>
 
 </div>
 
 <div class="toolbar">
 
-    <button class="tool" onclick="zoomIn()">🔍+</button>
-    <button class="tool" onclick="zoomOut()">🔍−</button>
-    <button class="tool" onclick="resetView()">↺</button>
+<button class="tool" onclick="zoomIn()">🔍+</button>
+<button class="tool" onclick="zoomOut()">🔍−</button>
+<button class="tool" onclick="resetView()">↺</button>
 
-    <div class="separator"></div>
+<div class="separator"></div>
 
-    <button class="tool" onclick="rotateLeft()">↶</button>
-    <button class="tool" onclick="rotateRight()">↷</button>
-    <button class="tool" onclick="invertImage()">◐</button>
-    <button class="tool" onclick="contrastUp()">C+</button>
-    <button class="tool" onclick="contrastDown()">C−</button>
+<button class="tool" onclick="rotateLeft()">↶</button>
+<button class="tool" onclick="rotateRight()">↷</button>
+<button class="tool" onclick="invertImage()">◐</button>
+<button class="tool" onclick="contrastUp()">C+</button>
+<button class="tool" onclick="contrastDown()">C−</button>
 
-    <div class="separator"></div>
+<div class="separator"></div>
 
-    <button class="tool" onclick="previousImage()">◀</button>
-    <button class="tool" onclick="nextImage()">▶</button>
-    <button class="tool" onclick="openFullscreen()">⛶</button>
+<button class="tool" onclick="previousImage()">◀</button>
+<button class="tool" onclick="nextImage()">▶</button>
+<button class="tool" onclick="openFullscreen()">⛶</button>
 
 </div>
 
@@ -1075,13 +1088,11 @@ button,input,select{
     class="thumbnails"
     id="thumbnailList">
 </div>
-```
 
 </section>
 
 <aside class="panel info-panel">
 
-```
 <div class="panel-header">
     <span class="panel-title">
         Información
@@ -1090,607 +1101,519 @@ button,input,select{
 
 <div class="info-section">
 
-    <div class="info-heading">
-        Paciente
-    </div>
+<div class="info-heading">
+    Paciente
+</div>
 
-    <div class="patient-card">
+<div class="patient-card">
 
-        <div
-            class="patient-card-name"
-            id="infoPatientName">
-            --
-        </div>
+<div
+    class="patient-card-name"
+    id="infoPatientName">
+    --
+</div>
 
-        <div
-            class="patient-card-meta"
-            id="infoPatientMeta">
-            --
-        </div>
+<div
+    class="patient-card-meta"
+    id="infoPatientMeta">
+    --
+</div>
 
-    </div>
+</div>
 
 </div>
 
 <div class="info-section">
 
-    <div class="info-heading">
-        Estudios
-    </div>
+<div class="info-heading">
+    Estudios
+</div>
 
-    <select
-        class="study-selector"
-        id="studySelector"
-        onchange="changeSelectedStudy(this.value)">
-        <option value="">Seleccione un estudio</option>
-    </select>
+<select
+    class="study-selector"
+    id="studySelector"
+    onchange="changeSelectedStudy(this.value)">
+
+<option value="">
+    Seleccione un estudio
+</option>
+
+</select>
 
 </div>
 
 <div class="info-section">
 
-    <div class="info-heading">
-        Estudio
-    </div>
+<div class="info-heading">
+    Estudio
+</div>
 
-    <div class="info-row">
-        <span class="info-label">DESCRIPCIÓN</span>
-        <span
-            class="info-value"
-            id="infoStudy">
-            --
-        </span>
-    </div>
+<div class="info-row">
+<span class="info-label">DESCRIPCIÓN</span>
+<span
+    class="info-value"
+    id="infoStudy">
+    --
+</span>
+</div>
 
-    <div class="info-row">
-        <span class="info-label">ESTRUCTURA</span>
-        <span
-            class="info-value"
-            id="infoStructure">
-            --
-        </span>
-    </div>
+<div class="info-row">
+<span class="info-label">ESTRUCTURA</span>
+<span
+    class="info-value"
+    id="infoStructure">
+    --
+</span>
+</div>
 
-    <div class="info-row">
-        <span class="info-label">LADO</span>
-        <span
-            class="info-value"
-            id="infoSide">
-            --
-        </span>
-    </div>
+<div class="info-row">
+<span class="info-label">LADO</span>
+<span
+    class="info-value"
+    id="infoSide">
+    --
+</span>
+</div>
 
-    <div class="info-row">
-        <span class="info-label">FECHA</span>
-        <span
-            class="info-value"
-            id="infoDate">
-            --
-        </span>
-    </div>
+<div class="info-row">
+<span class="info-label">FECHA</span>
+<span
+    class="info-value"
+    id="infoDate">
+    --
+</span>
+</div>
 
-    <div class="info-row">
-        <span class="info-label">MODALIDAD</span>
-        <span
-            class="info-value"
-            id="infoModality">
-            --
-        </span>
-    </div>
+<div class="info-row">
+<span class="info-label">MODALIDAD</span>
+<span
+    class="info-value"
+    id="infoModality">
+    --
+</span>
+</div>
 
-    <div class="info-row">
-        <span class="info-label">IMÁGENES</span>
-        <span
-            class="info-value"
-            id="infoImages">
-            --
-        </span>
-    </div>
+<div class="info-row">
+<span class="info-label">IMÁGENES</span>
+<span
+    class="info-value"
+    id="infoImages">
+    --
+</span>
+</div>
 
 </div>
 
 <div class="info-section">
 
-    <div class="info-heading">
-        Visualización
-    </div>
+<div class="info-heading">
+    Visualización
+</div>
 
-    <div class="info-row">
-        <span class="info-label">ZOOM</span>
-        <span
-            class="info-value"
-            id="infoZoom">
-            100%
-        </span>
-    </div>
+<div class="info-row">
+<span class="info-label">ZOOM</span>
+<span
+    class="info-value"
+    id="infoZoom">
+    100%
+</span>
+</div>
 
-    <div class="info-row">
-        <span class="info-label">ROTACIÓN</span>
-        <span
-            class="info-value"
-            id="infoRotation">
-            0°
-        </span>
-    </div>
+<div class="info-row">
+<span class="info-label">ROTACIÓN</span>
+<span
+    class="info-value"
+    id="infoRotation">
+    0°
+</span>
+</div>
 
-    <div class="info-row">
-        <span class="info-label">IMAGEN</span>
-        <span
-            class="info-value"
-            id="infoCurrentImage">
-            --
-        </span>
-    </div>
+<div class="info-row">
+<span class="info-label">IMAGEN</span>
+<span
+    class="info-value"
+    id="infoCurrentImage">
+    --
+</span>
+</div>
 
 </div>
-```
 
 </aside>
 
 </div>
 
-<!-- ================= LOGIN ================= -->
+<!-- LOGIN -->
 
 <div
     class="admin-overlay"
     id="loginOverlay">
 
-```
 <div class="login-box">
 
-    <div class="login-header">
+<div class="login-header">
 
-        <div class="login-title">
-            ACCESO ADMINISTRADOR
-        </div>
-
-        <div class="login-subtitle">
-            Hospital San Martín de Pangoa - Rayos X
-        </div>
-
-    </div>
-
-    <div class="login-body">
-
-        <div class="form-group">
-
-            <label class="form-label">
-                Correo electrónico
-            </label>
-
-            <input
-                class="form-input"
-                id="loginEmail"
-                type="email"
-                autocomplete="username"
-                placeholder="Correo">
-
-        </div>
-
-        <div class="form-group">
-
-            <label class="form-label">
-                Contraseña
-            </label>
-
-            <input
-                class="form-input"
-                id="loginPassword"
-                type="password"
-                autocomplete="current-password"
-                placeholder="Contraseña">
-
-        </div>
-
-        <div class="admin-actions">
-
-            <button
-                class="admin-secondary"
-                onclick="closeLogin()">
-                CANCELAR
-            </button>
-
-            <button
-                class="admin-primary"
-                onclick="loginAdmin()">
-                INGRESAR
-            </button>
-
-        </div>
-
-        <div
-            class="status-message"
-            id="loginStatus">
-        </div>
-
-    </div>
-
+<div class="login-title">
+    ACCESO ADMINISTRADOR
 </div>
-```
+
+<div class="login-subtitle">
+    Hospital San Martín de Pangoa - Rayos X
+</div>
 
 </div>
 
-<!-- ================= PANEL ADMINISTRADOR ================= -->
+<div class="login-body">
+
+<div class="form-group">
+
+<label class="form-label">
+    Correo electrónico
+</label>
+
+<input
+    class="form-input"
+    id="loginEmail"
+    type="email"
+    autocomplete="username"
+    placeholder="Correo">
+
+</div>
+
+<div class="form-group">
+
+<label class="form-label">
+    Contraseña
+</label>
+
+<input
+    class="form-input"
+    id="loginPassword"
+    type="password"
+    autocomplete="current-password"
+    placeholder="Contraseña">
+
+</div>
+
+<div class="admin-actions">
+
+<button
+    class="admin-secondary"
+    onclick="closeLogin()">
+    CANCELAR
+</button>
+
+<button
+    class="admin-primary"
+    onclick="loginAdmin()">
+    INGRESAR
+</button>
+
+</div>
+
+<div
+    class="status-message"
+    id="loginStatus">
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- NUEVO ESTUDIO -->
 
 <div
     class="admin-overlay"
     id="adminOverlay">
 
-```
 <div class="admin-box">
 
-    <div class="admin-header">
+<div class="admin-header">
 
-        <div class="admin-title">
-            NUEVO ESTUDIO
-        </div>
-
-        <button
-            class="admin-close"
-            onclick="closeAdmin()">
-            ×
-        </button>
-
-    </div>
-
-    <div class="admin-body">
-
-        <div class="form-group">
-
-            <label class="form-label">
-                Nombre del paciente
-            </label>
-
-            <input
-                class="form-input"
-                id="adminPatient"
-                type="text"
-                placeholder="Ej. JUAN PÉREZ GARCÍA">
-
-        </div>
-
-        <div class="form-group">
-
-            <label class="form-label">
-                Fecha del estudio
-            </label>
-
-            <input
-                class="form-input"
-                id="adminDate"
-                type="date">
-
-        </div>
-
-        <div class="form-group">
-
-            <label class="form-label">
-                Estructura anatómica
-            </label>
-
-            <select
-                class="form-select"
-                id="adminStructure"
-                onchange="updateSideOptions()">
-
-                <option value="">
-                    Seleccionar estructura
-                </option>
-
-                <option value="CRÁNEO">
-                    Cráneo
-                </option>
-
-                <option value="SENOS PARANASALES">
-                    Senos paranasales
-                </option>
-
-                <option value="MACIZO FACIAL">
-                    Macizo facial
-                </option>
-
-                <option value="COLUMNA CERVICAL">
-                    Columna cervical
-                </option>
-
-                <option value="COLUMNA DORSAL">
-                    Columna dorsal
-                </option>
-
-                <option value="COLUMNA LUMBAR">
-                    Columna lumbar
-                </option>
-
-                <option value="TÓRAX">
-                    Tórax
-                </option>
-
-                <option value="COSTILLAS">
-                    Costillas
-                </option>
-
-                <option value="CLAVÍCULA">
-                    Clavícula
-                </option>
-
-                <option value="HOMBRO">
-                    Hombro
-                </option>
-
-                <option value="HÚMERO">
-                    Húmero
-                </option>
-
-                <option value="CODO">
-                    Codo
-                </option>
-
-                <option value="ANTEBRAZO">
-                    Antebrazo
-                </option>
-
-                <option value="MUÑECA">
-                    Muñeca
-                </option>
-
-                <option value="MANO">
-                    Mano
-                </option>
-
-                <option value="PELVIS">
-                    Pelvis
-                </option>
-
-                <option value="CADERA">
-                    Cadera
-                </option>
-
-                <option value="FÉMUR">
-                    Fémur
-                </option>
-
-                <option value="RODILLA">
-                    Rodilla
-                </option>
-
-                <option value="PIERNA">
-                    Pierna
-                </option>
-
-                <option value="TOBILLO">
-                    Tobillo
-                </option>
-
-                <option value="PIE">
-                    Pie
-                </option>
-
-                <option value="ABDOMEN">
-                    Abdomen
-                </option>
-
-                <option value="OTRO">
-                    Otro
-                </option>
-
-            </select>
-
-        </div>
-
-        <div
-            class="form-group side-group"
-            id="sideGroup">
-
-            <label class="form-label">
-                Lado
-            </label>
-
-            <select
-                class="form-select"
-                id="adminSide">
-
-                <option value="">
-                    Seleccionar lado
-                </option>
-
-                <option value="DERECHA">
-                    Derecha
-                </option>
-
-                <option value="IZQUIERDA">
-                    Izquierda
-                </option>
-
-                <option value="BILATERAL">
-                    Bilateral
-                </option>
-
-            </select>
-
-        </div>
-
-        <div class="form-group">
-
-            <label class="form-label">
-                Descripción del estudio
-            </label>
-
-            <input
-                class="form-input"
-                id="adminStudy"
-                type="text"
-                placeholder="Ej. AP Y LATERAL">
-
-        </div>
-
-        <div class="form-group">
-
-            <label class="form-label">
-                Modalidad
-            </label>
-
-            <select
-                class="form-select"
-                id="adminModality">
-
-                <option value="CR">CR</option>
-                <option value="DX">DX</option>
-                <option value="XR">XR</option>
-
-            </select>
-
-        </div>
-
-        <div class="form-group">
-
-            <label class="form-label">
-                Imágenes JPG
-            </label>
-
-            <input
-                class="file-input"
-                id="adminFiles"
-                type="file"
-                accept=".jpg,.jpeg,image/jpeg"
-                multiple
-                onchange="showSelectedFiles()">
-
-            <div
-                class="file-list"
-                id="fileList">
-                Ningún archivo seleccionado.
-            </div>
-
-        </div>
-
-        <div
-            class="status-message"
-            id="adminStatus">
-        </div>
-
-        <div class="admin-actions">
-
-            <button
-                class="admin-secondary"
-                onclick="closeAdmin()">
-                CANCELAR
-            </button>
-
-            <button
-                class="admin-primary"
-                onclick="createStudyAndUpload()">
-                CREAR ESTUDIO Y SUBIR IMÁGENES
-            </button>
-
-        </div>
-
-    </div>
-
+<div class="admin-title">
+    NUEVO ESTUDIO
 </div>
-```
+
+<button
+    class="admin-close"
+    onclick="closeAdmin()">
+    ×
+</button>
 
 </div>
 
-<!-- ================= AÑADIR IMÁGENES ================= -->
+<div class="admin-body">
+
+<div class="form-group">
+
+<label class="form-label">
+    Nombre del paciente *
+</label>
+
+<input
+    class="form-input"
+    id="adminPatient"
+    type="text"
+    placeholder="Ej. JUAN PÉREZ GARCÍA">
+
+</div>
+
+<div class="form-group">
+
+<label class="form-label">
+    Fecha del estudio
+</label>
+
+<input
+    class="form-input"
+    id="adminDate"
+    type="date">
+
+</div>
+
+<div class="form-group">
+
+<label class="form-label">
+    Estructura anatómica
+</label>
+
+<select
+    class="form-select"
+    id="adminStructure"
+    onchange="updateSideOptions()">
+
+<option value="">No especificar</option>
+<option value="CRÁNEO">Cráneo</option>
+<option value="SENOS PARANASALES">Senos paranasales</option>
+<option value="MACIZO FACIAL">Macizo facial</option>
+<option value="COLUMNA CERVICAL">Columna cervical</option>
+<option value="COLUMNA DORSAL">Columna dorsal</option>
+<option value="COLUMNA LUMBAR">Columna lumbar</option>
+<option value="TÓRAX">Tórax</option>
+<option value="COSTILLAS">Costillas</option>
+<option value="CLAVÍCULA">Clavícula</option>
+<option value="HOMBRO">Hombro</option>
+<option value="HÚMERO">Húmero</option>
+<option value="CODO">Codo</option>
+<option value="ANTEBRAZO">Antebrazo</option>
+<option value="MUÑECA">Muñeca</option>
+<option value="MANO">Mano</option>
+<option value="PELVIS">Pelvis</option>
+<option value="CADERA">Cadera</option>
+<option value="FÉMUR">Fémur</option>
+<option value="RODILLA">Rodilla</option>
+<option value="PIERNA">Pierna</option>
+<option value="TOBILLO">Tobillo</option>
+<option value="PIE">Pie</option>
+<option value="ABDOMEN">Abdomen</option>
+<option value="OTRO">Otro</option>
+
+</select>
+
+</div>
+
+<div
+    class="form-group side-group"
+    id="sideGroup">
+
+<label class="form-label">
+    Lado
+</label>
+
+<select
+    class="form-select"
+    id="adminSide">
+
+<option value="">No especificar</option>
+<option value="DERECHA">Derecha</option>
+<option value="IZQUIERDA">Izquierda</option>
+<option value="BILATERAL">Bilateral</option>
+
+</select>
+
+</div>
+
+<div class="form-group">
+
+<label class="form-label">
+    Descripción del estudio
+</label>
+
+<input
+    class="form-input"
+    id="adminStudy"
+    type="text"
+    placeholder="Ej. AP Y LATERAL">
+
+</div>
+
+<div class="form-group">
+
+<label class="form-label">
+    Modalidad
+</label>
+
+<select
+    class="form-select"
+    id="adminModality">
+
+<option value="">No especificar</option>
+<option value="CR">CR</option>
+<option value="DX">DX</option>
+<option value="XR">XR</option>
+
+</select>
+
+</div>
+
+<div class="form-group">
+
+<label class="form-label">
+    Imágenes JPG *
+</label>
+
+<input
+    class="file-input"
+    id="adminFiles"
+    type="file"
+    accept=".jpg,.jpeg,image/jpeg"
+    multiple
+    onchange="showSelectedFiles()">
+
+<div
+    class="file-list"
+    id="fileList">
+    Ningún archivo seleccionado.
+</div>
+
+</div>
+
+<div
+    class="status-message"
+    id="adminStatus">
+</div>
+
+<div class="admin-actions">
+
+<button
+    class="admin-secondary"
+    onclick="closeAdmin()">
+    CANCELAR
+</button>
+
+<button
+    class="admin-primary"
+    onclick="createStudyAndUpload()">
+    CREAR ESTUDIO Y SUBIR IMÁGENES
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- AÑADIR IMÁGENES -->
 
 <div
     class="admin-overlay"
     id="addImagesOverlay">
 
-```
 <div class="admin-box">
 
-    <div class="admin-header">
+<div class="admin-header">
 
-        <div class="admin-title">
-            AÑADIR IMÁGENES AL ESTUDIO
-        </div>
-
-        <button
-            class="admin-close"
-            onclick="closeAddImages()">
-            ×
-        </button>
-
-    </div>
-
-    <div class="admin-body">
-
-        <div class="patient-card">
-
-            <div
-                class="patient-card-name"
-                id="addImagesPatient">
-                --
-            </div>
-
-            <div
-                class="patient-card-meta"
-                id="addImagesStudy">
-                --
-            </div>
-
-        </div>
-
-        <br>
-
-        <div class="form-group">
-
-            <label class="form-label">
-                Seleccionar nuevas imágenes JPG
-            </label>
-
-            <input
-                class="file-input"
-                id="additionalFiles"
-                type="file"
-                accept=".jpg,.jpeg,image/jpeg"
-                multiple
-                onchange="showAdditionalFiles()">
-
-            <div
-                class="file-list"
-                id="additionalFileList">
-                Ningún archivo seleccionado.
-            </div>
-
-        </div>
-
-        <div
-            class="status-message"
-            id="addImagesStatus">
-        </div>
-
-        <div class="admin-actions">
-
-            <button
-                class="admin-secondary"
-                onclick="closeAddImages()">
-                CANCELAR
-            </button>
-
-            <button
-                class="admin-primary"
-                onclick="uploadAdditionalImages()">
-                AÑADIR IMÁGENES
-            </button>
-
-        </div>
-
-    </div>
-
+<div class="admin-title">
+    AÑADIR IMÁGENES AL ESTUDIO
 </div>
-```
+
+<button
+    class="admin-close"
+    onclick="closeAddImages()">
+    ×
+</button>
 
 </div>
 
-<!-- ================= PANTALLA COMPLETA ================= -->
+<div class="admin-body">
+
+<div class="patient-card">
+
+<div
+    class="patient-card-name"
+    id="addImagesPatient">
+    --
+</div>
+
+<div
+    class="patient-card-meta"
+    id="addImagesStudy">
+    --
+</div>
+
+</div>
+
+<br>
+
+<div class="form-group">
+
+<label class="form-label">
+    Seleccionar nuevas imágenes JPG
+</label>
+
+<input
+    class="file-input"
+    id="additionalFiles"
+    type="file"
+    accept=".jpg,.jpeg,image/jpeg"
+    multiple
+    onchange="showAdditionalFiles()">
+
+<div
+    class="file-list"
+    id="additionalFileList">
+    Ningún archivo seleccionado.
+</div>
+
+</div>
+
+<div
+    class="status-message"
+    id="addImagesStatus">
+</div>
+
+<div class="admin-actions">
+
+<button
+    class="admin-secondary"
+    onclick="closeAddImages()">
+    CANCELAR
+</button>
+
+<button
+    class="admin-primary"
+    onclick="uploadAdditionalImages()">
+    AÑADIR IMÁGENES
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- PANTALLA COMPLETA -->
 
 <div
     class="fullscreen"
     id="fullscreenViewer">
 
-```
 <div
     class="close-fullscreen"
     onclick="closeFullscreen()">
@@ -1700,7 +1623,6 @@ button,input,select{
 <img
     id="fullscreenImage"
     alt="Imagen">
-```
 
 </div>
 
@@ -1722,17 +1644,11 @@ const supabaseClient =
         SUPABASE_KEY
     );
 
-
-/* =========================================================
-   ADMINISTRADOR
-========================================================= */
-
 const ADMIN_UID =
     "622de888-2abd-4f4c-b1ba-488c7472b767";
 
 const STORAGE_BUCKET =
     "IMAGENES";
-
 
 /* =========================================================
    VARIABLES
@@ -1754,7 +1670,6 @@ let rotation = 0;
 let inverted = false;
 let contrast = 1;
 
-
 /* =========================================================
    FECHA
 ========================================================= */
@@ -1763,8 +1678,7 @@ function formatDate(dateString){
 
     if(!dateString) return "--";
 
-    const parts =
-        dateString.split("-");
+    const parts = dateString.split("-");
 
     if(parts.length !== 3)
         return dateString;
@@ -1776,17 +1690,13 @@ function formatDate(dateString){
     );
 }
 
-
 /* =========================================================
    URL IMAGEN
 ========================================================= */
 
 function getImageUrl(file){
 
-    if(!file)
-        return "";
-
-    if(typeof file !== "string")
+    if(!file || typeof file !== "string")
         return "";
 
     file = file.trim();
@@ -1808,92 +1718,21 @@ function getImageUrl(file){
         "/" +
         file
             .split("/")
-            .map(
-                part =>
-                    encodeURIComponent(part)
-            )
+            .map(part => encodeURIComponent(part))
             .join("/")
     );
 }
 
-
 /* =========================================================
-   NORMALIZAR IMÁGENES
-========================================================= */
-
-function normalizeImages(value){
-
-    if(!value)
-        return [];
-
-    if(Array.isArray(value)){
-
-        return value
-            .filter(
-                item =>
-                    typeof item === "string" &&
-                    item.trim() !== ""
-            )
-            .map(
-                item =>
-                    getImageUrl(item)
-            );
-
-    }
-
-    if(typeof value === "string"){
-
-        const text =
-            value.trim();
-
-        if(!text)
-            return [];
-
-        try{
-
-            const parsed =
-                JSON.parse(text);
-
-            if(Array.isArray(parsed)){
-
-                return parsed
-                    .filter(
-                        item =>
-                            typeof item === "string" &&
-                            item.trim() !== ""
-                    )
-                    .map(
-                        item =>
-                            getImageUrl(item)
-                    );
-
-            }
-
-        }
-        catch(error){}
-
-        return [
-            getImageUrl(text)
-        ];
-
-    }
-
-    return [];
-
-}
-
-
-/* =========================================================
-   OBTENER RUTA REAL DE STORAGE
+   RUTA REAL DE STORAGE
 ========================================================= */
 
 function getStoragePath(file){
 
-    if(!file)
+    if(!file || typeof file !== "string")
         return "";
 
-    if(typeof file !== "string")
-        return "";
+    file = file.trim();
 
     const marker =
         "/storage/v1/object/public/" +
@@ -1911,6 +1750,56 @@ function getStoragePath(file){
     return file;
 }
 
+/* =========================================================
+   NORMALIZAR IMÁGENES
+========================================================= */
+
+function normalizeImages(value){
+
+    if(!value)
+        return [];
+
+    let items = [];
+
+    if(Array.isArray(value)){
+
+        items = value;
+
+    }
+    else if(typeof value === "string"){
+
+        const text = value.trim();
+
+        if(!text)
+            return [];
+
+        try{
+
+            const parsed = JSON.parse(text);
+
+            if(Array.isArray(parsed))
+                items = parsed;
+            else
+                items = [text];
+
+        }
+        catch(error){
+
+            items = [text];
+
+        }
+
+    }
+
+    return items
+        .filter(
+            item =>
+                typeof item === "string" &&
+                item.trim() !== ""
+        )
+        .map(item => getImageUrl(item));
+
+}
 
 /* =========================================================
    CARGAR ESTUDIOS
@@ -1938,59 +1827,34 @@ async function loadStudies(){
             throw error;
 
         studies =
-            data.map(
-                item => {
+            (data || []).map(item => {
 
-                    return {
+                return {
 
-                        id:item.id,
+                    id:item.id,
+                    date:item.date || "",
+                    patient:item.patient || "",
+                    history:item.history || "",
+                    birth:item.birth || "",
+                    sex:item.sex || "",
+                    study:item.study || "",
+                    structure:item.structure || "",
+                    side:item.side || "",
+                    modality:item.modality || "",
+                    images:normalizeImages(item.images)
 
-                        date:item.date,
+                };
 
-                        patient:item.patient,
-
-                        history:item.history || "",
-
-                        birth:item.birth || "",
-
-                        sex:item.sex || "",
-
-                        study:item.study || "",
-
-                        structure:
-                            item.structure ||
-                            "",
-
-                        side:
-                            item.side ||
-                            "",
-
-                        modality:
-                            item.modality ||
-                            "CR",
-
-                        images:
-                            normalizeImages(
-                                item.images
-                            )
-
-                    };
-
-                }
-            );
+            });
 
         renderCalendar();
-
         renderPatients();
-
         clearViewer();
 
         document.getElementById(
             "currentDateLabel"
         ).textContent =
-            formatDate(
-                selectedDate
-            );
+            formatDate(selectedDate);
 
     }
     catch(error){
@@ -2006,9 +1870,7 @@ async function loadStudies(){
                 Error al conectar con<br>
                 Supabase.<br><br>
 
-                ${escapeHtml(
-                    error.message || ""
-                )}
+                ${escapeHtml(error.message || "")}
 
             </div>
 
@@ -2017,7 +1879,6 @@ async function loadStudies(){
     }
 
 }
-
 
 /* =========================================================
    PACIENTES
@@ -2036,22 +1897,18 @@ function getPatientsForDate(){
 
     const result = [];
 
-    getStudiesForDate()
-        .forEach(item => {
+    getStudiesForDate().forEach(item => {
 
-            if(
-                !result.includes(
-                    item.patient
-                )
-            ){
+        if(
+            item.patient &&
+            !result.includes(item.patient)
+        ){
 
-                result.push(
-                    item.patient
-                );
+            result.push(item.patient);
 
-            }
+        }
 
-        });
+    });
 
     return result;
 
@@ -2062,15 +1919,18 @@ function getPatientStudies(){
     if(!currentPatient)
         return [];
 
-    return getStudiesForDate()
+    return studies
         .filter(
             item =>
-                item.patient ===
-                currentPatient
+                item.patient === currentPatient
+        )
+        .filter(
+            item =>
+                !selectedDate ||
+                item.date === selectedDate
         );
 
 }
-
 
 /* =========================================================
    CALENDARIO
@@ -2085,40 +1945,23 @@ function renderCalendar(){
         calendarDate.getMonth();
 
     const monthNames = [
-        "enero",
-        "febrero",
-        "marzo",
-        "abril",
-        "mayo",
-        "junio",
-        "julio",
-        "agosto",
-        "septiembre",
-        "octubre",
-        "noviembre",
-        "diciembre"
+        "enero","febrero","marzo","abril",
+        "mayo","junio","julio","agosto",
+        "septiembre","octubre","noviembre","diciembre"
     ];
 
     document.getElementById(
         "calendarMonth"
     ).textContent =
-        monthNames[month] +
-        " " +
-        year;
+        monthNames[month] + " " + year;
 
     const container =
-        document.getElementById(
-            "calendarDays"
-        );
+        document.getElementById("calendarDays");
 
     container.innerHTML = "";
 
     let firstDay =
-        new Date(
-            year,
-            month,
-            1
-        ).getDay();
+        new Date(year,month,1).getDay();
 
     firstDay =
         firstDay === 0
@@ -2132,16 +1975,10 @@ function renderCalendar(){
             0
         ).getDate();
 
-    for(
-        let i=firstDay-1;
-        i>=0;
-        i--
-    ){
+    for(let i=firstDay-1;i>=0;i--){
 
         const div =
-            document.createElement(
-                "div"
-            );
+            document.createElement("div");
 
         div.className =
             "day other-month";
@@ -2157,111 +1994,69 @@ function renderCalendar(){
 
     }
 
-    for(
-        let day=1;
-        day<=daysInMonth;
-        day++
-    ){
+    for(let day=1;day<=daysInMonth;day++){
 
         const div =
-            document.createElement(
-                "div"
-            );
+            document.createElement("div");
 
-        div.className =
-            "day";
+        div.className = "day";
 
         const dateString =
             year +
             "-" +
-            String(month+1)
-                .padStart(2,"0") +
+            String(month+1).padStart(2,"0") +
             "-" +
-            String(day)
-                .padStart(2,"0");
+            String(day).padStart(2,"0");
 
-        div.textContent =
-            day;
+        div.textContent = day;
 
         if(
             studies.some(
                 item =>
-                    item.date ===
-                    dateString
+                    item.date === dateString
             )
         ){
 
-            div.classList.add(
-                "has-studies"
-            );
+            div.classList.add("has-studies");
 
         }
 
-        if(
-            dateString ===
-            selectedDate
-        ){
+        if(dateString === selectedDate){
 
-            div.classList.add(
-                "selected"
-            );
+            div.classList.add("selected");
 
         }
 
-        const today =
-            new Date();
+        const today = new Date();
 
         const todayString =
             today.getFullYear() +
             "-" +
-            String(
-                today.getMonth()+1
-            ).padStart(2,"0") +
+            String(today.getMonth()+1).padStart(2,"0") +
             "-" +
-            String(
-                today.getDate()
-            ).padStart(2,"0");
+            String(today.getDate()).padStart(2,"0");
 
-        if(
-            dateString ===
-            todayString
-        ){
+        if(dateString === todayString){
 
-            div.classList.add(
-                "today"
-            );
+            div.classList.add("today");
 
         }
 
-        div.onclick = () => {
+        div.onclick = () =>
+            selectDate(dateString);
 
-            selectDate(
-                dateString
-            );
-
-        };
-
-        container.appendChild(
-            div
-        );
+        container.appendChild(div);
 
     }
 
 }
-
-
-/* =========================================================
-   FECHA
-========================================================= */
 
 function selectDate(date){
 
     selectedDate = date;
 
     currentPatient = null;
-
     currentStudy = 0;
-
     currentImage = 0;
 
     resetView();
@@ -2272,9 +2067,7 @@ function selectDate(date){
         formatDate(date);
 
     renderCalendar();
-
     renderPatients();
-
     clearViewer();
 
 }
@@ -2301,8 +2094,7 @@ function nextMonth(){
 
 function goToday(){
 
-    const today =
-        new Date();
+    const today = new Date();
 
     calendarDate =
         new Date(
@@ -2314,17 +2106,12 @@ function goToday(){
     selectDate(
         today.getFullYear() +
         "-" +
-        String(
-            today.getMonth()+1
-        ).padStart(2,"0") +
+        String(today.getMonth()+1).padStart(2,"0") +
         "-" +
-        String(
-            today.getDate()
-        ).padStart(2,"0")
+        String(today.getDate()).padStart(2,"0")
     );
 
 }
-
 
 /* =========================================================
    PACIENTES
@@ -2333,9 +2120,7 @@ function goToday(){
 function renderPatients(filter=""){
 
     const list =
-        document.getElementById(
-            "patientList"
-        );
+        document.getElementById("patientList");
 
     list.innerHTML = "";
 
@@ -2348,10 +2133,8 @@ function renderPatients(filter=""){
             patients.filter(
                 name =>
                     name
-                    .toLowerCase()
-                    .includes(
-                        filter.toLowerCase()
-                    )
+                        .toLowerCase()
+                        .includes(filter.toLowerCase())
             );
 
     }
@@ -2361,107 +2144,78 @@ function renderPatients(filter=""){
     ).textContent =
         patients.length;
 
-    if(
-        patients.length === 0
-    ){
+    if(!patients.length){
 
         list.innerHTML = `
-
             <div class="no-results">
-
                 No hay pacientes<br>
                 registrados para<br>
                 esta fecha.
-
             </div>
-
         `;
 
         return;
 
     }
 
-    patients.forEach(
-        name => {
+    patients.forEach(name => {
 
-            const patientStudies =
-                getStudiesForDate()
-                .filter(
-                    item =>
-                        item.patient ===
-                        name
-                );
-
-            const element =
-                document.createElement(
-                    "div"
-                );
-
-            element.className =
-                "patient";
-
-            if(
-                currentPatient ===
-                name
-            ){
-
-                element.classList.add(
-                    "active"
-                );
-
-            }
-
-            element.innerHTML = `
-
-                <div class="patient-name">
-                    ${escapeHtml(name)}
-                </div>
-
-                <div class="patient-meta">
-
-                    <span>
-                        ${patientStudies.length}
-                        estudio(s)
-                    </span>
-
-                    <span class="badge">
-                        ${patientStudies.length}
-                    </span>
-
-                </div>
-
-            `;
-
-            element.onclick = () => {
-
-                currentPatient =
-                    name;
-
-                currentStudy = 0;
-
-                currentImage = 0;
-
-                resetView();
-
-                renderPatients(
-                    document.getElementById(
-                        "search"
-                    ).value
-                );
-
-                showFirstStudy();
-
-            };
-
-            list.appendChild(
-                element
+        const patientStudies =
+            getStudiesForDate().filter(
+                item =>
+                    item.patient === name
             );
 
-        }
-    );
+        const element =
+            document.createElement("div");
+
+        element.className = "patient";
+
+        if(currentPatient === name)
+            element.classList.add("active");
+
+        element.innerHTML = `
+
+            <div class="patient-name">
+                ${escapeHtml(name)}
+            </div>
+
+            <div class="patient-meta">
+
+                <span>
+                    ${patientStudies.length}
+                    estudio(s)
+                </span>
+
+                <span class="badge">
+                    ${patientStudies.length}
+                </span>
+
+            </div>
+
+        `;
+
+        element.onclick = () => {
+
+            currentPatient = name;
+            currentStudy = 0;
+            currentImage = 0;
+
+            resetView();
+
+            renderPatients(
+                document.getElementById("search").value
+            );
+
+            showFirstStudy();
+
+        };
+
+        list.appendChild(element);
+
+    });
 
 }
-
 
 /* =========================================================
    ESTUDIO ACTUAL
@@ -2469,29 +2223,28 @@ function renderPatients(filter=""){
 
 function showFirstStudy(){
 
-    const list =
-        getPatientStudies();
+    const list = getPatientStudies();
 
-    if(!list.length)
+    if(!list.length){
+
+        clearViewer();
         return;
+
+    }
 
     currentStudy = 0;
 
-    renderStudy(
-        list[0]
-    );
+    renderStudy(list[0]);
 
 }
 
 function getCurrentStudy(){
 
-    const list =
-        getPatientStudies();
+    const list = getPatientStudies();
 
     return list[currentStudy];
 
 }
-
 
 /* =========================================================
    SELECTOR DE ESTUDIOS
@@ -2500,14 +2253,11 @@ function getCurrentStudy(){
 function renderStudySelector(){
 
     const selector =
-        document.getElementById(
-            "studySelector"
-        );
+        document.getElementById("studySelector");
 
     selector.innerHTML = "";
 
-    const list =
-        getPatientStudies();
+    const list = getPatientStudies();
 
     if(!list.length){
 
@@ -2518,50 +2268,40 @@ function renderStudySelector(){
 
     }
 
-    list.forEach(
-        (study,index) => {
+    list.forEach((study,index) => {
 
-            const option =
-                document.createElement(
-                    "option"
-                );
+        const option =
+            document.createElement("option");
 
-            option.value =
-                index;
+        option.value = index;
 
-            let label =
-                study.structure ||
-                study.study ||
-                "Estudio";
+        let label =
+            study.structure ||
+            study.study ||
+            "Estudio sin descripción";
 
-            if(study.side)
-                label +=
-                    " · " +
-                    study.side;
+        if(study.side)
+            label += " · " + study.side;
 
-            if(study.study)
-                label +=
-                    " · " +
-                    study.study;
+        if(
+            study.study &&
+            study.structure
+        ){
 
-            option.textContent =
-                label;
-
-            if(
-                index === currentStudy
-            ){
-
-                option.selected =
-                    true;
-
-            }
-
-            selector.appendChild(
-                option
-            );
+            label +=
+                " · " +
+                study.study;
 
         }
-    );
+
+        option.textContent = label;
+
+        if(index === currentStudy)
+            option.selected = true;
+
+        selector.appendChild(option);
+
+    });
 
 }
 
@@ -2573,32 +2313,22 @@ function changeSelectedStudy(value){
     const index =
         parseInt(value,10);
 
-    if(
-        isNaN(index)
-    )
+    if(isNaN(index))
         return;
 
-    const list =
-        getPatientStudies();
+    const list = getPatientStudies();
 
-    if(
-        !list[index]
-    )
+    if(!list[index])
         return;
 
-    currentStudy =
-        index;
-
+    currentStudy = index;
     currentImage = 0;
 
     resetView();
 
-    renderStudy(
-        list[index]
-    );
+    renderStudy(list[index]);
 
 }
-
 
 /* =========================================================
    MOSTRAR ESTUDIO
@@ -2614,76 +2344,44 @@ function renderStudy(study){
     document.getElementById(
         "viewerTitle"
     ).textContent =
-        study.structure
-        ? study.structure +
-          (
-              study.side
-              ? " · " + study.side
-              : ""
-          )
-        : (
-            study.study ||
-            "Estudio"
-        );
+        study.structure ||
+        study.study ||
+        "Estudio sin descripción";
 
     document.getElementById(
         "viewerSubtitle"
     ).textContent =
         study.patient +
-        " · " +
-        formatDate(
+        (
             study.date
+            ? " · " + formatDate(study.date)
+            : ""
         );
 
     document.getElementById(
         "overlayRight"
     ).innerHTML =
-        escapeHtml(
-            study.patient
-        ) +
-        "<br>" +
-        escapeHtml(
-            study.structure || ""
+        escapeHtml(study.patient || "") +
+        (
+            study.structure
+            ? "<br>" + escapeHtml(study.structure)
+            : ""
         ) +
         (
             study.side
-            ? "<br>" +
-              escapeHtml(
-                  study.side
-              )
+            ? "<br>" + escapeHtml(study.side)
             : ""
         );
 
     document.getElementById(
         "infoPatientName"
     ).textContent =
-        study.patient;
-
-    let patientMeta = "";
-
-    if(study.sex)
-        patientMeta +=
-            "Sexo: " +
-            study.sex;
-
-    if(study.birth){
-
-        if(patientMeta)
-            patientMeta +=
-                " · ";
-
-        patientMeta +=
-            "Nacimiento: " +
-            formatDate(
-                study.birth
-            );
-
-    }
+        study.patient || "--";
 
     document.getElementById(
         "infoPatientMeta"
     ).textContent =
-        patientMeta || "";
+        "";
 
     document.getElementById(
         "infoStudy"
@@ -2703,32 +2401,29 @@ function renderStudy(study){
     document.getElementById(
         "infoDate"
     ).textContent =
-        formatDate(
-            study.date
-        );
+        formatDate(study.date);
 
     document.getElementById(
         "infoModality"
     ).textContent =
-        study.modality || "CR";
+        study.modality || "--";
 
     document.getElementById(
         "infoImages"
     ).textContent =
         study.images.length;
 
-    currentImage = 0;
-
-    renderThumbnails(
-        study
+    currentImage = Math.min(
+        currentImage,
+        Math.max(study.images.length - 1,0)
     );
 
-    if(
-        study.images.length > 0
-    ){
+    renderThumbnails(study);
+
+    if(study.images.length){
 
         showImage(
-            study.images[0]
+            study.images[currentImage]
         );
 
     }
@@ -2736,8 +2431,7 @@ function renderStudy(study){
 
         document.getElementById(
             "imageWrapper"
-        ).style.display =
-            "none";
+        ).style.display = "none";
 
         document.getElementById(
             "emptyMessage"
@@ -2746,37 +2440,30 @@ function renderStudy(study){
 
         document.getElementById(
             "emptyMessage"
-        ).style.display =
-            "block";
+        ).style.display = "block";
 
     }
 
-    updateImageInformation(
-        study
-    );
+    updateImageInformation(study);
 
     updateViewerAdminButtons();
 
 }
 
-
 /* =========================================================
-   MOSTRAR / OCULTAR BOTONES ADMIN
+   BOTONES ADMIN
 ========================================================= */
 
 async function isAdminLogged(){
 
-    const {
-        data
-    } =
+    const {data} =
         await supabaseClient.auth.getSession();
 
     return !!(
         data &&
         data.session &&
         data.session.user &&
-        data.session.user.id ===
-        ADMIN_UID
+        data.session.user.id === ADMIN_UID
     );
 
 }
@@ -2784,20 +2471,14 @@ async function isAdminLogged(){
 async function updateViewerAdminButtons(){
 
     const buttons =
-        document.getElementById(
-            "viewerAdminActions"
-        );
+        document.getElementById("viewerAdminActions");
 
     const study =
         getCurrentStudy();
 
-    if(
-        !study
-    ){
+    if(!study){
 
-        buttons.style.display =
-            "none";
-
+        buttons.style.display = "none";
         return;
 
     }
@@ -2806,12 +2487,9 @@ async function updateViewerAdminButtons(){
         await isAdminLogged();
 
     buttons.style.display =
-        admin
-        ? "flex"
-        : "none";
+        admin ? "flex" : "none";
 
 }
-
 
 /* =========================================================
    IMAGEN
@@ -2824,18 +2502,14 @@ function showImage(src){
 
     document.getElementById(
         "emptyMessage"
-    ).style.display =
-        "none";
+    ).style.display = "none";
 
     document.getElementById(
         "imageWrapper"
-    ).style.display =
-        "flex";
+    ).style.display = "flex";
 
     const image =
-        document.getElementById(
-            "mainImage"
-        );
+        document.getElementById("mainImage");
 
     image.onerror = () => {
 
@@ -2846,8 +2520,7 @@ function showImage(src){
 
         document.getElementById(
             "emptyMessage"
-        ).style.display =
-            "block";
+        ).style.display = "block";
 
     };
 
@@ -2857,77 +2530,291 @@ function showImage(src){
 
 }
 
-
 /* =========================================================
-   MINIATURAS
+   MINIATURAS + ELIMINAR IMAGEN
 ========================================================= */
 
 function renderThumbnails(study){
 
     const container =
-        document.getElementById(
-            "thumbnailList"
-        );
+        document.getElementById("thumbnailList");
 
     container.innerHTML = "";
 
-    study.images.forEach(
-        (src,index) => {
+    study.images.forEach((src,index) => {
 
-            const img =
-                document.createElement(
-                    "img"
+        const item =
+            document.createElement("div");
+
+        item.className =
+            "thumbnail-item";
+
+        const img =
+            document.createElement("img");
+
+        img.src = src;
+        img.className = "thumbnail";
+
+        if(index === currentImage)
+            img.classList.add("active");
+
+        img.onclick = () => {
+
+            currentImage = index;
+
+            showImage(src);
+            renderThumbnails(study);
+            updateImageInformation(study);
+
+        };
+
+        const deleteButton =
+            document.createElement("button");
+
+        deleteButton.className =
+            "thumbnail-delete";
+
+        deleteButton.type = "button";
+        deleteButton.title =
+            "Eliminar imagen";
+
+        deleteButton.textContent = "×";
+
+        deleteButton.onclick = event => {
+
+            event.stopPropagation();
+
+            deleteImageFromStudy(
+                study,
+                index
+            );
+
+        };
+
+        item.appendChild(img);
+        item.appendChild(deleteButton);
+
+        container.appendChild(item);
+
+    });
+
+}
+
+/* =========================================================
+   ELIMINAR IMAGEN INDIVIDUAL
+========================================================= */
+
+async function deleteImageFromStudy(
+    study,
+    imageIndex
+){
+
+    if(!study)
+        return;
+
+    if(
+        imageIndex < 0 ||
+        imageIndex >= study.images.length
+    )
+        return;
+
+    const confirmed =
+        confirm(
+            "¿Deseas eliminar esta imagen?\n\n" +
+            "Esta acción no se puede deshacer."
+        );
+
+    if(!confirmed)
+        return;
+
+    const admin =
+        await isAdminLogged();
+
+    if(!admin){
+
+        alert(
+            "La sesión de administrador no es válida."
+        );
+
+        return;
+
+    }
+
+    try{
+
+        document.getElementById(
+            "viewerSubtitle"
+        ).textContent =
+            "Eliminando imagen...";
+
+        const imageUrl =
+            study.images[imageIndex];
+
+        const storagePath =
+            getStoragePath(imageUrl);
+
+        /*
+         * Creamos una nueva lista SIN la imagen eliminada.
+         */
+        const remainingImages =
+            study.images
+                .filter(
+                    (_,index) =>
+                        index !== imageIndex
+                )
+                .map(
+                    image =>
+                        getStoragePath(image)
+                )
+                .filter(
+                    path =>
+                        path
                 );
 
-            img.src = src;
+        /*
+         * ACTUALIZAMOS PRIMERO LA BASE DE DATOS.
+         *
+         * Esto evita que la imagen vuelva a aparecer
+         * después de actualizar la página.
+         */
+        const {
+            error: updateError
+        } =
+            await supabaseClient
+                .from("studies")
+                .update({
+                    images:remainingImages
+                })
+                .eq(
+                    "id",
+                    study.id
+                );
 
-            img.className =
-                "thumbnail";
+        if(updateError)
+            throw updateError;
 
-            if(
-                index === currentImage
-            ){
+        /*
+         * Eliminamos el archivo físico de Storage.
+         */
+        if(storagePath){
 
-                img.classList.add(
-                    "active"
+            const {
+                error: storageError
+            } =
+                await supabaseClient
+                    .storage
+                    .from(STORAGE_BUCKET)
+                    .remove([
+                        storagePath
+                    ]);
+
+            if(storageError){
+
+                console.error(
+                    "Advertencia Storage:",
+                    storageError
                 );
 
             }
 
-            img.onclick = () => {
+        }
 
-                currentImage =
-                    index;
+        /*
+         * Recargamos todo desde Supabase.
+         */
+        await loadStudies();
 
-                showImage(src);
+        /*
+         * Volvemos a seleccionar el mismo paciente.
+         */
+        currentPatient =
+            study.patient;
 
-                renderThumbnails(
-                    study
-                );
+        const patientStudies =
+            getPatientStudies();
 
-                updateImageInformation(
-                    study
-                );
-
-            };
-
-            container.appendChild(
-                img
+        currentStudy =
+            patientStudies.findIndex(
+                item =>
+                    String(item.id) ===
+                    String(study.id)
             );
 
+        if(currentStudy < 0){
+
+            currentStudy = 0;
+
+            if(patientStudies.length){
+
+                renderPatients();
+
+                renderStudy(
+                    patientStudies[0]
+                );
+
+            }
+            else{
+
+                currentPatient = null;
+                clearViewer();
+
+            }
+
         }
-    );
+        else{
+
+            const updatedStudy =
+                patientStudies[currentStudy];
+
+            if(
+                updatedStudy.images.length === 0
+            ){
+
+                currentImage = 0;
+
+            }
+            else{
+
+                currentImage =
+                    Math.min(
+                        imageIndex,
+                        updatedStudy.images.length - 1
+                    );
+
+            }
+
+            renderPatients();
+            renderStudy(updatedStudy);
+
+        }
+
+    }
+    catch(error){
+
+        console.error(
+            "ERROR AL ELIMINAR IMAGEN:",
+            error
+        );
+
+        alert(
+            "No se pudo eliminar la imagen:\n\n" +
+            (
+                error.message ||
+                "Error desconocido"
+            )
+        );
+
+        updateViewerAdminButtons();
+
+    }
 
 }
 
-
 /* =========================================================
-   INFORMACIÓN
+   INFORMACIÓN IMAGEN
 ========================================================= */
 
-function updateImageInformation(
-    study
-){
+function updateImageInformation(study){
 
     document.getElementById(
         "imageCounter"
@@ -2950,9 +2837,8 @@ function updateImageInformation(
 
 }
 
-
 /* =========================================================
-   NAVEGACIÓN DE IMÁGENES
+   NAVEGACIÓN
 ========================================================= */
 
 function nextImage(){
@@ -2981,13 +2867,8 @@ function nextImage(){
         study.images[currentImage]
     );
 
-    renderThumbnails(
-        study
-    );
-
-    updateImageInformation(
-        study
-    );
+    renderThumbnails(study);
+    updateImageInformation(study);
 
 }
 
@@ -3004,12 +2885,10 @@ function previousImage(){
 
     currentImage--;
 
-    if(
-        currentImage < 0
-    ){
+    if(currentImage < 0){
 
         currentImage =
-            study.images.length-1;
+            study.images.length - 1;
 
     }
 
@@ -3017,16 +2896,10 @@ function previousImage(){
         study.images[currentImage]
     );
 
-    renderThumbnails(
-        study
-    );
-
-    updateImageInformation(
-        study
-    );
+    renderThumbnails(study);
+    updateImageInformation(study);
 
 }
-
 
 /* =========================================================
    ZOOM
@@ -3054,7 +2927,6 @@ function zoomOut(){
 
 }
 
-
 /* =========================================================
    ROTACIÓN
 ========================================================= */
@@ -3080,7 +2952,6 @@ function rotateLeft(){
     applyTransform();
 
 }
-
 
 /* =========================================================
    INVERSIÓN / CONTRASTE
@@ -3116,7 +2987,6 @@ function contrastDown(){
 
 }
 
-
 /* =========================================================
    TRANSFORMACIONES
 ========================================================= */
@@ -3124,14 +2994,10 @@ function contrastDown(){
 function applyTransform(){
 
     const wrapper =
-        document.getElementById(
-            "imageWrapper"
-        );
+        document.getElementById("imageWrapper");
 
     const image =
-        document.getElementById(
-            "mainImage"
-        );
+        document.getElementById("mainImage");
 
     wrapper.style.transform =
         "scale(" +
@@ -3153,9 +3019,7 @@ function applyTransform(){
     document.getElementById(
         "infoZoom"
     ).textContent =
-        Math.round(
-            zoom * 100
-        ) + "%";
+        Math.round(zoom * 100) + "%";
 
     document.getElementById(
         "infoRotation"
@@ -3175,7 +3039,6 @@ function resetView(){
 
 }
 
-
 /* =========================================================
    LIMPIAR VISOR
 ========================================================= */
@@ -3191,24 +3054,19 @@ function clearViewer(){
         "viewerSubtitle"
     ).textContent =
         "Fecha: " +
-        formatDate(
-            selectedDate
-        );
+        formatDate(selectedDate);
 
     document.getElementById(
         "imageCounter"
-    ).textContent =
-        "--";
+    ).textContent = "--";
 
     document.getElementById(
         "overlayRight"
-    ).innerHTML =
-        "--";
+    ).innerHTML = "--";
 
     document.getElementById(
         "imageWrapper"
-    ).style.display =
-        "none";
+    ).style.display = "none";
 
     document.getElementById(
         "emptyMessage"
@@ -3217,60 +3075,48 @@ function clearViewer(){
 
     document.getElementById(
         "emptyMessage"
-    ).style.display =
-        "block";
+    ).style.display = "block";
 
     document.getElementById(
         "thumbnailList"
-    ).innerHTML =
-        "";
+    ).innerHTML = "";
 
     document.getElementById(
         "infoPatientName"
-    ).textContent =
-        "--";
+    ).textContent = "--";
 
     document.getElementById(
         "infoPatientMeta"
-    ).textContent =
-        "--";
+    ).textContent = "--";
 
     document.getElementById(
         "infoStudy"
-    ).textContent =
-        "--";
+    ).textContent = "--";
 
     document.getElementById(
         "infoStructure"
-    ).textContent =
-        "--";
+    ).textContent = "--";
 
     document.getElementById(
         "infoSide"
-    ).textContent =
-        "--";
+    ).textContent = "--";
 
     document.getElementById(
         "infoDate"
     ).textContent =
-        formatDate(
-            selectedDate
-        );
+        formatDate(selectedDate);
 
     document.getElementById(
         "infoModality"
-    ).textContent =
-        "--";
+    ).textContent = "--";
 
     document.getElementById(
         "infoImages"
-    ).textContent =
-        "--";
+    ).textContent = "--";
 
     document.getElementById(
         "infoCurrentImage"
-    ).textContent =
-        "--";
+    ).textContent = "--";
 
     document.getElementById(
         "studySelector"
@@ -3279,27 +3125,22 @@ function clearViewer(){
 
     document.getElementById(
         "viewerAdminActions"
-    ).style.display =
-        "none";
+    ).style.display = "none";
 
 }
 
-
 /* =========================================================
-   BUSCAR
+   BÚSQUEDA
 ========================================================= */
 
 function searchPatients(){
 
     const value =
-        document.getElementById(
-            "search"
-        ).value;
+        document.getElementById("search").value;
 
     renderPatients(value);
 
 }
-
 
 /* =========================================================
    PANTALLA COMPLETA
@@ -3323,8 +3164,7 @@ function openFullscreen(){
 
     document.getElementById(
         "fullscreenViewer"
-    ).style.display =
-        "flex";
+    ).style.display = "flex";
 
 }
 
@@ -3332,11 +3172,9 @@ function closeFullscreen(){
 
     document.getElementById(
         "fullscreenViewer"
-    ).style.display =
-        "none";
+    ).style.display = "none";
 
 }
-
 
 /* =========================================================
    ESCAPE HTML
@@ -3359,7 +3197,6 @@ function escapeHtml(value){
 
 }
 
-
 /* =========================================================
    LOGIN
 ========================================================= */
@@ -3368,13 +3205,11 @@ function openLogin(){
 
     document.getElementById(
         "loginStatus"
-    ).textContent =
-        "";
+    ).textContent = "";
 
     document.getElementById(
         "loginOverlay"
-    ).style.display =
-        "flex";
+    ).style.display = "flex";
 
     setTimeout(
         () => {
@@ -3393,11 +3228,9 @@ function closeLogin(){
 
     document.getElementById(
         "loginOverlay"
-    ).style.display =
-        "none";
+    ).style.display = "none";
 
 }
-
 
 /* =========================================================
    LOGIN ADMIN
@@ -3467,9 +3300,7 @@ async function loginAdmin(){
 
         closeLogin();
 
-        updateAuthInterface(
-            data.user
-        );
+        updateAuthInterface(data.user);
 
     }
     catch(error){
@@ -3485,9 +3316,8 @@ async function loginAdmin(){
 
 }
 
-
 /* =========================================================
-   ESTADO DE SESIÓN
+   SESIÓN
 ========================================================= */
 
 async function checkAuth(){
@@ -3504,8 +3334,7 @@ async function checkAuth(){
     ){
 
         if(
-            data.session.user.id ===
-            ADMIN_UID
+            data.session.user.id === ADMIN_UID
         ){
 
             updateAuthInterface(
@@ -3527,8 +3356,7 @@ async function checkAuth(){
             if(
                 session &&
                 session.user &&
-                session.user.id ===
-                ADMIN_UID
+                session.user.id === ADMIN_UID
             ){
 
                 updateAuthInterface(
@@ -3538,9 +3366,7 @@ async function checkAuth(){
             }
             else{
 
-                updateAuthInterface(
-                    null
-                );
+                updateAuthInterface(null);
 
             }
 
@@ -3549,7 +3375,6 @@ async function checkAuth(){
 
 }
 
-
 /* =========================================================
    INTERFAZ ADMIN
 ========================================================= */
@@ -3557,73 +3382,50 @@ async function checkAuth(){
 function updateAuthInterface(user){
 
     const loginButton =
-        document.getElementById(
-            "loginButton"
-        );
+        document.getElementById("loginButton");
 
     const logoutButton =
-        document.getElementById(
-            "logoutButton"
-        );
+        document.getElementById("logoutButton");
 
     const authUser =
-        document.getElementById(
-            "authUser"
-        );
+        document.getElementById("authUser");
 
     const newStudyButton =
-        document.getElementById(
-            "newStudyButton"
-        );
+        document.getElementById("newStudyButton");
 
     if(user){
 
-        loginButton.style.display =
-            "none";
-
-        logoutButton.style.display =
-            "inline-block";
-
-        newStudyButton.style.display =
-            "inline-block";
+        loginButton.style.display = "none";
+        logoutButton.style.display = "inline-block";
+        newStudyButton.style.display = "inline-block";
 
         authUser.textContent =
-            user.email ||
-            "Administrador";
+            user.email || "Administrador";
 
         updateViewerAdminButtons();
 
     }
     else{
 
-        loginButton.style.display =
-            "inline-block";
+        loginButton.style.display = "inline-block";
+        logoutButton.style.display = "none";
+        newStudyButton.style.display = "none";
 
-        logoutButton.style.display =
-            "none";
-
-        newStudyButton.style.display =
-            "none";
-
-        authUser.textContent =
-            "";
+        authUser.textContent = "";
 
         closeAdmin();
-
         closeAddImages();
 
         document.getElementById(
             "viewerAdminActions"
-        ).style.display =
-            "none";
+        ).style.display = "none";
 
     }
 
 }
 
-
 /* =========================================================
-   ABRIR ADMIN
+   NUEVO ESTUDIO
 ========================================================= */
 
 function openAdmin(){
@@ -3633,8 +3435,7 @@ function openAdmin(){
     ).value =
         currentPatient || "";
 
-    const today =
-        new Date();
+    const today = new Date();
 
     document.getElementById(
         "adminDate"
@@ -3643,34 +3444,30 @@ function openAdmin(){
         (
             today.getFullYear() +
             "-" +
-            String(
-                today.getMonth()+1
-            ).padStart(2,"0") +
+            String(today.getMonth()+1).padStart(2,"0") +
             "-" +
-            String(
-                today.getDate()
-            ).padStart(2,"0")
+            String(today.getDate()).padStart(2,"0")
         );
 
     document.getElementById(
         "adminStructure"
-    ).value =
-        "";
+    ).value = "";
 
     document.getElementById(
         "adminSide"
-    ).value =
-        "";
+    ).value = "";
 
     document.getElementById(
         "adminStudy"
-    ).value =
-        "";
+    ).value = "";
+
+    document.getElementById(
+        "adminModality"
+    ).value = "";
 
     document.getElementById(
         "adminFiles"
-    ).value =
-        "";
+    ).value = "";
 
     document.getElementById(
         "fileList"
@@ -3679,36 +3476,25 @@ function openAdmin(){
 
     document.getElementById(
         "adminStatus"
-    ).textContent =
-        "";
+    ).textContent = "";
 
     document.getElementById(
         "sideGroup"
-    ).classList.remove(
-        "visible"
-    );
+    ).classList.remove("visible");
 
     document.getElementById(
         "adminOverlay"
-    ).style.display =
-        "flex";
+    ).style.display = "flex";
 
 }
-
-
-/* =========================================================
-   CERRAR ADMIN
-========================================================= */
 
 function closeAdmin(){
 
     document.getElementById(
         "adminOverlay"
-    ).style.display =
-        "none";
+    ).style.display = "none";
 
 }
-
 
 /* =========================================================
    LADO
@@ -3722,9 +3508,7 @@ function updateSideOptions(){
         ).value;
 
     const sideGroup =
-        document.getElementById(
-            "sideGroup"
-        );
+        document.getElementById("sideGroup");
 
     const unilateralStructures = [
 
@@ -3745,31 +3529,23 @@ function updateSideOptions(){
     ];
 
     if(
-        unilateralStructures.includes(
-            structure
-        )
+        unilateralStructures.includes(structure)
     ){
 
-        sideGroup.classList.add(
-            "visible"
-        );
+        sideGroup.classList.add("visible");
 
     }
     else{
 
-        sideGroup.classList.remove(
-            "visible"
-        );
+        sideGroup.classList.remove("visible");
 
         document.getElementById(
             "adminSide"
-        ).value =
-            "";
+        ).value = "";
 
     }
 
 }
-
 
 /* =========================================================
    CERRAR SESIÓN
@@ -3779,28 +3555,21 @@ async function logoutAdmin(){
 
     await supabaseClient.auth.signOut();
 
-    updateAuthInterface(
-        null
-    );
+    updateAuthInterface(null);
 
 }
 
-
 /* =========================================================
-   ARCHIVOS SELECCIONADOS
+   ARCHIVOS
 ========================================================= */
 
 function showSelectedFiles(){
 
     const input =
-        document.getElementById(
-            "adminFiles"
-        );
+        document.getElementById("adminFiles");
 
     const list =
-        document.getElementById(
-            "fileList"
-        );
+        document.getElementById("fileList");
 
     if(
         !input.files ||
@@ -3815,16 +3584,12 @@ function showSelectedFiles(){
     }
 
     const files =
-        Array.from(
-            input.files
-        );
+        Array.from(input.files);
 
     const invalid =
         files.filter(
             file =>
-                !file.type.includes(
-                    "jpeg"
-                )
+                !file.type.includes("jpeg")
         );
 
     if(invalid.length){
@@ -3840,21 +3605,18 @@ function showSelectedFiles(){
 
     list.innerHTML =
         files
-        .map(
-            (file,index) =>
-                (index+1) +
-                ". " +
-                escapeHtml(
-                    file.name
-                )
-        )
-        .join("<br>");
+            .map(
+                (file,index) =>
+                    (index+1) +
+                    ". " +
+                    escapeHtml(file.name)
+            )
+            .join("<br>");
 
 }
 
-
 /* =========================================================
-   CREAR ESTUDIO + SUBIR IMÁGENES
+   CREAR ESTUDIO
 ========================================================= */
 
 async function createStudyAndUpload(){
@@ -3899,17 +3661,17 @@ async function createStudyAndUpload(){
             "adminStatus"
         );
 
-    if(
-        !patient ||
-        !date ||
-        !structure
-    ){
+    /*
+     * SOLO PACIENTE E IMÁGENES SON OBLIGATORIOS.
+     */
+
+    if(!patient){
 
         status.className =
             "status-message status-error";
 
         status.textContent =
-            "Completa paciente, fecha y estructura.";
+            "Ingresa el nombre del paciente.";
 
         return;
 
@@ -3939,8 +3701,7 @@ async function createStudyAndUpload(){
         !sessionData ||
         !sessionData.session ||
         !sessionData.session.user ||
-        sessionData.session.user.id !==
-        ADMIN_UID
+        sessionData.session.user.id !== ADMIN_UID
     ){
 
         status.className =
@@ -3954,9 +3715,7 @@ async function createStudyAndUpload(){
     }
 
     const files =
-        Array.from(
-            fileInput.files
-        );
+        Array.from(fileInput.files);
 
     const uploadedPaths = [];
 
@@ -3968,8 +3727,16 @@ async function createStudyAndUpload(){
         status.textContent =
             "Subiendo imágenes...";
 
+        /*
+         * Si el usuario deja la fecha vacía,
+         * utilizamos la fecha actual.
+         */
+        const finalDate =
+            date ||
+            new Date().toISOString().slice(0,10);
+
         const folder =
-            date +
+            finalDate +
             "/" +
             crypto.randomUUID();
 
@@ -3979,13 +3746,10 @@ async function createStudyAndUpload(){
             i++
         ){
 
-            const file =
-                files[i];
+            const file = files[i];
 
             if(
-                !file.type.includes(
-                    "jpeg"
-                )
+                !file.type.includes("jpeg")
             ){
 
                 throw new Error(
@@ -3997,17 +3761,15 @@ async function createStudyAndUpload(){
             }
 
             const safeName =
-                file.name
-                    .replace(
-                        /[^a-zA-Z0-9._-]/g,
-                        "_"
-                    );
+                file.name.replace(
+                    /[^a-zA-Z0-9._-]/g,
+                    "_"
+                );
 
             const path =
                 folder +
                 "/" +
-                String(i+1)
-                    .padStart(3,"0") +
+                String(i+1).padStart(3,"0") +
                 "_" +
                 safeName;
 
@@ -4021,20 +3783,16 @@ async function createStudyAndUpload(){
                         path,
                         file,
                         {
-                            cacheControl:
-                                "3600",
+                            cacheControl:"3600",
                             upsert:false,
-                            contentType:
-                                "image/jpeg"
+                            contentType:"image/jpeg"
                         }
                     );
 
             if(error)
                 throw error;
 
-            uploadedPaths.push(
-                path
-            );
+            uploadedPaths.push(path);
 
             status.textContent =
                 "Subiendo imagen " +
@@ -4055,40 +3813,36 @@ async function createStudyAndUpload(){
                 .from("studies")
                 .insert({
 
-                    date:date,
+                    date:finalDate,
 
                     patient:patient,
 
                     study:
                         study ||
-                        structure,
+                        null,
 
                     structure:
-                        structure,
+                        structure ||
+                        null,
 
                     side:
-                        side || null,
+                        side ||
+                        null,
 
                     modality:
-                        modality,
+                        modality ||
+                        null,
 
-                    images:
-                        uploadedPaths
+                    images:uploadedPaths
 
                 });
 
         if(error){
 
-            for(
-                const path of uploadedPaths
-            ){
-
-                await supabaseClient
-                    .storage
-                    .from(STORAGE_BUCKET)
-                    .remove([path]);
-
-            }
+            await supabaseClient
+                .storage
+                .from(STORAGE_BUCKET)
+                .remove(uploadedPaths);
 
             throw error;
 
@@ -4103,23 +3857,23 @@ async function createStudyAndUpload(){
         await loadStudies();
 
         selectedDate =
-            date;
+            finalDate;
 
         calendarDate =
-            new Date(
-                date + "T00:00:00"
-            );
+            new Date(finalDate + "T00:00:00");
 
         currentPatient =
             patient;
 
+        const patientStudies =
+            getPatientStudies();
+
         currentStudy =
-            getPatientStudies().length - 1;
+            patientStudies.length - 1;
 
         currentImage = 0;
 
         renderCalendar();
-
         renderPatients();
 
         renderStudy(
@@ -4127,11 +3881,7 @@ async function createStudyAndUpload(){
         );
 
         setTimeout(
-            () => {
-
-                closeAdmin();
-
-            },
+            () => closeAdmin(),
             1000
         );
 
@@ -4153,7 +3903,6 @@ async function createStudyAndUpload(){
     }
 
 }
-
 
 /* =========================================================
    AÑADIR IMÁGENES
@@ -4199,8 +3948,7 @@ function addImagesToCurrentStudy(){
 
     document.getElementById(
         "additionalFiles"
-    ).value =
-        "";
+    ).value = "";
 
     document.getElementById(
         "additionalFileList"
@@ -4209,13 +3957,11 @@ function addImagesToCurrentStudy(){
 
     document.getElementById(
         "addImagesStatus"
-    ).textContent =
-        "";
+    ).textContent = "";
 
     document.getElementById(
         "addImagesOverlay"
-    ).style.display =
-        "flex";
+    ).style.display = "flex";
 
 }
 
@@ -4223,8 +3969,7 @@ function closeAddImages(){
 
     document.getElementById(
         "addImagesOverlay"
-    ).style.display =
-        "none";
+    ).style.display = "none";
 
 }
 
@@ -4253,16 +3998,12 @@ function showAdditionalFiles(){
     }
 
     const files =
-        Array.from(
-            input.files
-        );
+        Array.from(input.files);
 
     const invalid =
         files.filter(
             file =>
-                !file.type.includes(
-                    "jpeg"
-                )
+                !file.type.includes("jpeg")
         );
 
     if(invalid.length){
@@ -4278,18 +4019,15 @@ function showAdditionalFiles(){
 
     list.innerHTML =
         files
-        .map(
-            (file,index) =>
-                (index+1) +
-                ". " +
-                escapeHtml(
-                    file.name
-                )
-        )
-        .join("<br>");
+            .map(
+                (file,index) =>
+                    (index+1) +
+                    ". " +
+                    escapeHtml(file.name)
+            )
+            .join("<br>");
 
 }
-
 
 /* =========================================================
    SUBIR IMÁGENES ADICIONALES
@@ -4337,18 +4075,10 @@ async function uploadAdditionalImages(){
 
     }
 
-    const {
-        data:sessionData
-    } =
-        await supabaseClient.auth.getSession();
+    const admin =
+        await isAdminLogged();
 
-    if(
-        !sessionData ||
-        !sessionData.session ||
-        !sessionData.session.user ||
-        sessionData.session.user.id !==
-        ADMIN_UID
-    ){
+    if(!admin){
 
         status.className =
             "status-message status-error";
@@ -4361,9 +4091,7 @@ async function uploadAdditionalImages(){
     }
 
     const files =
-        Array.from(
-            input.files
-        );
+        Array.from(input.files);
 
     const newPaths = [];
 
@@ -4376,7 +4104,7 @@ async function uploadAdditionalImages(){
             "Preparando subida...";
 
         const folder =
-            study.date +
+            (study.date || new Date().toISOString().slice(0,10)) +
             "/" +
             crypto.randomUUID();
 
@@ -4386,13 +4114,10 @@ async function uploadAdditionalImages(){
             i++
         ){
 
-            const file =
-                files[i];
+            const file = files[i];
 
             if(
-                !file.type.includes(
-                    "jpeg"
-                )
+                !file.type.includes("jpeg")
             ){
 
                 throw new Error(
@@ -4404,17 +4129,15 @@ async function uploadAdditionalImages(){
             }
 
             const safeName =
-                file.name
-                    .replace(
-                        /[^a-zA-Z0-9._-]/g,
-                        "_"
-                    );
+                file.name.replace(
+                    /[^a-zA-Z0-9._-]/g,
+                    "_"
+                );
 
             const path =
                 folder +
                 "/" +
-                String(i+1)
-                    .padStart(3,"0") +
+                String(i+1).padStart(3,"0") +
                 "_" +
                 safeName;
 
@@ -4428,27 +4151,16 @@ async function uploadAdditionalImages(){
                         path,
                         file,
                         {
-                            cacheControl:
-                                "3600",
+                            cacheControl:"3600",
                             upsert:false,
-                            contentType:
-                                "image/jpeg"
+                            contentType:"image/jpeg"
                         }
                     );
 
             if(error)
                 throw error;
 
-            newPaths.push(
-                path
-            );
-
-            status.textContent =
-                "Subiendo imagen " +
-                (i+1) +
-                " de " +
-                files.length +
-                "...";
+            newPaths.push(path);
 
         }
 
@@ -4456,16 +4168,14 @@ async function uploadAdditionalImages(){
             study.images.map(
                 image =>
                     getStoragePath(image)
+            ).filter(
+                path => path
             );
 
-        const combinedPaths =
-            [
-                ...existingPaths,
-                ...newPaths
-            ];
-
-        status.textContent =
-            "Actualizando estudio...";
+        const combinedPaths = [
+            ...existingPaths,
+            ...newPaths
+        ];
 
         const {
             error:updateError
@@ -4473,8 +4183,7 @@ async function uploadAdditionalImages(){
             await supabaseClient
                 .from("studies")
                 .update({
-                    images:
-                        combinedPaths
+                    images:combinedPaths
                 })
                 .eq(
                     "id",
@@ -4486,9 +4195,7 @@ async function uploadAdditionalImages(){
             await supabaseClient
                 .storage
                 .from(STORAGE_BUCKET)
-                .remove(
-                    newPaths
-                );
+                .remove(newPaths);
 
             throw updateError;
 
@@ -4502,50 +4209,33 @@ async function uploadAdditionalImages(){
 
         await loadStudies();
 
-        const newIndex =
-            studies.findIndex(
+        currentPatient =
+            study.patient;
+
+        const patientList =
+            getPatientStudies();
+
+        currentStudy =
+            patientList.findIndex(
                 item =>
                     String(item.id) ===
                     String(study.id)
             );
 
-        if(newIndex !== -1){
+        if(currentStudy < 0)
+            currentStudy = 0;
 
-            currentPatient =
-                studies[newIndex].patient;
+        currentImage =
+            study.images.length;
 
-            const patientList =
-                getPatientStudies();
+        renderPatients();
 
-            currentStudy =
-                patientList.findIndex(
-                    item =>
-                        String(item.id) ===
-                        String(study.id)
-                );
-
-            if(
-                currentStudy < 0
-            )
-                currentStudy = 0;
-
-            currentImage =
-                study.images.length;
-
-            renderPatients();
-
-            renderStudy(
-                getCurrentStudy()
-            );
-
-        }
+        renderStudy(
+            getCurrentStudy()
+        );
 
         setTimeout(
-            () => {
-
-                closeAddImages();
-
-            },
+            () => closeAddImages(),
             1000
         );
 
@@ -4568,9 +4258,8 @@ async function uploadAdditionalImages(){
 
 }
 
-
 /* =========================================================
-   ELIMINAR ESTUDIO
+   ELIMINAR ESTUDIO COMPLETO
 ========================================================= */
 
 async function deleteCurrentStudy(){
@@ -4651,23 +4340,10 @@ async function deleteCurrentStudy(){
                         path
                 );
 
-        if(paths.length){
-
-            const {
-                error:storageError
-            } =
-                await supabaseClient
-                    .storage
-                    .from(STORAGE_BUCKET)
-                    .remove(
-                        paths
-                    );
-
-            if(storageError)
-                throw storageError;
-
-        }
-
+        /*
+         * ELIMINAMOS PRIMERO EL REGISTRO
+         * DE LA BASE DE DATOS.
+         */
         const {
             error:deleteError
         } =
@@ -4682,9 +4358,29 @@ async function deleteCurrentStudy(){
         if(deleteError)
             throw deleteError;
 
-        alert(
-            "Estudio eliminado correctamente."
-        );
+        /*
+         * DESPUÉS ELIMINAMOS LOS ARCHIVOS.
+         */
+        if(paths.length){
+
+            const {
+                error:storageError
+            } =
+                await supabaseClient
+                    .storage
+                    .from(STORAGE_BUCKET)
+                    .remove(paths);
+
+            if(storageError){
+
+                console.error(
+                    "Advertencia al eliminar Storage:",
+                    storageError
+                );
+
+            }
+
+        }
 
         currentPatient = null;
         currentStudy = 0;
@@ -4693,6 +4389,10 @@ async function deleteCurrentStudy(){
         await loadStudies();
 
         clearViewer();
+
+        alert(
+            "Estudio eliminado correctamente."
+        );
 
     }
     catch(error){
@@ -4716,7 +4416,6 @@ async function deleteCurrentStudy(){
 
 }
 
-
 /* =========================================================
    TECLADO
 ========================================================= */
@@ -4725,39 +4424,23 @@ document.addEventListener(
     "keydown",
     event => {
 
-        if(
-            event.key === "Escape"
-        ){
+        if(event.key === "Escape"){
 
             closeFullscreen();
-
             closeLogin();
-
             closeAdmin();
-
             closeAddImages();
 
         }
 
-        if(
-            event.key === "ArrowRight"
-        ){
-
+        if(event.key === "ArrowRight")
             nextImage();
 
-        }
-
-        if(
-            event.key === "ArrowLeft"
-        ){
-
+        if(event.key === "ArrowLeft")
             previousImage();
-
-        }
 
     }
 );
-
 
 /* =========================================================
    INICIO
@@ -4770,9 +4453,7 @@ clearViewer();
 document.getElementById(
     "currentDateLabel"
 ).textContent =
-    formatDate(
-        selectedDate
-    );
+    formatDate(selectedDate);
 
 checkAuth();
 
