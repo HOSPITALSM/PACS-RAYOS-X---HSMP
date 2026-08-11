@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -841,11 +842,6 @@ body{overflow:hidden}
 const SUPABASE_URL =
     "https://tapjgdzwmsfgthxncero.supabase.co";
 
-/*
-   PEGA AQUÍ TU MISMA PUBLISHABLE KEY.
-   NO CAMBIES EL NOMBRE.
-*/
-
 const SUPABASE_KEY =
     "sb_publishable_5L4-txz5pZzI6dU6UAw86w_5gXbHZr0";
 
@@ -909,11 +905,6 @@ function getImageUrl(file){
     ){
         return file;
     }
-
-    /*
-       IMPORTANTE:
-       El bucket se llama IMAGENES.
-    */
 
     return (
         SUPABASE_URL +
@@ -983,11 +974,6 @@ async function loadStudies(){
 
                 let imageList = [];
 
-
-                /*
-                   Tu columna se llama IMAGE
-                   y contiene corchetes/lista.
-                */
 
                 if(
                     Array.isArray(item.image)
@@ -1582,33 +1568,36 @@ function renderPatients(filter=""){
 
 
 /* =========================================================
-   ESTUDIO
+   MOSTRAR PRIMER ESTUDIO
 ========================================================= */
 
 function showFirstStudy(){
 
     const list =
-        getStudiesForDate().filter(
+        getStudiesForDate()
+        .filter(
             item =>
-                item.patient === currentPatient
+                item.patient ===
+                currentPatient
         );
 
-    console.log("Paciente seleccionado:", currentPatient);
-    console.log("Estudios encontrados:", list);
-
-    if(!list.length){
-
-        console.log(
-            "No se encontró ningún estudio para este paciente."
-        );
-
+    if(!list.length)
         return;
-    }
 
     currentStudy = 0;
 
-    renderStudy(list[0]);
+    renderStudy(
+        list[0]
+    );
+
 }
+
+
+/* =========================================================
+   OBTENER ESTUDIO ACTUAL
+========================================================= */
+
+function getCurrentStudy(){
 
     const list =
         getStudiesForDate()
@@ -1846,7 +1835,9 @@ function renderThumbnails(study){
             };
 
 
-            container.appendChild(img);
+            container.appendChild(
+                img
+            );
 
         }
     );
@@ -1903,6 +1894,7 @@ function nextImage(){
 
     currentImage++;
 
+
     if(
         currentImage >=
         study.images.length
@@ -1917,9 +1909,11 @@ function nextImage(){
         study.images[currentImage]
     );
 
+
     renderThumbnails(
         study
     );
+
 
     updateImageInformation(
         study
@@ -1942,6 +1936,7 @@ function previousImage(){
 
     currentImage--;
 
+
     if(
         currentImage < 0
     ){
@@ -1956,9 +1951,11 @@ function previousImage(){
         study.images[currentImage]
     );
 
+
     renderThumbnails(
         study
     );
+
 
     updateImageInformation(
         study
@@ -2287,8 +2284,10 @@ function closeFullscreen(){
 
 function escapeHtml(value){
 
-    if(value === null ||
-       value === undefined)
+    if(
+        value === null ||
+        value === undefined
+    )
         return "";
 
     return String(value)
@@ -2316,10 +2315,10 @@ document.getElementById(
         selectedDate
     );
 
-
 loadStudies();
 
 </script>
 
 </body>
 </html>
+```
