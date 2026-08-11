@@ -1,88 +1,48 @@
 ```html
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
 
 <meta charset="UTF-8">
-
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>PACS RAYOS X - HSMP</title>
-
 
 <style>
 
 /* =========================================================
-   VARIABLES
+   CONFIGURACIÓN GENERAL
 ========================================================= */
 
 :root{
-
-    --bg:#0b0b0c;
-
-    --panel:#121315;
-
-    --panel2:#18191b;
-
-    --panel3:#202124;
-
-    --border:#2c2e31;
-
+    --bg:#08090a;
+    --panel:#111315;
+    --panel2:#17191c;
+    --panel3:#202328;
+    --border:#2c3035;
     --text:#eeeeee;
-
-    --muted:#85888d;
-
-    --hover:#27292c;
-
-    --active:#34373b;
-
-    --accent:#b9bdc2;
-
+    --muted:#858a91;
+    --accent:#d4d8dc;
+    --selected:#30353a;
+    --hover:#25292d;
 }
-
-
-/* =========================================================
-   RESET
-========================================================= */
 
 *{
-
     box-sizing:border-box;
-
 }
-
 
 html,
 body{
-
     margin:0;
-
     width:100%;
-
     height:100%;
-
     background:var(--bg);
-
     color:var(--text);
-
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-
+    font-family:Arial,Helvetica,sans-serif;
 }
 
-
-/* =========================================================
-   CUERPO
-========================================================= */
-
 body{
-
     overflow:hidden;
-
 }
 
 
@@ -91,159 +51,115 @@ body{
 ========================================================= */
 
 .topbar{
-
     height:64px;
-
-    background:#111214;
-
+    background:#101214;
     border-bottom:1px solid var(--border);
 
     display:flex;
-
     align-items:center;
 
     padding:0 16px;
-
-    gap:16px;
-
+    gap:15px;
 }
 
 
 /* LOGO */
 
 .logo{
+    width:145px;
+    height:42px;
 
-    width:150px;
-
-    height:44px;
-
-    border:1px dashed #505258;
+    border:1px dashed #4a4f55;
 
     display:flex;
-
     align-items:center;
-
     justify-content:center;
 
-    color:#70747a;
-
-    font-size:11px;
-
-    overflow:hidden;
+    color:#6e747b;
+    font-size:10px;
 
     flex-shrink:0;
-
+    overflow:hidden;
 }
 
-
 .logo img{
-
     width:100%;
-
     height:100%;
-
     object-fit:contain;
-
 }
 
 
 /* TITULO */
 
 .brand{
-
     min-width:210px;
-
 }
-
 
 .brand-title{
-
     font-size:16px;
-
-    font-weight:600;
-
+    font-weight:bold;
     letter-spacing:.5px;
-
 }
 
-
 .brand-subtitle{
-
     color:var(--muted);
-
     font-size:10px;
-
-    margin-top:3px;
-
+    margin-top:4px;
 }
 
 
 /* BUSCADOR */
 
 .search{
-
     flex:1;
-
-    max-width:500px;
-
+    max-width:430px;
     margin-left:auto;
-
 }
 
-
 .search input{
-
     width:100%;
-
     height:36px;
 
-    background:#1b1c1f;
-
-    color:white;
-
-    border:1px solid #33363a;
-
+    background:#1a1d20;
+    border:1px solid #353a40;
     border-radius:5px;
 
+    color:white;
     padding:0 12px;
 
     outline:none;
-
 }
-
 
 .search input:focus{
-
-    border-color:#62666b;
-
+    border-color:#70767c;
 }
 
 
-.status{
+/* FECHA SUPERIOR */
 
-    color:#74777c;
-
+.current-date{
+    color:#a9adb2;
     font-size:11px;
-
     white-space:nowrap;
-
 }
 
 
 /* =========================================================
-   LAYOUT PRINCIPAL
+   ESTRUCTURA
 ========================================================= */
 
 .app{
-
     height:calc(100vh - 64px);
 
     display:grid;
 
-    grid-template-columns:260px 300px 1fr 245px;
+    grid-template-columns:
+        255px
+        245px
+        1fr
+        240px;
 
     min-width:950px;
-
 }
 
 
@@ -252,67 +168,202 @@ body{
 ========================================================= */
 
 .panel{
-
     background:var(--panel);
-
     border-right:1px solid var(--border);
 
-    overflow:hidden;
-
     display:flex;
-
     flex-direction:column;
 
+    overflow:hidden;
 }
 
-
 .panel-header{
-
     height:52px;
 
     padding:0 14px;
 
     display:flex;
-
     align-items:center;
-
     justify-content:space-between;
 
     border-bottom:1px solid var(--border);
 
     flex-shrink:0;
-
 }
 
-
 .panel-title{
-
-    font-size:11px;
-
-    color:#aeb1b6;
+    font-size:10px;
 
     text-transform:uppercase;
 
     letter-spacing:1px;
 
+    color:#a8adb3;
+}
+
+.panel-count{
+    color:#6f747a;
+    font-size:10px;
+}
+
+.panel-body{
+    flex:1;
+    overflow-y:auto;
 }
 
 
-.panel-count{
+/* =========================================================
+   CALENDARIO
+========================================================= */
 
-    color:#696c71;
+.calendar{
+    padding:12px;
+}
+
+.calendar-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    margin-bottom:12px;
+}
+
+.calendar-month{
+    font-size:13px;
+    font-weight:bold;
+    text-transform:capitalize;
+}
+
+.calendar-button{
+    width:28px;
+    height:28px;
+
+    background:#202328;
+    border:1px solid #34383d;
+
+    color:#ddd;
+
+    border-radius:4px;
+
+    cursor:pointer;
+}
+
+.calendar-button:hover{
+    background:#30343a;
+}
+
+.calendar-weekdays{
+    display:grid;
+
+    grid-template-columns:
+        repeat(7,1fr);
+
+    gap:2px;
+
+    margin-bottom:4px;
+}
+
+.calendar-weekdays div{
+    text-align:center;
+
+    color:#656a70;
+
+    font-size:9px;
+
+    padding:4px 0;
+}
+
+.calendar-days{
+    display:grid;
+
+    grid-template-columns:
+        repeat(7,1fr);
+
+    gap:3px;
+}
+
+.day{
+    height:31px;
+
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+
+    border-radius:4px;
+
+    color:#aeb2b7;
 
     font-size:10px;
 
+    cursor:pointer;
+
+    position:relative;
+}
+
+.day:hover{
+    background:var(--hover);
+}
+
+.day.other-month{
+    color:#3e4247;
+}
+
+.day.today{
+    border:1px solid #676d74;
+}
+
+.day.selected{
+    background:#d3d7da;
+    color:#111;
+
+    font-weight:bold;
+}
+
+.day.has-studies::after{
+    content:"";
+
+    width:4px;
+    height:4px;
+
+    background:#aeb3b8;
+
+    border-radius:50%;
+
+    position:absolute;
+
+    bottom:4px;
+}
+
+.day.selected.has-studies::after{
+    background:#111;
 }
 
 
-.panel-body{
+/* BOTÓN HOY */
 
-    flex:1;
+.today-button{
+    width:100%;
 
-    overflow-y:auto;
+    height:32px;
 
+    margin-top:12px;
+
+    background:#202328;
+
+    border:1px solid #34383d;
+
+    color:#bbbfc4;
+
+    border-radius:4px;
+
+    cursor:pointer;
+
+    font-size:10px;
+}
+
+.today-button:hover{
+    background:#2c3035;
 }
 
 
@@ -321,68 +372,48 @@ body{
 ========================================================= */
 
 .patient{
+    padding:13px;
 
-    padding:13px 14px;
-
-    border-bottom:1px solid #222427;
+    border-bottom:1px solid #22262a;
 
     cursor:pointer;
-
-    transition:.15s;
-
 }
-
 
 .patient:hover{
-
     background:var(--hover);
-
 }
-
 
 .patient.active{
-
-    background:var(--active);
+    background:var(--selected);
 
     box-shadow:
-        inset 3px 0 0 #bfc3c8;
+        inset 3px 0 0 #d0d4d8;
 }
-
 
 .patient-name{
-
-    font-size:13px;
-
-    font-weight:500;
+    font-size:12px;
 
     margin-bottom:6px;
-
 }
 
-
 .patient-meta{
-
     display:flex;
 
     justify-content:space-between;
 
-    color:var(--muted);
+    color:#73787e;
 
-    font-size:10px;
-
+    font-size:9px;
 }
 
-
 .badge{
-
-    background:#292b2f;
-
-    color:#bfc2c6;
+    background:#2a2e33;
 
     padding:2px 6px;
 
     border-radius:10px;
 
+    color:#c2c6ca;
 }
 
 
@@ -391,83 +422,56 @@ body{
 ========================================================= */
 
 .study{
-
     padding:13px;
 
-    border-bottom:1px solid #222427;
+    border-bottom:1px solid #22262a;
 
     cursor:pointer;
-
 }
-
 
 .study:hover{
-
     background:var(--hover);
-
 }
-
 
 .study.active{
-
-    background:var(--active);
-
+    background:var(--selected);
 }
-
-
-.study-date{
-
-    color:#8b8e93;
-
-    font-size:10px;
-
-    margin-bottom:6px;
-
-}
-
 
 .study-name{
+    font-size:12px;
 
-    font-size:13px;
-
-    margin-bottom:5px;
-
+    margin-bottom:6px;
 }
 
-
 .study-meta{
+    color:#70757b;
 
-    color:#686b70;
+    font-size:9px;
 
-    font-size:10px;
-
+    line-height:1.6;
 }
 
 
 /* =========================================================
-   VISOR CENTRAL
+   VISOR
 ========================================================= */
 
 .viewer{
-
-    background:#050505;
+    background:#030303;
 
     display:flex;
-
     flex-direction:column;
 
     min-width:0;
-
 }
 
 
-/* INFORMACION SUPERIOR */
+/* CABECERA DEL VISOR */
 
 .viewer-header{
-
     height:52px;
 
-    background:#111214;
+    background:#111315;
 
     border-bottom:1px solid var(--border);
 
@@ -475,48 +479,37 @@ body{
 
     align-items:center;
 
-    padding:0 15px;
-
     justify-content:space-between;
 
+    padding:0 15px;
+
     flex-shrink:0;
-
 }
 
-
-.study-title{
-
+.viewer-title{
     font-size:12px;
-
 }
 
+.viewer-subtitle{
+    color:#70757b;
 
-.study-subtitle{
+    font-size:9px;
 
-    color:#73767b;
-
-    font-size:10px;
-
-    margin-top:3px;
-
+    margin-top:4px;
 }
-
 
 .image-counter{
-
-    color:#8d9095;
+    color:#8c9197;
 
     font-size:10px;
-
 }
 
 
 /* =========================================================
-   AREA DE IMAGEN
+   VIEWPORT
 ========================================================= */
 
 .viewport{
-
     flex:1;
 
     position:relative;
@@ -532,83 +525,70 @@ body{
     background:
 
         radial-gradient(
-            circle at center,
-            #101010 0%,
-            #050505 60%,
-            #000000 100%
+            circle,
+            #151515 0%,
+            #050505 65%,
+            #000 100%
         );
-
 }
 
-
-/* INFORMACION SOBRE LA IMAGEN */
-
-.overlay{
-
+.overlay-left{
     position:absolute;
 
-    top:14px;
-
+    top:13px;
     left:15px;
 
+    color:#70757b;
+
+    font-size:9px;
+
     z-index:5;
-
-    font-size:10px;
-
-    color:#888;
 
     pointer-events:none;
-
 }
 
-
 .overlay-right{
-
     position:absolute;
 
-    top:14px;
-
+    top:13px;
     right:15px;
 
-    z-index:5;
+    color:#70757b;
 
-    font-size:10px;
-
-    color:#888;
+    font-size:9px;
 
     text-align:right;
 
-    pointer-events:none;
+    z-index:5;
 
+    pointer-events:none;
 }
 
+.empty-message{
+    color:#50555b;
 
-/* IMAGEN */
+    font-size:12px;
+
+    text-align:center;
+
+    max-width:300px;
+}
 
 .image-wrapper{
-
     width:100%;
-
     height:100%;
 
     display:flex;
 
     align-items:center;
-
     justify-content:center;
 
     transform-origin:center center;
-
-    transition:transform .12s ease;
-
 }
 
-
 .main-image{
-
-    max-width:85%;
-
-    max-height:85%;
+    max-width:86%;
+    max-height:86%;
 
     object-fit:contain;
 
@@ -620,22 +600,7 @@ body{
         brightness(var(--brightness,1))
         contrast(var(--contrast,1));
 
-    box-shadow:
-        0 0 0 1px #161616;
-
-}
-
-
-/* MENSAJE */
-
-.empty{
-
-    color:#555;
-
-    text-align:center;
-
-    font-size:12px;
-
+    transition:filter .1s;
 }
 
 
@@ -644,10 +609,9 @@ body{
 ========================================================= */
 
 .toolbar{
+    height:56px;
 
-    height:58px;
-
-    background:#111214;
+    background:#111315;
 
     border-top:1px solid var(--border);
 
@@ -655,64 +619,45 @@ body{
 
     align-items:center;
 
-    gap:6px;
+    gap:5px;
 
-    padding:8px 10px;
+    padding:8px;
 
     flex-shrink:0;
-
 }
 
-
 .tool{
-
     height:34px;
 
     min-width:34px;
 
-    padding:0 10px;
+    padding:0 9px;
 
-    background:#202225;
+    background:#202328;
 
-    border:1px solid #34363a;
-
-    color:#d0d2d5;
+    border:1px solid #34383d;
 
     border-radius:4px;
 
+    color:#d0d4d8;
+
+    font-size:10px;
+
     cursor:pointer;
-
-    font-size:11px;
-
 }
-
 
 .tool:hover{
-
-    background:#2b2d30;
-
+    background:#30343a;
 }
 
-
-.tool.active{
-
-    background:#3a3d41;
-
-    border-color:#62666b;
-
-}
-
-
-.toolbar-separator{
-
+.separator{
     width:1px;
 
     height:25px;
 
-    background:#303236;
+    background:#30343a;
 
     margin:0 3px;
-
 }
 
 
@@ -720,11 +665,10 @@ body{
    MINIATURAS
 ========================================================= */
 
-.series{
+.thumbnails{
+    height:88px;
 
-    height:92px;
-
-    background:#101113;
+    background:#101214;
 
     border-top:1px solid var(--border);
 
@@ -732,192 +676,128 @@ body{
 
     align-items:center;
 
-    gap:8px;
+    gap:7px;
 
-    padding:8px;
+    padding:7px;
 
     overflow-x:auto;
 
     flex-shrink:0;
-
 }
 
-
 .thumbnail{
-
-    height:72px;
-
-    width:82px;
+    width:80px;
+    height:70px;
 
     object-fit:cover;
 
     background:#000;
 
-    border:2px solid #303236;
+    border:2px solid #30343a;
 
     border-radius:3px;
 
     cursor:pointer;
 
     flex-shrink:0;
-
 }
-
 
 .thumbnail:hover{
-
-    border-color:#686c72;
-
+    border-color:#686e75;
 }
 
-
 .thumbnail.active{
-
-    border-color:#c2c6ca;
-
+    border-color:#d0d4d8;
 }
 
 
 /* =========================================================
-   PANEL DERECHO
+   INFORMACIÓN
 ========================================================= */
 
 .info-panel{
-
     background:var(--panel);
 
-    display:flex;
-
-    flex-direction:column;
-
-    overflow:hidden;
-
+    overflow-y:auto;
 }
-
 
 .info-section{
-
-    border-bottom:1px solid var(--border);
-
     padding:15px;
 
+    border-bottom:1px solid var(--border);
 }
 
-
 .info-heading{
+    color:#858a90;
 
-    color:#8d9095;
-
-    font-size:10px;
+    font-size:9px;
 
     text-transform:uppercase;
 
     letter-spacing:1px;
 
     margin-bottom:13px;
-
 }
-
 
 .info-row{
-
-    display:flex;
-
-    flex-direction:column;
-
     margin-bottom:11px;
-
 }
-
 
 .info-label{
+    display:block;
 
-    color:#65686d;
+    color:#5f646a;
 
-    font-size:9px;
+    font-size:8px;
 
     margin-bottom:3px;
-
 }
-
 
 .info-value{
+    color:#d1d4d7;
 
-    color:#d4d6d9;
-
-    font-size:12px;
-
-    word-break:break-word;
-
+    font-size:11px;
 }
 
+.patient-card{
+    background:#191c1f;
 
-.patient-summary{
-
-    background:#191a1d;
-
-    border:1px solid #292b2f;
+    border:1px solid #2b2f34;
 
     border-radius:5px;
 
     padding:12px;
-
 }
 
-
-.patient-summary-name{
-
-    font-size:14px;
+.patient-card-name{
+    font-size:13px;
 
     margin-bottom:8px;
-
 }
 
+.patient-card-meta{
+    color:#777c82;
 
-.patient-summary-meta{
-
-    color:#777a7f;
-
-    font-size:10px;
+    font-size:9px;
 
     line-height:1.7;
-
 }
 
 
 /* =========================================================
-   SCROLLBAR
+   SIN RESULTADOS
 ========================================================= */
 
-::-webkit-scrollbar{
+.no-results{
+    padding:30px 15px;
 
-    width:6px;
+    text-align:center;
 
-    height:6px;
+    color:#5e6369;
 
-}
+    font-size:11px;
 
-
-::-webkit-scrollbar-track{
-
-    background:#101113;
-
-}
-
-
-::-webkit-scrollbar-thumb{
-
-    background:#37393d;
-
-    border-radius:4px;
-
-}
-
-
-::-webkit-scrollbar-thumb:hover{
-
-    background:#4c4f54;
-
+    line-height:1.6;
 }
 
 
@@ -926,49 +806,39 @@ body{
 ========================================================= */
 
 .fullscreen{
-
     position:fixed;
 
     inset:0;
 
     background:#000;
 
-    z-index:9999;
+    z-index:99999;
 
     display:none;
 
     align-items:center;
 
     justify-content:center;
-
 }
 
-
 .fullscreen img{
-
     max-width:96%;
-
     max-height:96%;
 
     object-fit:contain;
-
 }
 
-
 .close-fullscreen{
-
     position:absolute;
 
-    top:18px;
+    top:15px;
+    right:22px;
 
-    right:24px;
-
-    color:#fff;
+    color:white;
 
     font-size:30px;
 
     cursor:pointer;
-
 }
 
 
@@ -979,34 +849,25 @@ body{
 @media(max-width:1100px){
 
     .app{
-
-        grid-template-columns:220px 250px 1fr 210px;
-
-        min-width:0;
-
+        grid-template-columns:
+            220px
+            220px
+            1fr
+            210px;
     }
-
 
     .brand{
-
         display:none;
-
     }
-
 }
-
 
 @media(max-width:800px){
 
     body{
-
         overflow:auto;
-
     }
 
-
     .app{
-
         display:flex;
 
         flex-direction:column;
@@ -1014,37 +875,24 @@ body{
         height:auto;
 
         min-width:0;
-
     }
-
 
     .panel{
-
         width:100%;
 
-        max-height:220px;
-
+        max-height:300px;
     }
-
 
     .viewer{
-
         height:650px;
-
     }
-
 
     .info-panel{
-
         width:100%;
-
     }
 
-
     .search{
-
         display:none;
-
     }
 
 }
@@ -1057,9 +905,9 @@ body{
 <body>
 
 
-<!-- =======================================================
+<!-- =========================================================
      CABECERA
-======================================================= -->
+========================================================= -->
 
 <header class="topbar">
 
@@ -1067,17 +915,15 @@ body{
     <div class="logo">
 
         <!--
-        PARA COLOCAR EL LOGO:
+        PARA COLOCAR TU LOGO:
 
-        Sube un archivo llamado:
+        1. Sube una imagen llamada:
 
-        logo.jpg
+           logo.jpg
 
-        al repositorio.
+        2. Reemplaza este texto por:
 
-        Luego cambia el contenido por:
-
-        <img src="logo.jpg" alt="Logo">
+           <img src="logo.jpg" alt="HSMP">
 
         -->
 
@@ -1106,17 +952,19 @@ body{
     <div class="search">
 
         <input
-            type="text"
             id="search"
+            type="text"
             placeholder="Buscar paciente..."
-            oninput="buscarPaciente()">
+            oninput="searchPatients()">
 
     </div>
 
 
-    <div class="status">
+    <div
+        class="current-date"
+        id="currentDateLabel">
 
-        SISTEMA LOCAL · JPG
+        --
 
     </div>
 
@@ -1125,16 +973,112 @@ body{
 
 
 
-<!-- =======================================================
+<!-- =========================================================
      APLICACIÓN
-======================================================= -->
+========================================================= -->
 
 <div class="app">
 
 
-<!-- =======================================================
-     PANEL PACIENTES
-======================================================= -->
+<!-- =========================================================
+     COLUMNA 1
+     CALENDARIO
+========================================================= -->
+
+<section class="panel">
+
+
+    <div class="panel-header">
+
+        <span class="panel-title">
+
+            Fecha
+
+        </span>
+
+    </div>
+
+
+    <div class="panel-body">
+
+
+        <div class="calendar">
+
+
+            <div class="calendar-header">
+
+
+                <button
+                    class="calendar-button"
+                    onclick="previousMonth()">
+
+                    ‹
+
+                </button>
+
+
+                <div
+                    class="calendar-month"
+                    id="calendarMonth">
+
+                </div>
+
+
+                <button
+                    class="calendar-button"
+                    onclick="nextMonth()">
+
+                    ›
+
+                </button>
+
+
+            </div>
+
+
+            <div class="calendar-weekdays">
+
+                <div>L</div>
+                <div>M</div>
+                <div>M</div>
+                <div>J</div>
+                <div>V</div>
+                <div>S</div>
+                <div>D</div>
+
+            </div>
+
+
+            <div
+                class="calendar-days"
+                id="calendarDays">
+
+            </div>
+
+
+            <button
+                class="today-button"
+                onclick="goToday()">
+
+                IR A HOY
+
+            </button>
+
+
+        </div>
+
+
+    </div>
+
+
+</section>
+
+
+
+<!-- =========================================================
+     COLUMNA 2
+     PACIENTES
+========================================================= -->
 
 <section class="panel">
 
@@ -1147,9 +1091,12 @@ body{
 
         </span>
 
+
         <span
             class="panel-count"
             id="patientCount">
+
+            0
 
         </span>
 
@@ -1167,44 +1114,10 @@ body{
 
 
 
-<!-- =======================================================
-     PANEL ESTUDIOS
-======================================================= -->
-
-<section class="panel">
-
-
-    <div class="panel-header">
-
-        <span class="panel-title">
-
-            Estudios
-
-        </span>
-
-        <span
-            class="panel-count"
-            id="studyCount">
-
-        </span>
-
-    </div>
-
-
-    <div
-        class="panel-body"
-        id="studyList">
-
-    </div>
-
-
-</section>
-
-
-
-<!-- =======================================================
+<!-- =========================================================
+     COLUMNA 3
      VISOR
-======================================================= -->
+========================================================= -->
 
 <section class="viewer">
 
@@ -1215,7 +1128,7 @@ body{
         <div>
 
             <div
-                class="study-title"
+                class="viewer-title"
                 id="viewerTitle">
 
                 Seleccione un estudio
@@ -1224,10 +1137,10 @@ body{
 
 
             <div
-                class="study-subtitle"
+                class="viewer-subtitle"
                 id="viewerSubtitle">
 
-                --
+                Seleccione una fecha
 
             </div>
 
@@ -1247,23 +1160,21 @@ body{
 
 
 
-    <!-- VIEWPORT -->
-
     <div
         class="viewport"
         id="viewport">
 
 
-        <div class="overlay">
+        <div class="overlay-left">
 
-            PACS RAYOS X
+            PACS RAYOS X · HSMP
 
         </div>
 
 
         <div
             class="overlay-right"
-            id="overlayInfo">
+            id="overlayRight">
 
             --
 
@@ -1271,10 +1182,10 @@ body{
 
 
         <div
-            class="empty"
+            class="empty-message"
             id="emptyMessage">
 
-            Seleccione un paciente y un estudio
+            Seleccione un paciente para visualizar sus estudios.
 
         </div>
 
@@ -1284,12 +1195,10 @@ body{
             id="imageWrapper"
             style="display:none;">
 
-
             <img
                 id="mainImage"
                 class="main-image"
                 alt="Imagen radiológica">
-
 
         </div>
 
@@ -1298,7 +1207,7 @@ body{
 
 
 
-    <!-- TOOLBAR -->
+    <!-- HERRAMIENTAS -->
 
     <div class="toolbar">
 
@@ -1330,7 +1239,7 @@ body{
         </button>
 
 
-        <div class="toolbar-separator"></div>
+        <div class="separator"></div>
 
 
         <button
@@ -1362,7 +1271,7 @@ body{
 
         <button
             class="tool"
-            onclick="increaseContrast()">
+            onclick="contrastUp()">
 
             C+
 
@@ -1371,14 +1280,14 @@ body{
 
         <button
             class="tool"
-            onclick="decreaseContrast()">
+            onclick="contrastDown()">
 
             C−
 
         </button>
 
 
-        <div class="toolbar-separator"></div>
+        <div class="separator"></div>
 
 
         <button
@@ -1415,7 +1324,7 @@ body{
     <!-- MINIATURAS -->
 
     <div
-        class="series"
+        class="thumbnails"
         id="thumbnailList">
 
     </div>
@@ -1425,11 +1334,24 @@ body{
 
 
 
-<!-- =======================================================
+<!-- =========================================================
+     COLUMNA 4
      INFORMACIÓN
-======================================================= -->
+========================================================= -->
 
-<aside class="info-panel">
+<aside class="panel info-panel">
+
+
+    <div class="panel-header">
+
+        <span class="panel-title">
+
+            Información
+
+        </span>
+
+    </div>
+
 
 
     <div class="info-section">
@@ -1442,11 +1364,11 @@ body{
         </div>
 
 
-        <div class="patient-summary">
+        <div class="patient-card">
 
 
             <div
-                class="patient-summary-name"
+                class="patient-card-name"
                 id="infoPatientName">
 
                 --
@@ -1455,7 +1377,7 @@ body{
 
 
             <div
-                class="patient-summary-meta"
+                class="patient-card-meta"
                 id="infoPatientMeta">
 
                 --
@@ -1482,13 +1404,11 @@ body{
 
         <div class="info-row">
 
-
             <span class="info-label">
 
-                Descripción
+                DESCRIPCIÓN
 
             </span>
-
 
             <span
                 class="info-value"
@@ -1498,19 +1418,16 @@ body{
 
             </span>
 
-
         </div>
 
 
         <div class="info-row">
 
-
             <span class="info-label">
 
-                Fecha
+                FECHA
 
             </span>
-
 
             <span
                 class="info-value"
@@ -1520,19 +1437,35 @@ body{
 
             </span>
 
+        </div>
+
+
+        <div class="info-row">
+
+            <span class="info-label">
+
+                MODALIDAD
+
+            </span>
+
+            <span
+                class="info-value"
+                id="infoModality">
+
+                --
+
+            </span>
 
         </div>
 
 
         <div class="info-row">
 
-
             <span class="info-label">
 
-                Imágenes
+                IMÁGENES
 
             </span>
-
 
             <span
                 class="info-value"
@@ -1541,7 +1474,6 @@ body{
                 --
 
             </span>
-
 
         </div>
 
@@ -1562,13 +1494,11 @@ body{
 
         <div class="info-row">
 
-
             <span class="info-label">
 
-                Zoom
+                ZOOM
 
             </span>
-
 
             <span
                 class="info-value"
@@ -1578,19 +1508,16 @@ body{
 
             </span>
 
-
         </div>
 
 
         <div class="info-row">
 
-
             <span class="info-label">
 
-                Rotación
+                ROTACIÓN
 
             </span>
-
 
             <span
                 class="info-value"
@@ -1600,19 +1527,16 @@ body{
 
             </span>
 
-
         </div>
 
 
         <div class="info-row">
 
-
             <span class="info-label">
 
-                Imagen
+                IMAGEN
 
             </span>
-
 
             <span
                 class="info-value"
@@ -1621,7 +1545,6 @@ body{
                 --
 
             </span>
-
 
         </div>
 
@@ -1636,9 +1559,9 @@ body{
 
 
 
-<!-- =======================================================
+<!-- =========================================================
      PANTALLA COMPLETA
-======================================================= -->
+========================================================= -->
 
 <div
     class="fullscreen"
@@ -1656,8 +1579,7 @@ body{
 
     <img
         id="fullscreenImage"
-        alt="Imagen ampliada">
-
+        alt="Imagen">
 
 </div>
 
@@ -1667,26 +1589,50 @@ body{
 
 
 /* =========================================================
-   DATOS DE PRUEBA
-=========================================================
+   =========================================================
+   DATOS DE LOS ESTUDIOS
+   =========================================================
 
-   ESTRUCTURA:
+   ESTA ES LA PARTE MÁS IMPORTANTE PARA TI.
 
-   PACIENTE
-       ↓
-   ESTUDIO
-       ↓
-   IMÁGENES
+   CADA ESTUDIO TIENE:
 
-========================================================= */
+   date      → fecha
+   patient   → paciente
+   history   → historia clínica
+   birth     → nacimiento
+   sex       → sexo
+   study     → estudio
+   modality  → modalidad
+   images    → imágenes
+
+   IMPORTANTE:
+
+   La fecha debe escribirse:
+
+   YYYY-MM-DD
+
+   Ejemplo:
+
+   2026-08-11
+
+   =========================================================
+   ========================================================= */
 
 
-const patients = [
+const studies = [
+
+
+    /* =====================================================
+       11 AGOSTO 2026
+    ===================================================== */
 
 
     {
 
-        name:"Juan Pérez",
+        date:"2026-08-11",
+
+        patient:"Juan Pérez",
 
         history:"HC-0001",
 
@@ -1694,25 +1640,15 @@ const patients = [
 
         sex:"Masculino",
 
-        studies:[
+        study:"Radiografía de tórax",
 
-            {
+        modality:"CR",
 
-                name:"Radiografía de tórax",
+        images:[
 
-                date:"11/08/2026",
+            "images.jfif",
 
-                modality:"CR",
-
-                images:[
-
-                    "images.jfif",
-
-                    "images (2).jfif"
-
-                ]
-
-            }
+            "images (2).jfif"
 
         ]
 
@@ -1721,7 +1657,9 @@ const patients = [
 
     {
 
-        name:"María López",
+        date:"2026-08-11",
+
+        patient:"María López",
 
         history:"HC-0002",
 
@@ -1729,23 +1667,43 @@ const patients = [
 
         sex:"Femenino",
 
-        studies:[
+        study:"Radiografía de columna",
 
-            {
+        modality:"CR",
 
-                name:"Radiografía de columna",
+        images:[
 
-                date:"10/08/2026",
+            "images.jfif"
 
-                modality:"CR",
+        ]
 
-                images:[
+    },
 
-                    "images.jfif"
 
-                ]
+    /* =====================================================
+       10 AGOSTO 2026
+    ===================================================== */
 
-            }
+
+    {
+
+        date:"2026-08-10",
+
+        patient:"Carlos Ruiz",
+
+        history:"HC-0003",
+
+        birth:"03/02/1978",
+
+        sex:"Masculino",
+
+        study:"Radiografía de cráneo",
+
+        modality:"CR",
+
+        images:[
+
+            "images (2).jfif"
 
         ]
 
@@ -1754,31 +1712,53 @@ const patients = [
 
     {
 
-        name:"Carlos Ruiz",
+        date:"2026-08-10",
 
-        history:"HC-0003",
+        patient:"Ana Torres",
 
-        birth:"03/02/1978",
+        history:"HC-0004",
+
+        birth:"11/06/1988",
+
+        sex:"Femenino",
+
+        study:"Radiografía de pelvis",
+
+        modality:"CR",
+
+        images:[
+
+            "images.jfif"
+
+        ]
+
+    },
+
+
+    /* =====================================================
+       8 AGOSTO 2026
+    ===================================================== */
+
+
+    {
+
+        date:"2026-08-08",
+
+        patient:"Pedro Sánchez",
+
+        history:"HC-0005",
+
+        birth:"19/01/1975",
 
         sex:"Masculino",
 
-        studies:[
+        study:"Radiografía de hombro",
 
-            {
+        modality:"CR",
 
-                name:"Radiografía de cráneo",
+        images:[
 
-                date:"08/08/2026",
-
-                modality:"CR",
-
-                images:[
-
-                    "images (2).jfif"
-
-                ]
-
-            }
+            "images (2).jfif"
 
         ]
 
@@ -1789,22 +1769,521 @@ const patients = [
 
 
 /* =========================================================
-   ESTADO
+   ESTADO DEL SISTEMA
 ========================================================= */
 
-let currentPatient = 0;
+let selectedDate =
+    "2026-08-11";
 
-let currentStudy = 0;
+let calendarDate =
+    new Date(
+        2026,
+        7,
+        11
+    );
 
-let currentImage = 0;
+let currentPatient =
+    null;
 
-let zoom = 1;
+let currentStudy =
+    null;
 
-let rotation = 0;
+let currentImage =
+    0;
 
-let inverted = false;
+let zoom =
+    1;
 
-let contrast = 1;
+let rotation =
+    0;
+
+let inverted =
+    false;
+
+let contrast =
+    1;
+
+
+
+/* =========================================================
+   FORMATEAR FECHA
+========================================================= */
+
+function formatDate(dateString){
+
+    const parts =
+        dateString.split("-");
+
+    return(
+        parts[2] +
+        "/" +
+        parts[1] +
+        "/" +
+        parts[0]
+    );
+
+}
+
+
+
+/* =========================================================
+   OBTENER ESTUDIOS DE LA FECHA
+========================================================= */
+
+function getStudiesForDate(){
+
+    return studies.filter(
+        item =>
+            item.date ===
+            selectedDate
+    );
+
+}
+
+
+
+/* =========================================================
+   OBTENER PACIENTES ÚNICOS
+========================================================= */
+
+function getPatientsForDate(){
+
+    const dateStudies =
+        getStudiesForDate();
+
+    const patients = [];
+
+    dateStudies.forEach(
+        item => {
+
+            if(
+                !patients.includes(
+                    item.patient
+                )
+            ){
+
+                patients.push(
+                    item.patient
+                );
+
+            }
+
+        }
+    );
+
+    return patients;
+
+}
+
+
+
+/* =========================================================
+   RENDER CALENDARIO
+========================================================= */
+
+function renderCalendar(){
+
+    const year =
+        calendarDate.getFullYear();
+
+    const month =
+        calendarDate.getMonth();
+
+
+    const monthNames = [
+
+        "enero",
+        "febrero",
+        "marzo",
+        "abril",
+        "mayo",
+        "junio",
+        "julio",
+        "agosto",
+        "septiembre",
+        "octubre",
+        "noviembre",
+        "diciembre"
+
+    ];
+
+
+    document.getElementById(
+        "calendarMonth"
+    ).textContent =
+
+        monthNames[month] +
+        " " +
+        year;
+
+
+    const container =
+        document.getElementById(
+            "calendarDays"
+        );
+
+
+    container.innerHTML="";
+
+
+    /*
+       Primer día del mes.
+       Convertimos domingo=0
+       a lunes=0.
+    */
+
+    let firstDay =
+        new Date(
+            year,
+            month,
+            1
+        ).getDay();
+
+
+    firstDay =
+        firstDay === 0
+        ? 6
+        : firstDay - 1;
+
+
+    const daysInMonth =
+        new Date(
+            year,
+            month + 1,
+            0
+        ).getDate();
+
+
+    const previousMonthDays =
+        new Date(
+            year,
+            month,
+            0
+        ).getDate();
+
+
+    /* Días del mes anterior */
+
+    for(
+        let i=firstDay-1;
+        i>=0;
+        i--
+    ){
+
+        const day =
+            previousMonthDays-i;
+
+        createCalendarDay(
+            day,
+            true,
+            container
+        );
+
+    }
+
+
+    /* Días actuales */
+
+    for(
+        let day=1;
+        day<=daysInMonth;
+        day++
+    ){
+
+        createCalendarDay(
+            day,
+            false,
+            container
+        );
+
+    }
+
+
+    /* Completar cuadrícula */
+
+    const total =
+        container.children.length;
+
+
+    const remaining =
+        total % 7 === 0
+        ? 0
+        : 7 -
+          (total % 7);
+
+
+    for(
+        let day=1;
+        day<=remaining;
+        day++
+    ){
+
+        createCalendarDay(
+            day,
+            true,
+            container
+        );
+
+    }
+
+}
+
+
+
+/* =========================================================
+   CREAR DÍA
+========================================================= */
+
+function createCalendarDay(
+    day,
+    otherMonth,
+    container
+){
+
+    const element =
+        document.createElement(
+            "div"
+        );
+
+
+    element.className =
+        "day";
+
+
+    if(otherMonth){
+
+        element.classList.add(
+            "other-month"
+        );
+
+        element.textContent =
+            day;
+
+        container.appendChild(
+            element
+        );
+
+        return;
+
+    }
+
+
+    const year =
+        calendarDate.getFullYear();
+
+    const month =
+        String(
+            calendarDate.getMonth()+1
+        ).padStart(2,"0");
+
+    const dayString =
+        String(day)
+        .padStart(2,"0");
+
+
+    const dateString =
+        year +
+        "-" +
+        month +
+        "-" +
+        dayString;
+
+
+    element.textContent =
+        day;
+
+
+    /* ¿Tiene estudios? */
+
+    const hasStudies =
+        studies.some(
+            item =>
+                item.date ===
+                dateString
+        );
+
+
+    if(hasStudies){
+
+        element.classList.add(
+            "has-studies"
+        );
+
+    }
+
+
+    /* ¿Está seleccionado? */
+
+    if(
+        dateString ===
+        selectedDate
+    ){
+
+        element.classList.add(
+            "selected"
+        );
+
+    }
+
+
+    /* ¿Es hoy? */
+
+    const today =
+        new Date();
+
+
+    const todayString =
+        today.getFullYear() +
+        "-" +
+        String(
+            today.getMonth()+1
+        ).padStart(2,"0") +
+        "-" +
+        String(
+            today.getDate()
+        ).padStart(2,"0");
+
+
+    if(
+        dateString ===
+        todayString
+    ){
+
+        element.classList.add(
+            "today"
+        );
+
+    }
+
+
+    element.onclick=()=>{
+
+        selectDate(
+            dateString
+        );
+
+    };
+
+
+    container.appendChild(
+        element
+    );
+
+}
+
+
+
+/* =========================================================
+   SELECCIONAR FECHA
+========================================================= */
+
+function selectDate(date){
+
+    selectedDate =
+        date;
+
+    currentPatient =
+        null;
+
+    currentStudy =
+        null;
+
+    currentImage =
+        0;
+
+    resetView();
+
+    document.getElementById(
+        "currentDateLabel"
+    ).textContent =
+
+        formatDate(date);
+
+
+    renderCalendar();
+
+    renderPatients();
+
+    clearViewer();
+
+}
+
+
+
+/* =========================================================
+   MES ANTERIOR
+========================================================= */
+
+function previousMonth(){
+
+    calendarDate.setMonth(
+        calendarDate.getMonth()-1
+    );
+
+    renderCalendar();
+
+}
+
+
+
+/* =========================================================
+   MES SIGUIENTE
+========================================================= */
+
+function nextMonth(){
+
+    calendarDate.setMonth(
+        calendarDate.getMonth()+1
+    );
+
+    renderCalendar();
+
+}
+
+
+
+/* =========================================================
+   IR A HOY
+========================================================= */
+
+function goToday(){
+
+    const today =
+        new Date();
+
+
+    calendarDate =
+        new Date(
+            today.getFullYear(),
+            today.getMonth(),
+            today.getDate()
+        );
+
+
+    /*
+       Si quieres que "HOY" siempre
+       tenga los estudios de hoy,
+       usamos la fecha real.
+    */
+
+    const todayString =
+
+        today.getFullYear() +
+        "-" +
+        String(
+            today.getMonth()+1
+        ).padStart(2,"0") +
+        "-" +
+        String(
+            today.getDate()
+        ).padStart(2,"0");
+
+
+    selectDate(
+        todayString
+    );
+
+}
 
 
 
@@ -1812,8 +2291,9 @@ let contrast = 1;
    MOSTRAR PACIENTES
 ========================================================= */
 
-function renderPatients(filter=""){
-
+function renderPatients(
+    filter=""
+){
 
     const list =
         document.getElementById(
@@ -1824,31 +2304,69 @@ function renderPatients(filter=""){
     list.innerHTML="";
 
 
-    const filtered =
-        patients.filter(
-            patient =>
-                patient.name
+    let patients =
+        getPatientsForDate();
+
+
+    /* FILTRO */
+
+    if(filter){
+
+        patients =
+            patients.filter(
+                name =>
+                    name
                     .toLowerCase()
                     .includes(
                         filter.toLowerCase()
                     )
-        );
+            );
+
+    }
 
 
     document.getElementById(
         "patientCount"
     ).textContent =
-        filtered.length;
+        patients.length;
 
 
-    filtered.forEach(
-        patient => {
+    if(
+        patients.length === 0
+    ){
+
+        list.innerHTML = `
+
+            <div class="no-results">
+
+                No hay pacientes<br>
+                registrados para<br>
+                esta fecha.
+
+            </div>
+
+        `;
+
+        return;
+
+    }
 
 
-            const originalIndex =
-                patients.indexOf(
-                    patient
+    patients.forEach(
+        name => {
+
+
+            const patientStudies =
+                getStudiesForDate()
+                .filter(
+                    item =>
+                        item.patient ===
+                        name
                 );
+
+
+            const first =
+                patientStudies[0];
 
 
             const element =
@@ -1862,8 +2380,8 @@ function renderPatients(filter=""){
 
 
             if(
-                originalIndex ===
-                currentPatient
+                currentPatient ===
+                name
             ){
 
                 element.classList.add(
@@ -1873,15 +2391,11 @@ function renderPatients(filter=""){
             }
 
 
-            const studies =
-                patient.studies.length;
-
-
             element.innerHTML=`
 
                 <div class="patient-name">
 
-                    ${patient.name}
+                    ${name}
 
                 </div>
 
@@ -1890,14 +2404,14 @@ function renderPatients(filter=""){
 
                     <span>
 
-                        ${patient.history}
+                        ${first.history}
 
                     </span>
 
 
                     <span class="badge">
 
-                        ${studies}
+                        ${patientStudies.length}
 
                     </span>
 
@@ -1909,13 +2423,15 @@ function renderPatients(filter=""){
             element.onclick=()=>{
 
                 currentPatient =
-                    originalIndex;
+                    name;
 
-                currentStudy=0;
+                currentStudy =
+                    0;
 
-                currentImage=0;
+                currentImage =
+                    0;
 
-                resetImageSettings();
+                resetView();
 
                 renderPatients(
                     document.getElementById(
@@ -1925,7 +2441,7 @@ function renderPatients(filter=""){
 
                 renderStudies();
 
-                renderImage();
+                showFirstStudy();
 
             };
 
@@ -1947,104 +2463,183 @@ function renderPatients(filter=""){
 
 function renderStudies(){
 
+    /*
+       La columna de estudios está
+       integrada visualmente con los
+       pacientes mediante el visor.
 
-    const list =
-        document.getElementById(
-            "studyList"
+       Aquí generamos la información
+       del paciente seleccionado.
+    */
+
+    const studiesForPatient =
+        getStudiesForDate()
+        .filter(
+            item =>
+                item.patient ===
+                currentPatient
         );
 
 
-    list.innerHTML="";
+    if(
+        studiesForPatient.length === 0
+    ){
+
+        return;
+
+    }
 
 
-    const patient =
-        patients[
-            currentPatient
-        ];
+    /*
+       Mostramos automáticamente
+       el primer estudio.
+    */
+
+}
+
+
+
+/* =========================================================
+   MOSTRAR PRIMER ESTUDIO
+========================================================= */
+
+function showFirstStudy(){
+
+    const list =
+        getStudiesForDate()
+        .filter(
+            item =>
+                item.patient ===
+                currentPatient
+        );
+
+
+    if(
+        list.length === 0
+    ){
+
+        return;
+
+    }
+
+
+    currentStudy =
+        0;
+
+    renderStudy(
+        list[currentStudy]
+    );
+
+}
+
+
+
+/* =========================================================
+   MOSTRAR ESTUDIO
+========================================================= */
+
+function renderStudy(study){
+
+    document.getElementById(
+        "viewerTitle"
+    ).textContent =
+        study.study;
 
 
     document.getElementById(
-        "studyCount"
+        "viewerSubtitle"
     ).textContent =
-        patient.studies.length;
+
+        study.patient +
+        " · " +
+        study.history +
+        " · " +
+        formatDate(
+            study.date
+        );
 
 
-    patient.studies.forEach(
-        (study,index)=>{
+    document.getElementById(
+        "imageCounter"
+    ).textContent =
+
+        "Imagen 1 / " +
+        study.images.length;
 
 
-            const element =
-                document.createElement(
-                    "div"
-                );
+    document.getElementById(
+        "overlayRight"
+    ).innerHTML =
+
+        study.patient +
+        "<br>" +
+        study.study;
 
 
-            element.className =
-                "study";
+    document.getElementById(
+        "infoPatientName"
+    ).textContent =
+        study.patient;
 
 
-            if(
-                index ===
-                currentStudy
-            ){
+    document.getElementById(
+        "infoPatientMeta"
+    ).innerHTML =
 
-                element.classList.add(
-                    "active"
-                );
+        "Historia: " +
+        study.history +
+        "<br>" +
 
-            }
+        "Sexo: " +
+        study.sex +
+        "<br>" +
 
-
-            element.innerHTML=`
-
-                <div class="study-date">
-
-                    ${study.date}
-
-                </div>
+        "Nacimiento: " +
+        study.birth;
 
 
-                <div class="study-name">
-
-                    ${study.name}
-
-                </div>
-
-
-                <div class="study-meta">
-
-                    ${study.modality}
-                    ·
-                    ${study.images.length}
-                    imagen(es)
-
-                </div>
-
-            `;
+    document.getElementById(
+        "infoStudy"
+    ).textContent =
+        study.study;
 
 
-            element.onclick=()=>{
-
-                currentStudy =
-                    index;
-
-                currentImage=0;
-
-                resetImageSettings();
-
-                renderStudies();
-
-                renderImage();
-
-            };
+    document.getElementById(
+        "infoDate"
+    ).textContent =
+        formatDate(
+            study.date
+        );
 
 
-            list.appendChild(
-                element
-            );
+    document.getElementById(
+        "infoModality"
+    ).textContent =
+        study.modality;
 
-        }
+
+    document.getElementById(
+        "infoImages"
+    ).textContent =
+        study.images.length;
+
+
+    renderThumbnails(
+        study
     );
+
+
+    if(
+        study.images.length > 0
+    ){
+
+        showImage(
+            study.images[
+                currentImage
+            ]
+        );
+
+    }
 
 }
 
@@ -2054,32 +2649,7 @@ function renderStudies(){
    MOSTRAR IMAGEN
 ========================================================= */
 
-function renderImage(){
-
-
-    const patient =
-        patients[
-            currentPatient
-        ];
-
-
-    const study =
-        patient.studies[
-            currentStudy
-        ];
-
-
-    const image =
-        study.images[
-            currentImage
-        ];
-
-
-    const mainImage =
-        document.getElementById(
-            "mainImage"
-        );
-
+function showImage(src){
 
     const wrapper =
         document.getElementById(
@@ -2093,21 +2663,10 @@ function renderImage(){
         );
 
 
-    if(
-        !study ||
-        !study.images ||
-        study.images.length===0
-    ){
-
-        wrapper.style.display =
-            "none";
-
-        empty.style.display =
-            "block";
-
-        return;
-
-    }
+    const image =
+        document.getElementById(
+            "mainImage"
+        );
 
 
     empty.style.display =
@@ -2118,97 +2677,11 @@ function renderImage(){
         "flex";
 
 
-    mainImage.src =
-        image;
+    image.src =
+        src;
 
 
-    document.getElementById(
-        "viewerTitle"
-    ).textContent =
-        study.name;
-
-
-    document.getElementById(
-        "viewerSubtitle"
-    ).textContent =
-        patient.name +
-        " · " +
-        patient.history +
-        " · " +
-        study.date;
-
-
-    document.getElementById(
-        "imageCounter"
-    ).textContent =
-
-        "Imagen " +
-        (currentImage+1) +
-        " / " +
-        study.images.length;
-
-
-    document.getElementById(
-        "overlayInfo"
-    ).innerHTML =
-
-        patient.name +
-        "<br>" +
-        study.name;
-
-
-    document.getElementById(
-        "infoPatientName"
-    ).textContent =
-        patient.name;
-
-
-    document.getElementById(
-        "infoPatientMeta"
-    ).innerHTML =
-
-        "Historia: " +
-        patient.history +
-        "<br>" +
-
-        "Sexo: " +
-        patient.sex +
-        "<br>" +
-
-        "Nacimiento: " +
-        patient.birth;
-
-
-    document.getElementById(
-        "infoStudy"
-    ).textContent =
-        study.name;
-
-
-    document.getElementById(
-        "infoDate"
-    ).textContent =
-        study.date;
-
-
-    document.getElementById(
-        "infoImages"
-    ).textContent =
-        study.images.length;
-
-
-    document.getElementById(
-        "infoCurrentImage"
-    ).textContent =
-
-        (currentImage+1) +
-        " / " +
-        study.images.length;
-
-
-    renderThumbnails();
-
-    applyImageTransform();
+    applyTransform();
 
 }
 
@@ -2218,8 +2691,7 @@ function renderImage(){
    MINIATURAS
 ========================================================= */
 
-function renderThumbnails(){
-
+function renderThumbnails(study){
 
     const container =
         document.getElementById(
@@ -2228,15 +2700,6 @@ function renderThumbnails(){
 
 
     container.innerHTML="";
-
-
-    const study =
-        patients[
-            currentPatient
-        ]
-        .studies[
-            currentStudy
-        ];
 
 
     study.images.forEach(
@@ -2249,7 +2712,8 @@ function renderThumbnails(){
                 );
 
 
-            img.src=src;
+            img.src =
+                src;
 
 
             img.className =
@@ -2273,7 +2737,17 @@ function renderThumbnails(){
                 currentImage =
                     index;
 
-                renderImage();
+                showImage(
+                    src
+                );
+
+                renderThumbnails(
+                    study
+                );
+
+                updateImageInformation(
+                    study
+                );
 
             };
 
@@ -2290,6 +2764,161 @@ function renderThumbnails(){
 
 
 /* =========================================================
+   ACTUALIZAR INFORMACIÓN DE IMAGEN
+========================================================= */
+
+function updateImageInformation(
+    study
+){
+
+    document.getElementById(
+        "imageCounter"
+    ).textContent =
+
+        "Imagen " +
+        (currentImage+1) +
+        " / " +
+        study.images.length;
+
+
+    document.getElementById(
+        "infoCurrentImage"
+    ).textContent =
+
+        (currentImage+1) +
+        " / " +
+        study.images.length;
+
+}
+
+
+
+/* =========================================================
+   OBTENER ESTUDIO ACTUAL
+========================================================= */
+
+function getCurrentStudy(){
+
+    const list =
+        getStudiesForDate()
+        .filter(
+            item =>
+                item.patient ===
+                currentPatient
+        );
+
+
+    return list[currentStudy];
+
+}
+
+
+
+/* =========================================================
+   SIGUIENTE IMAGEN
+========================================================= */
+
+function nextImage(){
+
+    const study =
+        getCurrentStudy();
+
+
+    if(
+        !study
+    ){
+
+        return;
+
+    }
+
+
+    currentImage++;
+
+
+    if(
+        currentImage >=
+        study.images.length
+    ){
+
+        currentImage=0;
+
+    }
+
+
+    showImage(
+        study.images[
+            currentImage
+        ]
+    );
+
+
+    renderThumbnails(
+        study
+    );
+
+
+    updateImageInformation(
+        study
+    );
+
+}
+
+
+
+/* =========================================================
+   IMAGEN ANTERIOR
+========================================================= */
+
+function previousImage(){
+
+    const study =
+        getCurrentStudy();
+
+
+    if(
+        !study
+    ){
+
+        return;
+
+    }
+
+
+    currentImage--;
+
+
+    if(
+        currentImage < 0
+    ){
+
+        currentImage =
+            study.images.length-1;
+
+    }
+
+
+    showImage(
+        study.images[
+            currentImage
+        ]
+    );
+
+
+    renderThumbnails(
+        study
+    );
+
+
+    updateImageInformation(
+        study
+    );
+
+}
+
+
+
+/* =========================================================
    ZOOM
 ========================================================= */
 
@@ -2297,13 +2926,15 @@ function zoomIn(){
 
     zoom += .15;
 
-    if(zoom>4){
+    if(
+        zoom > 4
+    ){
 
         zoom=4;
 
     }
 
-    applyImageTransform();
+    applyTransform();
 
 }
 
@@ -2313,13 +2944,15 @@ function zoomOut(){
 
     zoom -= .15;
 
-    if(zoom<.25){
+    if(
+        zoom < .25
+    ){
 
         zoom=.25;
 
     }
 
-    applyImageTransform();
+    applyTransform();
 
 }
 
@@ -2333,13 +2966,15 @@ function rotateRight(){
 
     rotation += 90;
 
-    if(rotation>=360){
+    if(
+        rotation >= 360
+    ){
 
         rotation=0;
 
     }
 
-    applyImageTransform();
+    applyTransform();
 
 }
 
@@ -2349,13 +2984,15 @@ function rotateLeft(){
 
     rotation -= 90;
 
-    if(rotation<0){
+    if(
+        rotation < 0
+    ){
 
         rotation=270;
 
     }
 
-    applyImageTransform();
+    applyTransform();
 
 }
 
@@ -2370,7 +3007,7 @@ function invertImage(){
     inverted =
         !inverted;
 
-    applyImageTransform();
+    applyTransform();
 
 }
 
@@ -2380,33 +3017,37 @@ function invertImage(){
    CONTRASTE
 ========================================================= */
 
-function increaseContrast(){
+function contrastUp(){
 
     contrast += .15;
 
-    if(contrast>2.5){
+    if(
+        contrast > 2.5
+    ){
 
         contrast=2.5;
 
     }
 
-    applyImageTransform();
+    applyTransform();
 
 }
 
 
 
-function decreaseContrast(){
+function contrastDown(){
 
     contrast -= .15;
 
-    if(contrast<.4){
+    if(
+        contrast < .4
+    ){
 
         contrast=.4;
 
     }
 
-    applyImageTransform();
+    applyTransform();
 
 }
 
@@ -2416,8 +3057,7 @@ function decreaseContrast(){
    APLICAR TRANSFORMACIONES
 ========================================================= */
 
-function applyImageTransform(){
-
+function applyTransform(){
 
     const wrapper =
         document.getElementById(
@@ -2435,14 +3075,14 @@ function applyImageTransform(){
 
         "scale(" +
         zoom +
-        ") rotate(" +
+        ") " +
+
+        "rotate(" +
         rotation +
         "deg)";
 
 
     image.style.filter =
-
-        "brightness(1) " +
 
         "contrast(" +
         contrast +
@@ -2479,10 +3119,10 @@ function applyImageTransform(){
 
 
 /* =========================================================
-   RESTABLECER
+   RESTABLECER VISOR
 ========================================================= */
 
-function resetImageSettings(){
+function resetView(){
 
     zoom=1;
 
@@ -2492,93 +3132,106 @@ function resetImageSettings(){
 
     contrast=1;
 
-}
 
-
-
-/* =========================================================
-   SIGUIENTE IMAGEN
-========================================================= */
-
-function nextImage(){
-
-
-    const study =
-        patients[
-            currentPatient
-        ]
-        .studies[
-            currentStudy
-        ];
-
-
-    if(
-        study.images.length===0
-    ){
-
-        return;
-
-    }
-
-
-    currentImage++;
-
-
-    if(
-        currentImage >=
-        study.images.length
-    ){
-
-        currentImage=0;
-
-    }
-
-
-    renderImage();
+    applyTransform();
 
 }
 
 
 
 /* =========================================================
-   IMAGEN ANTERIOR
+   LIMPIAR VISOR
 ========================================================= */
 
-function previousImage(){
+function clearViewer(){
+
+    document.getElementById(
+        "viewerTitle"
+    ).textContent =
+        "Sin estudio seleccionado";
 
 
-    const study =
-        patients[
-            currentPatient
-        ]
-        .studies[
-            currentStudy
-        ];
+    document.getElementById(
+        "viewerSubtitle"
+    ).textContent =
+
+        "Fecha: " +
+        formatDate(
+            selectedDate
+        );
 
 
-    if(
-        study.images.length===0
-    ){
-
-        return;
-
-    }
+    document.getElementById(
+        "imageCounter"
+    ).textContent =
+        "--";
 
 
-    currentImage--;
+    document.getElementById(
+        "overlayRight"
+    ).innerHTML =
+        "--";
 
 
-    if(
-        currentImage<0
-    ){
-
-        currentImage =
-            study.images.length-1;
-
-    }
+    document.getElementById(
+        "imageWrapper"
+    ).style.display =
+        "none";
 
 
-    renderImage();
+    document.getElementById(
+        "emptyMessage"
+    ).style.display =
+        "block";
+
+
+    document.getElementById(
+        "thumbnailList"
+    ).innerHTML="";
+
+
+    document.getElementById(
+        "infoPatientName"
+    ).textContent =
+        "--";
+
+
+    document.getElementById(
+        "infoPatientMeta"
+    ).textContent =
+        "--";
+
+
+    document.getElementById(
+        "infoStudy"
+    ).textContent =
+        "--";
+
+
+    document.getElementById(
+        "infoDate"
+    ).textContent =
+        formatDate(
+            selectedDate
+        );
+
+
+    document.getElementById(
+        "infoModality"
+    ).textContent =
+        "--";
+
+
+    document.getElementById(
+        "infoImages"
+    ).textContent =
+        "--";
+
+
+    document.getElementById(
+        "infoCurrentImage"
+    ).textContent =
+        "--";
 
 }
 
@@ -2588,7 +3241,7 @@ function previousImage(){
    BUSCAR PACIENTE
 ========================================================= */
 
-function buscarPaciente(){
+function searchPatients(){
 
     const value =
         document.getElementById(
@@ -2610,14 +3263,8 @@ function buscarPaciente(){
 
 function openFullscreen(){
 
-
     const study =
-        patients[
-            currentPatient
-        ]
-        .studies[
-            currentStudy
-        ];
+        getCurrentStudy();
 
 
     if(
@@ -2630,25 +3277,18 @@ function openFullscreen(){
     }
 
 
-    const viewer =
-        document.getElementById(
-            "fullscreenViewer"
-        );
+    document.getElementById(
+        "fullscreenImage"
+    ).src =
 
-
-    const image =
-        document.getElementById(
-            "fullscreenImage"
-        );
-
-
-    image.src =
         study.images[
             currentImage
         ];
 
 
-    viewer.style.display =
+    document.getElementById(
+        "fullscreenViewer"
+    ).style.display =
         "flex";
 
 }
@@ -2667,14 +3307,22 @@ function closeFullscreen(){
 
 
 /* =========================================================
-   INICIO
+   INICIALIZACIÓN
 ========================================================= */
+
+renderCalendar();
 
 renderPatients();
 
-renderStudies();
+clearViewer();
 
-renderImage();
+document.getElementById(
+    "currentDateLabel"
+).textContent =
+
+    formatDate(
+        selectedDate
+    );
 
 
 </script>
