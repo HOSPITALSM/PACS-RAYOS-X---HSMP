@@ -126,21 +126,6 @@ button,input,select{font-family:Arial,Helvetica,sans-serif;}
     color:var(--green);
 }
 
-.admin-top-button{
-    display:none;
-    height:34px;
-    padding:0 12px;
-    background:var(--green);
-    border:0;
-    border-radius:4px;
-    color:#07120d;
-    font-size:10px;
-    font-weight:bold;
-    cursor:pointer;
-}
-
-.admin-top-button:hover{background:#55d99d;}
-
 .auth-user{
     color:var(--green);
     font-size:9px;
@@ -149,6 +134,8 @@ button,input,select{font-family:Arial,Helvetica,sans-serif;}
     text-overflow:ellipsis;
     white-space:nowrap;
 }
+
+.logout-button{display:none;}
 
 .app{
     height:calc(100vh - 64px);
@@ -676,23 +663,6 @@ button,input,select{font-family:Arial,Helvetica,sans-serif;}
     letter-spacing:.6px;
 }
 
-.form-input,
-.form-select{
-    width:100%;
-    height:40px;
-    background:#1a1d20;
-    border:1px solid #34383d;
-    border-radius:5px;
-    color:#eee;
-    padding:0 11px;
-    outline:none;
-}
-
-.form-input:focus,
-.form-select:focus{
-    border-color:var(--green);
-}
-
 .file-input{
     width:100%;
     padding:10px;
@@ -779,8 +749,6 @@ button,input,select{font-family:Arial,Helvetica,sans-serif;}
 
 .login-body{padding:24px;}
 
-.logout-button{display:none;}
-
 @media(max-width:1100px){
     .app{
         grid-template-columns:220px 220px 1fr 230px;
@@ -851,13 +819,6 @@ button,input,select{font-family:Arial,Helvetica,sans-serif;}
         class="auth-user"
         id="authUser">
     </span>
-
-    <button
-        class="admin-top-button"
-        id="newStudyButton"
-        onclick="openAdmin()">
-        + NUEVO ESTUDIO
-    </button>
 
     <button
         class="auth-button"
@@ -1289,113 +1250,6 @@ button,input,select{font-family:Arial,Helvetica,sans-serif;}
 </div>
 
 
-<!-- NUEVO ESTUDIO -->
-
-<div
-    class="admin-overlay"
-    id="adminOverlay">
-
-<div class="admin-box">
-
-<div class="admin-header">
-
-    <div class="admin-title">
-        NUEVO ESTUDIO
-    </div>
-
-    <button
-        class="admin-close"
-        onclick="closeAdmin()">
-        ×
-    </button>
-
-</div>
-
-<div class="admin-body">
-
-<!-- NOMBRE DEL PACIENTE -->
-
-<div class="form-group">
-
-    <label class="form-label">
-        Nombre del paciente *
-    </label>
-
-    <input
-        class="form-input"
-        id="adminPatient"
-        type="text"
-        placeholder="Ej. JUAN PÉREZ GARCÍA">
-
-</div>
-
-<!-- FECHA DEL ESTUDIO -->
-
-<div class="form-group">
-
-    <label class="form-label">
-        Fecha del estudio
-    </label>
-
-    <input
-        class="form-input"
-        id="adminDate"
-        type="date">
-
-</div>
-
-<!-- IMÁGENES JPG -->
-
-<div class="form-group">
-
-    <label class="form-label">
-        Imágenes JPG
-    </label>
-
-    <input
-        class="file-input"
-        id="adminFiles"
-        type="file"
-        accept=".jpg,.jpeg,image/jpeg"
-        multiple
-        onchange="showSelectedFiles()">
-
-    <div
-        class="file-list"
-        id="fileList">
-        Ningún archivo seleccionado.
-    </div>
-
-</div>
-
-<div
-    class="status-message"
-    id="adminStatus">
-</div>
-
-<div class="admin-actions">
-
-    <button
-        class="admin-secondary"
-        onclick="closeAdmin()">
-        CANCELAR
-    </button>
-
-    <button
-        class="admin-primary"
-        onclick="createStudyAndUpload()">
-        CREAR ESTUDIO
-    </button>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-
 <!-- AÑADIR IMÁGENES -->
 
 <div
@@ -1509,14 +1363,17 @@ button,input,select{font-family:Arial,Helvetica,sans-serif;}
 
 <script>
 
-const SUPABASE_URL = "https://tapjgdzwmsfgthxncero.supabase.co";
+const SUPABASE_URL =
+    "https://tapjgdzwmsfgthxncero.supabase.co";
 
-const SUPABASE_KEY = "TU_PUBLISHABLE_KEY_COMPLETA";
+const SUPABASE_KEY =
+    "TU_PUBLISHABLE_KEY_COMPLETA";
 
-const supabaseClient = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-);
+const supabaseClient =
+    window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+    );
 
 const ADMIN_UID =
     "622de888-2abd-4f4c-b1ba-488c7472b767";
@@ -3464,20 +3321,12 @@ function updateAuthInterface(user){
             "authUser"
         );
 
-    const newStudyButton =
-        document.getElementById(
-            "newStudyButton"
-        );
-
     if(user){
 
         loginButton.style.display =
             "none";
 
         logoutButton.style.display =
-            "inline-block";
-
-        newStudyButton.style.display =
             "inline-block";
 
         authUser.textContent =
@@ -3495,13 +3344,9 @@ function updateAuthInterface(user){
         logoutButton.style.display =
             "none";
 
-        newStudyButton.style.display =
-            "none";
-
         authUser.textContent =
             "";
 
-        closeAdmin();
         closeAddImages();
 
         document.getElementById(
@@ -3509,53 +3354,6 @@ function updateAuthInterface(user){
         ).style.display =
             "none";
     }
-}
-
-
-/* =========================================================
-   NUEVO ESTUDIO
-========================================================= */
-
-function openAdmin(){
-
-    document.getElementById(
-        "adminPatient"
-    ).value =
-        currentPatient ||
-        "";
-
-    document.getElementById(
-        "adminDate"
-    ).value =
-        selectedDate;
-
-    document.getElementById(
-        "adminFiles"
-    ).value =
-        "";
-
-    document.getElementById(
-        "fileList"
-    ).textContent =
-        "Ningún archivo seleccionado.";
-
-    document.getElementById(
-        "adminStatus"
-    ).textContent =
-        "";
-
-    document.getElementById(
-        "adminOverlay"
-    ).style.display =
-        "flex";
-}
-
-function closeAdmin(){
-
-    document.getElementById(
-        "adminOverlay"
-    ).style.display =
-        "none";
 }
 
 
@@ -3572,462 +3370,6 @@ async function logoutAdmin(){
     updateAuthInterface(
         null
     );
-}
-
-
-/* =========================================================
-   ARCHIVOS
-========================================================= */
-
-function showSelectedFiles(){
-
-    const input =
-        document.getElementById(
-            "adminFiles"
-        );
-
-    const list =
-        document.getElementById(
-            "fileList"
-        );
-
-    if(
-        !input.files ||
-        input.files.length === 0
-    ){
-
-        list.textContent =
-            "Ningún archivo seleccionado.";
-
-        return;
-    }
-
-    const files =
-        Array.from(
-            input.files
-        );
-
-    const invalid =
-        files.filter(
-            file =>
-                !file.type.includes(
-                    "jpeg"
-                )
-        );
-
-    if(invalid.length){
-
-        list.innerHTML =
-            '<span style="color:#e47777">' +
-            "Solo se permiten imágenes JPG/JPEG." +
-            "</span>";
-
-        return;
-    }
-
-    list.innerHTML =
-        files
-            .map(
-                (
-                    file,
-                    index
-                ) =>
-                    (index + 1) +
-                    ". " +
-                    escapeHtml(
-                        file.name
-                    )
-            )
-            .join("<br>");
-}
-
-
-/* =========================================================
-   CREAR ESTUDIO
-   SOLO NOMBRE, FECHA E IMÁGENES
-========================================================= */
-
-async function createStudyAndUpload(){
-
-    const patient =
-        document.getElementById(
-            "adminPatient"
-        ).value.trim();
-
-    const date =
-        document.getElementById(
-            "adminDate"
-        ).value;
-
-    const fileInput =
-        document.getElementById(
-            "adminFiles"
-        );
-
-    const status =
-        document.getElementById(
-            "adminStatus"
-        );
-
-
-    /* =====================================================
-       NOMBRE OBLIGATORIO
-    ===================================================== */
-
-    if(!patient){
-
-        status.className =
-            "status-message status-error";
-
-        status.textContent =
-            "Ingresa el nombre del paciente.";
-
-        return;
-    }
-
-
-    /* =====================================================
-       VERIFICAR SESIÓN
-    ===================================================== */
-
-    const {
-        data:sessionData,
-        error:sessionError
-    } =
-        await supabaseClient
-            .auth
-            .getSession();
-
-    if(sessionError){
-
-        status.className =
-            "status-message status-error";
-
-        status.textContent =
-            sessionError.message;
-
-        return;
-    }
-
-    if(
-        !sessionData ||
-        !sessionData.session ||
-        !sessionData.session.user ||
-        sessionData.session.user.id !==
-        ADMIN_UID
-    ){
-
-        status.className =
-            "status-message status-error";
-
-        status.textContent =
-            "La sesión de administrador no es válida.";
-
-        return;
-    }
-
-
-    /* =====================================================
-       IMÁGENES
-    ===================================================== */
-
-    const files =
-        fileInput.files
-        ? Array.from(
-            fileInput.files
-          )
-        : [];
-
-
-    const invalidFiles =
-        files.filter(
-            file =>
-                !file.type ||
-                !file.type.includes("jpeg")
-        );
-
-    if(invalidFiles.length){
-
-        status.className =
-            "status-message status-error";
-
-        status.textContent =
-            "Solo se permiten imágenes JPG/JPEG.";
-
-        return;
-    }
-
-
-    const uploadedPaths = [];
-
-
-    try{
-
-        status.className =
-            "status-message";
-
-        status.textContent =
-            "Preparando estudio...";
-
-
-        const finalDate =
-            date ||
-            getTodayString();
-
-
-        /* =================================================
-           SUBIR IMÁGENES
-        ================================================= */
-
-        if(files.length > 0){
-
-            const folder =
-                finalDate +
-                "/" +
-                crypto.randomUUID();
-
-
-            for(
-                let i = 0;
-                i < files.length;
-                i++
-            ){
-
-                const file =
-                    files[i];
-
-                const safeName =
-                    file.name.replace(
-                        /[^a-zA-Z0-9._-]/g,
-                        "_"
-                    );
-
-                const path =
-                    folder +
-                    "/" +
-                    String(
-                        i + 1
-                    ).padStart(
-                        3,
-                        "0"
-                    ) +
-                    "_" +
-                    safeName;
-
-                status.textContent =
-                    "Subiendo imagen " +
-                    (i + 1) +
-                    " de " +
-                    files.length +
-                    "...";
-
-
-                const {
-                    error:uploadError
-                } =
-                    await supabaseClient
-                        .storage
-                        .from(
-                            STORAGE_BUCKET
-                        )
-                        .upload(
-                            path,
-                            file,
-                            {
-                                cacheControl:
-                                    "3600",
-                                upsert:
-                                    false,
-                                contentType:
-                                    "image/jpeg"
-                            }
-                        );
-
-                if(uploadError)
-                    throw uploadError;
-
-                uploadedPaths.push(
-                    path
-                );
-            }
-        }
-
-
-        /* =================================================
-           GUARDAR ESTUDIO
-           
-           Solo se utilizan:
-           - date
-           - patient
-           - images
-           
-           No se envían:
-           - structure
-           - study
-           - modality
-        ================================================= */
-
-        status.textContent =
-            "Guardando estudio en Supabase...";
-
-
-        const studyData = {
-
-            date:
-                finalDate,
-
-            patient:
-                patient,
-
-            images:
-                uploadedPaths
-
-        };
-
-
-        const {
-            data:insertedStudy,
-            error:insertError
-        } =
-            await supabaseClient
-                .from("studies")
-                .insert(
-                    studyData
-                )
-                .select()
-                .single();
-
-
-        if(insertError){
-
-            if(uploadedPaths.length){
-
-                await supabaseClient
-                    .storage
-                    .from(
-                        STORAGE_BUCKET
-                    )
-                    .remove(
-                        uploadedPaths
-                    );
-            }
-
-            throw insertError;
-        }
-
-
-        /* =================================================
-           ACTUALIZAR INTERFAZ
-        ================================================= */
-
-        selectedDate =
-            finalDate;
-
-        calendarDate =
-            new Date(
-                finalDate +
-                "T00:00:00"
-            );
-
-        currentPatient =
-            patient;
-
-        currentStudy =
-            0;
-
-        currentImage =
-            0;
-
-
-        await loadStudies();
-
-
-        const patientStudies =
-            getPatientStudies();
-
-
-        const createdIndex =
-            patientStudies.findIndex(
-                item =>
-                    String(item.id) ===
-                    String(
-                        insertedStudy.id
-                    )
-            );
-
-
-        if(createdIndex >= 0){
-
-            currentStudy =
-                createdIndex;
-
-        }
-        else{
-
-            currentStudy =
-                Math.max(
-                    patientStudies.length - 1,
-                    0
-                );
-        }
-
-
-        currentImage =
-            0;
-
-
-        renderCalendar();
-        renderPatients();
-
-
-        const current =
-            getCurrentStudy();
-
-
-        if(current){
-
-            renderStudy(
-                current
-            );
-
-        }
-        else{
-
-            clearViewer();
-
-        }
-
-
-        status.className =
-            "status-message status-success";
-
-        status.textContent =
-            "Estudio creado correctamente.";
-
-
-        setTimeout(
-            () =>
-                closeAdmin(),
-            800
-        );
-
-
-    }
-    catch(error){
-
-        console.error(
-            "ERROR AL CREAR ESTUDIO:",
-            error
-        );
-
-        status.className =
-            "status-message status-error";
-
-        status.textContent =
-            error.message ||
-            "No se pudo crear el estudio.";
-
-    }
 }
 
 
@@ -4283,7 +3625,6 @@ async function uploadAdditionalImages(){
                 files.length +
                 "...";
 
-
             const {
                 error:uploadError
             } =
@@ -4313,7 +3654,6 @@ async function uploadAdditionalImages(){
             );
         }
 
-
         const existingPaths =
             study.images
                 .map(
@@ -4332,10 +3672,8 @@ async function uploadAdditionalImages(){
             ...newPaths
         ];
 
-
         status.textContent =
             "Actualizando estudio...";
-
 
         const {
             error:updateError
@@ -4365,7 +3703,6 @@ async function uploadAdditionalImages(){
             throw updateError;
         }
 
-
         const studyId =
             study.id;
 
@@ -4375,9 +3712,7 @@ async function uploadAdditionalImages(){
         const studyDate =
             study.date;
 
-
         await loadStudies();
-
 
         selectedDate =
             studyDate;
@@ -4385,10 +3720,8 @@ async function uploadAdditionalImages(){
         currentPatient =
             patientName;
 
-
         const patientList =
             getPatientStudies();
-
 
         currentStudy =
             patientList.findIndex(
@@ -4397,14 +3730,11 @@ async function uploadAdditionalImages(){
                     String(studyId)
             );
 
-
         if(currentStudy < 0)
             currentStudy = 0;
 
-
         const updatedStudy =
             getCurrentStudy();
-
 
         if(updatedStudy){
 
@@ -4429,20 +3759,17 @@ async function uploadAdditionalImages(){
 
         }
 
-
         status.className =
             "status-message status-success";
 
         status.textContent =
             "Imágenes añadidas correctamente.";
 
-
         setTimeout(
             () =>
                 closeAddImages(),
             800
         );
-
 
     }
     catch(error){
@@ -4498,7 +3825,6 @@ async function deleteCurrentStudy(){
     if(!confirmed)
         return;
 
-
     const admin =
         await isAdminLogged();
 
@@ -4511,14 +3837,12 @@ async function deleteCurrentStudy(){
         return;
     }
 
-
     try{
 
         document.getElementById(
             "viewerSubtitle"
         ).textContent =
             "Eliminando estudio...";
-
 
         const paths =
             study.images
@@ -4533,7 +3857,6 @@ async function deleteCurrentStudy(){
                         path
                 );
 
-
         const {
             error:deleteError
         } =
@@ -4545,10 +3868,8 @@ async function deleteCurrentStudy(){
                     study.id
                 );
 
-
         if(deleteError)
             throw deleteError;
-
 
         if(paths.length){
 
@@ -4574,7 +3895,6 @@ async function deleteCurrentStudy(){
             }
         }
 
-
         currentPatient =
             null;
 
@@ -4584,16 +3904,13 @@ async function deleteCurrentStudy(){
         currentImage =
             0;
 
-
         await loadStudies();
 
         clearViewer();
 
-
         alert(
             "Estudio eliminado correctamente."
         );
-
 
     }
     catch(error){
@@ -4631,7 +3948,6 @@ document.addEventListener(
 
             closeFullscreen();
             closeLogin();
-            closeAdmin();
             closeAddImages();
 
         }
