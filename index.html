@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -40,7 +39,6 @@ body{
     color:var(--text);
     font-family:Arial,Helvetica,sans-serif;
 
-    /* NUEVO: permite desplazamiento vertical */
     overflow-x:hidden;
     overflow-y:auto;
 }
@@ -90,7 +88,7 @@ select{
 }
 
 .brand-title{
-    font-size:16px;
+    font-size:17px;
     font-weight:bold;
     letter-spacing:.5px;
     color:var(--green);
@@ -98,7 +96,7 @@ select{
 
 .brand-subtitle{
     color:var(--green);
-    font-size:11px;
+    font-size:12px;
     margin-top:5px;
 }
 
@@ -117,7 +115,7 @@ select{
     color:white;
     padding:0 13px;
     outline:none;
-    font-size:12px;
+    font-size:13px;
 }
 
 .search input:focus{
@@ -126,7 +124,7 @@ select{
 
 .current-date{
     color:#a9adb2;
-    font-size:12px;
+    font-size:13px;
     white-space:nowrap;
 }
 
@@ -143,7 +141,7 @@ select{
     border:1px solid #34383d;
     border-radius:4px;
     color:#d0d4d8;
-    font-size:11px;
+    font-size:12px;
     cursor:pointer;
 }
 
@@ -154,7 +152,7 @@ select{
 
 .auth-user{
     color:var(--green);
-    font-size:10px;
+    font-size:11px;
     max-width:130px;
     overflow:hidden;
     text-overflow:ellipsis;
@@ -170,18 +168,10 @@ select{
 ========================================================= */
 
 .app{
-    /*
-       NUEVO:
-       La altura mínima permite que aparezca la barra
-       vertical del navegador cuando la pantalla sea baja.
-    */
     min-height:calc(100vh - 72px);
 
     display:grid;
 
-    /*
-       INFORMACIÓN | PACIENTES | VISOR | FECHA
-    */
     grid-template-columns:260px 255px 1fr 255px;
 
     min-width:1050px;
@@ -211,7 +201,7 @@ select{
 }
 
 .panel-title{
-    font-size:11px;
+    font-size:12px;
     text-transform:uppercase;
     letter-spacing:1px;
     color:var(--green);
@@ -219,7 +209,7 @@ select{
 
 .panel-count{
     color:#858a91;
-    font-size:11px;
+    font-size:12px;
 }
 
 .panel-body{
@@ -240,7 +230,7 @@ select{
     border:0;
     border-radius:5px;
     color:#07120d;
-    font-size:11px;
+    font-size:12px;
     font-weight:bold;
     cursor:pointer;
 }
@@ -265,7 +255,7 @@ select{
 }
 
 .calendar-month{
-    font-size:14px;
+    font-size:15px;
     font-weight:bold;
     text-transform:capitalize;
 }
@@ -296,7 +286,7 @@ select{
 .calendar-weekdays div{
     text-align:center;
     color:#777d83;
-    font-size:10px;
+    font-size:11px;
     padding:5px 0;
 }
 
@@ -313,7 +303,7 @@ select{
     justify-content:center;
     border-radius:4px;
     color:#aeb2b7;
-    font-size:11px;
+    font-size:12px;
     cursor:pointer;
     position:relative;
 }
@@ -359,7 +349,7 @@ select{
     color:#bbbfc4;
     border-radius:4px;
     cursor:pointer;
-    font-size:11px;
+    font-size:12px;
 }
 
 .today-button:hover{
@@ -386,7 +376,7 @@ select{
 }
 
 .patient-name{
-    font-size:13px;
+    font-size:14px;
     margin-bottom:7px;
 }
 
@@ -394,7 +384,7 @@ select{
     display:flex;
     justify-content:space-between;
     color:#858a91;
-    font-size:10px;
+    font-size:11px;
 }
 
 .badge{
@@ -402,14 +392,14 @@ select{
     padding:3px 7px;
     border-radius:10px;
     color:#c2c6ca;
-    font-size:10px;
+    font-size:11px;
 }
 
 .no-results{
     padding:35px 15px;
     text-align:center;
     color:#686e74;
-    font-size:12px;
+    font-size:13px;
     line-height:1.7;
 }
 
@@ -422,12 +412,21 @@ select{
     display:flex;
     flex-direction:column;
     min-width:0;
-    min-height:650px;
+
+    /*
+       ALTURA ESTÁNDAR DEL VISOR.
+       Evita que el visor crezca excesivamente
+       en sentido vertical.
+    */
+    height:720px;
+    min-height:720px;
+
     overflow:hidden;
 }
 
 .viewer-header{
     min-height:64px;
+    height:64px;
     background:#111315;
     border-bottom:1px solid var(--border);
     display:flex;
@@ -439,13 +438,13 @@ select{
 }
 
 .viewer-title{
-    font-size:13px;
+    font-size:14px;
     color:var(--green);
 }
 
 .viewer-subtitle{
     color:#80858b;
-    font-size:10px;
+    font-size:11px;
     margin-top:5px;
 }
 
@@ -467,7 +466,7 @@ select{
     border:1px solid #34383d;
     border-radius:4px;
     color:#ccc;
-    font-size:10px;
+    font-size:11px;
     cursor:pointer;
 }
 
@@ -483,7 +482,7 @@ select{
 
 .image-counter{
     color:#999fa5;
-    font-size:11px;
+    font-size:12px;
     white-space:nowrap;
 }
 
@@ -492,19 +491,35 @@ select{
 ========================================================= */
 
 .viewport{
-    flex:1;
-    min-height:360px;
+
+    /*
+       ALTURA ESTÁNDAR DEL ÁREA DE IMAGEN.
+       Esta es la modificación principal.
+    */
+    height:480px;
+    min-height:480px;
+    max-height:480px;
+
     position:relative;
-    overflow:hidden;
+
+    /*
+       Permite desplazamiento cuando una imagen
+       vertical o ampliada supera el área visible.
+    */
+    overflow:auto;
+
     display:flex;
     align-items:center;
     justify-content:center;
+
     background:radial-gradient(
         circle,
         #151515 0%,
         #050505 65%,
         #000 100%
     );
+
+    flex-shrink:0;
 }
 
 .overlay-left{
@@ -512,7 +527,7 @@ select{
     top:14px;
     left:16px;
     color:#777d83;
-    font-size:10px;
+    font-size:11px;
     z-index:5;
     pointer-events:none;
 }
@@ -522,7 +537,7 @@ select{
     top:14px;
     right:16px;
     color:#777d83;
-    font-size:10px;
+    font-size:11px;
     text-align:right;
     z-index:5;
     pointer-events:none;
@@ -530,7 +545,7 @@ select{
 
 .empty-message{
     color:#60666c;
-    font-size:13px;
+    font-size:14px;
     text-align:center;
     padding:20px;
 }
@@ -538,16 +553,22 @@ select{
 .image-wrapper{
     width:100%;
     height:100%;
+    min-width:100%;
+    min-height:100%;
+
     display:flex;
     align-items:center;
     justify-content:center;
+
     transform-origin:center center;
 }
 
 .main-image{
     max-width:86%;
     max-height:86%;
+
     object-fit:contain;
+
     user-select:none;
     -webkit-user-drag:none;
 }
@@ -558,6 +579,7 @@ select{
 
 .toolbar{
     min-height:60px;
+    height:60px;
     background:#111315;
     border-top:1px solid var(--border);
     display:flex;
@@ -566,10 +588,6 @@ select{
     padding:9px;
     flex-shrink:0;
 
-    /*
-       IMPORTANTE:
-       La barra ya no queda escondida por el contenido.
-    */
     position:relative;
     z-index:20;
 }
@@ -582,7 +600,7 @@ select{
     border:1px solid #34383d;
     border-radius:4px;
     color:#d0d4d8;
-    font-size:11px;
+    font-size:12px;
     cursor:pointer;
 }
 
@@ -605,6 +623,7 @@ select{
 
 .thumbnails{
     min-height:112px;
+    height:112px;
     background:#101214;
     border-top:1px solid var(--border);
     display:flex;
@@ -677,7 +696,7 @@ select{
 
 .info-heading{
     color:var(--green);
-    font-size:10px;
+    font-size:11px;
     text-transform:uppercase;
     letter-spacing:1px;
     margin-bottom:14px;
@@ -690,13 +709,13 @@ select{
 .info-label{
     display:block;
     color:#686e74;
-    font-size:9px;
+    font-size:10px;
     margin-bottom:4px;
 }
 
 .info-value{
     color:#d1d4d7;
-    font-size:12px;
+    font-size:13px;
 }
 
 .patient-card{
@@ -707,13 +726,13 @@ select{
 }
 
 .patient-card-name{
-    font-size:14px;
+    font-size:15px;
     margin-bottom:9px;
 }
 
 .patient-card-meta{
     color:#858a91;
-    font-size:10px;
+    font-size:11px;
     line-height:1.8;
 }
 
@@ -726,7 +745,7 @@ select{
     color:#eee;
     padding:0 9px;
     outline:none;
-    font-size:11px;
+    font-size:12px;
 }
 
 .study-selector:focus{
@@ -746,7 +765,7 @@ select{
     color:#eee;
     padding:0 11px;
     outline:none;
-    font-size:12px;
+    font-size:13px;
 }
 
 .form-input:focus{
@@ -822,7 +841,7 @@ select{
 
 .admin-title{
     color:var(--green);
-    font-size:16px;
+    font-size:17px;
     font-weight:bold;
 }
 
@@ -845,7 +864,7 @@ select{
 .form-label{
     display:block;
     color:#a0a5aa;
-    font-size:10px;
+    font-size:11px;
     margin-bottom:7px;
     text-transform:uppercase;
     letter-spacing:.6px;
@@ -858,13 +877,13 @@ select{
     border:1px dashed #454b51;
     border-radius:5px;
     color:#aaa;
-    font-size:11px;
+    font-size:12px;
 }
 
 .file-list{
     margin-top:9px;
     color:#858a91;
-    font-size:10px;
+    font-size:11px;
     line-height:1.8;
     max-height:110px;
     overflow-y:auto;
@@ -885,7 +904,7 @@ select{
     border-radius:5px;
     font-weight:bold;
     cursor:pointer;
-    font-size:11px;
+    font-size:12px;
 }
 
 .admin-primary:hover{
@@ -900,12 +919,12 @@ select{
     color:#ccc;
     border-radius:5px;
     cursor:pointer;
-    font-size:11px;
+    font-size:12px;
 }
 
 .status-message{
     margin-top:13px;
-    font-size:11px;
+    font-size:12px;
     line-height:1.6;
 }
 
@@ -938,13 +957,13 @@ select{
 
 .login-title{
     color:var(--green);
-    font-size:17px;
+    font-size:18px;
     font-weight:bold;
 }
 
 .login-subtitle{
     color:#858a91;
-    font-size:11px;
+    font-size:12px;
     margin-top:7px;
 }
 
@@ -1003,6 +1022,19 @@ select{
 
     .viewer{
         order:3;
+
+        /*
+           En pantallas pequeñas se mantiene
+           un visor compacto.
+        */
+        height:680px;
+        min-height:680px;
+    }
+
+    .viewport{
+        height:440px;
+        min-height:440px;
+        max-height:440px;
     }
 
     .panel:last-child{
@@ -1032,11 +1064,11 @@ select{
     }
 
     .brand-title{
-        font-size:12px;
+        font-size:13px;
     }
 
     .brand-subtitle{
-        font-size:9px;
+        font-size:10px;
     }
 
     .current-date{
@@ -1054,15 +1086,22 @@ select{
     .tool{
         flex-shrink:0;
     }
+
+    .viewer{
+        height:650px;
+        min-height:650px;
+    }
+
+    .viewport{
+        height:410px;
+        min-height:410px;
+        max-height:410px;
+    }
 }
 </style>
 </head>
 
 <body>
-
-<!-- =========================================================
-     BARRA SUPERIOR
-========================================================= -->
 
 <header class="topbar">
 
@@ -1121,10 +1160,6 @@ select{
 
 
 <div class="app">
-
-<!-- =========================================================
-     COLUMNA INFORMACIÓN
-========================================================= -->
 
 <aside class="panel info-panel">
 
@@ -1266,10 +1301,6 @@ select{
 </aside>
 
 
-<!-- =========================================================
-     COLUMNA PACIENTES
-========================================================= -->
-
 <section class="panel">
 
 <div class="panel-header">
@@ -1303,10 +1334,6 @@ select{
 
 </section>
 
-
-<!-- =========================================================
-     VISOR
-========================================================= -->
 
 <section class="viewer">
 
@@ -1473,10 +1500,6 @@ select{
 </section>
 
 
-<!-- =========================================================
-     COLUMNA FECHA
-========================================================= -->
-
 <section class="panel">
 
 <div class="panel-header">
@@ -1539,10 +1562,6 @@ select{
 
 </div>
 
-
-<!-- =========================================================
-     LOGIN
-========================================================= -->
 
 <div
     class="admin-overlay"
@@ -1621,10 +1640,6 @@ select{
 
 </div>
 
-
-<!-- =========================================================
-     AGREGAR NUEVO ESTUDIO
-========================================================= -->
 
 <div
     class="admin-overlay"
@@ -1725,10 +1740,6 @@ select{
 </div>
 
 
-<!-- =========================================================
-     AÑADIR IMÁGENES
-========================================================= -->
-
 <div
     class="admin-overlay"
     id="addImagesOverlay">
@@ -1818,10 +1829,6 @@ select{
 
 </div>
 
-
-<!-- =========================================================
-     PANTALLA COMPLETA
-========================================================= -->
 
 <div
     class="fullscreen"
@@ -4277,12 +4284,6 @@ async function createNewStudy(){
         status.textContent =
             "Creando estudio...";
 
-        /*
-           IMPORTANTE:
-           study ya no es obligatorio en Supabase.
-           Por eso enviamos NULL.
-        */
-
         const {
             data,
             error
@@ -4404,12 +4405,6 @@ async function createNewStudy(){
         status.textContent =
             error.message ||
             "No se pudo crear el estudio.";
-
-        /*
-           Si hubo archivos subidos pero falló
-           la creación de la fila, intentamos
-           eliminarlos.
-        */
 
         if(newPaths.length){
 
@@ -5073,4 +5068,3 @@ loadStudies();
 
 </body>
 </html>
-```
