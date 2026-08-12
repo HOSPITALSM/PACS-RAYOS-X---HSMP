@@ -3423,9 +3423,16 @@ document.getElementById(
 };
 
 
-image.src=src;
+image.onload=()=>{
+
+fitImageToViewport();
 
 applyTransform();
+
+};
+
+
+image.src=src;
 
 }
 
