@@ -22,7 +22,9 @@
     --green-dark:#2fb477;
 }
 
-*{box-sizing:border-box}
+*{
+    box-sizing:border-box;
+}
 
 html,body{
     margin:0;
@@ -33,7 +35,9 @@ html,body{
     font-family:Arial,Helvetica,sans-serif;
 }
 
-body{overflow:hidden}
+body{
+    overflow:hidden;
+}
 
 button,input,select{
     font-family:Arial,Helvetica,sans-serif;
@@ -66,7 +70,9 @@ button,input,select{
     object-fit:contain;
 }
 
-.brand{min-width:280px}
+.brand{
+    min-width:280px;
+}
 
 .brand-title{
     font-size:15px;
@@ -198,7 +204,9 @@ button,input,select{
     overflow-y:auto;
 }
 
-.calendar{padding:12px}
+.calendar{
+    padding:12px;
+}
 
 .calendar-header{
     display:flex;
@@ -255,9 +263,17 @@ button,input,select{
     position:relative;
 }
 
-.day:hover{background:var(--hover)}
-.day.other-month{color:#3e4247}
-.day.today{border:1px solid #676d74}
+.day:hover{
+    background:var(--hover);
+}
+
+.day.other-month{
+    color:#3e4247;
+}
+
+.day.today{
+    border:1px solid #676d74;
+}
 
 .day.selected{
     background:#d3d7da;
@@ -297,7 +313,9 @@ button,input,select{
     cursor:pointer;
 }
 
-.patient:hover{background:var(--hover)}
+.patient:hover{
+    background:var(--hover);
+}
 
 .patient.active{
     background:var(--selected);
@@ -537,7 +555,9 @@ button,input,select{
     border-color:#d66565;
 }
 
-.info-panel{overflow-y:auto}
+.info-panel{
+    overflow-y:auto;
+}
 
 .info-section{
     padding:15px;
@@ -552,7 +572,9 @@ button,input,select{
     margin-bottom:13px;
 }
 
-.info-row{margin-bottom:11px}
+.info-row{
+    margin-bottom:11px;
+}
 
 .info-label{
     display:block;
@@ -730,14 +752,6 @@ button,input,select{
     overflow-y:auto;
 }
 
-.side-group{
-    display:none;
-}
-
-.side-group.visible{
-    display:block;
-}
-
 .admin-actions{
     display:flex;
     gap:8px;
@@ -775,8 +789,13 @@ button,input,select{
     line-height:1.5;
 }
 
-.status-success{color:var(--green)}
-.status-error{color:#e47777}
+.status-success{
+    color:var(--green);
+}
+
+.status-error{
+    color:#e47777;
+}
 
 .login-box{
     width:100%;
@@ -822,7 +841,6 @@ button,input,select{
     .brand{
         min-width:250px;
     }
-
 }
 
 @media(max-width:800px){
@@ -858,7 +876,6 @@ button,input,select{
     .viewer-admin-actions{
         flex-wrap:wrap;
     }
-
 }
 </style>
 </head>
@@ -872,7 +889,6 @@ button,input,select{
 </div>
 
 <div class="brand">
-
     <div class="brand-title">
         HOSPITAL SAN MARTÍN DE PANGOA - RAYOS X
     </div>
@@ -880,17 +896,14 @@ button,input,select{
     <div class="brand-subtitle">
         VISOR DE IMÁGENES RADIOGRÁFICAS
     </div>
-
 </div>
 
 <div class="search">
-
     <input
         id="search"
         type="text"
         placeholder="Buscar paciente..."
         oninput="searchPatients()">
-
 </div>
 
 <div
@@ -936,11 +949,7 @@ button,input,select{
 <section class="panel">
 
 <div class="panel-header">
-
-    <span class="panel-title">
-        Fecha
-    </span>
-
+    <span class="panel-title">Fecha</span>
 </div>
 
 <div class="panel-body">
@@ -969,7 +978,6 @@ button,input,select{
 </div>
 
 <div class="calendar-weekdays">
-
     <div>L</div>
     <div>M</div>
     <div>M</div>
@@ -977,7 +985,6 @@ button,input,select{
     <div>V</div>
     <div>S</div>
     <div>D</div>
-
 </div>
 
 <div
@@ -1132,11 +1139,7 @@ button,input,select{
 <aside class="panel info-panel">
 
 <div class="panel-header">
-
-    <span class="panel-title">
-        Información
-    </span>
-
+    <span class="panel-title">Información</span>
 </div>
 
 <div class="info-section">
@@ -1731,10 +1734,33 @@ const STORAGE_BUCKET =
 
 let studies = [];
 
-let selectedDate = "2026-08-11";
+function getTodayString(){
+
+    const today =
+        new Date();
+
+    return (
+        today.getFullYear() +
+        "-" +
+        String(
+            today.getMonth() + 1
+        ).padStart(2,"0") +
+        "-" +
+        String(
+            today.getDate()
+        ).padStart(2,"0")
+    );
+
+}
+
+let selectedDate =
+    getTodayString();
 
 let calendarDate =
-    new Date(2026,7,11);
+    new Date(
+        selectedDate +
+        "T00:00:00"
+    );
 
 let currentPatient = null;
 let currentStudy = 0;
@@ -1782,7 +1808,8 @@ function getImageUrl(file){
     )
         return "";
 
-    file = file.trim();
+    file =
+        file.trim();
 
     if(!file)
         return "";
@@ -1825,7 +1852,8 @@ function getStoragePath(file){
     )
         return "";
 
-    file = file.trim();
+    file =
+        file.trim();
 
     const marker =
         "/storage/v1/object/public/" +
@@ -1931,35 +1959,45 @@ async function loadStudies(){
             throw error;
 
         studies =
-            (data || []).map(item => {
+            (data || []).map(
+                item => {
 
-                return {
+                    return {
 
-                    id:item.id,
-                    date:item.date || "",
-                    patient:item.patient || "",
-                    history:item.history || "",
-                    birth:item.birth || "",
-                    sex:item.sex || "",
-                    study:item.study || "",
-                    structure:item.structure || "",
-                    modality:item.modality || "",
+                        id:item.id,
+                        date:item.date || "",
+                        patient:item.patient || "",
+                        history:item.history || "",
+                        birth:item.birth || "",
+                        sex:item.sex || "",
+                        study:item.study || "",
 
-                    /*
-                     * La columna side no existe
-                     * actualmente en Supabase.
-                     */
+                        /*
+                         * Si structure existe,
+                         * se utilizará.
+                         * Si no existe,
+                         * queda vacío.
+                         */
 
-                    side:"",
+                        structure:
+                            item.structure ||
+                            "",
 
-                    images:
-                        normalizeImages(
-                            item.images
-                        )
+                        modality:
+                            item.modality ||
+                            "",
 
-                };
+                        side:"",
 
-            });
+                        images:
+                            normalizeImages(
+                                item.images
+                            )
+
+                    };
+
+                }
+            );
 
         renderCalendar();
 
@@ -1972,7 +2010,9 @@ async function loadStudies(){
         document.getElementById(
             "currentDateLabel"
         ).textContent =
-            formatDate(selectedDate);
+            formatDate(
+                selectedDate
+            );
 
     }
     catch(error){
@@ -2018,7 +2058,8 @@ function getStudiesForDate(){
 
     return studies.filter(
         item =>
-            item.date === selectedDate
+            item.date ===
+            selectedDate
     );
 
 }
@@ -2064,7 +2105,8 @@ function getPatientStudies(){
         .filter(
             item =>
                 !selectedDate ||
-                item.date === selectedDate
+                item.date ===
+                selectedDate
         );
 
 }
@@ -2210,19 +2252,8 @@ function renderCalendar(){
 
         }
 
-        const today =
-            new Date();
-
         const todayString =
-            today.getFullYear() +
-            "-" +
-            String(
-                today.getMonth() + 1
-            ).padStart(2,"0") +
-            "-" +
-            String(
-                today.getDate()
-            ).padStart(2,"0");
+            getTodayString();
 
         if(
             dateString ===
@@ -2268,7 +2299,9 @@ function selectDate(date){
     document.getElementById(
         "currentDateLabel"
     ).textContent =
-        formatDate(date);
+        formatDate(
+            date
+        );
 
     renderCalendar();
     renderPatients();
@@ -2309,17 +2342,7 @@ function goToday(){
         );
 
     selectDate(
-
-        today.getFullYear() +
-        "-" +
-        String(
-            today.getMonth() + 1
-        ).padStart(2,"0") +
-        "-" +
-        String(
-            today.getDate()
-        ).padStart(2,"0")
-
+        getTodayString()
     );
 
 }
@@ -2682,7 +2705,7 @@ function renderStudy(study){
         "infoStructure"
     ).textContent =
         study.structure ||
-        "--";
+        "NO ESPECIFICADO";
 
     document.getElementById(
         "infoSide"
@@ -3111,12 +3134,8 @@ async function deleteImageFromStudy(
                     String(studyId)
             );
 
-        if(currentStudy < 0){
-
-            currentStudy =
-                0;
-
-        }
+        if(currentStudy < 0)
+            currentStudy = 0;
 
         const updatedStudy =
             getCurrentStudy();
@@ -3919,24 +3938,10 @@ function openAdmin(){
         currentPatient ||
         "";
 
-    const today =
-        new Date();
-
     document.getElementById(
         "adminDate"
     ).value =
-        selectedDate ||
-        (
-            today.getFullYear() +
-            "-" +
-            String(
-                today.getMonth() + 1
-            ).padStart(2,"0") +
-            "-" +
-            String(
-                today.getDate()
-            ).padStart(2,"0")
-        );
+        selectedDate;
 
     document.getElementById(
         "adminStructure"
@@ -4197,12 +4202,7 @@ async function createStudyAndUpload(){
 
         const finalDate =
             date ||
-            new Date()
-                .toISOString()
-                .slice(
-                    0,
-                    10
-                );
+            getTodayString();
 
         const folder =
             finalDate +
@@ -4288,45 +4288,133 @@ async function createStudyAndUpload(){
 
         }
 
+
+        /* =====================================================
+           GUARDAR ESTUDIO
+           
+           PRIMERO intenta guardar structure.
+           
+           Si Supabase responde que la columna structure
+           no existe, automáticamente vuelve a intentar
+           SIN structure.
+        ===================================================== */
+
         status.textContent =
             "Guardando estudio en Supabase...";
 
+        const studyDataWithStructure = {
+
+            date:finalDate,
+
+            patient:patient,
+
+            study:
+                study ||
+                null,
+
+            structure:
+                structure ||
+                null,
+
+            modality:
+                modality ||
+                null,
+
+            images:
+                uploadedPaths
+
+        };
+
+
+        let insertedStudy = null;
+        let insertError = null;
+
+
         /*
-         * IMPORTANTE:
-         * NO incluimos "side".
-         * Esa columna no existe en la tabla studies.
+         * PRIMER INTENTO
          */
 
-        const {
-            data:insertedStudy,
-            error:insertError
-        } =
+        const firstInsert =
             await supabaseClient
                 .from("studies")
-                .insert({
-
-                    date:finalDate,
-
-                    patient:patient,
-
-                    study:
-                        study ||
-                        null,
-
-                    structure:
-                        structure ||
-                        null,
-
-                    modality:
-                        modality ||
-                        null,
-
-                    images:
-                        uploadedPaths
-
-                })
+                .insert(
+                    studyDataWithStructure
+                )
                 .select()
                 .single();
+
+        insertedStudy =
+            firstInsert.data;
+
+        insertError =
+            firstInsert.error;
+
+
+        /*
+         * SI STRUCTURE NO EXISTE:
+         * REINTENTAR SIN ESA COLUMNA.
+         */
+
+        if(
+            insertError &&
+            (
+                insertError.message
+                    .toLowerCase()
+                    .includes("structure") ||
+                insertError.message
+                    .toLowerCase()
+                    .includes("schema cache")
+            )
+        ){
+
+            console.warn(
+                "La columna structure no existe. Reintentando sin structure..."
+            );
+
+            status.textContent =
+                "La base de datos no tiene 'structure'. Guardando el estudio sin ese campo...";
+
+            const fallbackData = {
+
+                date:finalDate,
+
+                patient:patient,
+
+                study:
+                    study ||
+                    null,
+
+                modality:
+                    modality ||
+                    null,
+
+                images:
+                    uploadedPaths
+
+            };
+
+            const secondInsert =
+                await supabaseClient
+                    .from("studies")
+                    .insert(
+                        fallbackData
+                    )
+                    .select()
+                    .single();
+
+            insertedStudy =
+                secondInsert.data;
+
+            insertError =
+                secondInsert.error;
+
+        }
+
+
+        /*
+         * SI TODAVÍA HAY ERROR:
+         * BORRAMOS LAS IMÁGENES QUE YA SE SUBIERON.
+         */
 
         if(insertError){
 
@@ -4342,6 +4430,7 @@ async function createStudyAndUpload(){
             throw insertError;
 
         }
+
 
         selectedDate =
             finalDate;
@@ -4416,8 +4505,25 @@ async function createStudyAndUpload(){
         status.className =
             "status-message status-success";
 
-        status.textContent =
-            "Estudio creado correctamente.";
+        /*
+         * Aviso solamente si structure no existe.
+         */
+
+        if(
+            !structure &&
+            insertedStudy
+        ){
+
+            status.textContent =
+                "Estudio creado correctamente.";
+
+        }
+        else{
+
+            status.textContent =
+                "Estudio creado correctamente.";
+
+        }
 
         setTimeout(
             () =>
@@ -4661,12 +4767,7 @@ async function uploadAdditionalImages(){
         const folder =
             (
                 study.date ||
-                new Date()
-                    .toISOString()
-                    .slice(
-                        0,
-                        10
-                    )
+                getTodayString()
             ) +
             "/" +
             crypto.randomUUID();
@@ -4777,10 +4878,8 @@ async function uploadAdditionalImages(){
             await supabaseClient
                 .from("studies")
                 .update({
-
                     images:
                         combinedPaths
-
                 })
                 .eq(
                     "id",
