@@ -592,6 +592,7 @@ cursor:grab;
 touch-action:none;
 user-select:none;
 -webkit-user-select:none;
+-webkit-touch-callout:none;
 overscroll-behavior:none
 }
 
@@ -1201,10 +1202,6 @@ flex:1
 
 @media(max-width:700px){
 
-/* =========================
-   ENCABEZADO MÓVIL
-========================= */
-
 .topbar{
 min-height:0;
 height:auto;
@@ -1302,13 +1299,8 @@ padding:0 12px;
 
 .auth-user{
 max-width:180px;
-font-size:10px;
+font-size:10px
 }
-
-
-/* =========================
-   APLICACIÓN MÓVIL
-========================= */
 
 .app{
 min-width:0;
@@ -1324,14 +1316,11 @@ width:100%;
 height:calc(100vh - 280px);
 min-height:360px;
 max-height:none;
-
 position:relative;
 overflow:hidden;
-
 display:flex;
 align-items:center;
 justify-content:center;
-
 touch-action:none;
 overscroll-behavior:none;
 }
@@ -1375,11 +1364,6 @@ overflow-y:hidden;
 
 }
 
-
-/* =========================================================
-   FIN DEL CSS MÓVIL
-========================================================= */
-
 </style>
 </head>
 
@@ -1408,7 +1392,7 @@ id="search"
 type="text"
 placeholder="Buscar paciente..."
 autocomplete="off"
-oninput="searchPatients"
+oninput="searchPatients()"
 >
 
 <div class="search-results" id="searchResults"></div>
@@ -2011,7 +1995,6 @@ placeholder="Nombre completo del paciente">
 
 </div>
 
-
 <div class="form-group">
 
 <label class="form-label">
@@ -2024,7 +2007,6 @@ id="newStudyDate"
 type="date">
 
 </div>
-
 
 <div class="form-group">
 
@@ -2251,39 +2233,42 @@ let imageLoaded=false;
 
 
 /* =========================================================
-   VARIABLES DEL ARRASTRE
+   VARIABLES DE DESPLAZAMIENTO
 ========================================================= */
 
 let panX=0;
-
 let panY=0;
 
 let isDragging=false;
 
 let dragStartX=0;
-
 let dragStartY=0;
 
 let dragOriginX=0;
-
 let dragOriginY=0;
 
 
 /* =========================================================
-   VARIABLES DE GESTOS MÓVILES
+   VARIABLES DE GESTOS TÁCTILES
 ========================================================= */
 
 let activePointers=new Map();
 
 let pinchStartDistance=0;
-
 let pinchStartZoom=1;
 
-let pinchCenterX=0;
+let pinchStartCenterX=0;
+let pinchStartCenterY=0;
 
-let pinchCenterY=0;
+let pinchStartPanX=0;
+let pinchStartPanY=0;
 
-let mobileGesture=false;
+let pinchStartFocalX=0;
+let pinchStartFocalY=0;
+
+let wasPinching=false;
+
+let suppressNextDrag=false;
 
 
 /* =========================================================
@@ -2408,13 +2393,11 @@ items=[text];
 }
 
 return items
-
 .filter(
 item=>
 typeof item==="string"&&
 item.trim()!==""
 )
-
 .map(item=>getImageUrl(item));
 
 }
@@ -2433,16 +2416,13 @@ document.getElementById(
 ).textContent=
 "Conectando con Supabase...";
 
-
 const{data,error}=
 await supabaseClient
 .from("studies")
 .select("*")
 .order("date",{ascending:false});
 
-
 if(error)throw error;
-
 
 studies=(data||[]).map(item=>({
 
@@ -2470,17 +2450,14 @@ images:normalizeImages(item.images)
 
 }));
 
-
 renderCalendar();
 
 renderPatients();
-
 
 document.getElementById(
 "currentDateLabel"
 ).textContent=
 formatDate(selectedDate);
-
 
 }catch(error){
 
@@ -2488,7 +2465,6 @@ console.error(
 "ERROR AL CARGAR ESTUDIOS:",
 error
 );
-
 
 document.getElementById(
 "patientList"
@@ -2507,7 +2483,6 @@ error.message||
 </div>
 
 `;
-
 
 document.getElementById(
 "viewerSubtitle"
@@ -2598,12 +2573,10 @@ const monthNames=[
 "diciembre"
 ];
 
-
 document.getElementById(
 "calendarMonth"
 ).textContent=
 monthNames[month]+" "+year;
-
 
 const container=
 document.getElementById(
@@ -2612,7 +2585,6 @@ document.getElementById(
 
 container.innerHTML="";
 
-
 let firstDay=
 new Date(
 year,
@@ -2620,12 +2592,10 @@ month,
 1
 ).getDay();
 
-
 firstDay=
 firstDay===0?
 6:
 firstDay-1;
-
 
 const daysInMonth=
 new Date(
@@ -2633,7 +2603,6 @@ year,
 month+1,
 0
 ).getDate();
-
 
 for(
 let i=firstDay-1;
@@ -2658,7 +2627,6 @@ container.appendChild(div);
 
 }
 
-
 for(
 let day=1;
 day<=daysInMonth;
@@ -2670,15 +2638,12 @@ document.createElement("div");
 
 div.className="day";
 
-
 const dateString=
 year+"-"+
 String(month+1).padStart(2,"0")+"-"+
 String(day).padStart(2,"0");
 
-
 div.textContent=day;
-
 
 if(
 studies.some(
@@ -2692,7 +2657,6 @@ div.classList.add(
 
 }
 
-
 if(dateString===selectedDate){
 
 div.classList.add(
@@ -2700,7 +2664,6 @@ div.classList.add(
 );
 
 }
-
 
 if(dateString===getTodayString()){
 
@@ -2710,11 +2673,9 @@ div.classList.add(
 
 }
 
-
 div.onclick=()=>selectDate(
 dateString
 );
-
 
 container.appendChild(div);
 
@@ -2739,12 +2700,10 @@ currentImage=0;
 
 resetView();
 
-
 document.getElementById(
 "currentDateLabel"
 ).textContent=
 formatDate(date);
-
 
 renderCalendar();
 
@@ -2812,16 +2771,13 @@ document.getElementById(
 
 list.innerHTML="";
 
-
 const patients=
 getPatientsForDate();
-
 
 document.getElementById(
 "patientCount"
 ).textContent=
 patients.length;
-
 
 if(!patients.length){
 
@@ -2841,7 +2797,6 @@ return;
 
 }
 
-
 patients.forEach(name=>{
 
 const patientStudies=
@@ -2850,13 +2805,10 @@ getStudiesForDate()
 item=>item.patient===name
 );
 
-
 const element=
 document.createElement("div");
 
-
 element.className="patient";
-
 
 if(currentPatient===name){
 
@@ -2865,7 +2817,6 @@ element.classList.add(
 );
 
 }
-
 
 element.innerHTML=`
 
@@ -2890,7 +2841,6 @@ ${patientStudies.length}
 
 `;
 
-
 element.onclick=()=>{
 
 currentPatient=name;
@@ -2906,7 +2856,6 @@ renderPatients();
 showFirstStudy();
 
 };
-
 
 element.dataset.patientName=
 name.toLowerCase();
@@ -2935,9 +2884,7 @@ document.getElementById(
 const value=
 input.value.trim().toLowerCase();
 
-
 results.innerHTML="";
-
 
 if(!value){
 
@@ -2947,20 +2894,16 @@ return;
 
 }
 
-
 const matches=[];
 
 const seen=new Set();
-
 
 studies.forEach(study=>{
 
 if(!study.patient)return;
 
-
 const patientName=
 study.patient.toLowerCase();
-
 
 if(
 patientName.includes(value) &&
@@ -2974,7 +2917,6 @@ matches.push(study);
 }
 
 });
-
 
 if(!matches.length){
 
@@ -2994,7 +2936,6 @@ return;
 
 }
 
-
 matches
 .sort((a,b)=>{
 
@@ -3011,7 +2952,6 @@ document.createElement("div");
 
 item.className=
 "search-result";
-
 
 item.innerHTML=`
 
@@ -3032,7 +2972,6 @@ ${formatDate(study.date)}
 
 `;
 
-
 item.onclick=()=>{
 
 openPatientFromSearch(
@@ -3042,11 +2981,9 @@ study.date
 
 };
 
-
 results.appendChild(item);
 
 });
-
 
 results.style.display="block";
 
@@ -3066,12 +3003,10 @@ document.getElementById(
 "searchResults"
 ).style.display="none";
 
-
 document.getElementById(
 "search"
 ).value=
 patientName;
-
 
 selectedDate=date;
 
@@ -3089,19 +3024,16 @@ currentImage=0;
 
 resetView();
 
-
 document.getElementById(
 "currentDateLabel"
 ).textContent=
 formatDate(date);
-
 
 renderCalendar();
 
 renderPatients();
 
 showFirstStudy();
-
 
 setTimeout(()=>{
 
@@ -3136,7 +3068,7 @@ block:"center"
 
 
 /* =========================================================
-   CERRAR RESULTADOS DE BÚSQUEDA
+   CERRAR RESULTADOS
 ========================================================= */
 
 document.addEventListener(
@@ -3171,7 +3103,6 @@ function showFirstStudy(){
 const list=
 getPatientStudies();
 
-
 if(!list.length){
 
 clearViewer();
@@ -3179,7 +3110,6 @@ clearViewer();
 return;
 
 }
-
 
 currentStudy=0;
 
@@ -3213,10 +3143,8 @@ document.getElementById(
 
 selector.innerHTML="";
 
-
 const list=
 getPatientStudies();
-
 
 if(!list.length){
 
@@ -3226,7 +3154,6 @@ selector.innerHTML=
 return;
 
 }
-
 
 list.forEach(
 (study,index)=>{
@@ -3243,7 +3170,6 @@ option.textContent=
 (index+1)+
 " · "+
 formatDate(study.date);
-
 
 if(index===currentStudy){
 
@@ -3269,13 +3195,10 @@ parseInt(value,10);
 
 if(isNaN(index))return;
 
-
 const list=
 getPatientStudies();
 
-
 if(!list[index])return;
-
 
 currentStudy=index;
 
@@ -3298,16 +3221,13 @@ function renderStudy(study){
 
 if(!study)return;
 
-
 renderStudySelector();
-
 
 document.getElementById(
 "viewerTitle"
 ).textContent=
 "Estudio · "+
 formatDate(study.date);
-
 
 document.getElementById(
 "viewerSubtitle"
@@ -3320,7 +3240,6 @@ formatDate(study.date):
 ""
 );
 
-
 document.getElementById(
 "overlayRight"
 ).innerHTML=
@@ -3328,12 +3247,10 @@ escapeHtml(
 study.patient||""
 );
 
-
 document.getElementById(
 "infoPatientName"
 ).textContent=
 study.patient||"--";
-
 
 document.getElementById(
 "infoPatientMeta"
@@ -3342,18 +3259,15 @@ study.sex?
 "Sexo: "+study.sex:
 "";
 
-
 document.getElementById(
 "infoDate"
 ).textContent=
 formatDate(study.date);
 
-
 document.getElementById(
 "infoImages"
 ).textContent=
 study.images.length;
-
 
 currentImage=
 Math.min(
@@ -3364,9 +3278,7 @@ study.images.length-1,
 )
 );
 
-
 renderThumbnails(study);
-
 
 if(study.images.length){
 
@@ -3391,7 +3303,6 @@ document.getElementById(
 
 }
 
-
 updateImageInformation(
 study
 );
@@ -3411,7 +3322,6 @@ const{data}=
 await supabaseClient
 .auth
 .getSession();
-
 
 return !!(
 data &&
@@ -3441,14 +3351,12 @@ getCurrentStudy();
 const admin=
 await isAdminLogged();
 
-
 if(addStudyButton){
 
 addStudyButton.style.display=
 admin?"block":"none";
 
 }
-
 
 if(!study){
 
@@ -3459,9 +3367,135 @@ return;
 
 }
 
-
 buttons.style.display=
 admin?"flex":"none";
+
+}
+
+
+/* =========================================================
+   LIMITAR DESPLAZAMIENTO
+========================================================= */
+
+function clampPan(){
+
+const viewport=
+document.getElementById("viewport");
+
+const image=
+document.getElementById("mainImage");
+
+if(
+!viewport||
+!image||
+!image.naturalWidth||
+!image.naturalHeight
+){
+
+return;
+
+}
+
+
+/*
+   El tamaño visual real de la imagen
+   considerando el zoom.
+*/
+
+const scaledWidth=
+image.naturalWidth*
+zoom;
+
+const scaledHeight=
+image.naturalHeight*
+zoom;
+
+const viewportWidth=
+viewport.clientWidth;
+
+const viewportHeight=
+viewport.clientHeight;
+
+
+/*
+   Permitimos que la imagen pueda salir
+   parcialmente del visor, pero siempre
+   conservamos una parte visible.
+*/
+
+const minimumVisible=
+35;
+
+
+/*
+   Si la imagen es menor que el visor,
+   no permitimos que se aleje del centro
+   más allá del espacio disponible.
+*/
+
+let maxPanX;
+
+let maxPanY;
+
+if(scaledWidth<=viewportWidth){
+
+maxPanX=
+Math.max(
+0,
+(viewportWidth-scaledWidth)/2
+);
+
+}else{
+
+maxPanX=
+(scaledWidth/2)+
+(viewportWidth/2)-
+minimumVisible;
+
+}
+
+if(scaledHeight<=viewportHeight){
+
+maxPanY=
+Math.max(
+0,
+(viewportHeight-scaledHeight)/2
+);
+
+}else{
+
+maxPanY=
+(scaledHeight/2)+
+(viewportHeight/2)-
+minimumVisible;
+
+}
+
+
+if(!isFinite(maxPanX))
+maxPanX=0;
+
+if(!isFinite(maxPanY))
+maxPanY=0;
+
+
+panX=
+Math.max(
+-maxPanX,
+Math.min(
+maxPanX,
+panX
+)
+);
+
+panY=
+Math.max(
+-maxPanY,
+Math.min(
+maxPanY,
+panY
+)
+);
 
 }
 
@@ -3493,13 +3527,11 @@ return;
 
 }
 
-
 const viewportWidth=
 viewport.clientWidth;
 
 const viewportHeight=
 viewport.clientHeight;
-
 
 if(
 viewportWidth<=0||
@@ -3512,8 +3544,8 @@ return;
 
 
 /*
-   En celular utilizamos un margen menor.
-   En PC se conserva el margen original.
+   Dejamos un pequeño margen alrededor
+   de la imagen para que se vea completa.
 */
 
 const isMobile =
@@ -3523,7 +3555,6 @@ window.matchMedia(
 
 const margin =
 isMobile ? 12 : 24;
-
 
 const availableWidth=
 Math.max(
@@ -3537,20 +3568,17 @@ viewportHeight-margin,
 1
 );
 
-
 const imageWidth=
 image.naturalWidth;
 
 const imageHeight=
 image.naturalHeight;
 
-
 let fitZoom=
 Math.min(
 availableWidth/imageWidth,
 availableHeight/imageHeight
 );
-
 
 if(
 !isFinite(fitZoom)||
@@ -3562,12 +3590,16 @@ fitZoom=1;
 }
 
 
+/*
+   Nunca hacemos la imagen mayor que su
+   tamaño natural durante el ajuste inicial.
+*/
+
 if(fitZoom>1){
 
 fitZoom=1;
 
 }
-
 
 if(fitZoom<0.25){
 
@@ -3575,20 +3607,12 @@ fitZoom=0.25;
 
 }
 
-
 zoom=fitZoom;
 
-
 panX=0;
-
 panY=0;
 
 isDragging=false;
-
-viewport.classList.remove(
-"dragging"
-);
-
 
 imageLoaded=true;
 
@@ -3605,25 +3629,20 @@ function showImage(src){
 
 if(!src)return;
 
-
 document.getElementById(
 "emptyMessage"
 ).style.display="none";
 
-
 document.getElementById(
 "imageWrapper"
 ).style.display="flex";
-
 
 const image=
 document.getElementById(
 "mainImage"
 );
 
-
 imageLoaded=false;
-
 
 image.onerror=()=>{
 
@@ -3640,15 +3659,24 @@ document.getElementById(
 
 };
 
-
 image.onload=()=>{
+
+/*
+   Cada nueva imagen comienza ajustada
+   completamente al visor.
+*/
+
+rotation=0;
+inverted=false;
+contrast=1;
+panX=0;
+panY=0;
 
 fitImageToViewport();
 
 applyTransform();
 
 };
-
 
 image.src=src;
 
@@ -3668,7 +3696,6 @@ document.getElementById(
 
 container.innerHTML="";
 
-
 study.images.forEach(
 (src,index)=>{
 
@@ -3680,7 +3707,6 @@ document.createElement(
 item.className=
 "thumbnail-item";
 
-
 const img=
 document.createElement("img");
 
@@ -3689,7 +3715,6 @@ img.src=src;
 img.className=
 "thumbnail";
 
-
 if(index===currentImage){
 
 img.classList.add(
@@ -3697,7 +3722,6 @@ img.classList.add(
 );
 
 }
-
 
 img.onclick=()=>{
 
@@ -3715,7 +3739,6 @@ study
 
 };
 
-
 const deleteButton=
 document.createElement(
 "button"
@@ -3731,7 +3754,6 @@ deleteButton.title=
 
 deleteButton.textContent="×";
 
-
 deleteButton.onclick=
 event=>{
 
@@ -3743,7 +3765,6 @@ index
 );
 
 };
-
 
 item.appendChild(img);
 
@@ -3774,20 +3795,16 @@ imageIndex<0||
 imageIndex>=study.images.length
 )return;
 
-
 const confirmed=
 confirm(
 "¿Deseas eliminar esta imagen?\n\n"+
 "Esta acción no se puede deshacer."
 );
 
-
 if(!confirmed)return;
-
 
 const admin=
 await isAdminLogged();
-
 
 if(!admin){
 
@@ -3799,7 +3816,6 @@ return;
 
 }
 
-
 try{
 
 document.getElementById(
@@ -3807,14 +3823,11 @@ document.getElementById(
 ).textContent=
 "Eliminando imagen...";
 
-
 const imageUrl=
 study.images[imageIndex];
 
-
 const storagePath=
 getStoragePath(imageUrl);
-
 
 const remainingImages=
 study.images
@@ -3827,7 +3840,6 @@ image=>getStoragePath(image)
 .filter(
 path=>path
 );
-
 
 const{
 error:updateError
@@ -3842,10 +3854,8 @@ images:remainingImages
 study.id
 );
 
-
 if(updateError)
 throw updateError;
-
 
 if(storagePath){
 
@@ -3859,7 +3869,6 @@ await supabaseClient
 storagePath
 ]);
 
-
 if(storageError)
 console.error(
 "ADVERTENCIA STORAGE:",
@@ -3868,23 +3877,18 @@ storageError
 
 }
 
-
 const studyId=study.id;
 
 const patientName=
 study.patient;
 
-
 await loadStudies();
-
 
 currentPatient=
 patientName;
 
-
 const patientStudies=
 getPatientStudies();
-
 
 currentStudy=
 patientStudies.findIndex(
@@ -3893,14 +3897,11 @@ String(item.id)===
 String(studyId)
 );
 
-
 if(currentStudy<0)
 currentStudy=0;
 
-
 const updatedStudy=
 getCurrentStudy();
-
 
 if(updatedStudy){
 
@@ -3925,7 +3926,6 @@ clearViewer();
 
 }
 
-
 }catch(error){
 
 console.error(
@@ -3933,13 +3933,11 @@ console.error(
 error
 );
 
-
 alert(
 "No se pudo eliminar la imagen:\n\n"+
 (error.message||
 "Error desconocido")
 );
-
 
 updateViewerAdminButtons();
 
@@ -3966,7 +3964,6 @@ study.images.length?
 study.images.length:
 "--";
 
-
 document.getElementById(
 "infoCurrentImage"
 ).textContent=
@@ -3988,15 +3985,12 @@ function nextImage(){
 const study=
 getCurrentStudy();
 
-
 if(
 !study||
 !study.images.length
 )return;
 
-
 currentImage++;
-
 
 if(
 currentImage>=study.images.length
@@ -4006,13 +4000,11 @@ currentImage=0;
 
 }
 
-
 resetView();
 
 showImage(
 study.images[currentImage]
 );
-
 
 renderThumbnails(study);
 
@@ -4026,15 +4018,12 @@ function previousImage(){
 const study=
 getCurrentStudy();
 
-
 if(
 !study||
 !study.images.length
 )return;
 
-
 currentImage--;
-
 
 if(currentImage<0){
 
@@ -4043,13 +4032,11 @@ study.images.length-1;
 
 }
 
-
 resetView();
 
 showImage(
 study.images[currentImage]
 );
-
 
 renderThumbnails(study);
 
@@ -4090,13 +4077,15 @@ zoom=4;
 if(zoom<.25)
 zoom=.25;
 
+clampPan();
+
 applyTransform();
 
 }
 
 
 /* =========================================================
-   ZOOM CON SCROLL
+   ZOOM CON RUEDA
 ========================================================= */
 
 function zoomAtPoint(
@@ -4113,12 +4102,10 @@ document.getElementById(
 const rect=
 viewport.getBoundingClientRect();
 
-
 const oldZoom=zoom;
 
 let newZoom=
 zoom+(delta>0?.15:-.15);
-
 
 if(newZoom>4)
 newZoom=4;
@@ -4126,24 +4113,30 @@ newZoom=4;
 if(newZoom<.25)
 newZoom=.25;
 
-
 if(newZoom===oldZoom)
 return;
 
-
 const mouseX=
 clientX-
-(rect.left+
-rect.width/2);
+(
+rect.left+
+rect.width/2
+);
 
 const mouseY=
 clientY-
-(rect.top+
-rect.height/2);
-
+(
+rect.top+
+rect.height/2
+);
 
 const scale=
 newZoom/oldZoom;
+
+
+/*
+   Mantiene el punto bajo el cursor.
+*/
 
 panX=
 mouseX-
@@ -4155,6 +4148,8 @@ mouseY-
 
 zoom=newZoom;
 
+clampPan();
+
 applyTransform();
 
 }
@@ -4163,15 +4158,11 @@ applyTransform();
 const viewportElement=
 document.getElementById("viewport");
 
-
 viewportElement.addEventListener(
 "wheel",
 event=>{
 
 if(
-!document.getElementById(
-"imageWrapper"
-).style.display||
 document.getElementById(
 "imageWrapper"
 ).style.display==="none"
@@ -4180,7 +4171,6 @@ document.getElementById(
 return;
 
 }
-
 
 event.preventDefault();
 
@@ -4198,12 +4188,7 @@ passive:false
 
 
 /* =========================================================
-   ARRASTRAR IMAGEN + GESTOS TÁCTILES
-========================================================= */
-
-
-/* =========================================================
-   DISTANCIA ENTRE DOS DEDOS
+   FUNCIONES DE GESTOS
 ========================================================= */
 
 function getPointerDistance(){
@@ -4216,7 +4201,6 @@ activePointers.values()
 if(points.length<2)
 return 0;
 
-
 const dx=
 points[1].x-
 points[0].x;
@@ -4225,7 +4209,6 @@ const dy=
 points[1].y-
 points[0].y;
 
-
 return Math.sqrt(
 dx*dx+
 dy*dy
@@ -4233,10 +4216,6 @@ dy*dy
 
 }
 
-
-/* =========================================================
-   CENTRO ENTRE DOS DEDOS
-========================================================= */
 
 function getPointerCenter(){
 
@@ -4247,7 +4226,6 @@ activePointers.values()
 
 if(points.length<2)
 return null;
-
 
 return{
 
@@ -4288,7 +4266,6 @@ return;
 
 }
 
-
 if(
 event.pointerType==="mouse" &&
 event.button!==0
@@ -4299,6 +4276,10 @@ return;
 }
 
 
+/*
+   Guardamos la posición exacta de cada dedo.
+*/
+
 activePointers.set(
 event.pointerId,
 {
@@ -4306,7 +4287,6 @@ x:event.clientX,
 y:event.clientY
 }
 );
-
 
 try{
 
@@ -4317,13 +4297,103 @@ event.pointerId
 }catch(error){}
 
 
-/* =========================================
-   DOS DEDOS = PINCH ZOOM
-========================================= */
+/* =======================================================
+   DOS DEDOS
+======================================================= */
 
 if(activePointers.size===2){
 
-mobileGesture=true;
+isDragging=false;
+
+wasPinching=true;
+
+suppressNextDrag=true;
+
+viewportElement.classList.remove(
+"dragging"
+);
+
+pinchStartDistance=
+getPointerDistance();
+
+pinchStartZoom=
+zoom;
+
+pinchStartPanX=
+panX;
+
+pinchStartPanY=
+panY;
+
+const center=
+getPointerCenter();
+
+if(center){
+
+const rect=
+viewportElement.getBoundingClientRect();
+
+
+/*
+   Centro del gesto respecto al centro
+   geométrico del visor.
+*/
+
+pinchStartCenterX=
+center.x-
+(
+rect.left+
+rect.width/2
+);
+
+pinchStartCenterY=
+center.y-
+(
+rect.top+
+rect.height/2
+);
+
+
+/*
+   Punto de referencia del zoom.
+   Se calcula como coordenada dentro
+   del sistema de la imagen.
+*/
+
+pinchStartFocalX=
+(
+pinchStartCenterX-
+pinchStartPanX
+)/
+pinchStartZoom;
+
+pinchStartFocalY=
+(
+pinchStartCenterY-
+pinchStartPanY
+)/
+pinchStartZoom;
+
+}
+
+return;
+
+}
+
+
+/* =======================================================
+   UN DEDO
+======================================================= */
+
+if(activePointers.size===1){
+
+/*
+   Si acabamos de terminar un pinch,
+   no convertimos inmediatamente el dedo
+   restante en arrastre.
+*/
+
+if(suppressNextDrag){
 
 isDragging=false;
 
@@ -4331,63 +4401,15 @@ viewportElement.classList.remove(
 "dragging"
 );
 
-
-pinchStartDistance=
-getPointerDistance();
-
-
-pinchStartZoom=
-zoom;
-
-
-const center=
-getPointerCenter();
-
-
-if(center){
-
-const rect=
-viewportElement
-.getBoundingClientRect();
-
-
-pinchCenterX=
-center.x-
-(
-rect.left+
-rect.width/2
-);
-
-
-pinchCenterY=
-center.y-
-(
-rect.top+
-rect.height/2
-);
-
-}
-
-
 return;
 
 }
-
-
-/* =========================================
-   UN DEDO = ARRASTRE
-========================================= */
-
-if(activePointers.size===1){
-
-mobileGesture=false;
 
 isDragging=true;
 
 viewportElement.classList.add(
 "dragging"
 );
-
 
 dragStartX=
 event.clientX;
@@ -4424,7 +4446,6 @@ return;
 
 }
 
-
 activePointers.set(
 event.pointerId,
 {
@@ -4434,25 +4455,57 @@ y:event.clientY
 );
 
 
-/* =========================================
-   DOS DEDOS = PINCH ZOOM
-========================================= */
+/* =======================================================
+   DOS DEDOS = PINCH
+======================================================= */
 
 if(activePointers.size>=2){
+
+isDragging=false;
+
+viewportElement.classList.remove(
+"dragging"
+);
 
 const distance=
 getPointerDistance();
 
+const center=
+getPointerCenter();
 
 if(
 !distance||
-!pinchStartDistance
+!pinchStartDistance||
+!center
 ){
 
 return;
 
 }
 
+const rect=
+viewportElement.getBoundingClientRect();
+
+
+const centerX=
+center.x-
+(
+rect.left+
+rect.width/2
+);
+
+const centerY=
+center.y-
+(
+rect.top+
+rect.height/2
+);
+
+
+/*
+   Factor de zoom basado en la distancia
+   original entre los dos dedos.
+*/
 
 let newZoom=
 pinchStartZoom*
@@ -4461,44 +4514,41 @@ distance/
 pinchStartDistance
 );
 
-
 if(newZoom>4)
 newZoom=4;
-
 
 if(newZoom<.25)
 newZoom=.25;
 
 
-const scale=
-newZoom/
-pinchStartZoom;
-
-
 /*
-   Conservamos aproximadamente el punto
-   central del pellizco.
+   El punto de la imagen que estaba debajo
+   del centro inicial debe permanecer debajo
+   del centro actual del gesto.
+
+   Fórmula:
+   pan = centroActual - puntoImagen * zoom
 */
 
 panX=
-pinchCenterX-
-(
-pinchCenterX-
-panX
-)*
-scale;
-
+centerX-
+pinchStartFocalX*
+newZoom;
 
 panY=
-pinchCenterY-
-(
-pinchCenterY-
-panY
-)*
-scale;
+centerY-
+pinchStartFocalY*
+newZoom;
 
+
+/*
+   Si además los dos dedos se trasladan,
+   el centro se mueve con ellos.
+*/
 
 zoom=newZoom;
+
+clampPan();
 
 applyTransform();
 
@@ -4507,13 +4557,14 @@ return;
 }
 
 
-/* =========================================
-   UN DEDO = DESPLAZAMIENTO
-========================================= */
+/* =======================================================
+   UN DEDO = ARRASTRE
+======================================================= */
 
 if(
 activePointers.size===1 &&
-isDragging
+isDragging &&
+!suppressNextDrag
 ){
 
 panX=
@@ -4523,7 +4574,6 @@ event.clientX-
 dragStartX
 );
 
-
 panY=
 dragOriginY+
 (
@@ -4531,6 +4581,7 @@ event.clientY-
 dragStartY
 );
 
+clampPan();
 
 applyTransform();
 
@@ -4540,7 +4591,7 @@ applyTransform();
 
 
 /* =========================================================
-   POINTER UP
+   POINTER UP / CANCEL
 ========================================================= */
 
 function handlePointerUp(event){
@@ -4548,7 +4599,6 @@ function handlePointerUp(event){
 activePointers.delete(
 event.pointerId
 );
-
 
 try{
 
@@ -4559,13 +4609,53 @@ event.pointerId
 }catch(error){}
 
 
+/*
+   Todavía quedan dos dedos.
+*/
+
+if(activePointers.size>=2){
+
+return;
+
+}
+
+
+/*
+   Al terminar un pinch dejamos el estado
+   preparado para que el siguiente toque
+   comience un nuevo arrastre limpio.
+*/
+
+if(wasPinching){
+
+isDragging=false;
+
+suppressNextDrag=true;
+
+wasPinching=false;
+
+viewportElement.classList.remove(
+"dragging"
+);
+
+pinchStartDistance=0;
+
+}
+
+
+/*
+   Si no queda ningún dedo.
+*/
+
 if(activePointers.size===0){
 
 isDragging=false;
 
-mobileGesture=false;
-
 pinchStartDistance=0;
+
+pinchStartZoom=zoom;
+
+suppressNextDrag=false;
 
 viewportElement.classList.remove(
 "dragging"
@@ -4576,17 +4666,14 @@ return;
 }
 
 
-if(activePointers.size===1){
-
 /*
-   Después del pinch no comenzamos
-   automáticamente un nuevo arrastre
-   con el dedo restante.
+   Si queda un dedo después de un pinch,
+   NO comenzamos automáticamente el arrastre.
 */
 
-isDragging=false;
+if(activePointers.size===1){
 
-mobileGesture=true;
+isDragging=false;
 
 viewportElement.classList.remove(
 "dragging"
@@ -4601,7 +4688,6 @@ viewportElement.addEventListener(
 "pointerup",
 handlePointerUp
 );
-
 
 viewportElement.addEventListener(
 "pointercancel",
@@ -4714,10 +4800,16 @@ document.getElementById(
 "mainImage"
 );
 
-
 if(!wrapper||!image)
 return;
 
+
+/*
+   Primero limitamos la posición para evitar
+   que la imagen desaparezca completamente.
+*/
+
+clampPan();
 
 wrapper.style.transform=
 "translate3d(calc(-50% + "+
@@ -4731,7 +4823,6 @@ zoom+
 rotation+
 "deg)";
 
-
 image.style.filter=
 "contrast("+
 contrast+
@@ -4742,18 +4833,17 @@ inverted?
 " invert(0)"
 );
 
-
 document.getElementById(
 "infoZoom"
 ).textContent=
 Math.round(zoom*100)+
 "%";
 
-
 document.getElementById(
 "infoRotation"
 ).textContent=
-rotation+"°";
+rotation+
+"°";
 
 }
 
@@ -4782,8 +4872,21 @@ pinchStartDistance=0;
 
 pinchStartZoom=1;
 
-mobileGesture=false;
+pinchStartCenterX=0;
 
+pinchStartCenterY=0;
+
+pinchStartPanX=0;
+
+pinchStartPanY=0;
+
+pinchStartFocalX=0;
+
+pinchStartFocalY=0;
+
+wasPinching=false;
+
+suppressNextDrag=false;
 
 const viewport=
 document.getElementById(
@@ -4797,13 +4900,6 @@ viewport.classList.remove(
 );
 
 }
-
-
-/*
-   Si la imagen ya está cargada,
-   volvemos a calcular su tamaño
-   correcto dentro del visor.
-*/
 
 const image=
 document.getElementById(
@@ -4840,12 +4936,10 @@ resetView();
 
 imageLoaded=false;
 
-
 document.getElementById(
 "viewerTitle"
 ).textContent=
 "Sin estudio seleccionado";
-
 
 document.getElementById(
 "viewerSubtitle"
@@ -4853,69 +4947,56 @@ document.getElementById(
 "Fecha: "+
 formatDate(selectedDate);
 
-
 document.getElementById(
 "imageCounter"
 ).textContent="--";
-
 
 document.getElementById(
 "overlayRight"
 ).innerHTML="--";
 
-
 document.getElementById(
 "imageWrapper"
 ).style.display="none";
-
 
 document.getElementById(
 "emptyMessage"
 ).textContent=
 "Seleccione un paciente para visualizar sus estudios.";
 
-
 document.getElementById(
 "emptyMessage"
 ).style.display="block";
-
 
 document.getElementById(
 "thumbnailList"
 ).innerHTML="";
 
-
 document.getElementById(
 "infoPatientName"
 ).textContent="--";
 
-
 document.getElementById(
 "infoPatientMeta"
 ).textContent="--";
-
 
 document.getElementById(
 "infoDate"
 ).textContent=
 formatDate(selectedDate);
 
-
 document.getElementById(
 "infoImages"
 ).textContent="--";
-
 
 document.getElementById(
 "infoCurrentImage"
 ).textContent="--";
 
-
 document.getElementById(
 "studySelector"
 ).innerHTML=
 '<option value="">Seleccione un estudio</option>';
-
 
 document.getElementById(
 "viewerAdminActions"
@@ -4933,18 +5014,15 @@ function openFullscreen(){
 const study=
 getCurrentStudy();
 
-
 if(
 !study||
 !study.images.length
 )return;
 
-
 document.getElementById(
 "fullscreenImage"
 ).src=
 study.images[currentImage];
-
 
 document.getElementById(
 "fullscreenViewer"
@@ -4976,29 +5054,23 @@ value===undefined
 )
 return"";
 
-
 return String(value)
-
 .replaceAll(
 "&",
 "&amp;"
 )
-
 .replaceAll(
 "<",
 "&lt;"
 )
-
 .replaceAll(
 ">",
 "&gt;"
 )
-
 .replaceAll(
 '"',
 "&quot;"
 )
-
 .replaceAll(
 "'",
 "&#039;"
@@ -5017,12 +5089,10 @@ document.getElementById(
 "loginStatus"
 ).textContent="";
 
-
 document.getElementById(
 "loginOverlay"
 ).style.display=
 "flex";
-
 
 setTimeout(()=>{
 
@@ -5056,18 +5126,15 @@ document.getElementById(
 "loginEmail"
 ).value.trim();
 
-
 const password=
 document.getElementById(
 "loginPassword"
 ).value;
 
-
 const status=
 document.getElementById(
 "loginStatus"
 );
-
 
 if(!email||!password){
 
@@ -5081,13 +5148,11 @@ return;
 
 }
 
-
 status.className=
 "status-message";
 
 status.textContent=
 "Verificando acceso...";
-
 
 try{
 
@@ -5102,10 +5167,8 @@ email:email,
 password:password
 });
 
-
 if(error)
 throw error;
-
 
 if(
 !data.user||
@@ -5122,13 +5185,11 @@ throw new Error(
 
 }
 
-
 closeLogin();
 
 updateAuthInterface(
 data.user
 );
-
 
 }catch(error){
 
@@ -5157,7 +5218,6 @@ await supabaseClient
 .auth
 .getSession();
 
-
 if(
 data&&
 data.session&&
@@ -5182,7 +5242,6 @@ await supabaseClient
 }
 
 }
-
 
 supabaseClient
 .auth
@@ -5241,7 +5300,6 @@ document.getElementById(
 "addStudyButton"
 );
 
-
 if(user){
 
 loginButton.style.display=
@@ -5254,7 +5312,6 @@ authUser.textContent=
 user.email||
 "Administrador";
 
-
 if(addStudyButton){
 
 addStudyButton.style.display=
@@ -5263,7 +5320,6 @@ addStudyButton.style.display=
 }
 
 updateViewerAdminButtons();
-
 
 }else{
 
@@ -5274,7 +5330,6 @@ logoutButton.style.display=
 "none";
 
 authUser.textContent="";
-
 
 if(addStudyButton){
 
@@ -5289,8 +5344,7 @@ closeAddStudy();
 
 document.getElementById(
 "viewerAdminActions"
-).style.display=
-"none";
+).style.display="none";
 
 }
 
@@ -5322,35 +5376,29 @@ document.getElementById(
 "newPatient"
 ).value="";
 
-
 document.getElementById(
 "newStudyDate"
 ).value=
 selectedDate||
 getTodayString();
 
-
 document.getElementById(
 "newStudyFiles"
 ).value="";
-
 
 document.getElementById(
 "newStudyFileList"
 ).textContent=
 "Ningún archivo seleccionado.";
 
-
 document.getElementById(
 "newStudyStatus"
 ).textContent="";
-
 
 document.getElementById(
 "addStudyOverlay"
 ).style.display=
 "flex";
-
 
 setTimeout(()=>{
 
@@ -5389,7 +5437,6 @@ document.getElementById(
 "newStudyFileList"
 );
 
-
 if(
 !input.files||
 input.files.length===0
@@ -5402,10 +5449,8 @@ return;
 
 }
 
-
 const files=
 Array.from(input.files);
-
 
 const invalid=
 files.filter(
@@ -5415,7 +5460,6 @@ file.type==="image/jpeg"||
 /\.jpe?g$/i.test(file.name)
 )
 );
-
 
 if(invalid.length){
 
@@ -5427,7 +5471,6 @@ list.innerHTML=
 return;
 
 }
-
 
 list.innerHTML=
 files.map(
@@ -5451,24 +5494,20 @@ document.getElementById(
 "newPatient"
 ).value.trim();
 
-
 const date=
 document.getElementById(
 "newStudyDate"
 ).value;
-
 
 const input=
 document.getElementById(
 "newStudyFiles"
 );
 
-
 const status=
 document.getElementById(
 "newStudyStatus"
 );
-
 
 if(!patient){
 
@@ -5482,7 +5521,6 @@ return;
 
 }
 
-
 if(!date){
 
 status.className=
@@ -5494,7 +5532,6 @@ status.textContent=
 return;
 
 }
-
 
 if(
 !input.files||
@@ -5511,10 +5548,8 @@ return;
 
 }
 
-
 const admin=
 await isAdminLogged();
-
 
 if(!admin){
 
@@ -5528,10 +5563,8 @@ return;
 
 }
 
-
 const files=
 Array.from(input.files);
-
 
 const invalid=
 files.filter(
@@ -5541,7 +5574,6 @@ file.type==="image/jpeg"||
 /\.jpe?g$/i.test(file.name)
 )
 );
-
 
 if(invalid.length){
 
@@ -5555,9 +5587,7 @@ return;
 
 }
 
-
 const newPaths=[];
-
 
 try{
 
@@ -5567,12 +5597,10 @@ status.className=
 status.textContent=
 "Preparando estudio...";
 
-
 const folder=
 date+
 "/"+
 crypto.randomUUID();
-
 
 for(
 let i=0;
@@ -5582,13 +5610,11 @@ i++
 
 const file=files[i];
 
-
 const safeName=
 file.name.replace(
 /[^a-zA-Z0-9.\_-]/g,
 "_"
 );
-
 
 const path=
 folder+
@@ -5596,14 +5622,12 @@ folder+
 String(i+1).padStart(3,"0")+
 "_"+safeName;
 
-
 status.textContent=
 "Subiendo imagen "+
 (i+1)+
 " de "+
 files.length+
 "...";
-
 
 const{
 error:uploadError
@@ -5621,19 +5645,15 @@ contentType:"image/jpeg"
 }
 );
 
-
 if(uploadError)
 throw uploadError;
-
 
 newPaths.push(path);
 
 }
 
-
 status.textContent=
 "Creando estudio...";
-
 
 const{
 data,
@@ -5659,7 +5679,6 @@ images:newPaths
 .select()
 .single();
 
-
 if(error){
 
 await supabaseClient
@@ -5672,7 +5691,6 @@ newPaths
 throw error;
 
 }
-
 
 selectedDate=date;
 
@@ -5688,13 +5706,10 @@ currentStudy=0;
 
 currentImage=0;
 
-
 await loadStudies();
-
 
 const patientStudies=
 getPatientStudies();
-
 
 currentStudy=
 patientStudies.findIndex(
@@ -5703,19 +5718,15 @@ String(item.id)===
 String(data.id)
 );
 
-
 if(currentStudy<0)
 currentStudy=0;
-
 
 const createdStudy=
 getCurrentStudy();
 
-
 renderCalendar();
 
 renderPatients();
-
 
 if(createdStudy){
 
@@ -5725,13 +5736,11 @@ createdStudy
 
 }
 
-
 status.className=
 "status-message status-success";
 
 status.textContent=
 "Estudio creado correctamente.";
-
 
 setTimeout(
 ()=>{
@@ -5740,7 +5749,6 @@ closeAddStudy();
 700
 );
 
-
 }catch(error){
 
 console.error(
@@ -5748,14 +5756,12 @@ console.error(
 error
 );
 
-
 status.className=
 "status-message status-error";
 
 status.textContent=
 error.message||
 "No se pudo crear el estudio.";
-
 
 if(newPaths.length){
 
@@ -5793,7 +5799,6 @@ function addImagesToCurrentStudy(){
 const study=
 getCurrentStudy();
 
-
 if(!study){
 
 alert(
@@ -5804,12 +5809,10 @@ return;
 
 }
 
-
 document.getElementById(
 "addImagesPatient"
 ).textContent=
 study.patient;
-
 
 document.getElementById(
 "addImagesStudy"
@@ -5817,22 +5820,18 @@ document.getElementById(
 "Fecha: "+
 formatDate(study.date);
 
-
 document.getElementById(
 "additionalFiles"
 ).value="";
-
 
 document.getElementById(
 "additionalFileList"
 ).textContent=
 "Ningún archivo seleccionado.";
 
-
 document.getElementById(
 "addImagesStatus"
 ).textContent="";
-
 
 document.getElementById(
 "addImagesOverlay"
@@ -5868,7 +5867,6 @@ document.getElementById(
 "additionalFileList"
 );
 
-
 if(
 !input.files||
 input.files.length===0
@@ -5881,10 +5879,8 @@ return;
 
 }
 
-
 const files=
 Array.from(input.files);
-
 
 const invalid=
 files.filter(
@@ -5894,7 +5890,6 @@ file.type==="image/jpeg"||
 /\.jpe?g$/i.test(file.name)
 )
 );
-
 
 if(invalid.length){
 
@@ -5906,7 +5901,6 @@ list.innerHTML=
 return;
 
 }
-
 
 list.innerHTML=
 files.map(
@@ -5928,18 +5922,15 @@ async function uploadAdditionalImages(){
 const study=
 getCurrentStudy();
 
-
 const input=
 document.getElementById(
 "additionalFiles"
 );
 
-
 const status=
 document.getElementById(
 "addImagesStatus"
 );
-
 
 if(!study){
 
@@ -5952,7 +5943,6 @@ status.textContent=
 return;
 
 }
-
 
 if(
 !input.files||
@@ -5969,10 +5959,8 @@ return;
 
 }
 
-
 const admin=
 await isAdminLogged();
-
 
 if(!admin){
 
@@ -5986,12 +5974,10 @@ return;
 
 }
 
-
 const files=
 Array.from(input.files);
 
 const newPaths=[];
-
 
 try{
 
@@ -6001,12 +5987,10 @@ status.className=
 status.textContent=
 "Preparando subida...";
 
-
 const folder=
 (study.date||getTodayString())+
 "/"+
 crypto.randomUUID();
-
 
 for(
 let i=0;
@@ -6015,7 +5999,6 @@ i++
 ){
 
 const file=files[i];
-
 
 if(
 !(
@@ -6032,13 +6015,11 @@ file.name+
 
 }
 
-
 const safeName=
 file.name.replace(
 /[^a-zA-Z0-9.\_-]/g,
 "_"
 );
-
 
 const path=
 folder+
@@ -6046,14 +6027,12 @@ folder+
 String(i+1).padStart(3,"0")+
 "_"+safeName;
 
-
 status.textContent=
 "Subiendo imagen "+
 (i+1)+
 " de "+
 files.length+
 "...";
-
 
 const{
 error:uploadError
@@ -6071,32 +6050,25 @@ contentType:"image/jpeg"
 }
 );
 
-
 if(uploadError)
 throw uploadError;
-
 
 newPaths.push(path);
 
 }
-
 
 const existingPaths=
 study.images
 .map(image=>getStoragePath(image))
 .filter(path=>path);
 
-
-const combinedPaths=
-[
+const combinedPaths=[
 ...existingPaths,
 ...newPaths
 ];
 
-
 status.textContent=
 "Actualizando estudio...";
-
 
 const{
 error:updateError
@@ -6111,7 +6083,6 @@ images:combinedPaths
 study.id
 );
 
-
 if(updateError){
 
 await supabaseClient
@@ -6125,7 +6096,6 @@ throw updateError;
 
 }
 
-
 const studyId=study.id;
 
 const patientName=
@@ -6134,9 +6104,7 @@ study.patient;
 const studyDate=
 study.date;
 
-
 await loadStudies();
-
 
 selectedDate=
 studyDate;
@@ -6149,10 +6117,8 @@ studyDate+"T00:00:00"
 currentPatient=
 patientName;
 
-
 const patientList=
 getPatientStudies();
-
 
 currentStudy=
 patientList.findIndex(
@@ -6161,14 +6127,11 @@ String(item.id)===
 String(studyId)
 );
 
-
 if(currentStudy<0)
 currentStudy=0;
 
-
 const updatedStudy=
 getCurrentStudy();
-
 
 if(updatedStudy){
 
@@ -6193,19 +6156,16 @@ clearViewer();
 
 }
 
-
 status.className=
 "status-message status-success";
 
 status.textContent=
 "Imágenes añadidas correctamente.";
 
-
 setTimeout(
 ()=>closeAddImages(),
 800
 );
-
 
 }catch(error){
 
@@ -6213,7 +6173,6 @@ console.error(
 "ERROR AL AÑADIR IMÁGENES:",
 error
 );
-
 
 status.className=
 "status-message status-error";
@@ -6236,7 +6195,6 @@ async function deleteCurrentStudy(){
 const study=
 getCurrentStudy();
 
-
 if(!study){
 
 alert(
@@ -6246,7 +6204,6 @@ alert(
 return;
 
 }
-
 
 const confirmed=
 confirm(
@@ -6263,13 +6220,10 @@ formatDate(study.date)+
 
 );
 
-
 if(!confirmed)return;
-
 
 const admin=
 await isAdminLogged();
-
 
 if(!admin){
 
@@ -6281,7 +6235,6 @@ return;
 
 }
 
-
 try{
 
 document.getElementById(
@@ -6289,12 +6242,10 @@ document.getElementById(
 ).textContent=
 "Eliminando estudio...";
 
-
 const paths=
 study.images
 .map(image=>getStoragePath(image))
 .filter(path=>path);
-
 
 const{
 error:deleteError
@@ -6307,10 +6258,8 @@ await supabaseClient
 study.id
 );
 
-
 if(deleteError)
 throw deleteError;
-
 
 if(paths.length){
 
@@ -6321,7 +6270,6 @@ await supabaseClient
 .storage
 .from(STORAGE_BUCKET)
 .remove(paths);
-
 
 if(storageError){
 
@@ -6334,23 +6282,19 @@ storageError
 
 }
 
-
 currentPatient=null;
 
 currentStudy=0;
 
 currentImage=0;
 
-
 await loadStudies();
 
 clearViewer();
 
-
 alert(
 "Estudio eliminado correctamente."
 );
-
 
 }catch(error){
 
@@ -6359,7 +6303,6 @@ console.error(
 error
 );
 
-
 alert(
 
 "NO SE PUDO ELIMINAR EL ESTUDIO.\n\n"+
@@ -6367,7 +6310,6 @@ alert(
 "Error desconocido")
 
 );
-
 
 updateViewerAdminButtons();
 
@@ -6400,10 +6342,8 @@ document.getElementById(
 
 }
 
-
 if(event.key==="ArrowRight")
 nextImage();
-
 
 if(event.key==="ArrowLeft")
 previousImage();
@@ -6431,6 +6371,11 @@ image.naturalWidth>0 &&
 image.naturalHeight>0
 ){
 
+/*
+   Al cambiar el tamaño del dispositivo
+   recalculamos el ajuste inicial.
+*/
+
 fitImageToViewport();
 
 }
@@ -6446,12 +6391,10 @@ renderCalendar();
 
 clearViewer();
 
-
 document.getElementById(
 "currentDateLabel"
 ).textContent=
 formatDate(selectedDate);
-
 
 checkAuth();
 
