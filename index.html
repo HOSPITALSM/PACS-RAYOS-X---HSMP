@@ -21,7 +21,9 @@
     --green-dark:#2fb477;
 }
 
-*{box-sizing:border-box;}
+*{
+    box-sizing:border-box;
+}
 
 html,body{
     margin:0;
@@ -32,11 +34,17 @@ html,body{
     font-family:Arial,Helvetica,sans-serif;
 }
 
-body{overflow:hidden;}
+body{
+    overflow:hidden;
+}
 
 button,input,select{
     font-family:Arial,Helvetica,sans-serif;
 }
+
+/* =========================================================
+   TOPBAR
+========================================================= */
 
 .topbar{
     height:64px;
@@ -131,23 +139,6 @@ button,input,select{
     color:var(--green);
 }
 
-.add-study-top-button{
-    height:34px;
-    padding:0 12px;
-    background:var(--green);
-    border:0;
-    border-radius:4px;
-    color:#07120d;
-    font-size:10px;
-    font-weight:bold;
-    cursor:pointer;
-    display:none;
-}
-
-.add-study-top-button:hover{
-    background:#55d99d;
-}
-
 .auth-user{
     color:var(--green);
     font-size:9px;
@@ -161,19 +152,38 @@ button,input,select{
     display:none;
 }
 
+.add-study-top-button{
+    display:none;
+    height:34px;
+    padding:0 13px;
+    background:var(--green);
+    border:0;
+    border-radius:4px;
+    color:#07120d;
+    font-size:10px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.add-study-top-button:hover{
+    background:#55d99d;
+}
+
+/* =========================================================
+   APP
+========================================================= */
+
+/*
+    ORDEN:
+    1. INFORMACIÓN
+    2. PACIENTES
+    3. VISOR
+    4. FECHA
+*/
+
 .app{
     height:calc(100vh - 64px);
     display:grid;
-
-    /*
-       NUEVO ORDEN VISUAL:
-
-       1. INFORMACIÓN
-       2. PACIENTES
-       3. VISOR
-       4. FECHA
-    */
-
     grid-template-columns:260px 245px 1fr 255px;
     min-width:950px;
 }
@@ -186,35 +196,9 @@ button,input,select{
     overflow:hidden;
 }
 
-/* Fecha -> derecha */
-.app > section.panel:first-child{
-    grid-column:4;
-    grid-row:1;
+.panel:last-child{
     border-right:0;
     border-left:1px solid var(--border);
-}
-
-/* Pacientes -> segunda columna */
-.app > section.panel:nth-child(2){
-    grid-column:2;
-    grid-row:1;
-}
-
-/* Visor -> tercera columna */
-.viewer{
-    grid-column:3;
-    grid-row:1;
-    background:#030303;
-    display:flex;
-    flex-direction:column;
-    min-width:0;
-}
-
-/* Información -> izquierda */
-.info-panel{
-    grid-column:1;
-    grid-row:1;
-    overflow-y:auto;
 }
 
 .panel-header{
@@ -243,6 +227,10 @@ button,input,select{
     flex:1;
     overflow-y:auto;
 }
+
+/* =========================================================
+   CALENDARIO
+========================================================= */
 
 .calendar{
     padding:12px;
@@ -347,6 +335,10 @@ button,input,select{
     font-size:10px;
 }
 
+/* =========================================================
+   PACIENTES
+========================================================= */
+
 .patient{
     padding:13px;
     border-bottom:1px solid #22262a;
@@ -379,6 +371,17 @@ button,input,select{
     padding:2px 6px;
     border-radius:10px;
     color:#c2c6ca;
+}
+
+/* =========================================================
+   VISOR
+========================================================= */
+
+.viewer{
+    background:#030303;
+    display:flex;
+    flex-direction:column;
+    min-width:0;
 }
 
 .viewer-header{
@@ -580,12 +583,25 @@ button,input,select{
     line-height:16px;
     cursor:pointer;
     z-index:3;
+    display:none;
+}
+
+.admin-mode .thumbnail-delete{
+    display:block;
 }
 
 .thumbnail-delete:hover{
     background:#8b3535;
     color:#fff;
     border-color:#d66565;
+}
+
+/* =========================================================
+   INFORMACIÓN
+========================================================= */
+
+.info-panel{
+    overflow-y:auto;
 }
 
 .info-section{
@@ -659,7 +675,9 @@ button,input,select{
     line-height:1.6;
 }
 
-/* OVERLAYS */
+/* =========================================================
+   OVERLAYS
+========================================================= */
 
 .fullscreen{
     position:fixed;
@@ -708,10 +726,6 @@ button,input,select{
     box-shadow:0 20px 60px rgba(0,0,0,.6);
 }
 
-.admin-box.small{
-    max-width:470px;
-}
-
 .admin-header{
     padding:18px 20px;
     border-bottom:1px solid var(--border);
@@ -753,7 +767,7 @@ button,input,select{
 
 .form-input{
     width:100%;
-    height:38px;
+    height:40px;
     background:#1a1d20;
     border:1px solid #34383d;
     border-radius:5px;
@@ -831,6 +845,10 @@ button,input,select{
     color:#e47777;
 }
 
+/* =========================================================
+   LOGIN
+========================================================= */
+
 .login-box{
     width:100%;
     max-width:390px;
@@ -862,6 +880,10 @@ button,input,select{
     padding:24px;
 }
 
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
 @media(max-width:1100px){
 
     .app{
@@ -870,6 +892,10 @@ button,input,select{
 
     .brand{
         min-width:250px;
+    }
+
+    .add-study-top-button{
+        padding:0 9px;
     }
 }
 
@@ -893,20 +919,10 @@ button,input,select{
 
     .viewer{
         height:650px;
-        order:3;
     }
 
     .info-panel{
         width:100%;
-        order:1;
-    }
-
-    .app > section.panel:nth-child(2){
-        order:2;
-    }
-
-    .app > section.panel:first-child{
-        order:4;
     }
 
     .search{
@@ -916,16 +932,15 @@ button,input,select{
     .viewer-admin-actions{
         flex-wrap:wrap;
     }
-
-    .add-study-top-button{
-        font-size:9px;
-        padding:0 8px;
-    }
 }
 </style>
 </head>
 
 <body>
+
+<!-- =======================================================
+     TOPBAR
+======================================================= -->
 
 <header class="topbar">
 
@@ -934,6 +949,7 @@ button,input,select{
 </div>
 
 <div class="brand">
+
     <div class="brand-title">
         HOSPITAL SAN MARTÍN DE PANGOA - RAYOS X
     </div>
@@ -941,14 +957,17 @@ button,input,select{
     <div class="brand-subtitle">
         VISOR DE IMÁGENES RADIOGRÁFICAS
     </div>
+
 </div>
 
 <div class="search">
+
     <input
         id="search"
         type="text"
         placeholder="Buscar paciente..."
         oninput="searchPatients()">
+
 </div>
 
 <div
@@ -959,17 +978,18 @@ button,input,select{
 
 <div class="auth-area">
 
+    <span
+        class="auth-user"
+        id="authUser">
+    </span>
+
+    <!-- BOTÓN INDEPENDIENTE PARA CREAR ESTUDIO -->
     <button
         class="add-study-top-button"
         id="addStudyButton"
         onclick="openAddStudy()">
         + AÑADIR ESTUDIO
     </button>
-
-    <span
-        class="auth-user"
-        id="authUser">
-    </span>
 
     <button
         class="auth-button"
@@ -989,221 +1009,25 @@ button,input,select{
 
 </header>
 
+
+<!-- =======================================================
+     APP
+======================================================= -->
+
 <div class="app">
 
-<!-- ======================================================
-     FECHA
-====================================================== -->
-
-<section class="panel">
-
-<div class="panel-header">
-    <span class="panel-title">Fecha</span>
-</div>
-
-<div class="panel-body">
-
-<div class="calendar">
-
-<div class="calendar-header">
-
-    <button
-        class="calendar-button"
-        onclick="previousMonth()">
-        ‹
-    </button>
-
-    <div
-        class="calendar-month"
-        id="calendarMonth">
-    </div>
-
-    <button
-        class="calendar-button"
-        onclick="nextMonth()">
-        ›
-    </button>
-
-</div>
-
-<div class="calendar-weekdays">
-    <div>L</div>
-    <div>M</div>
-    <div>M</div>
-    <div>J</div>
-    <div>V</div>
-    <div>S</div>
-    <div>D</div>
-</div>
-
-<div
-    class="calendar-days"
-    id="calendarDays">
-</div>
-
-<button
-    class="today-button"
-    onclick="goToday()">
-    IR A HOY
-</button>
-
-</div>
-
-</div>
-
-</section>
-
-
-<!-- ======================================================
-     PACIENTES
-====================================================== -->
-
-<section class="panel">
-
-<div class="panel-header">
-
-    <span class="panel-title">
-        Pacientes
-    </span>
-
-    <span
-        class="panel-count"
-        id="patientCount">
-        0
-    </span>
-
-</div>
-
-<div
-    class="panel-body"
-    id="patientList">
-</div>
-
-</section>
-
-
-<!-- ======================================================
-     VISOR
-====================================================== -->
-
-<section class="viewer">
-
-<div class="viewer-header">
-
-<div class="viewer-header-left">
-
-    <div
-        class="viewer-title"
-        id="viewerTitle">
-        Seleccione un estudio
-    </div>
-
-    <div
-        class="viewer-subtitle"
-        id="viewerSubtitle">
-        Conectando con Supabase...
-    </div>
-
-</div>
-
-<div
-    class="viewer-admin-actions"
-    id="viewerAdminActions">
-
-    <button
-        class="viewer-admin-button"
-        onclick="addImagesToCurrentStudy()">
-        + AÑADIR IMÁGENES
-    </button>
-
-    <button
-        class="viewer-admin-button danger"
-        onclick="deleteCurrentStudy()">
-        🗑 ELIMINAR ESTUDIO
-    </button>
-
-</div>
-
-<div
-    class="image-counter"
-    id="imageCounter">
-    --
-</div>
-
-</div>
-
-<div
-    class="viewport"
-    id="viewport">
-
-    <div class="overlay-left">
-        PACS RAYOS X · HSMP
-    </div>
-
-    <div
-        class="overlay-right"
-        id="overlayRight">
-        --
-    </div>
-
-    <div
-        class="empty-message"
-        id="emptyMessage">
-        Seleccione un paciente para visualizar sus estudios.
-    </div>
-
-    <div
-        class="image-wrapper"
-        id="imageWrapper"
-        style="display:none;">
-
-        <img
-            id="mainImage"
-            class="main-image"
-            alt="Imagen radiológica">
-
-    </div>
-
-</div>
-
-<div class="toolbar">
-
-    <button class="tool" onclick="zoomIn()">🔍+</button>
-    <button class="tool" onclick="zoomOut()">🔍−</button>
-    <button class="tool" onclick="resetView()">↺</button>
-
-    <div class="separator"></div>
-
-    <button class="tool" onclick="rotateLeft()">↶</button>
-    <button class="tool" onclick="rotateRight()">↷</button>
-    <button class="tool" onclick="invertImage()">◐</button>
-    <button class="tool" onclick="contrastUp()">C+</button>
-    <button class="tool" onclick="contrastDown()">C−</button>
-
-    <div class="separator"></div>
-
-    <button class="tool" onclick="previousImage()">◀</button>
-    <button class="tool" onclick="nextImage()">▶</button>
-    <button class="tool" onclick="openFullscreen()">⛶</button>
-
-</div>
-
-<div
-    class="thumbnails"
-    id="thumbnailList">
-</div>
-
-</section>
-
-
-<!-- ======================================================
-     INFORMACIÓN
-====================================================== -->
+<!-- =======================================================
+     COLUMNA 1: INFORMACIÓN
+======================================================= -->
 
 <aside class="panel info-panel">
 
 <div class="panel-header">
-    <span class="panel-title">Información</span>
+
+    <span class="panel-title">
+        Información
+    </span>
+
 </div>
 
 <div class="info-section">
@@ -1337,12 +1161,224 @@ button,input,select{
 
 </aside>
 
+
+<!-- =======================================================
+     COLUMNA 2: PACIENTES
+======================================================= -->
+
+<section class="panel">
+
+<div class="panel-header">
+
+    <span class="panel-title">
+        Pacientes
+    </span>
+
+    <span
+        class="panel-count"
+        id="patientCount">
+        0
+    </span>
+
+</div>
+
+<div
+    class="panel-body"
+    id="patientList">
+</div>
+
+</section>
+
+
+<!-- =======================================================
+     COLUMNA 3: VISOR
+======================================================= -->
+
+<section class="viewer">
+
+<div class="viewer-header">
+
+<div class="viewer-header-left">
+
+    <div
+        class="viewer-title"
+        id="viewerTitle">
+        Seleccione un estudio
+    </div>
+
+    <div
+        class="viewer-subtitle"
+        id="viewerSubtitle">
+        Conectando con Supabase...
+    </div>
+
+</div>
+
+<div
+    class="viewer-admin-actions"
+    id="viewerAdminActions">
+
+    <button
+        class="viewer-admin-button"
+        onclick="addImagesToCurrentStudy()">
+        + AÑADIR IMÁGENES
+    </button>
+
+    <button
+        class="viewer-admin-button danger"
+        onclick="deleteCurrentStudy()">
+        🗑 ELIMINAR ESTUDIO
+    </button>
+
+</div>
+
+<div
+    class="image-counter"
+    id="imageCounter">
+    --
+</div>
+
 </div>
 
 
-<!-- ======================================================
+<div
+    class="viewport"
+    id="viewport">
+
+    <div class="overlay-left">
+        PACS RAYOS X · HSMP
+    </div>
+
+    <div
+        class="overlay-right"
+        id="overlayRight">
+        --
+    </div>
+
+    <div
+        class="empty-message"
+        id="emptyMessage">
+        Seleccione un paciente para visualizar sus estudios.
+    </div>
+
+    <div
+        class="image-wrapper"
+        id="imageWrapper"
+        style="display:none;">
+
+        <img
+            id="mainImage"
+            class="main-image"
+            alt="Imagen radiológica">
+
+    </div>
+
+</div>
+
+
+<div class="toolbar">
+
+    <button class="tool" onclick="zoomIn()">🔍+</button>
+    <button class="tool" onclick="zoomOut()">🔍−</button>
+    <button class="tool" onclick="resetView()">↺</button>
+
+    <div class="separator"></div>
+
+    <button class="tool" onclick="rotateLeft()">↶</button>
+    <button class="tool" onclick="rotateRight()">↷</button>
+    <button class="tool" onclick="invertImage()">◐</button>
+    <button class="tool" onclick="contrastUp()">C+</button>
+    <button class="tool" onclick="contrastDown()">C−</button>
+
+    <div class="separator"></div>
+
+    <button class="tool" onclick="previousImage()">◀</button>
+    <button class="tool" onclick="nextImage()">▶</button>
+    <button class="tool" onclick="openFullscreen()">⛶</button>
+
+</div>
+
+
+<div
+    class="thumbnails"
+    id="thumbnailList">
+</div>
+
+</section>
+
+
+<!-- =======================================================
+     COLUMNA 4: FECHA
+======================================================= -->
+
+<section class="panel">
+
+<div class="panel-header">
+
+    <span class="panel-title">
+        Fecha
+    </span>
+
+</div>
+
+<div class="panel-body">
+
+<div class="calendar">
+
+<div class="calendar-header">
+
+    <button
+        class="calendar-button"
+        onclick="previousMonth()">
+        ‹
+    </button>
+
+    <div
+        class="calendar-month"
+        id="calendarMonth">
+    </div>
+
+    <button
+        class="calendar-button"
+        onclick="nextMonth()">
+        ›
+    </button>
+
+</div>
+
+<div class="calendar-weekdays">
+    <div>L</div>
+    <div>M</div>
+    <div>M</div>
+    <div>J</div>
+    <div>V</div>
+    <div>S</div>
+    <div>D</div>
+</div>
+
+<div
+    class="calendar-days"
+    id="calendarDays">
+</div>
+
+<button
+    class="today-button"
+    onclick="goToday()">
+    IR A HOY
+</button>
+
+</div>
+
+</div>
+
+</section>
+
+</div>
+
+
+<!-- =======================================================
      LOGIN
-====================================================== -->
+======================================================= -->
 
 <div
     class="admin-overlay"
@@ -1422,20 +1458,20 @@ button,input,select{
 </div>
 
 
-<!-- ======================================================
-     NUEVO ESTUDIO
-====================================================== -->
+<!-- =======================================================
+     CREAR NUEVO ESTUDIO
+======================================================= -->
 
 <div
     class="admin-overlay"
     id="addStudyOverlay">
 
-<div class="admin-box small">
+<div class="admin-box">
 
 <div class="admin-header">
 
     <div class="admin-title">
-        AÑADIR ESTUDIO
+        AÑADIR NUEVO ESTUDIO
     </div>
 
     <button
@@ -1447,6 +1483,8 @@ button,input,select{
 </div>
 
 <div class="admin-body">
+
+<!-- SOLO PACIENTE -->
 
 <div class="form-group">
 
@@ -1462,10 +1500,13 @@ button,input,select{
 
 </div>
 
+
+<!-- SOLO FECHA -->
+
 <div class="form-group">
 
     <label class="form-label">
-        Fecha del estudio
+        Fecha
     </label>
 
     <input
@@ -1475,18 +1516,22 @@ button,input,select{
 
 </div>
 
+
+<!-- SOLO JPG -->
+
 <div class="form-group">
 
     <label class="form-label">
-        Imagen JPG
+        Imágenes JPG
     </label>
 
     <input
         class="file-input"
-        id="newStudyImage"
+        id="newStudyFiles"
         type="file"
         accept=".jpg,.jpeg,image/jpeg"
-        onchange="showNewStudyFile()">
+        multiple
+        onchange="showNewStudyFiles()">
 
     <div
         class="file-list"
@@ -1496,10 +1541,12 @@ button,input,select{
 
 </div>
 
+
 <div
     class="status-message"
     id="newStudyStatus">
 </div>
+
 
 <div class="admin-actions">
 
@@ -1524,9 +1571,9 @@ button,input,select{
 </div>
 
 
-<!-- ======================================================
+<!-- =======================================================
      AÑADIR IMÁGENES A ESTUDIO EXISTENTE
-====================================================== -->
+======================================================= -->
 
 <div
     class="admin-overlay"
@@ -1618,9 +1665,9 @@ button,input,select{
 </div>
 
 
-<!-- ======================================================
+<!-- =======================================================
      PANTALLA COMPLETA
-====================================================== -->
+======================================================= -->
 
 <div
     class="fullscreen"
@@ -1663,33 +1710,14 @@ const ADMIN_UID =
 const STORAGE_BUCKET =
     "IMAGENES";
 
-
-/* =========================================================
-   VARIABLES
-========================================================= */
-
 let studies = [];
-
-function getTodayString(){
-
-    const today = new Date();
-
-    return (
-        today.getFullYear() +
-        "-" +
-        String(today.getMonth()+1).padStart(2,"0") +
-        "-" +
-        String(today.getDate()).padStart(2,"0")
-    );
-}
 
 let selectedDate =
     getTodayString();
 
 let calendarDate =
     new Date(
-        selectedDate +
-        "T00:00:00"
+        selectedDate + "T00:00:00"
     );
 
 let currentPatient = null;
@@ -1705,6 +1733,24 @@ let contrast = 1;
 /* =========================================================
    FECHA
 ========================================================= */
+
+function getTodayString(){
+
+    const today =
+        new Date();
+
+    return (
+        today.getFullYear() +
+        "-" +
+        String(
+            today.getMonth() + 1
+        ).padStart(2,"0") +
+        "-" +
+        String(
+            today.getDate()
+        ).padStart(2,"0")
+    );
+}
 
 function formatDate(dateString){
 
@@ -1737,7 +1783,8 @@ function getImageUrl(file){
     )
         return "";
 
-    file = file.trim();
+    file =
+        file.trim();
 
     if(!file)
         return "";
@@ -1777,7 +1824,8 @@ function getStoragePath(file){
     )
         return "";
 
-    file = file.trim();
+    file =
+        file.trim();
 
     const marker =
         "/storage/v1/object/public/" +
@@ -1789,6 +1837,7 @@ function getStoragePath(file){
         return decodeURIComponent(
             file.split(marker)[1]
         );
+
     }
 
     return file;
@@ -1872,7 +1921,9 @@ async function loadStudies(){
                 .select("*")
                 .order(
                     "date",
-                    {ascending:false}
+                    {
+                        ascending:false
+                    }
                 );
 
         if(error)
@@ -1885,16 +1936,17 @@ async function loadStudies(){
                     return {
 
                         id:item.id,
-                        date:item.date || "",
-                        patient:item.patient || "",
-                        history:item.history || "",
-                        birth:item.birth || "",
-                        sex:item.sex || "",
-                        study:item.study || "",
-                        structure:item.structure || "",
-                        modality:item.modality || "",
-                        side:"",
-                        images:normalizeImages(item.images)
+
+                        date:
+                            item.date || "",
+
+                        patient:
+                            item.patient || "",
+
+                        images:
+                            normalizeImages(
+                                item.images
+                            )
 
                     };
 
@@ -2023,9 +2075,18 @@ function renderCalendar(){
         calendarDate.getMonth();
 
     const monthNames = [
-        "enero","febrero","marzo","abril",
-        "mayo","junio","julio","agosto",
-        "septiembre","octubre","noviembre","diciembre"
+        "enero",
+        "febrero",
+        "marzo",
+        "abril",
+        "mayo",
+        "junio",
+        "julio",
+        "agosto",
+        "septiembre",
+        "octubre",
+        "noviembre",
+        "diciembre"
     ];
 
     document.getElementById(
@@ -2104,7 +2165,9 @@ function renderCalendar(){
         const dateString =
             year +
             "-" +
-            String(month + 1).padStart(2,"0") +
+            String(
+                month + 1
+            ).padStart(2,"0") +
             "-" +
             String(day).padStart(2,"0");
 
@@ -2118,27 +2181,33 @@ function renderCalendar(){
                     dateString
             )
         ){
+
             div.classList.add(
                 "has-studies"
             );
+
         }
 
         if(
             dateString ===
             selectedDate
         ){
+
             div.classList.add(
                 "selected"
             );
+
         }
 
         if(
             dateString ===
             getTodayString()
         ){
+
             div.classList.add(
                 "today"
             );
+
         }
 
         div.onclick =
@@ -2150,6 +2219,7 @@ function renderCalendar(){
         container.appendChild(
             div
         );
+
     }
 }
 
@@ -2177,7 +2247,9 @@ function selectDate(date){
         );
 
     renderCalendar();
+
     renderPatients();
+
     clearViewer();
 }
 
@@ -2244,6 +2316,7 @@ function renderPatients(filter=""){
                             filter.toLowerCase()
                         )
             );
+
     }
 
     document.getElementById(
@@ -2291,9 +2364,11 @@ function renderPatients(filter=""){
                 currentPatient ===
                 name
             ){
+
                 element.classList.add(
                     "active"
                 );
+
             }
 
             element.innerHTML = `
@@ -2384,7 +2459,7 @@ function getCurrentStudy(){
 
 
 /* =========================================================
-   SELECTOR DE ESTUDIOS
+   SELECTOR ESTUDIOS
 ========================================================= */
 
 function renderStudySelector(){
@@ -2629,6 +2704,10 @@ async function updateViewerAdminButtons(){
         buttons.style.display =
             "none";
 
+        document.body.classList.remove(
+            "admin-mode"
+        );
+
         return;
     }
 
@@ -2639,6 +2718,21 @@ async function updateViewerAdminButtons(){
         admin
         ? "flex"
         : "none";
+
+    if(admin){
+
+        document.body.classList.add(
+            "admin-mode"
+        );
+
+    }
+    else{
+
+        document.body.classList.remove(
+            "admin-mode"
+        );
+
+    }
 }
 
 
@@ -2727,9 +2821,11 @@ function renderThumbnails(study){
                 index ===
                 currentImage
             ){
+
                 img.classList.add(
                     "active"
                 );
+
             }
 
             img.onclick =
@@ -2895,14 +2991,14 @@ async function deleteImageFromStudy(
             const {
                 error:storageError
             } =
-            await supabaseClient
-                .storage
-                .from(
-                    STORAGE_BUCKET
-                )
-                .remove([
-                    storagePath
-                ]);
+                await supabaseClient
+                    .storage
+                    .from(
+                        STORAGE_BUCKET
+                    )
+                    .remove([
+                        storagePath
+                    ]);
 
             if(storageError){
 
@@ -3034,7 +3130,9 @@ function nextImage(){
         currentImage >=
         study.images.length
     ){
+
         currentImage = 0;
+
     }
 
     showImage(
@@ -3068,8 +3166,10 @@ function previousImage(){
     if(
         currentImage < 0
     ){
+
         currentImage =
             study.images.length - 1;
+
     }
 
     showImage(
@@ -3313,6 +3413,10 @@ function clearViewer(){
         "viewerAdminActions"
     ).style.display =
         "none";
+
+    document.body.classList.remove(
+        "admin-mode"
+    );
 }
 
 
@@ -3515,6 +3619,7 @@ async function loginAdmin(){
         status.textContent =
             error.message ||
             "No se pudo iniciar sesión.";
+
     }
 }
 
@@ -3629,6 +3734,10 @@ function updateAuthInterface(user){
             user.email ||
             "Administrador";
 
+        document.body.classList.add(
+            "admin-mode"
+        );
+
         updateViewerAdminButtons();
 
     }
@@ -3653,6 +3762,10 @@ function updateAuthInterface(user){
             "viewerAdminActions"
         ).style.display =
             "none";
+
+        document.body.classList.remove(
+            "admin-mode"
+        );
     }
 }
 
@@ -3681,7 +3794,8 @@ function openAddStudy(){
 
     document.getElementById(
         "newPatientName"
-    ).value = "";
+    ).value =
+        "";
 
     document.getElementById(
         "newStudyDate"
@@ -3690,8 +3804,9 @@ function openAddStudy(){
         getTodayString();
 
     document.getElementById(
-        "newStudyImage"
-    ).value = "";
+        "newStudyFiles"
+    ).value =
+        "";
 
     document.getElementById(
         "newStudyFileList"
@@ -3702,6 +3817,11 @@ function openAddStudy(){
         "newStudyStatus"
     ).textContent =
         "";
+
+    document.getElementById(
+        "newStudyStatus"
+    ).className =
+        "status-message";
 
     document.getElementById(
         "addStudyOverlay"
@@ -3728,11 +3848,11 @@ function closeAddStudy(){
         "none";
 }
 
-function showNewStudyFile(){
+function showNewStudyFiles(){
 
     const input =
         document.getElementById(
-            "newStudyImage"
+            "newStudyFiles"
         );
 
     const list =
@@ -3751,46 +3871,71 @@ function showNewStudyFile(){
         return;
     }
 
-    const file =
-        input.files[0];
+    const files =
+        Array.from(
+            input.files
+        );
 
-    if(
-        !file.type ||
-        !file.type.includes("jpeg")
-    ){
+    const invalid =
+        files.filter(
+            file =>
+                !(
+                    file.type === "image/jpeg" ||
+                    file.name
+                        .toLowerCase()
+                        .endsWith(".jpg") ||
+                    file.name
+                        .toLowerCase()
+                        .endsWith(".jpeg")
+                )
+        );
+
+    if(invalid.length){
 
         list.innerHTML =
             '<span style="color:#e47777">' +
-            "Solo se permite una imagen JPG/JPEG." +
+            "Solo se permiten imágenes JPG/JPEG." +
             "</span>";
 
         return;
     }
 
-    list.textContent =
-        file.name;
+    list.innerHTML =
+        files
+            .map(
+                (
+                    file,
+                    index
+                ) =>
+                    (index + 1) +
+                    ". " +
+                    escapeHtml(
+                        file.name
+                    )
+            )
+            .join("<br>");
 }
 
 
 /* =========================================================
-   CREAR NUEVO ESTUDIO
+   CREAR ESTUDIO NUEVO
 ========================================================= */
 
 async function createNewStudy(){
 
-    const patient =
+    const patientInput =
         document.getElementById(
             "newPatientName"
-        ).value.trim();
+        );
 
-    const date =
+    const dateInput =
         document.getElementById(
             "newStudyDate"
-        ).value;
+        );
 
-    const input =
+    const fileInput =
         document.getElementById(
-            "newStudyImage"
+            "newStudyFiles"
         );
 
     const status =
@@ -3798,13 +3943,21 @@ async function createNewStudy(){
             "newStudyStatus"
         );
 
+    const patient =
+        patientInput.value.trim();
+
+    const date =
+        dateInput.value;
+
     if(!patient){
 
         status.className =
             "status-message status-error";
 
         status.textContent =
-            "Escribe el nombre del paciente.";
+            "Ingresa el nombre del paciente.";
+
+        patientInput.focus();
 
         return;
     }
@@ -3815,38 +3968,23 @@ async function createNewStudy(){
             "status-message status-error";
 
         status.textContent =
-            "Selecciona la fecha del estudio.";
+            "Selecciona la fecha.";
+
+        dateInput.focus();
 
         return;
     }
 
     if(
-        !input.files ||
-        input.files.length === 0
+        !fileInput.files ||
+        fileInput.files.length === 0
     ){
 
         status.className =
             "status-message status-error";
 
         status.textContent =
-            "Selecciona una imagen JPG.";
-
-        return;
-    }
-
-    const file =
-        input.files[0];
-
-    if(
-        !file.type ||
-        !file.type.includes("jpeg")
-    ){
-
-        status.className =
-            "status-message status-error";
-
-        status.textContent =
-            "La imagen debe ser JPG/JPEG.";
+            "Selecciona al menos una imagen JPG.";
 
         return;
     }
@@ -3865,7 +4003,37 @@ async function createNewStudy(){
         return;
     }
 
-    let uploadedPath = "";
+    const files =
+        Array.from(
+            fileInput.files
+        );
+
+    const invalid =
+        files.filter(
+            file =>
+                !(
+                    file.type === "image/jpeg" ||
+                    file.name
+                        .toLowerCase()
+                        .endsWith(".jpg") ||
+                    file.name
+                        .toLowerCase()
+                        .endsWith(".jpeg")
+                )
+        );
+
+    if(invalid.length){
+
+        status.className =
+            "status-message status-error";
+
+        status.textContent =
+            "Todos los archivos deben ser JPG/JPEG.";
+
+        return;
+    }
+
+    const newPaths = [];
 
     try{
 
@@ -3873,58 +4041,95 @@ async function createNewStudy(){
             "status-message";
 
         status.textContent =
-            "Subiendo imagen...";
+            "Preparando imágenes...";
+
+        /*
+            Carpeta:
+            FECHA / UUID-DEL-ESTUDIO
+        */
 
         const folder =
             date +
             "/" +
             crypto.randomUUID();
 
-        const safeName =
-            file.name.replace(
-                /[^a-zA-Z0-9._-]/g,
-                "_"
-            );
+        for(
+            let i = 0;
+            i < files.length;
+            i++
+        ){
 
-        uploadedPath =
-            folder +
-            "/001_" +
-            safeName;
+            const file =
+                files[i];
 
-        const {
-            error:uploadError
-        } =
-            await supabaseClient
-                .storage
-                .from(
-                    STORAGE_BUCKET
-                )
-                .upload(
-                    uploadedPath,
-                    file,
-                    {
-                        cacheControl:"3600",
-                        upsert:false,
-                        contentType:"image/jpeg"
-                    }
+            const safeName =
+                file.name.replace(
+                    /[^a-zA-Z0-9._-]/g,
+                    "_"
                 );
 
-        if(uploadError)
-            throw uploadError;
+            const path =
+                folder +
+                "/" +
+                String(
+                    i + 1
+                ).padStart(
+                    3,
+                    "0"
+                ) +
+                "_" +
+                safeName;
 
+            status.textContent =
+                "Subiendo imagen " +
+                (i + 1) +
+                " de " +
+                files.length +
+                "...";
+
+            const {
+                error:uploadError
+            } =
+                await supabaseClient
+                    .storage
+                    .from(
+                        STORAGE_BUCKET
+                    )
+                    .upload(
+                        path,
+                        file,
+                        {
+                            cacheControl:
+                                "3600",
+
+                            upsert:
+                                false,
+
+                            contentType:
+                                "image/jpeg"
+                        }
+                    );
+
+            if(uploadError)
+                throw uploadError;
+
+            newPaths.push(
+                path
+            );
+        }
+
+
+        /* =================================================
+           CREAR REGISTRO EN studies
+           
+           SOLAMENTE:
+           patient
+           date
+           images
+        ================================================= */
 
         status.textContent =
             "Creando estudio...";
-
-
-        /*
-          Solo se rellenan:
-          patient
-          date
-          images
-
-          El resto queda vacío.
-        */
 
         const {
             data:newStudy,
@@ -3933,34 +4138,44 @@ async function createNewStudy(){
             await supabaseClient
                 .from("studies")
                 .insert({
-                    patient:patient,
-                    date:date,
-                    images:[uploadedPath]
+
+                    patient:
+                        patient,
+
+                    date:
+                        date,
+
+                    images:
+                        newPaths
+
                 })
                 .select()
                 .single();
 
         if(insertError){
 
+            /*
+                Si falla la creación del registro,
+                eliminamos las imágenes que acabamos
+                de subir para no dejar archivos huérfanos.
+            */
+
             await supabaseClient
                 .storage
                 .from(
                     STORAGE_BUCKET
                 )
-                .remove([
-                    uploadedPath
-                ]);
+                .remove(
+                    newPaths
+                );
 
             throw insertError;
         }
 
 
-        status.className =
-            "status-message status-success";
-
-        status.textContent =
-            "Estudio creado correctamente.";
-
+        /* =================================================
+           ACTUALIZAR INTERFAZ
+        ================================================= */
 
         selectedDate =
             date;
@@ -3974,11 +4189,13 @@ async function createNewStudy(){
         currentPatient =
             patient;
 
-        currentImage = 0;
+        currentStudy =
+            0;
 
+        currentImage =
+            0;
 
         await loadStudies();
-
 
         const patientStudies =
             getPatientStudies();
@@ -3993,10 +4210,9 @@ async function createNewStudy(){
         if(currentStudy < 0)
             currentStudy = 0;
 
-
         renderCalendar();
-        renderPatients();
 
+        renderPatients();
 
         const createdStudy =
             getCurrentStudy();
@@ -4009,6 +4225,11 @@ async function createNewStudy(){
 
         }
 
+        status.className =
+            "status-message status-success";
+
+        status.textContent =
+            "Estudio creado correctamente.";
 
         setTimeout(
             () => {
@@ -4016,7 +4237,7 @@ async function createNewStudy(){
                 closeAddStudy();
 
             },
-            700
+            900
         );
 
     }
@@ -4027,12 +4248,43 @@ async function createNewStudy(){
             error
         );
 
+        /*
+            Por seguridad, si hubo alguna subida
+            pero el proceso falló después,
+            intentamos limpiar las imágenes.
+        */
+
+        if(newPaths.length){
+
+            try{
+
+                await supabaseClient
+                    .storage
+                    .from(
+                        STORAGE_BUCKET
+                    )
+                    .remove(
+                        newPaths
+                    );
+
+            }
+            catch(cleanError){
+
+                console.error(
+                    "ERROR AL LIMPIAR STORAGE:",
+                    cleanError
+                );
+
+            }
+        }
+
         status.className =
             "status-message status-error";
 
         status.textContent =
             error.message ||
             "No se pudo crear el estudio.";
+
     }
 }
 
@@ -4128,8 +4380,14 @@ function showAdditionalFiles(){
     const invalid =
         files.filter(
             file =>
-                !file.type.includes(
-                    "jpeg"
+                !(
+                    file.type === "image/jpeg" ||
+                    file.name
+                        .toLowerCase()
+                        .endsWith(".jpg") ||
+                    file.name
+                        .toLowerCase()
+                        .endsWith(".jpeg")
                 )
         );
 
@@ -4249,20 +4507,6 @@ async function uploadAdditionalImages(){
 
             const file =
                 files[i];
-
-            if(
-                !file.type ||
-                !file.type.includes(
-                    "jpeg"
-                )
-            ){
-
-                throw new Error(
-                    "El archivo " +
-                    file.name +
-                    " no es JPG/JPEG."
-                );
-            }
 
             const safeName =
                 file.name.replace(
@@ -4416,6 +4660,7 @@ async function uploadAdditionalImages(){
                 );
 
             renderCalendar();
+
             renderPatients();
 
             renderStudy(
@@ -4455,6 +4700,7 @@ async function uploadAdditionalImages(){
         status.textContent =
             error.message ||
             "No se pudieron añadir las imágenes.";
+
     }
 }
 
@@ -4626,14 +4872,20 @@ document.addEventListener(
         if(
             event.key ===
             "ArrowRight"
-        )
+        ){
+
             nextImage();
+
+        }
 
         if(
             event.key ===
             "ArrowLeft"
-        )
+        ){
+
             previousImage();
+
+        }
 
     }
 );
