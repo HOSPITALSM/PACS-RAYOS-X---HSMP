@@ -19,6 +19,10 @@
 --hover:#25292d;
 --green:#3ecf8e;
 --green-dark:#2fb477;
+--warning:#e0a94e;
+--shadow-sm:0 2px 8px rgba(0,0,0,.35);
+--shadow-md:0 8px 24px rgba(0,0,0,.45);
+--ease:.15s ease;
 }
 
 *{
@@ -37,13 +41,14 @@ width:100%;
 min-height:100vh;
 background:var(--bg);
 color:var(--text);
-font-family:Arial,Helvetica,sans-serif;
+font-family:"Inter","Segoe UI",system-ui,Arial,Helvetica,sans-serif;
+-webkit-font-smoothing:antialiased;
 overflow-x:hidden;
 overflow-y:auto
 }
 
 button,input,select{
-font-family:Arial,Helvetica,sans-serif
+font-family:"Inter","Segoe UI",system-ui,Arial,Helvetica,sans-serif
 }
 
 /* =========================
@@ -65,7 +70,8 @@ z-index:10
 .logo{
 width:100px;
 height:100px;
-border:1px dashed #4a4f55;
+border:1px solid var(--border);
+border-radius:6px;
 display:flex;
 align-items:center;
 justify-content:center;
@@ -113,11 +119,13 @@ border-radius:5px;
 color:white;
 padding:0 13px;
 outline:none;
-font-size:13px
+font-size:13px;
+transition:border-color var(--ease),box-shadow var(--ease)
 }
 
 .search input:focus{
-border-color:var(--green)
+border-color:var(--green);
+box-shadow:0 0 0 3px rgba(62,207,142,.12)
 }
 
 /* RESULTADOS DE BÚSQUEDA */
@@ -130,7 +138,7 @@ right:0;
 background:#151719;
 border:1px solid #34383d;
 border-radius:5px;
-box-shadow:0 12px 30px rgba(0,0,0,.45);
+box-shadow:var(--shadow-md);
 max-height:300px;
 overflow-y:auto;
 display:none;
@@ -140,7 +148,8 @@ z-index:1000
 .search-result{
 padding:11px 13px;
 border-bottom:1px solid #282c30;
-cursor:pointer
+cursor:pointer;
+transition:background var(--ease)
 }
 
 .search-result:last-child{
@@ -189,7 +198,8 @@ border:1px solid #34383d;
 border-radius:4px;
 color:#d0d4d8;
 font-size:12px;
-cursor:pointer
+cursor:pointer;
+transition:border-color var(--ease),color var(--ease),background var(--ease)
 }
 
 .auth-button:hover{
@@ -264,6 +274,11 @@ overflow-x:hidden
 
 /* SCROLL PACIENTES */
 
+.panel-body{
+scrollbar-color:#353a40 #0d0f10;
+scrollbar-width:thin
+}
+
 .panel-body::-webkit-scrollbar{
 width:8px
 }
@@ -295,11 +310,16 @@ border-radius:5px;
 color:#07120d;
 font-size:12px;
 font-weight:bold;
-cursor:pointer
+cursor:pointer;
+transition:background var(--ease),transform var(--ease)
 }
 
 .add-study-button:hover{
 background:#55d99d
+}
+
+.add-study-button:active{
+transform:scale(.98)
 }
 
 /* =========================
@@ -331,7 +351,8 @@ border:1px solid #34383d;
 color:#ddd;
 border-radius:4px;
 cursor:pointer;
-font-size:17px
+font-size:17px;
+transition:border-color var(--ease),color var(--ease)
 }
 
 .calendar-button:hover{
@@ -368,7 +389,8 @@ border-radius:4px;
 color:#aeb2b7;
 font-size:12px;
 cursor:pointer;
-position:relative
+position:relative;
+transition:background var(--ease),color var(--ease)
 }
 
 .day:hover{
@@ -412,11 +434,13 @@ border:1px solid #34383d;
 color:#bbbfc4;
 border-radius:4px;
 cursor:pointer;
-font-size:12px
+font-size:12px;
+transition:border-color var(--ease),color var(--ease)
 }
 
 .today-button:hover{
-border-color:var(--green)
+border-color:var(--green);
+color:var(--green)
 }
 
 /* =========================
@@ -426,7 +450,8 @@ border-color:var(--green)
 .patient{
 padding:15px;
 border-bottom:1px solid #22262a;
-cursor:pointer
+cursor:pointer;
+transition:background var(--ease),box-shadow var(--ease)
 }
 
 .patient:hover{
@@ -523,7 +548,8 @@ border:1px solid #34383d;
 border-radius:4px;
 color:#ccc;
 font-size:11px;
-cursor:pointer
+cursor:pointer;
+transition:border-color var(--ease),color var(--ease)
 }
 
 .viewer-admin-button:hover{
@@ -558,6 +584,11 @@ align-items:center;
 justify-content:center;
 background:radial-gradient(circle,#151515 0%,#050505 65%,#000 100%);
 flex-shrink:0
+}
+
+.viewport{
+scrollbar-color:#383838 #080808;
+scrollbar-width:thin
 }
 
 .viewport::-webkit-scrollbar{
@@ -614,7 +645,8 @@ min-height:100%;
 display:flex;
 align-items:center;
 justify-content:center;
-transform-origin:center center
+transform-origin:center center;
+transition:transform .12s ease
 }
 
 .main-image{
@@ -624,7 +656,8 @@ width:auto;
 height:auto;
 object-fit:contain;
 user-select:none;
--webkit-user-drag:none
+-webkit-user-drag:none;
+transition:filter .12s ease
 }
 
 /* =========================
@@ -654,13 +687,18 @@ border:1px solid #34383d;
 border-radius:4px;
 color:#d0d4d8;
 font-size:12px;
-cursor:pointer
+cursor:pointer;
+transition:background var(--ease),border-color var(--ease),color var(--ease)
 }
 
 .tool:hover{
 background:#2a2e33;
 border-color:#555b61;
 color:white
+}
+
+.tool:active{
+transform:scale(.96)
 }
 
 .separator{
@@ -688,6 +726,11 @@ overflow-y:hidden;
 flex-shrink:0
 }
 
+.thumbnails{
+scrollbar-color:#353a40 #101214;
+scrollbar-width:thin
+}
+
 .thumbnail-item{
 width:82px;
 height:92px;
@@ -703,7 +746,12 @@ background:#000;
 border:2px solid #30343a;
 border-radius:3px;
 cursor:pointer;
-display:block
+display:block;
+transition:border-color var(--ease),opacity var(--ease)
+}
+
+.thumbnail:hover{
+opacity:.85
 }
 
 .thumbnail.active{
@@ -724,7 +772,8 @@ color:#d96b6b;
 font-size:13px;
 line-height:17px;
 cursor:pointer;
-z-index:3
+z-index:3;
+transition:background var(--ease),color var(--ease),border-color var(--ease)
 }
 
 .thumbnail-delete:hover{
@@ -762,7 +811,7 @@ margin-bottom:13px
 .info-label{
 display:block;
 color:#686e74;
-font-size:10px;
+font-size:10.5px;
 margin-bottom:4px
 }
 
@@ -775,7 +824,8 @@ font-size:13px
 background:#191c1f;
 border:1px solid #2b2f34;
 border-radius:5px;
-padding:13px
+padding:13px;
+box-shadow:var(--shadow-sm)
 }
 
 .patient-card-name{
@@ -798,7 +848,8 @@ border-radius:5px;
 color:#eee;
 padding:0 9px;
 outline:none;
-font-size:12px
+font-size:12px;
+transition:border-color var(--ease)
 }
 
 .study-selector:focus{
@@ -818,11 +869,13 @@ border-radius:5px;
 color:#eee;
 padding:0 11px;
 outline:none;
-font-size:13px
+font-size:13px;
+transition:border-color var(--ease),box-shadow var(--ease)
 }
 
 .form-input:focus{
-border-color:var(--green)
+border-color:var(--green);
+box-shadow:0 0 0 3px rgba(62,207,142,.12)
 }
 
 .form-input::placeholder{
@@ -855,7 +908,13 @@ top:15px;
 right:22px;
 color:white;
 font-size:32px;
-cursor:pointer
+cursor:pointer;
+transition:color var(--ease),transform var(--ease)
+}
+
+.close-fullscreen:hover{
+color:var(--green);
+transform:scale(1.1)
 }
 
 /* =========================
@@ -881,7 +940,7 @@ overflow-y:auto;
 background:#111315;
 border:1px solid #30353a;
 border-radius:8px;
-box-shadow:0 20px 60px rgba(0,0,0,.6)
+box-shadow:var(--shadow-md)
 }
 
 .admin-header{
@@ -903,7 +962,12 @@ background:none;
 border:0;
 color:#888;
 font-size:26px;
-cursor:pointer
+cursor:pointer;
+transition:color var(--ease)
+}
+
+.admin-close:hover{
+color:#e47777
 }
 
 .admin-body{
@@ -930,7 +994,12 @@ background:#1a1d20;
 border:1px dashed #454b51;
 border-radius:5px;
 color:#aaa;
-font-size:12px
+font-size:12px;
+transition:border-color var(--ease)
+}
+
+.file-input:hover{
+border-color:var(--green)
 }
 
 .file-list{
@@ -957,11 +1026,16 @@ color:#07120d;
 border-radius:5px;
 font-weight:bold;
 cursor:pointer;
-font-size:12px
+font-size:12px;
+transition:background var(--ease),transform var(--ease)
 }
 
 .admin-primary:hover{
 background:#55d99d
+}
+
+.admin-primary:active{
+transform:scale(.98)
 }
 
 .admin-secondary{
@@ -972,7 +1046,13 @@ border:1px solid #34383d;
 color:#ccc;
 border-radius:5px;
 cursor:pointer;
-font-size:12px
+font-size:12px;
+transition:border-color var(--ease),color var(--ease)
+}
+
+.admin-secondary:hover{
+border-color:#555b61;
+color:#fff
 }
 
 .status-message{
@@ -999,7 +1079,7 @@ max-width:390px;
 background:#111315;
 border:1px solid #30353a;
 border-radius:8px;
-box-shadow:0 20px 60px rgba(0,0,0,.6)
+box-shadow:var(--shadow-md)
 }
 
 .login-header{
