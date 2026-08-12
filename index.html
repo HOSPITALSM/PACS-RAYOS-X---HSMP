@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -21,9 +22,7 @@
 --green-dark:#2fb477;
 }
 
-*{
-box-sizing:border-box
-}
+*{box-sizing:border-box}
 
 html{
 width:100%;
@@ -46,9 +45,7 @@ button,input,select{
 font-family:Arial,Helvetica,sans-serif
 }
 
-/* =========================
-   BARRA SUPERIOR
-========================= */
+/* BARRA SUPERIOR */
 
 .topbar{
 min-height:72px;
@@ -100,8 +97,7 @@ margin-top:5px
 .search{
 flex:1;
 max-width:430px;
-margin-left:auto;
-position:relative
+margin-left:auto
 }
 
 .search input{
@@ -118,55 +114,6 @@ font-size:13px
 
 .search input:focus{
 border-color:var(--green)
-}
-
-/* RESULTADOS DE BÚSQUEDA */
-
-.search-results{
-position:absolute;
-top:45px;
-left:0;
-right:0;
-background:#151719;
-border:1px solid #34383d;
-border-radius:5px;
-box-shadow:0 12px 30px rgba(0,0,0,.45);
-max-height:300px;
-overflow-y:auto;
-display:none;
-z-index:1000
-}
-
-.search-result{
-padding:11px 13px;
-border-bottom:1px solid #282c30;
-cursor:pointer
-}
-
-.search-result:last-child{
-border-bottom:0
-}
-
-.search-result:hover{
-background:#25292d
-}
-
-.search-result-name{
-font-size:13px;
-color:#eee
-}
-
-.search-result-meta{
-font-size:10px;
-color:#858a91;
-margin-top:4px
-}
-
-.search-no-result{
-padding:15px;
-text-align:center;
-font-size:12px;
-color:#777d83
 }
 
 .current-date{
@@ -210,9 +157,7 @@ white-space:nowrap
 display:none
 }
 
-/* =========================
-   APLICACIÓN
-========================= */
+/* APLICACIÓN */
 
 .app{
 min-height:calc(100vh - 72px);
@@ -221,9 +166,7 @@ grid-template-columns:260px 255px 1fr 255px;
 min-width:1050px
 }
 
-/* =========================
-   PANELES
-========================= */
+/* PANELES */
 
 .panel{
 background:var(--panel);
@@ -262,28 +205,7 @@ overflow-y:auto;
 overflow-x:hidden
 }
 
-/* SCROLL PACIENTES */
-
-.panel-body::-webkit-scrollbar{
-width:8px
-}
-
-.panel-body::-webkit-scrollbar-track{
-background:#0d0f10
-}
-
-.panel-body::-webkit-scrollbar-thumb{
-background:#353a40;
-border-radius:6px
-}
-
-.panel-body::-webkit-scrollbar-thumb:hover{
-background:#4b5259
-}
-
-/* =========================
-   BOTÓN AGREGAR ESTUDIO
-========================= */
+/* BOTÓN AGREGAR ESTUDIO */
 
 .add-study-button{
 width:100%;
@@ -302,9 +224,7 @@ cursor:pointer
 background:#55d99d
 }
 
-/* =========================
-   CALENDARIO
-========================= */
+/* CALENDARIO */
 
 .calendar{
 padding:14px
@@ -419,9 +339,7 @@ font-size:12px
 border-color:var(--green)
 }
 
-/* =========================
-   PACIENTES
-========================= */
+/* PACIENTES */
 
 .patient{
 padding:15px;
@@ -466,17 +384,15 @@ font-size:13px;
 line-height:1.7
 }
 
-/* =========================
-   VISOR
-========================= */
+/* VISOR */
 
 .viewer{
 background:#030303;
 display:flex;
 flex-direction:column;
 min-width:0;
-height:840px;
-min-height:840px;
+height:830px;
+min-height:830px;
 overflow:hidden
 }
 
@@ -542,15 +458,12 @@ font-size:12px;
 white-space:nowrap
 }
 
-/* =========================
-   ÁREA DE IMAGEN
-   AUMENTADA UN POCO
-========================= */
+/* ÁREA DE IMAGEN */
 
 .viewport{
-height:600px;
-min-height:600px;
-max-height:600px;
+height:590px;
+min-height:590px;
+max-height:590px;
 position:relative;
 overflow:auto;
 display:flex;
@@ -558,24 +471,6 @@ align-items:center;
 justify-content:center;
 background:radial-gradient(circle,#151515 0%,#050505 65%,#000 100%);
 flex-shrink:0
-}
-
-.viewport::-webkit-scrollbar{
-width:9px;
-height:9px
-}
-
-.viewport::-webkit-scrollbar-track{
-background:#080808
-}
-
-.viewport::-webkit-scrollbar-thumb{
-background:#383838;
-border-radius:6px
-}
-
-.viewport::-webkit-scrollbar-thumb:hover{
-background:#505050
 }
 
 .overlay-left{
@@ -627,9 +522,126 @@ user-select:none;
 -webkit-user-drag:none
 }
 
-/* =========================
-   BARRA DE HERRAMIENTAS
-========================= */
+/* HISTORIAL DEL PACIENTE */
+
+.patient-history{
+width:100%;
+height:100%;
+overflow-y:auto;
+overflow-x:hidden;
+padding:25px 30px;
+background:#08090a
+}
+
+.history-header{
+display:flex;
+align-items:flex-start;
+justify-content:space-between;
+gap:15px;
+padding-bottom:18px;
+border-bottom:1px solid var(--border);
+margin-bottom:18px
+}
+
+.history-title{
+color:var(--green);
+font-size:18px;
+font-weight:bold
+}
+
+.history-subtitle{
+color:#858a91;
+font-size:12px;
+margin-top:6px
+}
+
+.history-back{
+height:36px;
+padding:0 13px;
+background:#202328;
+border:1px solid #34383d;
+border-radius:4px;
+color:#ccc;
+font-size:11px;
+cursor:pointer;
+white-space:nowrap
+}
+
+.history-back:hover{
+border-color:var(--green);
+color:var(--green)
+}
+
+.history-list{
+display:flex;
+flex-direction:column;
+gap:9px
+}
+
+.history-study{
+background:#111315;
+border:1px solid #2c3035;
+border-radius:5px;
+padding:16px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:15px;
+cursor:pointer;
+transition:.15s
+}
+
+.history-study:hover{
+background:#191c1f;
+border-color:#4a5056;
+transform:translateX(2px)
+}
+
+.history-study-main{
+min-width:0
+}
+
+.history-study-date{
+color:#eee;
+font-size:14px;
+font-weight:bold
+}
+
+.history-study-relative{
+color:#858a91;
+font-size:11px;
+margin-top:5px
+}
+
+.history-study-meta{
+display:flex;
+align-items:center;
+gap:8px;
+flex-shrink:0
+}
+
+.history-image-count{
+background:#24282c;
+border:1px solid #34383d;
+border-radius:12px;
+padding:5px 10px;
+color:#bfc4c8;
+font-size:11px
+}
+
+.history-arrow{
+color:var(--green);
+font-size:18px
+}
+
+.history-empty{
+padding:50px 20px;
+text-align:center;
+color:#686e74;
+font-size:13px
+}
+
+/* BARRA DE HERRAMIENTAS */
 
 .toolbar{
 min-height:60px;
@@ -670,9 +682,7 @@ background:#30343a;
 margin:0 4px
 }
 
-/* =========================
-   MINIATURAS
-========================= */
+/* MINIATURAS */
 
 .thumbnails{
 min-height:112px;
@@ -733,13 +743,10 @@ color:#fff;
 border-color:#d66565
 }
 
-/* =========================
-   INFORMACIÓN
-========================= */
+/* INFORMACIÓN */
 
 .info-panel{
-overflow-y:auto;
-overflow-x:hidden
+overflow-y:auto
 }
 
 .info-section{
@@ -805,9 +812,7 @@ font-size:12px
 border-color:var(--green)
 }
 
-/* =========================
-   INPUTS
-========================= */
+/* INPUTS */
 
 .form-input{
 width:100%;
@@ -829,9 +834,7 @@ border-color:var(--green)
 color:#666c72
 }
 
-/* =========================
-   PANTALLA COMPLETA
-========================= */
+/* PANTALLA COMPLETA */
 
 .fullscreen{
 position:fixed;
@@ -858,9 +861,7 @@ font-size:32px;
 cursor:pointer
 }
 
-/* =========================
-   MODALES
-========================= */
+/* MODALES */
 
 .admin-overlay{
 position:fixed;
@@ -989,9 +990,7 @@ color:var(--green)
 color:#e47777
 }
 
-/* =========================
-   LOGIN
-========================= */
+/* LOGIN */
 
 .login-box{
 width:100%;
@@ -1024,12 +1023,9 @@ margin-top:7px
 padding:25px
 }
 
-/* =========================
-   RESPONSIVO
-========================= */
+/* RESPONSIVO */
 
 @media(max-width:1250px){
-
 .app{
 grid-template-columns:240px 240px 1fr 235px
 }
@@ -1037,7 +1033,6 @@ grid-template-columns:240px 240px 1fr 235px
 .brand{
 min-width:240px
 }
-
 }
 
 @media(max-width:1000px){
@@ -1072,14 +1067,14 @@ order:2
 
 .viewer{
 order:3;
-height:800px;
-min-height:800px
+height:790px;
+min-height:790px
 }
 
 .viewport{
-height:560px;
-min-height:560px;
-max-height:560px
+height:550px;
+min-height:550px;
+max-height:550px
 }
 
 .panel:last-child{
@@ -1087,16 +1082,13 @@ order:4
 }
 
 .search{
-display:block;
-max-width:none;
-margin-left:0
+display:none
 }
 
 .brand{
 min-width:0;
 flex:1
 }
-
 }
 
 @media(max-width:700px){
@@ -1141,15 +1133,26 @@ min-height:760px
 }
 
 .viewport{
-height:530px;
-min-height:530px;
-max-height:530px
+height:520px;
+min-height:520px;
+max-height:520px
 }
 
-.search{
-display:block
+.patient-history{
+padding:18px 15px
 }
 
+.history-header{
+flex-direction:column
+}
+
+.history-back{
+width:100%
+}
+
+.history-study{
+padding:13px
+}
 }
 </style>
 </head>
@@ -1163,35 +1166,21 @@ display:block
 </div>
 
 <div class="brand">
-<div class="brand-title">
-HOSPITAL SAN MARTÍN DE PANGOA - RAYOS X
-</div>
-
-<div class="brand-subtitle">
-VISOR DE IMÁGENES RADIOGRÁFICAS
-</div>
+<div class="brand-title">HOSPITAL SAN MARTÍN DE PANGOA - RAYOS X</div>
+<div class="brand-subtitle">VISOR DE IMÁGENES RADIOGRÁFICAS</div>
 </div>
 
 <div class="search">
-
 <input
 id="search"
 type="text"
 placeholder="Buscar paciente..."
-autocomplete="off"
-oninput="searchPatients()"
->
-
-<div class="search-results" id="searchResults"></div>
-
+oninput="searchPatients()">
 </div>
 
-<div class="current-date" id="currentDateLabel">
---
-</div>
+<div class="current-date" id="currentDateLabel">--</div>
 
 <div class="auth-area">
-
 <span class="auth-user" id="authUser"></span>
 
 <button
@@ -1207,17 +1196,13 @@ id="logoutButton"
 onclick="logoutAdmin()">
 CERRAR SESIÓN
 </button>
-
 </div>
 
 </header>
 
-
 <div class="app">
 
-<!-- =========================
-     INFORMACIÓN
-========================= -->
+<!-- INFORMACIÓN -->
 
 <aside class="panel info-panel">
 
@@ -1227,9 +1212,7 @@ CERRAR SESIÓN
 
 <div class="info-section">
 
-<div class="info-heading">
-Paciente
-</div>
+<div class="info-heading">Paciente</div>
 
 <div class="patient-card">
 
@@ -1248,18 +1231,14 @@ id="infoPatientMeta">
 </div>
 </div>
 
-
 <div class="info-section">
 
-<div class="info-heading">
-Estudios
-</div>
+<div class="info-heading">Estudios</div>
 
 <select
 class="study-selector"
 id="studySelector"
-onchange="changeSelectedStudy(this.value)"
->
+onchange="changeSelectedStudy(this.value)">
 
 <option value="">
 Seleccione un estudio
@@ -1269,90 +1248,39 @@ Seleccione un estudio
 
 </div>
 
+<div class="info-section">
+
+<div class="info-heading">Estudio</div>
+
+<div class="info-row">
+<span class="info-label">FECHA</span>
+<span class="info-value" id="infoDate">--</span>
+</div>
+
+<div class="info-row">
+<span class="info-label">IMÁGENES</span>
+<span class="info-value" id="infoImages">--</span>
+</div>
+
+</div>
 
 <div class="info-section">
 
-<div class="info-heading">
-Estudio
+<div class="info-heading">Visualización</div>
+
+<div class="info-row">
+<span class="info-label">ZOOM</span>
+<span class="info-value" id="infoZoom">100%</span>
 </div>
 
 <div class="info-row">
-
-<span class="info-label">
-FECHA
-</span>
-
-<span
-class="info-value"
-id="infoDate">
---
-</span>
-
+<span class="info-label">ROTACIÓN</span>
+<span class="info-value" id="infoRotation">0°</span>
 </div>
 
 <div class="info-row">
-
-<span class="info-label">
-IMÁGENES
-</span>
-
-<span
-class="info-value"
-id="infoImages">
---
-</span>
-
-</div>
-
-</div>
-
-
-<div class="info-section">
-
-<div class="info-heading">
-Visualización
-</div>
-
-<div class="info-row">
-
-<span class="info-label">
-ZOOM
-</span>
-
-<span
-class="info-value"
-id="infoZoom">
-100%
-</span>
-
-</div>
-
-<div class="info-row">
-
-<span class="info-label">
-ROTACIÓN
-</span>
-
-<span
-class="info-value"
-id="infoRotation">
-0°
-</span>
-
-</div>
-
-<div class="info-row">
-
-<span class="info-label">
-IMAGEN
-</span>
-
-<span
-class="info-value"
-id="infoCurrentImage">
---
-</span>
-
+<span class="info-label">IMAGEN</span>
+<span class="info-value" id="infoCurrentImage">--</span>
 </div>
 
 </div>
@@ -1360,9 +1288,7 @@ id="infoCurrentImage">
 </aside>
 
 
-<!-- =========================
-     PACIENTES
-========================= -->
+<!-- PACIENTES -->
 
 <section class="panel">
 
@@ -1379,7 +1305,9 @@ class="add-study-button"
 id="addStudyButton"
 onclick="openAddStudy()"
 style="display:none;">
+
 + AGREGAR ESTUDIO
+
 </button>
 
 </div>
@@ -1400,9 +1328,7 @@ id="patientList">
 </section>
 
 
-<!-- =========================
-     VISOR
-========================= -->
+<!-- VISOR -->
 
 <section class="viewer">
 
@@ -1453,6 +1379,8 @@ id="imageCounter">
 </div>
 
 
+<!-- ÁREA CENTRAL -->
+
 <div
 class="viewport"
 id="viewport">
@@ -1467,11 +1395,58 @@ id="overlayRight">
 --
 </div>
 
+
 <div
 class="empty-message"
 id="emptyMessage">
+
 Seleccione un paciente para visualizar sus estudios.
+
 </div>
+
+
+<!-- HISTORIAL DEL PACIENTE -->
+
+<div
+class="patient-history"
+id="patientHistory"
+style="display:none;">
+
+<div class="history-header">
+
+<div>
+
+<div
+class="history-title"
+id="historyPatientName">
+Historial del paciente
+</div>
+
+<div
+class="history-subtitle"
+id="historyPatientSubtitle">
+Seleccione un estudio para visualizar sus imágenes.
+</div>
+
+</div>
+
+<button
+class="history-back"
+onclick="closePatientHistory()">
+← VOLVER AL VISOR
+</button>
+
+</div>
+
+<div
+class="history-list"
+id="historyList">
+</div>
+
+</div>
+
+
+<!-- IMAGEN -->
 
 <div
 class="image-wrapper"
@@ -1487,6 +1462,8 @@ alt="Imagen radiológica">
 
 </div>
 
+
+<!-- HERRAMIENTAS -->
 
 <div class="toolbar">
 
@@ -1563,6 +1540,8 @@ onclick="openFullscreen()">
 </div>
 
 
+<!-- MINIATURAS -->
+
 <div
 class="thumbnails"
 id="thumbnailList">
@@ -1571,16 +1550,12 @@ id="thumbnailList">
 </section>
 
 
-<!-- =========================
-     CALENDARIO
-========================= -->
+<!-- CALENDARIO -->
 
 <section class="panel">
 
 <div class="panel-header">
-<span class="panel-title">
-Fecha
-</span>
+<span class="panel-title">Fecha</span>
 </div>
 
 <div class="panel-body">
@@ -1608,7 +1583,6 @@ onclick="nextMonth()">
 
 </div>
 
-
 <div class="calendar-weekdays">
 
 <div>L</div>
@@ -1621,12 +1595,10 @@ onclick="nextMonth()">
 
 </div>
 
-
 <div
 class="calendar-days"
 id="calendarDays">
 </div>
-
 
 <button
 class="today-button"
@@ -1643,9 +1615,7 @@ IR A HOY
 </div>
 
 
-<!-- =========================
-     LOGIN
-========================= -->
+<!-- LOGIN -->
 
 <div
 class="admin-overlay"
@@ -1665,7 +1635,6 @@ Hospital San Martín de Pangoa - Rayos X
 
 </div>
 
-
 <div class="login-body">
 
 <div class="form-group">
@@ -1683,7 +1652,6 @@ placeholder="Correo">
 
 </div>
 
-
 <div class="form-group">
 
 <label class="form-label">
@@ -1698,7 +1666,6 @@ autocomplete="current-password"
 placeholder="Contraseña">
 
 </div>
-
 
 <div class="admin-actions">
 
@@ -1716,7 +1683,6 @@ INGRESAR
 
 </div>
 
-
 <div
 class="status-message"
 id="loginStatus">
@@ -1729,9 +1695,7 @@ id="loginStatus">
 </div>
 
 
-<!-- =========================
-     AGREGAR ESTUDIO
-========================= -->
+<!-- AGREGAR ESTUDIO -->
 
 <div
 class="admin-overlay"
@@ -1753,7 +1717,6 @@ onclick="closeAddStudy()">
 
 </div>
 
-
 <div class="admin-body">
 
 <div class="form-group">
@@ -1770,7 +1733,6 @@ placeholder="Nombre completo del paciente">
 
 </div>
 
-
 <div class="form-group">
 
 <label class="form-label">
@@ -1783,7 +1745,6 @@ id="newStudyDate"
 type="date">
 
 </div>
-
 
 <div class="form-group">
 
@@ -1807,12 +1768,10 @@ Ningún archivo seleccionado.
 
 </div>
 
-
 <div
 class="status-message"
 id="newStudyStatus">
 </div>
-
 
 <div class="admin-actions">
 
@@ -1837,9 +1796,7 @@ CREAR ESTUDIO
 </div>
 
 
-<!-- =========================
-     AÑADIR IMÁGENES
-========================= -->
+<!-- AÑADIR IMÁGENES -->
 
 <div
 class="admin-overlay"
@@ -1861,7 +1818,6 @@ onclick="closeAddImages()">
 
 </div>
 
-
 <div class="admin-body">
 
 <div class="patient-card">
@@ -1881,7 +1837,6 @@ id="addImagesStudy">
 </div>
 
 <br>
-
 
 <div class="form-group">
 
@@ -1905,12 +1860,10 @@ Ningún archivo seleccionado.
 
 </div>
 
-
 <div
 class="status-message"
 id="addImagesStatus">
 </div>
-
 
 <div class="admin-actions">
 
@@ -1935,9 +1888,7 @@ AÑADIR IMÁGENES
 </div>
 
 
-<!-- =========================
-     PANTALLA COMPLETA
-========================= -->
+<!-- PANTALLA COMPLETA -->
 
 <div
 class="fullscreen"
@@ -2006,6 +1957,8 @@ let inverted=false;
 
 let contrast=1;
 
+let showingPatientHistory=false;
+
 
 /* =========================================================
    FECHA
@@ -2015,8 +1968,10 @@ function getTodayString(){
 
 const today=new Date();
 
-return today.getFullYear()+"-"+
-String(today.getMonth()+1).padStart(2,"0")+"-"+
+return today.getFullYear()+
+"-"+
+String(today.getMonth()+1).padStart(2,"0")+
+"-"+
 String(today.getDate()).padStart(2,"0");
 
 }
@@ -2030,9 +1985,7 @@ const parts=dateString.split("-");
 
 if(parts.length!==3)return dateString;
 
-return parts[2]+"/"+
-parts[1]+"/"+
-parts[0];
+return parts[2]+"/"+parts[1]+"/"+parts[0];
 
 }
 
@@ -2058,8 +2011,7 @@ return SUPABASE_URL+
 "/storage/v1/object/public/"+
 STORAGE_BUCKET+
 "/"+
-file
-.split("/")
+file.split("/")
 .map(part=>encodeURIComponent(part))
 .join("/");
 
@@ -2078,15 +2030,13 @@ file=file.trim();
 
 const marker=
 "/storage/v1/object/public/"+
-STORAGE_BUCKET+"/";
+STORAGE_BUCKET+
+"/";
 
-if(file.includes(marker)){
-
+if(file.includes(marker))
 return decodeURIComponent(
 file.split(marker)[1]
 );
-
-}
 
 return file;
 
@@ -2151,21 +2101,20 @@ async function loadStudies(){
 
 try{
 
-document.getElementById(
-"viewerSubtitle"
-).textContent=
+document.getElementById("viewerSubtitle")
+.textContent=
 "Conectando con Supabase...";
 
-
-const{data,error}=
+const{
+data,
+error
+}=
 await supabaseClient
 .from("studies")
 .select("*")
 .order("date",{ascending:false});
 
-
 if(error)throw error;
-
 
 studies=(data||[]).map(item=>({
 
@@ -2193,28 +2142,13 @@ images:normalizeImages(item.images)
 
 }));
 
-
 renderCalendar();
-
-
-/*
- IMPORTANTE:
-
-La lista de pacientes SIEMPRE se
-renderiza completa para la fecha
-seleccionada.
-
-La búsqueda ya NO la filtra.
-*/
 
 renderPatients();
 
-
-document.getElementById(
-"currentDateLabel"
-).textContent=
+document.getElementById("currentDateLabel")
+.textContent=
 formatDate(selectedDate);
-
 
 }catch(error){
 
@@ -2223,10 +2157,8 @@ console.error(
 error
 );
 
-
-document.getElementById(
-"patientList"
-).innerHTML=`
+document.getElementById("patientList")
+.innerHTML=`
 
 <div class="no-results">
 
@@ -2242,10 +2174,8 @@ error.message||
 
 `;
 
-
-document.getElementById(
-"viewerSubtitle"
-).textContent=
+document.getElementById("viewerSubtitle")
+.textContent=
 "Error de conexión con Supabase.";
 
 }
@@ -2289,17 +2219,27 @@ return result;
 
 
 /* =========================================================
-   ESTUDIOS DEL PACIENTE
+   TODOS LOS ESTUDIOS DEL PACIENTE
+   IMPORTANTE:
+   AQUÍ NO SE FILTRA POR FECHA.
 ========================================================= */
 
 function getPatientStudies(){
 
 if(!currentPatient)return[];
 
-return studies.filter(
-item=>
-item.patient===currentPatient &&
-item.date===selectedDate
+return studies
+
+.filter(
+item=>item.patient===currentPatient
+)
+
+.sort(
+(a,b)=>
+String(b.date||"")
+.localeCompare(
+String(a.date||"")
+)
 );
 
 }
@@ -2332,12 +2272,10 @@ const monthNames=[
 "diciembre"
 ];
 
-
 document.getElementById(
 "calendarMonth"
 ).textContent=
 monthNames[month]+" "+year;
-
 
 const container=
 document.getElementById(
@@ -2346,7 +2284,6 @@ document.getElementById(
 
 container.innerHTML="";
 
-
 let firstDay=
 new Date(
 year,
@@ -2354,12 +2291,10 @@ month,
 1
 ).getDay();
 
-
 firstDay=
 firstDay===0?
 6:
 firstDay-1;
-
 
 const daysInMonth=
 new Date(
@@ -2404,15 +2339,14 @@ document.createElement("div");
 
 div.className="day";
 
-
 const dateString=
-year+"-"+
-String(month+1).padStart(2,"0")+"-"+
+year+
+"-"+
+String(month+1).padStart(2,"0")+
+"-"+
 String(day).padStart(2,"0");
 
-
 div.textContent=day;
-
 
 if(
 studies.some(
@@ -2426,8 +2360,9 @@ div.classList.add(
 
 }
 
-
-if(dateString===selectedDate){
+if(
+dateString===selectedDate
+){
 
 div.classList.add(
 "selected"
@@ -2435,8 +2370,9 @@ div.classList.add(
 
 }
 
-
-if(dateString===getTodayString()){
+if(
+dateString===getTodayString()
+){
 
 div.classList.add(
 "today"
@@ -2444,11 +2380,9 @@ div.classList.add(
 
 }
 
-
-div.onclick=()=>selectDate(
-dateString
-);
-
+div.onclick=()=>{
+selectDate(dateString);
+};
 
 container.appendChild(div);
 
@@ -2456,10 +2390,6 @@ container.appendChild(div);
 
 }
 
-
-/* =========================================================
-   CAMBIAR FECHA
-========================================================= */
 
 function selectDate(date){
 
@@ -2471,35 +2401,23 @@ currentStudy=0;
 
 currentImage=0;
 
-resetView();
+showingPatientHistory=false;
 
+resetView();
 
 document.getElementById(
 "currentDateLabel"
 ).textContent=
 formatDate(date);
 
-
 renderCalendar();
 
-
-/*
- Al cambiar de fecha,
- SIEMPRE mostramos todos los
- pacientes de esa fecha.
-*/
-
 renderPatients();
-
 
 clearViewer();
 
 }
 
-
-/* =========================================================
-   MESES
-========================================================= */
 
 function previousMonth(){
 
@@ -2542,12 +2460,10 @@ getTodayString()
 
 
 /* =========================================================
-   RENDERIZAR PACIENTES
-   IMPORTANTE:
-   NO SE FILTRA CON EL BUSCADOR
+   LISTA DE PACIENTES
 ========================================================= */
 
-function renderPatients(){
+function renderPatients(filter=""){
 
 const list=
 document.getElementById(
@@ -2556,9 +2472,56 @@ document.getElementById(
 
 list.innerHTML="";
 
+/*
+   COMPORTAMIENTO:
+   - Sin búsqueda:
+     muestra TODOS los pacientes de la fecha.
+   - Con búsqueda:
+     muestra los pacientes encontrados
+     en TODA la base de datos.
+*/
 
-const patients=
+let patients=[];
+
+if(filter.trim()){
+
+const normalized=
+filter.trim().toLowerCase();
+
+studies.forEach(item=>{
+
+if(
+item.patient&&
+item.patient
+.toLowerCase()
+.includes(normalized)&&
+!patients.includes(item.patient)
+){
+
+patients.push(item.patient);
+
+}
+
+});
+
+}else{
+
+patients=
 getPatientsForDate();
+
+}
+
+
+patients.sort(
+(a,b)=>
+a.localeCompare(
+b,
+"es",
+{
+sensitivity:"base"
+}
+)
+;
 
 
 document.getElementById(
@@ -2573,9 +2536,12 @@ list.innerHTML=`
 
 <div class="no-results">
 
-No hay pacientes<br>
-registrados para<br>
-esta fecha.
+${filter.trim()
+?
+"Paciente no encontrado."
+:
+"No hay pacientes<br>registrados para<br>esta fecha."
+}
 
 </div>
 
@@ -2589,6 +2555,12 @@ return;
 patients.forEach(name=>{
 
 const patientStudies=
+filter.trim()
+?
+studies.filter(
+item=>item.patient===name
+)
+:
 getStudiesForDate()
 .filter(
 item=>item.patient===name
@@ -2598,11 +2570,11 @@ item=>item.patient===name
 const element=
 document.createElement("div");
 
-
 element.className="patient";
 
-
-if(currentPatient===name){
+if(
+currentPatient===name
+){
 
 element.classList.add(
 "active"
@@ -2614,9 +2586,7 @@ element.classList.add(
 element.innerHTML=`
 
 <div class="patient-name">
-
 ${escapeHtml(name)}
-
 </div>
 
 <div class="patient-meta">
@@ -2635,13 +2605,6 @@ ${patientStudies.length}
 `;
 
 
-/*
- AL HACER CLIC:
- - conserva la lista completa
- - selecciona paciente
- - abre estudio
-*/
-
 element.onclick=()=>{
 
 currentPatient=name;
@@ -2652,32 +2615,16 @@ currentImage=0;
 
 resetView();
 
+renderPatients("");
 
 /*
- IMPORTANTE:
- NO hacemos renderPatients con
- el texto de búsqueda.
-
-Por eso la lista completa
-permanece visible.
+   AL HACER CLIC EN EL PACIENTE:
+   MOSTRAR HISTORIAL COMPLETO
 */
 
-renderPatients();
-
-
-showFirstStudy();
+showPatientHistory();
 
 };
-
-
-/*
- Guardamos una referencia para
- poder desplazar hasta el paciente
- cuando venga desde la búsqueda.
-*/
-
-element.dataset.patientName=
-name.toLowerCase();
 
 
 list.appendChild(element);
@@ -2688,123 +2635,236 @@ list.appendChild(element);
 
 
 /* =========================================================
-   BÚSQUEDA DE PACIENTES
+   BÚSQUEDA
 ========================================================= */
 
 function searchPatients(){
 
-const input=
-document.getElementById("search");
-
-const results=
-document.getElementById(
-"searchResults"
-);
-
 const value=
-input.value.trim().toLowerCase();
+document.getElementById(
+"search"
+).value;
 
-
-results.innerHTML="";
-
-
-if(!value){
-
-results.style.display="none";
-
-return;
+renderPatients(value);
 
 }
+
+
+/* =========================================================
+   HISTORIAL DEL PACIENTE
+========================================================= */
+
+function showPatientHistory(){
+
+if(!currentPatient)return;
+
+showingPatientHistory=true;
+
+const history=
+document.getElementById(
+"patientHistory"
+);
+
+const imageWrapper=
+document.getElementById(
+"imageWrapper"
+);
+
+const emptyMessage=
+document.getElementById(
+"emptyMessage"
+);
+
+const thumbnailList=
+document.getElementById(
+"thumbnailList"
+);
+
+history.style.display="block";
+
+imageWrapper.style.display="none";
+
+emptyMessage.style.display="none";
+
+thumbnailList.innerHTML="";
+
+
+document.getElementById(
+"historyPatientName"
+).textContent=
+currentPatient;
+
+
+const patientStudies=
+getPatientStudies();
+
+
+document.getElementById(
+"historyPatientSubtitle"
+).textContent=
+patientStudies.length+
+(
+patientStudies.length===1
+?
+" estudio registrado"
+:
+" estudios registrados"
+);
+
+
+renderPatientHistory(
+patientStudies
+);
 
 
 /*
- Buscamos en TODOS los estudios,
- no solamente en la fecha actual.
+   Ocultamos las herramientas del visor
+   mientras estamos en el historial.
 */
 
-const matches=[];
-
-const seen=new Set();
-
-
-studies.forEach(study=>{
-
-if(!study.patient)return;
+document.querySelector(
+".toolbar"
+).style.display="none";
 
 
-const patientName=
-study.patient.toLowerCase();
+document.getElementById(
+"viewerAdminActions"
+).style.display="none";
 
 
-if(
-patientName.includes(value) &&
-!seen.has(patientName)
-){
+document.getElementById(
+"imageCounter"
+).textContent=
+patientStudies.length+
+(
+patientStudies.length===1
+?
+" estudio"
+:
+" estudios"
+);
 
-seen.add(patientName);
 
-matches.push(study);
+document.getElementById(
+"viewerTitle"
+).textContent=
+"Historial de estudios";
+
+
+document.getElementById(
+"viewerSubtitle"
+).textContent=
+currentPatient;
+
+document.getElementById(
+"overlayRight"
+).textContent="";
+
 
 }
 
-});
+
+/* =========================================================
+   RENDER HISTORIAL
+========================================================= */
+
+function renderPatientHistory(patientStudies){
+
+const container=
+document.getElementById(
+"historyList"
+);
+
+container.innerHTML="";
 
 
-if(!matches.length){
+if(!patientStudies.length){
 
-results.innerHTML=`
+container.innerHTML=`
 
-<div class="search-no-result">
+<div class="history-empty">
 
-No se encontró ningún paciente.
+No existen estudios registrados
+para este paciente.
 
 </div>
 
 `;
 
-results.style.display="block";
-
 return;
 
 }
 
 
-/*
- Mostramos resultados de búsqueda.
-*/
-
-matches
-.sort((a,b)=>{
-
-if(a.date===b.date)return 0;
-
-return a.date>b.date?-1:1;
-
-})
-.slice(0,30)
-.forEach(study=>{
+patientStudies.forEach(
+(study,index)=>{
 
 const item=
 document.createElement("div");
 
 item.className=
-"search-result";
+"history-study";
+
+
+const imageCount=
+study.images?
+study.images.length:
+0;
+
+
+let studyName=
+"Estudio radiográfico";
+
+
+if(study.study){
+
+studyName=
+study.study;
+
+}else if(study.modality){
+
+studyName=
+study.modality;
+
+}
 
 
 item.innerHTML=`
 
-<div class="search-result-name">
+<div class="history-study-main">
 
-${escapeHtml(
-study.patient
-)}
+<div class="history-study-date">
+
+${formatDate(study.date)}
 
 </div>
 
-<div class="search-result-meta">
+<div class="history-study-relative">
 
-Fecha del estudio:
-${formatDate(study.date)}
+${escapeHtml(studyName)}
+
+${study.structure?
+" · "+escapeHtml(study.structure):
+""}
+
+</div>
+
+</div>
+
+<div class="history-study-meta">
+
+<span class="history-image-count">
+
+${imageCount}
+${imageCount===1?
+"imagen":
+"imágenes"}
+
+</span>
+
+<span class="history-arrow">
+›
+</span>
 
 </div>
 
@@ -2813,165 +2873,117 @@ ${formatDate(study.date)}
 
 item.onclick=()=>{
 
-openPatientFromSearch(
-study.patient,
-study.date
+openStudyFromHistory(
+study.id
 );
 
 };
 
 
-results.appendChild(item);
+container.appendChild(item);
 
-});
+}
 
-
-results.style.display="block";
+);
 
 }
 
 
 /* =========================================================
-   ABRIR PACIENTE DESDE BÚSQUEDA
+   ABRIR ESTUDIO DESDE HISTORIAL
 ========================================================= */
 
-function openPatientFromSearch(
-patientName,
-date
+function openStudyFromHistory(
+studyId
 ){
 
+const patientStudies=
+getPatientStudies();
+
+
+const index=
+patientStudies.findIndex(
+item=>
+String(item.id)===
+String(studyId)
+);
+
+
+if(index<0)return;
+
+
+currentStudy=index;
+
+currentImage=0;
+
+showingPatientHistory=false;
+
+resetView();
+
+
 /*
- Cerramos resultados
+   Ocultar historial.
 */
 
 document.getElementById(
-"searchResults"
+"patientHistory"
 ).style.display="none";
 
 
 /*
- Limpiamos visualmente el
- buscador.
+   Mostrar visor.
 */
+
+document.querySelector(
+".toolbar"
+).style.display="flex";
+
+
+const study=
+patientStudies[index];
+
+
+renderStudy(study);
+
+}
+
+
+/* =========================================================
+   CERRAR HISTORIAL
+========================================================= */
+
+function closePatientHistory(){
+
+showingPatientHistory=false;
 
 document.getElementById(
-"search"
-).value=
-patientName;
+"patientHistory"
+).style.display="none";
 
-
-/*
- Cambiamos la fecha al día
- donde está el estudio.
-*/
-
-selectedDate=date;
-
-calendarDate=
-new Date(
-date+"T00:00:00"
-);
-
-currentPatient=
-patientName;
-
-currentStudy=0;
+document.querySelector(
+".toolbar"
+).style.display="flex";
 
 currentImage=0;
 
 resetView();
 
 
-document.getElementById(
-"currentDateLabel"
-).textContent=
-formatDate(date);
+const study=
+getCurrentStudy();
 
 
-/*
- MUY IMPORTANTE:
+if(study){
 
-Aquí volvemos a mostrar TODOS
-los pacientes de esa fecha.
+renderStudy(study);
 
-NO solamente el paciente buscado.
-*/
+}else{
 
-renderCalendar();
-
-renderPatients();
-
-
-/*
- Abrimos el paciente.
-*/
-
-showFirstStudy();
-
-
-/*
- Intentamos llevar visualmente
- el paciente seleccionado
- al centro de la columna.
-*/
-
-setTimeout(()=>{
-
-const patientElements=
-document.querySelectorAll(
-"#patientList .patient"
-);
-
-patientElements.forEach(
-element=>{
-
-const name=
-element.dataset.patientName||"";
-
-if(
-name===
-patientName.toLowerCase()
-){
-
-element.scrollIntoView({
-behavior:"smooth",
-block:"center"
-});
+clearViewer();
 
 }
 
-});
-
-},100);
-
 }
-
-
-/* =========================================================
-   CERRAR RESULTADOS DE BÚSQUEDA
-========================================================= */
-
-document.addEventListener(
-"click",
-function(event){
-
-const searchBox=
-document.querySelector(
-".search"
-);
-
-if(
-searchBox &&
-!searchBox.contains(event.target)
-){
-
-document.getElementById(
-"searchResults"
-).style.display="none";
-
-}
-
-});
 
 
 /* =========================================================
@@ -2983,7 +2995,6 @@ function showFirstStudy(){
 const list=
 getPatientStudies();
 
-
 if(!list.length){
 
 clearViewer();
@@ -2991,7 +3002,6 @@ clearViewer();
 return;
 
 }
-
 
 currentStudy=0;
 
@@ -3025,7 +3035,6 @@ document.getElementById(
 
 selector.innerHTML="";
 
-
 const list=
 getPatientStudies();
 
@@ -3044,9 +3053,7 @@ list.forEach(
 (study,index)=>{
 
 const option=
-document.createElement(
-"option"
-);
+document.createElement("option");
 
 option.value=index;
 
@@ -3054,27 +3061,24 @@ option.textContent=
 "Estudio "+
 (index+1)+
 " · "+
-formatDate(study.date);
+formatDate(study.date)+
+" · "+
+(study.images.length)+
+" imagen(es)";
 
-
-if(index===currentStudy){
-
+if(index===currentStudy)
 option.selected=true;
 
+selector.appendChild(option);
+
 }
 
-selector.appendChild(
-option
 );
 
-});
-
 }
 
 
-function changeSelectedStudy(
-value
-){
+function changeSelectedStudy(value){
 
 if(value==="")return;
 
@@ -3083,19 +3087,26 @@ parseInt(value,10);
 
 if(isNaN(index))return;
 
-
 const list=
 getPatientStudies();
 
-
 if(!list[index])return;
-
 
 currentStudy=index;
 
 currentImage=0;
 
+showingPatientHistory=false;
+
 resetView();
+
+document.getElementById(
+"patientHistory"
+).style.display="none";
+
+document.querySelector(
+".toolbar"
+).style.display="flex";
 
 renderStudy(
 list[index]
@@ -3111,6 +3122,18 @@ list[index]
 function renderStudy(study){
 
 if(!study)return;
+
+showingPatientHistory=false;
+
+
+document.getElementById(
+"patientHistory"
+).style.display="none";
+
+
+document.querySelector(
+".toolbar"
+).style.display="flex";
 
 
 renderStudySelector();
@@ -3129,8 +3152,7 @@ document.getElementById(
 study.patient+
 (
 study.date?
-" · "+
-formatDate(study.date):
+" · "+formatDate(study.date):
 ""
 );
 
@@ -3149,12 +3171,24 @@ document.getElementById(
 study.patient||"--";
 
 
+let meta="";
+
+if(study.sex)
+meta+="Sexo: "+study.sex;
+
+if(study.birth){
+
+if(meta)meta+=" · ";
+
+meta+="Nacimiento: "+
+formatDate(study.birth);
+
+}
+
 document.getElementById(
 "infoPatientMeta"
 ).textContent=
-study.sex?
-"Sexo: "+study.sex:
-"";
+meta||"--";
 
 
 document.getElementById(
@@ -3221,17 +3255,19 @@ updateViewerAdminButtons();
 
 async function isAdminLogged(){
 
-const{data}=
+const{
+data
+}=
 await supabaseClient
 .auth
 .getSession();
 
-
 return !!(
-data &&
-data.session &&
-data.session.user &&
-data.session.user.id===ADMIN_UID
+data&&
+data.session&&
+data.session.user&&
+data.session.user.id===
+ADMIN_UID
 );
 
 }
@@ -3259,15 +3295,16 @@ await isAdminLogged();
 if(addStudyButton){
 
 addStudyButton.style.display=
-admin?"block":"none";
+admin?
+"block":
+"none";
 
 }
 
 
 if(!study){
 
-buttons.style.display=
-"none";
+buttons.style.display="none";
 
 return;
 
@@ -3275,7 +3312,9 @@ return;
 
 
 buttons.style.display=
-admin?"flex":"none";
+admin?
+"flex":
+"none";
 
 }
 
@@ -3288,16 +3327,13 @@ function showImage(src){
 
 if(!src)return;
 
-
 document.getElementById(
 "emptyMessage"
 ).style.display="none";
 
-
 document.getElementById(
 "imageWrapper"
 ).style.display="flex";
-
 
 const image=
 document.getElementById(
@@ -3314,7 +3350,8 @@ document.getElementById(
 
 document.getElementById(
 "emptyMessage"
-).style.display="block";
+).style.display=
+"block";
 
 };
 
@@ -3344,9 +3381,7 @@ study.images.forEach(
 (src,index)=>{
 
 const item=
-document.createElement(
-"div"
-);
+document.createElement("div");
 
 item.className=
 "thumbnail-item";
@@ -3378,17 +3413,13 @@ showImage(src);
 
 renderThumbnails(study);
 
-updateImageInformation(
-study
-);
+updateImageInformation(study);
 
 };
 
 
 const deleteButton=
-document.createElement(
-"button"
-);
+document.createElement("button");
 
 deleteButton.className=
 "thumbnail-delete";
@@ -3401,8 +3432,7 @@ deleteButton.title=
 deleteButton.textContent="×";
 
 
-deleteButton.onclick=
-event=>{
+deleteButton.onclick=event=>{
 
 event.stopPropagation();
 
@@ -3422,7 +3452,9 @@ deleteButton
 
 container.appendChild(item);
 
-});
+}
+
+);
 
 }
 
@@ -3449,7 +3481,6 @@ confirm(
 "¿Deseas eliminar esta imagen?\n\n"+
 "Esta acción no se puede deshacer."
 );
-
 
 if(!confirmed)return;
 
@@ -3487,12 +3518,17 @@ getStoragePath(imageUrl);
 
 const remainingImages=
 study.images
+
 .filter(
-(_,index)=>index!==imageIndex
+(_,index)=>
+index!==imageIndex
 )
+
 .map(
-image=>getStoragePath(image)
+image=>
+getStoragePath(image)
 )
+
 .filter(
 path=>path
 );
@@ -3506,10 +3542,7 @@ await supabaseClient
 .update({
 images:remainingImages
 })
-.eq(
-"id",
-study.id
-);
+.eq("id",study.id);
 
 
 if(updateError)
@@ -3528,7 +3561,6 @@ await supabaseClient
 storagePath
 ]);
 
-
 if(storageError)
 console.error(
 "ADVERTENCIA STORAGE:",
@@ -3538,7 +3570,8 @@ storageError
 }
 
 
-const studyId=study.id;
+const studyId=
+study.id;
 
 const patientName=
 study.patient;
@@ -3602,13 +3635,11 @@ console.error(
 error
 );
 
-
 alert(
 "No se pudo eliminar la imagen:\n\n"+
 (error.message||
 "Error desconocido")
 );
-
 
 updateViewerAdminButtons();
 
@@ -3621,28 +3652,30 @@ updateViewerAdminButtons();
    INFORMACIÓN IMAGEN
 ========================================================= */
 
-function updateImageInformation(
-study
-){
+function updateImageInformation(study){
 
 document.getElementById(
 "imageCounter"
 ).textContent=
-study.images.length?
+study.images.length
+?
 "Imagen "+
 (currentImage+1)+
 " / "+
-study.images.length:
+study.images.length
+:
 "--";
 
 
 document.getElementById(
 "infoCurrentImage"
 ).textContent=
-study.images.length?
+study.images.length
+?
 (currentImage+1)+
 " / "+
-study.images.length:
+study.images.length
+:
 "--";
 
 }
@@ -3657,18 +3690,15 @@ function nextImage(){
 const study=
 getCurrentStudy();
 
-
-if(
-!study||
-!study.images.length
-)return;
+if(!study||!study.images.length)
+return;
 
 
 currentImage++;
 
-
 if(
-currentImage>=study.images.length
+currentImage>=
+study.images.length
 ){
 
 currentImage=0;
@@ -3680,12 +3710,9 @@ showImage(
 study.images[currentImage]
 );
 
-
 renderThumbnails(study);
 
-updateImageInformation(
-study
-);
+updateImageInformation(study);
 
 }
 
@@ -3695,15 +3722,11 @@ function previousImage(){
 const study=
 getCurrentStudy();
 
-
-if(
-!study||
-!study.images.length
-)return;
+if(!study||!study.images.length)
+return;
 
 
 currentImage--;
-
 
 if(currentImage<0){
 
@@ -3717,12 +3740,9 @@ showImage(
 study.images[currentImage]
 );
 
-
 renderThumbnails(study);
 
-updateImageInformation(
-study
-);
+updateImageInformation(study);
 
 }
 
@@ -3859,8 +3879,9 @@ inverted?
 document.getElementById(
 "infoZoom"
 ).textContent=
-Math.round(zoom*100)+
-"%";
+Math.round(
+zoom*100
+)+"%";
 
 
 document.getElementById(
@@ -3891,6 +3912,19 @@ applyTransform();
 ========================================================= */
 
 function clearViewer(){
+
+showingPatientHistory=false;
+
+
+document.getElementById(
+"patientHistory"
+).style.display="none";
+
+
+document.querySelector(
+".toolbar"
+).style.display="flex";
+
 
 document.getElementById(
 "viewerTitle"
@@ -3984,11 +4018,11 @@ function openFullscreen(){
 const study=
 getCurrentStudy();
 
-
 if(
 !study||
 !study.images.length
-)return;
+)
+return;
 
 
 document.getElementById(
@@ -4075,13 +4109,16 @@ document.getElementById(
 "flex";
 
 
-setTimeout(()=>{
+setTimeout(
+()=>{
 
 document.getElementById(
 "loginEmail"
 ).focus();
 
-},100);
+},
+100
+);
 
 }
 
@@ -4235,8 +4272,7 @@ await supabaseClient
 }
 
 
-supabaseClient
-.auth
+supabaseClient.auth
 .onAuthStateChange(
 async(event,session)=>{
 
@@ -4253,13 +4289,12 @@ session.user
 
 }else{
 
-updateAuthInterface(
-null
-);
+updateAuthInterface(null);
 
 }
 
-});
+}
+);
 
 }
 
@@ -4268,9 +4303,7 @@ null
    INTERFAZ ADMIN
 ========================================================= */
 
-function updateAuthInterface(
-user
-){
+function updateAuthInterface(user){
 
 const loginButton=
 document.getElementById(
@@ -4333,6 +4366,7 @@ addStudyButton.style.display=
 "none";
 
 }
+
 
 closeAddImages();
 
@@ -4403,13 +4437,16 @@ document.getElementById(
 "flex";
 
 
-setTimeout(()=>{
+setTimeout(
+()=>{
 
 document.getElementById(
 "newPatient"
 ).focus();
 
-},100);
+},
+100
+);
 
 }
 
@@ -4423,10 +4460,6 @@ document.getElementById(
 
 }
 
-
-/* =========================================================
-   ARCHIVOS NUEVO ESTUDIO
-========================================================= */
 
 function showNewStudyFiles(){
 
@@ -4455,7 +4488,9 @@ return;
 
 
 const files=
-Array.from(input.files);
+Array.from(
+input.files
+);
 
 
 const invalid=
@@ -4486,7 +4521,8 @@ files.map(
 (index+1)+
 ". "+
 escapeHtml(file.name)
-).join("<br>");
+)
+.join("<br>");
 
 }
 
@@ -4581,7 +4617,9 @@ return;
 
 
 const files=
-Array.from(input.files);
+Array.from(
+input.files
+);
 
 
 const invalid=
@@ -4631,12 +4669,13 @@ i<files.length;
 i++
 ){
 
-const file=files[i];
+const file=
+files[i];
 
 
 const safeName=
 file.name.replace(
-/[^a-zA-Z0-9.\_-]/g,
+/[^a-zA-Z0-9._-]/g,
 "_"
 );
 
@@ -4644,7 +4683,8 @@ file.name.replace(
 const path=
 folder+
 "/"+
-String(i+1).padStart(3,"0")+
+String(i+1)
+.padStart(3,"0")+
 "_"+safeName;
 
 
@@ -4903,10 +4943,6 @@ document.getElementById(
 }
 
 
-/* =========================================================
-   ARCHIVOS ADICIONALES
-========================================================= */
-
 function showAdditionalFiles(){
 
 const input=
@@ -4934,7 +4970,9 @@ return;
 
 
 const files=
-Array.from(input.files);
+Array.from(
+input.files
+);
 
 
 const invalid=
@@ -4965,7 +5003,8 @@ files.map(
 (index+1)+
 ". "+
 escapeHtml(file.name)
-).join("<br>");
+)
+.join("<br>");
 
 }
 
@@ -5039,7 +5078,10 @@ return;
 
 
 const files=
-Array.from(input.files);
+Array.from(
+input.files
+);
+
 
 const newPaths=[];
 
@@ -5054,7 +5096,8 @@ status.textContent=
 
 
 const folder=
-(study.date||getTodayString())+
+(study.date||
+getTodayString())+
 "/"+
 crypto.randomUUID();
 
@@ -5065,7 +5108,8 @@ i<files.length;
 i++
 ){
 
-const file=files[i];
+const file=
+files[i];
 
 
 if(
@@ -5086,7 +5130,7 @@ file.name+
 
 const safeName=
 file.name.replace(
-/[^a-zA-Z0-9.\_-]/g,
+/[^a-zA-Z0-9._-]/g,
 "_"
 );
 
@@ -5094,7 +5138,8 @@ file.name.replace(
 const path=
 folder+
 "/"+
-String(i+1).padStart(3,"0")+
+String(i+1)
+.padStart(3,"0")+
 "_"+safeName;
 
 
@@ -5134,8 +5179,15 @@ newPaths.push(path);
 
 const existingPaths=
 study.images
-.map(image=>getStoragePath(image))
-.filter(path=>path);
+
+.map(
+image=>
+getStoragePath(image)
+)
+
+.filter(
+path=>path
+);
 
 
 const combinedPaths=
@@ -5177,7 +5229,8 @@ throw updateError;
 }
 
 
-const studyId=study.id;
+const studyId=
+study.id;
 
 const patientName=
 study.patient;
@@ -5192,10 +5245,12 @@ await loadStudies();
 selectedDate=
 studyDate;
 
+
 calendarDate=
 new Date(
 studyDate+"T00:00:00"
 );
+
 
 currentPatient=
 patientName;
@@ -5229,6 +5284,7 @@ updatedStudy.images.length-
 newPaths.length,
 0
 );
+
 
 renderCalendar();
 
@@ -5343,8 +5399,15 @@ document.getElementById(
 
 const paths=
 study.images
-.map(image=>getStoragePath(image))
-.filter(path=>path);
+
+.map(
+image=>
+getStoragePath(image)
+)
+
+.filter(
+path=>path
+);
 
 
 const{
@@ -5374,14 +5437,11 @@ await supabaseClient
 .remove(paths);
 
 
-if(storageError){
-
+if(storageError)
 console.error(
 "ADVERTENCIA STORAGE:",
 storageError
 );
-
-}
 
 }
 
@@ -5414,8 +5474,10 @@ error
 alert(
 
 "NO SE PUDO ELIMINAR EL ESTUDIO.\n\n"+
-(error.message||
-"Error desconocido")
+(
+error.message||
+"Error desconocido"
+)
 
 );
 
@@ -5445,21 +5507,23 @@ closeAddImages();
 
 closeAddStudy();
 
-document.getElementById(
-"searchResults"
-).style.display="none";
-
 }
 
+
+if(
+!showingPatientHistory
+){
 
 if(event.key==="ArrowRight")
 nextImage();
 
-
 if(event.key==="ArrowLeft")
 previousImage();
 
-});
+}
+
+}
+);
 
 
 /* =========================================================
@@ -5485,3 +5549,4 @@ loadStudies();
 
 </body>
 </html>
+```
