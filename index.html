@@ -8,6 +8,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
+
 :root{
 --bg:#08090a;
 --panel:#111315;
@@ -50,6 +51,7 @@ overflow-y:auto
 button,input,select{
 font-family:"Inter","Segoe UI",system-ui,Arial,Helvetica,sans-serif
 }
+
 
 /* =========================
    BARRA SUPERIOR
@@ -218,6 +220,7 @@ white-space:nowrap
 display:none
 }
 
+
 /* =========================
    APLICACIÓN
 ========================= */
@@ -228,6 +231,7 @@ display:grid;
 grid-template-columns:260px 255px 1fr 255px;
 min-width:1050px
 }
+
 
 /* =========================
    PANELES
@@ -292,6 +296,7 @@ border-radius:6px
 background:#4b5259
 }
 
+
 /* =========================
    BOTÓN AGREGAR ESTUDIO
 ========================= */
@@ -317,6 +322,7 @@ background:#55d99d
 .add-study-button:active{
 transform:scale(.98)
 }
+
 
 /* =========================
    CALENDARIO
@@ -439,6 +445,7 @@ border-color:var(--green);
 color:var(--green)
 }
 
+
 /* =========================
    PACIENTES
 ========================= */
@@ -486,6 +493,7 @@ color:#686e74;
 font-size:13px;
 line-height:1.7
 }
+
 
 /* =========================
    VISOR
@@ -564,6 +572,7 @@ font-size:12px;
 white-space:nowrap
 }
 
+
 /* =========================
    ÁREA DE IMAGEN
 ========================= */
@@ -581,7 +590,9 @@ background:radial-gradient(circle,#151515 0%,#050505 65%,#000 100%);
 flex-shrink:0;
 cursor:grab;
 touch-action:none;
-user-select:none
+user-select:none;
+-webkit-user-select:none;
+overscroll-behavior:none
 }
 
 .viewport:active{
@@ -638,7 +649,8 @@ rotate(0deg);
 transform-origin:center center;
 will-change:transform;
 transition:none;
-pointer-events:none
+pointer-events:none;
+touch-action:none
 }
 
 .main-image{
@@ -649,11 +661,15 @@ max-width:none;
 max-height:none;
 object-fit:contain;
 user-select:none;
+-webkit-user-select:none;
 -webkit-user-drag:none;
+-webkit-touch-callout:none;
 pointer-events:none;
+touch-action:none;
 transform-origin:center center;
 transition:filter .12s ease
 }
+
 
 /* =========================
    BARRA DE HERRAMIENTAS
@@ -702,6 +718,7 @@ height:28px;
 background:#30343a;
 margin:0 4px
 }
+
 
 /* =========================
    MINIATURAS
@@ -777,6 +794,7 @@ color:#fff;
 border-color:#d66565
 }
 
+
 /* =========================
    INFORMACIÓN
 ========================= */
@@ -851,6 +869,7 @@ transition:border-color var(--ease)
 border-color:var(--green)
 }
 
+
 /* =========================
    INPUTS
 ========================= */
@@ -876,6 +895,7 @@ box-shadow:0 0 0 3px rgba(62,207,142,.12)
 .form-input::placeholder{
 color:#666c72
 }
+
 
 /* =========================
    PANTALLA COMPLETA
@@ -911,6 +931,7 @@ transition:color var(--ease),transform var(--ease)
 color:var(--green);
 transform:scale(1.1)
 }
+
 
 /* =========================
    MODALES
@@ -1064,6 +1085,7 @@ color:var(--green)
 color:#e47777
 }
 
+
 /* =========================
    LOGIN
 ========================= */
@@ -1099,6 +1121,7 @@ margin-top:7px
 padding:25px
 }
 
+
 /* =========================
    RESPONSIVO
 ========================= */
@@ -1114,6 +1137,7 @@ min-width:240px
 }
 
 }
+
 
 @media(max-width:1000px){
 
@@ -1173,6 +1197,7 @@ flex:1
 }
 
 }
+
 
 @media(max-width:700px){
 
@@ -1280,6 +1305,7 @@ max-width:180px;
 font-size:10px;
 }
 
+
 /* =========================
    APLICACIÓN MÓVIL
 ========================= */
@@ -1289,25 +1315,71 @@ min-width:0;
 }
 
 .viewer{
-height:760px;
-min-height:760px;
+height:auto;
+min-height:0;
 }
 
 .viewport{
-height:530px;
-min-height:530px;
-max-height:530px;
+width:100%;
+height:calc(100vh - 280px);
+min-height:360px;
+max-height:none;
+
+position:relative;
+overflow:hidden;
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+touch-action:none;
+overscroll-behavior:none;
+}
+
+.image-wrapper{
+max-width:none;
+max-height:none;
+touch-action:none;
+will-change:transform;
+}
+
+.main-image{
+max-width:none;
+max-height:none;
+touch-action:none;
+user-select:none;
+-webkit-user-select:none;
+-webkit-touch-callout:none;
+-webkit-user-drag:none;
 }
 
 .toolbar{
+height:60px;
+min-height:60px;
 overflow-x:auto;
+overflow-y:hidden;
+-webkit-overflow-scrolling:touch;
 }
 
 .tool{
 flex-shrink:0;
 }
 
+.thumbnails{
+height:112px;
+min-height:112px;
+overflow-x:auto;
+overflow-y:hidden;
+-webkit-overflow-scrolling:touch;
 }
+
+}
+
+
+/* =========================================================
+   FIN DEL CSS MÓVIL
+========================================================= */
+
 </style>
 </head>
 
@@ -1336,7 +1408,7 @@ id="search"
 type="text"
 placeholder="Buscar paciente..."
 autocomplete="off"
-oninput="searchPatients()"
+oninput="searchPatients"
 >
 
 <div class="search-results" id="searchResults"></div>
@@ -1371,6 +1443,7 @@ CERRAR SESIÓN
 
 
 <div class="app">
+
 
 <!-- =========================
      INFORMACIÓN
@@ -2166,12 +2239,6 @@ let currentStudy=0;
 
 let currentImage=0;
 
-/*
-   IMPORTANTE:
-   zoom ya no representa siempre 100%.
-   Ahora se calcula automáticamente para
-   que la imagen entre completa en el visor.
-*/
 let zoom=1;
 
 let rotation=0;
@@ -2180,11 +2247,6 @@ let inverted=false;
 
 let contrast=1;
 
-/*
-   Guarda si la imagen ya fue cargada.
-   Se utiliza para que RESTABLECER pueda
-   volver al tamaño correcto de la imagen.
-*/
 let imageLoaded=false;
 
 
@@ -2205,6 +2267,23 @@ let dragStartY=0;
 let dragOriginX=0;
 
 let dragOriginY=0;
+
+
+/* =========================================================
+   VARIABLES DE GESTOS MÓVILES
+========================================================= */
+
+let activePointers=new Map();
+
+let pinchStartDistance=0;
+
+let pinchStartZoom=1;
+
+let pinchCenterX=0;
+
+let pinchCenterY=0;
+
+let mobileGesture=false;
 
 
 /* =========================================================
@@ -3391,20 +3470,6 @@ admin?"flex":"none";
    AJUSTAR IMAGEN AL VISOR
 ========================================================= */
 
-/*
-   Esta es la parte nueva/importante.
-
-   Calcula automáticamente cuánto debe reducirse
-   o ampliarse la imagen para que entre COMPLETA
-   dentro del viewport.
-
-   No modifica las dimensiones reales de la imagen.
-   Solo modifica el zoom visual.
-
-   Funciona tanto en PC como en celular porque
-   obtiene el tamaño REAL disponible del viewport.
-*/
-
 function fitImageToViewport(){
 
 const image=
@@ -3447,12 +3512,18 @@ return;
 
 
 /*
-   Dejamos un pequeño margen alrededor
-   de la radiografía para que no quede
-   pegada a los bordes.
+   En celular utilizamos un margen menor.
+   En PC se conserva el margen original.
 */
 
-const margin=24;
+const isMobile =
+window.matchMedia(
+"(max-width:700px)"
+).matches;
+
+const margin =
+isMobile ? 12 : 24;
+
 
 const availableWidth=
 Math.max(
@@ -3467,10 +3538,6 @@ viewportHeight-margin,
 );
 
 
-/*
-   Tamaño natural de la imagen.
-*/
-
 const imageWidth=
 image.naturalWidth;
 
@@ -3478,22 +3545,12 @@ const imageHeight=
 image.naturalHeight;
 
 
-/*
-   Calculamos el factor necesario para
-   que entre completamente.
-*/
-
 let fitZoom=
 Math.min(
 availableWidth/imageWidth,
 availableHeight/imageHeight
 );
 
-
-/*
-   Seguridad:
-   nunca permitimos valores inválidos.
-*/
 
 if(
 !isFinite(fitZoom)||
@@ -3505,26 +3562,12 @@ fitZoom=1;
 }
 
 
-/*
-   El visor puede reducir una imagen grande,
-   pero también permite imágenes pequeñas
-   sin forzarlas a crecer demasiado.
-
-   Si la imagen original ya es menor que
-   el visor, se mantiene en su tamaño natural.
-*/
-
 if(fitZoom>1){
 
 fitZoom=1;
 
 }
 
-
-/*
-   Limitamos el mínimo al mismo rango
-   utilizado por el sistema de zoom.
-*/
 
 if(fitZoom<0.25){
 
@@ -3535,11 +3578,6 @@ fitZoom=0.25;
 
 zoom=fitZoom;
 
-
-/*
-   Cada vez que ajustamos la imagen al visor,
-   eliminamos el desplazamiento anterior.
-*/
 
 panX=0;
 
@@ -3584,12 +3622,6 @@ document.getElementById(
 );
 
 
-/*
-   Mientras se carga la nueva imagen,
-   marcamos que todavía no tenemos
-   dimensiones válidas.
-*/
-
 imageLoaded=false;
 
 
@@ -3610,13 +3642,6 @@ document.getElementById(
 
 
 image.onload=()=>{
-
-/*
-   IMPORTANTE:
-   aquí calculamos el zoom inicial
-   utilizando las dimensiones reales
-   de la imagen recién cargada.
-*/
 
 fitImageToViewport();
 
@@ -4173,7 +4198,74 @@ passive:false
 
 
 /* =========================================================
-   ARRASTRAR IMAGEN
+   ARRASTRAR IMAGEN + GESTOS TÁCTILES
+========================================================= */
+
+
+/* =========================================================
+   DISTANCIA ENTRE DOS DEDOS
+========================================================= */
+
+function getPointerDistance(){
+
+const points=
+Array.from(
+activePointers.values()
+);
+
+if(points.length<2)
+return 0;
+
+
+const dx=
+points[1].x-
+points[0].x;
+
+const dy=
+points[1].y-
+points[0].y;
+
+
+return Math.sqrt(
+dx*dx+
+dy*dy
+);
+
+}
+
+
+/* =========================================================
+   CENTRO ENTRE DOS DEDOS
+========================================================= */
+
+function getPointerCenter(){
+
+const points=
+Array.from(
+activePointers.values()
+);
+
+if(points.length<2)
+return null;
+
+
+return{
+
+x:
+(points[0].x+
+points[1].x)/2,
+
+y:
+(points[0].y+
+points[1].y)/2
+
+};
+
+}
+
+
+/* =========================================================
+   POINTER DOWN
 ========================================================= */
 
 viewportElement.addEventListener(
@@ -4207,58 +4299,256 @@ return;
 }
 
 
-isDragging=true;
-
-viewportElement.classList.add(
-"dragging"
+activePointers.set(
+event.pointerId,
+{
+x:event.clientX,
+y:event.clientY
+}
 );
 
-dragStartX=event.clientX;
 
-dragStartY=event.clientY;
-
-dragOriginX=panX;
-
-dragOriginY=panY;
+try{
 
 viewportElement.setPointerCapture(
 event.pointerId
 );
 
-});
+}catch(error){}
 
 
-viewportElement.addEventListener(
-"pointermove",
-event=>{
+/* =========================================
+   DOS DEDOS = PINCH ZOOM
+========================================= */
 
-if(!isDragging)
-return;
+if(activePointers.size===2){
 
-
-panX=
-dragOriginX+
-(event.clientX-dragStartX);
-
-panY=
-dragOriginY+
-(event.clientY-dragStartY);
-
-applyTransform();
-
-});
-
-
-function stopDragging(event){
-
-if(!isDragging)
-return;
+mobileGesture=true;
 
 isDragging=false;
 
 viewportElement.classList.remove(
 "dragging"
 );
+
+
+pinchStartDistance=
+getPointerDistance();
+
+
+pinchStartZoom=
+zoom;
+
+
+const center=
+getPointerCenter();
+
+
+if(center){
+
+const rect=
+viewportElement
+.getBoundingClientRect();
+
+
+pinchCenterX=
+center.x-
+(
+rect.left+
+rect.width/2
+);
+
+
+pinchCenterY=
+center.y-
+(
+rect.top+
+rect.height/2
+);
+
+}
+
+
+return;
+
+}
+
+
+/* =========================================
+   UN DEDO = ARRASTRE
+========================================= */
+
+if(activePointers.size===1){
+
+mobileGesture=false;
+
+isDragging=true;
+
+viewportElement.classList.add(
+"dragging"
+);
+
+
+dragStartX=
+event.clientX;
+
+dragStartY=
+event.clientY;
+
+dragOriginX=
+panX;
+
+dragOriginY=
+panY;
+
+}
+
+});
+
+
+/* =========================================================
+   POINTER MOVE
+========================================================= */
+
+viewportElement.addEventListener(
+"pointermove",
+event=>{
+
+if(
+!activePointers.has(
+event.pointerId
+)
+){
+
+return;
+
+}
+
+
+activePointers.set(
+event.pointerId,
+{
+x:event.clientX,
+y:event.clientY
+}
+);
+
+
+/* =========================================
+   DOS DEDOS = PINCH ZOOM
+========================================= */
+
+if(activePointers.size>=2){
+
+const distance=
+getPointerDistance();
+
+
+if(
+!distance||
+!pinchStartDistance
+){
+
+return;
+
+}
+
+
+let newZoom=
+pinchStartZoom*
+(
+distance/
+pinchStartDistance
+);
+
+
+if(newZoom>4)
+newZoom=4;
+
+
+if(newZoom<.25)
+newZoom=.25;
+
+
+const scale=
+newZoom/
+pinchStartZoom;
+
+
+/*
+   Conservamos aproximadamente el punto
+   central del pellizco.
+*/
+
+panX=
+pinchCenterX-
+(
+pinchCenterX-
+panX
+)*
+scale;
+
+
+panY=
+pinchCenterY-
+(
+pinchCenterY-
+panY
+)*
+scale;
+
+
+zoom=newZoom;
+
+applyTransform();
+
+return;
+
+}
+
+
+/* =========================================
+   UN DEDO = DESPLAZAMIENTO
+========================================= */
+
+if(
+activePointers.size===1 &&
+isDragging
+){
+
+panX=
+dragOriginX+
+(
+event.clientX-
+dragStartX
+);
+
+
+panY=
+dragOriginY+
+(
+event.clientY-
+dragStartY
+);
+
+
+applyTransform();
+
+}
+
+});
+
+
+/* =========================================================
+   POINTER UP
+========================================================= */
+
+function handlePointerUp(event){
+
+activePointers.delete(
+event.pointerId
+);
+
 
 try{
 
@@ -4268,18 +4558,60 @@ event.pointerId
 
 }catch(error){}
 
+
+if(activePointers.size===0){
+
+isDragging=false;
+
+mobileGesture=false;
+
+pinchStartDistance=0;
+
+viewportElement.classList.remove(
+"dragging"
+);
+
+return;
+
+}
+
+
+if(activePointers.size===1){
+
+/*
+   Después del pinch no comenzamos
+   automáticamente un nuevo arrastre
+   con el dedo restante.
+*/
+
+isDragging=false;
+
+mobileGesture=true;
+
+viewportElement.classList.remove(
+"dragging"
+);
+
+}
+
 }
 
 
 viewportElement.addEventListener(
 "pointerup",
-stopDragging
+handlePointerUp
 );
+
 
 viewportElement.addEventListener(
 "pointercancel",
-stopDragging
+handlePointerUp
 );
+
+
+/* =========================================================
+   POINTER LEAVE - SOLO PC
+========================================================= */
 
 viewportElement.addEventListener(
 "pointerleave",
@@ -4290,7 +4622,11 @@ event.pointerType==="mouse" &&
 isDragging
 ){
 
-stopDragging(event);
+isDragging=false;
+
+viewportElement.classList.remove(
+"dragging"
+);
 
 }
 
@@ -4440,6 +4776,14 @@ panY=0;
 
 isDragging=false;
 
+activePointers.clear();
+
+pinchStartDistance=0;
+
+pinchStartZoom=1;
+
+mobileGesture=false;
+
 
 const viewport=
 document.getElementById(
@@ -4459,10 +4803,6 @@ viewport.classList.remove(
    Si la imagen ya está cargada,
    volvemos a calcular su tamaño
    correcto dentro del visor.
-
-   Esto es importante porque
-   RESTABLECER ya no debe volver
-   simplemente a zoom 100%.
 */
 
 const image=
@@ -6067,6 +6407,33 @@ nextImage();
 
 if(event.key==="ArrowLeft")
 previousImage();
+
+});
+
+
+/* =========================================================
+   AJUSTE AUTOMÁTICO AL CAMBIAR TAMAÑO
+========================================================= */
+
+window.addEventListener(
+"resize",
+()=>{
+
+const image=
+document.getElementById(
+"mainImage"
+);
+
+if(
+image &&
+image.complete &&
+image.naturalWidth>0 &&
+image.naturalHeight>0
+){
+
+fitImageToViewport();
+
+}
 
 });
 
