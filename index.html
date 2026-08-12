@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <title>Hospital San Martín de Pangoa - Rayos X</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -51,7 +51,6 @@ overflow-y:auto
 button,input,select{
 font-family:"Inter","Segoe UI",system-ui,Arial,Helvetica,sans-serif
 }
-
 
 /* =========================
    BARRA SUPERIOR
@@ -220,7 +219,6 @@ white-space:nowrap
 display:none
 }
 
-
 /* =========================
    APLICACIÓN
 ========================= */
@@ -231,7 +229,6 @@ display:grid;
 grid-template-columns:260px 255px 1fr 255px;
 min-width:1050px
 }
-
 
 /* =========================
    PANELES
@@ -296,7 +293,6 @@ border-radius:6px
 background:#4b5259
 }
 
-
 /* =========================
    BOTÓN AGREGAR ESTUDIO
 ========================= */
@@ -322,7 +318,6 @@ background:#55d99d
 .add-study-button:active{
 transform:scale(.98)
 }
-
 
 /* =========================
    CALENDARIO
@@ -445,7 +440,6 @@ border-color:var(--green);
 color:var(--green)
 }
 
-
 /* =========================
    PACIENTES
 ========================= */
@@ -493,7 +487,6 @@ color:#686e74;
 font-size:13px;
 line-height:1.7
 }
-
 
 /* =========================
    VISOR
@@ -571,7 +564,6 @@ color:#999fa5;
 font-size:12px;
 white-space:nowrap
 }
-
 
 /* =========================
    ÁREA DE IMAGEN
@@ -671,7 +663,6 @@ transform-origin:center center;
 transition:filter .12s ease
 }
 
-
 /* =========================
    BARRA DE HERRAMIENTAS
 ========================= */
@@ -719,7 +710,6 @@ height:28px;
 background:#30343a;
 margin:0 4px
 }
-
 
 /* =========================
    MINIATURAS
@@ -795,7 +785,6 @@ color:#fff;
 border-color:#d66565
 }
 
-
 /* =========================
    INFORMACIÓN
 ========================= */
@@ -870,7 +859,6 @@ transition:border-color var(--ease)
 border-color:var(--green)
 }
 
-
 /* =========================
    INPUTS
 ========================= */
@@ -896,7 +884,6 @@ box-shadow:0 0 0 3px rgba(62,207,142,.12)
 .form-input::placeholder{
 color:#666c72
 }
-
 
 /* =========================
    PANTALLA COMPLETA
@@ -932,7 +919,6 @@ transition:color var(--ease),transform var(--ease)
 color:var(--green);
 transform:scale(1.1)
 }
-
 
 /* =========================
    MODALES
@@ -1086,7 +1072,6 @@ color:var(--green)
 color:#e47777
 }
 
-
 /* =========================
    LOGIN
 ========================= */
@@ -1122,7 +1107,6 @@ margin-top:7px
 padding:25px
 }
 
-
 /* =========================
    RESPONSIVO
 ========================= */
@@ -1138,7 +1122,6 @@ min-width:240px
 }
 
 }
-
 
 @media(max-width:1000px){
 
@@ -1199,13 +1182,32 @@ flex:1
 
 }
 
+/* =========================================================
+   INTERFAZ MÓVIL TIPO APLICACIÓN
+   SOLO PRESENTACIÓN / INTERFAZ
+   NO MODIFICA LA LÓGICA DEL VISOR
+========================================================= */
 
 @media(max-width:700px){
 
+html{
+background:#050607;
+}
+
+body{
+background:#050607;
+padding:0;
+overflow-x:hidden;
+}
+
 .topbar{
+position:relative;
 min-height:0;
 height:auto;
-padding:14px 12px 16px;
+padding:
+calc(10px + env(safe-area-inset-top))
+12px
+12px;
 display:grid;
 grid-template-columns:1fr;
 grid-template-areas:
@@ -1213,17 +1215,30 @@ grid-template-areas:
 "brand"
 "search"
 "auth";
-gap:12px;
+gap:9px;
 align-items:center;
 justify-items:center;
+background:
+linear-gradient(
+180deg,
+#151719 0%,
+#101214 100%
+);
+border-bottom:1px solid #292d31;
+box-shadow:0 4px 18px rgba(0,0,0,.35);
 }
 
 .logo{
 grid-area:logo;
-width:72px;
-height:72px;
+width:58px;
+height:58px;
 margin:0 auto;
-border-radius:7px;
+border-radius:50%;
+border:1px solid #343a3f;
+background:#0c0e0f;
+box-shadow:
+0 3px 12px rgba(0,0,0,.45),
+0 0 0 4px rgba(255,255,255,.025);
 }
 
 .brand{
@@ -1240,11 +1255,11 @@ justify-content:center;
 
 .brand-title{
 width:100%;
-max-width:360px;
-font-size:15px;
+max-width:340px;
+font-size:14px;
 line-height:1.25;
 font-weight:700;
-letter-spacing:.35px;
+letter-spacing:.25px;
 text-align:center;
 white-space:normal;
 overflow-wrap:break-word;
@@ -1252,29 +1267,41 @@ overflow-wrap:break-word;
 
 .brand-subtitle{
 width:100%;
-margin-top:6px;
-font-size:10px;
+margin-top:4px;
+font-size:9px;
 line-height:1.3;
 text-align:center;
 white-space:normal;
+color:#8edbb8;
+letter-spacing:.4px;
 }
 
 .search{
 grid-area:search;
 width:100%;
 max-width:none;
-margin:0;
+margin:2px 0 0;
 }
 
 .search input{
 width:100%;
-height:40px;
+height:42px;
 font-size:13px;
+padding:0 14px;
+border-radius:21px;
+background:#1a1d20;
+border:1px solid #363b40;
+box-shadow:inset 0 1px 2px rgba(0,0,0,.25);
 }
 
 .search-results{
-top:44px;
+top:46px;
 max-height:250px;
+border-radius:10px;
+}
+
+.search-result{
+padding:13px 14px;
 }
 
 .current-date{
@@ -1292,9 +1319,10 @@ gap:7px;
 }
 
 .auth-button{
-height:36px;
-font-size:11px;
-padding:0 12px;
+height:34px;
+font-size:10px;
+padding:0 13px;
+border-radius:17px;
 }
 
 .auth-user{
@@ -1304,26 +1332,167 @@ font-size:10px
 
 .app{
 min-width:0;
+display:flex;
+flex-direction:column;
+gap:0;
+background:#050607;
 }
 
+/* Los paneles secundarios quedan debajo del visor,
+   como secciones de una aplicación móvil. */
+
+.info-panel{
+order:4;
+width:100%;
+min-height:0;
+background:#111315;
+border-right:0;
+border-top:1px solid #292d31;
+}
+
+.panel:nth-child(2){
+order:3;
+width:100%;
+min-height:0;
+background:#111315;
+border-right:0;
+}
+
+.panel:last-child{
+order:5;
+width:100%;
+min-height:0;
+background:#111315;
+border-right:0;
+}
+
+/* El visor pasa a ser el elemento principal. */
+
 .viewer{
+order:2;
+width:100%;
 height:auto;
 min-height:0;
+background:#000;
+border:0;
+display:flex;
+flex-direction:column;
+position:relative;
 }
+
+/* Cabecera compacta del visor */
+
+.viewer-header{
+height:54px;
+min-height:54px;
+padding:7px 11px;
+gap:8px;
+background:
+linear-gradient(
+180deg,
+#151719 0%,
+#101214 100%
+);
+border-bottom:1px solid #292d31;
+}
+
+.viewer-header-left{
+min-width:0;
+flex:1;
+overflow:hidden;
+}
+
+.viewer-title{
+font-size:12px;
+font-weight:600;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+}
+
+.viewer-subtitle{
+font-size:9px;
+margin-top:3px;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+color:#777e85;
+}
+
+.image-counter{
+font-size:10px;
+padding:5px 8px;
+border:1px solid #30353a;
+border-radius:12px;
+background:#191c1f;
+flex-shrink:0;
+}
+
+.viewer-admin-actions{
+gap:4px;
+}
+
+.viewer-admin-button{
+height:30px;
+padding:0 7px;
+font-size:9px;
+border-radius:15px;
+}
+
+/* =========================================================
+   VISOR MÓVIL PROTAGONISTA
+========================================================= */
 
 .viewport{
 width:100%;
-height:calc(100vh - 280px);
-min-height:360px;
+height:calc(100svh - 250px);
+min-height:390px;
 max-height:none;
 position:relative;
 overflow:hidden;
 display:flex;
 align-items:center;
 justify-content:center;
+background:
+radial-gradient(
+circle at center,
+#181818 0%,
+#080808 52%,
+#000 100%
+);
+border:0;
 touch-action:none;
 overscroll-behavior:none;
 }
+
+.overlay-left{
+top:10px;
+left:11px;
+font-size:8px;
+letter-spacing:.3px;
+opacity:.65;
+}
+
+.overlay-right{
+top:10px;
+right:11px;
+font-size:8px;
+max-width:45%;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+opacity:.65;
+}
+
+.empty-message{
+font-size:12px;
+max-width:270px;
+line-height:1.5;
+padding:18px;
+color:#686e74;
+}
+
+/* La imagen mantiene exactamente su sistema de transformaciones. */
 
 .image-wrapper{
 max-width:none;
@@ -1342,24 +1511,456 @@ user-select:none;
 -webkit-user-drag:none;
 }
 
+/* =========================================================
+   TOOLBAR TIPO APP
+========================================================= */
+
 .toolbar{
-height:60px;
-min-height:60px;
+height:58px;
+min-height:58px;
+width:100%;
+background:
+linear-gradient(
+180deg,
+#151719 0%,
+#101214 100%
+);
+border-top:1px solid #292d31;
+display:flex;
+align-items:center;
+gap:6px;
+padding:7px 8px;
 overflow-x:auto;
 overflow-y:hidden;
 -webkit-overflow-scrolling:touch;
+scrollbar-width:none;
+}
+
+.toolbar::-webkit-scrollbar{
+display:none;
 }
 
 .tool{
+height:42px;
+min-width:42px;
+padding:0 10px;
+border-radius:10px;
+background:#202428;
+border:1px solid #34393e;
+color:#d4d8db;
+font-size:13px;
+flex-shrink:0;
+display:flex;
+align-items:center;
+justify-content:center;
+-webkit-tap-highlight-color:transparent;
+touch-action:manipulation;
+}
+
+.tool:active{
+transform:scale(.93);
+background:#2b3035;
+}
+
+.separator{
+width:1px;
+height:30px;
+background:#34383d;
+margin:0 2px;
 flex-shrink:0;
 }
 
+/* =========================================================
+   MINIATURAS TIPO GALERÍA
+========================================================= */
+
 .thumbnails{
-height:112px;
-min-height:112px;
+height:94px;
+min-height:94px;
+width:100%;
+background:#0e1012;
+border-top:1px solid #292d31;
+display:flex;
+align-items:center;
+gap:8px;
+padding:8px 9px;
 overflow-x:auto;
 overflow-y:hidden;
 -webkit-overflow-scrolling:touch;
+scrollbar-width:none;
+}
+
+.thumbnails::-webkit-scrollbar{
+display:none;
+}
+
+.thumbnail-item{
+width:76px;
+height:76px;
+flex-shrink:0;
+position:relative;
+}
+
+.thumbnail{
+width:76px;
+height:68px;
+object-fit:cover;
+background:#000;
+border:2px solid #30343a;
+border-radius:7px;
+cursor:pointer;
+display:block;
+transition:border-color var(--ease),opacity var(--ease);
+-webkit-tap-highlight-color:transparent;
+}
+
+.thumbnail.active{
+border-color:var(--green);
+box-shadow:0 0 0 1px rgba(62,207,142,.15);
+}
+
+.thumbnail-delete{
+right:-3px;
+bottom:0;
+width:21px;
+height:21px;
+font-size:13px;
+}
+
+/* =========================================================
+   INFORMACIÓN COMO TARJETAS
+========================================================= */
+
+.info-section{
+padding:14px 13px;
+border-bottom:1px solid #292d31;
+}
+
+.info-heading{
+font-size:10px;
+margin-bottom:10px;
+letter-spacing:1.1px;
+}
+
+.patient-card{
+padding:12px;
+border-radius:9px;
+background:#181b1e;
+}
+
+.patient-card-name{
+font-size:14px;
+margin-bottom:7px;
+}
+
+.patient-card-meta{
+font-size:10px;
+line-height:1.7;
+}
+
+.study-selector{
+height:42px;
+border-radius:9px;
+font-size:12px;
+}
+
+.info-row{
+display:flex;
+align-items:center;
+justify-content:space-between;
+margin-bottom:10px;
+padding-bottom:7px;
+border-bottom:1px solid rgba(255,255,255,.035);
+}
+
+.info-row:last-child{
+margin-bottom:0;
+border-bottom:0;
+}
+
+.info-label{
+font-size:9px;
+margin-bottom:0;
+}
+
+.info-value{
+font-size:12px;
+}
+
+/* =========================================================
+   LISTA DE PACIENTES
+========================================================= */
+
+.panel:nth-child(2) .panel-header{
+height:52px;
+min-height:52px;
+padding:0 13px;
+}
+
+.panel:nth-child(2) .panel-title{
+font-size:10px;
+}
+
+.patient{
+padding:13px;
+min-height:62px;
+}
+
+.patient-name{
+font-size:13px;
+margin-bottom:5px;
+}
+
+.patient-meta{
+font-size:10px;
+}
+
+.badge{
+font-size:10px;
+padding:3px 7px;
+}
+
+/* =========================================================
+   CALENDARIO
+========================================================= */
+
+.panel:last-child .panel-header{
+height:52px;
+min-height:52px;
+padding:0 13px;
+}
+
+.calendar{
+padding:13px;
+}
+
+.calendar-header{
+margin-bottom:10px;
+}
+
+.calendar-month{
+font-size:14px;
+}
+
+.calendar-button{
+width:38px;
+height:38px;
+border-radius:10px;
+font-size:20px;
+}
+
+.calendar-weekdays div{
+font-size:10px;
+padding:6px 0;
+}
+
+.calendar-days{
+gap:3px;
+}
+
+.day{
+height:39px;
+font-size:12px;
+border-radius:8px;
+}
+
+.today-button{
+height:42px;
+margin-top:11px;
+border-radius:10px;
+}
+
+/* =========================================================
+   MODALES MÓVILES
+========================================================= */
+
+.admin-overlay{
+padding:12px;
+align-items:flex-end;
+}
+
+.admin-box{
+width:100%;
+max-width:none;
+max-height:92svh;
+border-radius:14px 14px 8px 8px;
+}
+
+.admin-header{
+padding:16px;
+}
+
+.admin-title{
+font-size:14px;
+}
+
+.admin-body{
+padding:16px;
+}
+
+.login-box{
+max-width:none;
+border-radius:14px;
+}
+
+.login-header{
+padding:21px 18px 16px;
+}
+
+.login-title{
+font-size:16px;
+}
+
+.login-body{
+padding:19px;
+}
+
+.form-input{
+height:42px;
+border-radius:9px;
+}
+
+.file-input{
+border-radius:9px;
+}
+
+.admin-primary,
+.admin-secondary{
+min-height:43px;
+border-radius:9px;
+}
+
+/* =========================================================
+   PANTALLA COMPLETA
+========================================================= */
+
+.fullscreen{
+padding:
+env(safe-area-inset-top)
+env(safe-area-inset-right)
+env(safe-area-inset-bottom)
+env(safe-area-inset-left);
+}
+
+.fullscreen img{
+max-width:100%;
+max-height:100%;
+}
+
+.close-fullscreen{
+top:calc(10px + env(safe-area-inset-top));
+right:15px;
+font-size:34px;
+z-index:2;
+}
+
+}
+
+/* =========================================================
+   MÓVILES MUY PEQUEÑOS
+========================================================= */
+
+@media(max-width:380px){
+
+.brand-title{
+font-size:13px;
+}
+
+.brand-subtitle{
+font-size:8px;
+}
+
+.viewport{
+height:calc(100svh - 245px);
+min-height:350px;
+}
+
+.tool{
+min-width:40px;
+height:40px;
+padding:0 8px;
+font-size:12px;
+}
+
+.toolbar{
+gap:5px;
+padding:7px;
+}
+
+.thumbnails{
+height:88px;
+min-height:88px;
+}
+
+.thumbnail-item{
+width:70px;
+}
+
+.thumbnail{
+width:70px;
+height:62px;
+}
+
+}
+
+/* =========================================================
+   PANTALLAS MÓVILES HORIZONTALES
+========================================================= */
+
+@media(max-width:900px) and (orientation:landscape){
+
+.topbar{
+grid-template-columns:auto 1fr auto;
+grid-template-areas:
+"logo brand auth"
+"logo search auth";
+justify-items:stretch;
+padding:7px 10px;
+gap:5px 9px;
+}
+
+.logo{
+grid-area:logo;
+width:48px;
+height:48px;
+align-self:center;
+}
+
+.brand{
+text-align:left;
+align-items:flex-start;
+}
+
+.brand-title{
+text-align:left;
+font-size:12px;
+}
+
+.brand-subtitle{
+text-align:left;
+font-size:8px;
+}
+
+.search{
+margin:0;
+}
+
+.search input{
+height:34px;
+}
+
+.auth-area{
+width:auto;
+}
+
+.viewport{
+height:calc(100svh - 175px);
+min-height:300px;
+}
+
+.thumbnails{
+height:82px;
+min-height:82px;
 }
 
 }
@@ -1425,13 +2026,9 @@ CERRAR SESIÓN
 
 </header>
 
-
 <div class="app">
 
-
-<!-- =========================
-     INFORMACIÓN
-========================= -->
+<!-- INFORMACIÓN -->
 
 <aside class="panel info-panel">
 
@@ -1462,7 +2059,6 @@ id="infoPatientMeta">
 </div>
 </div>
 
-
 <div class="info-section">
 
 <div class="info-heading">
@@ -1482,7 +2078,6 @@ Seleccione un estudio
 </select>
 
 </div>
-
 
 <div class="info-section">
 
@@ -1519,7 +2114,6 @@ id="infoImages">
 </div>
 
 </div>
-
 
 <div class="info-section">
 
@@ -1573,10 +2167,7 @@ id="infoCurrentImage">
 
 </aside>
 
-
-<!-- =========================
-     PACIENTES
-========================= -->
+<!-- PACIENTES -->
 
 <section class="panel">
 
@@ -1613,10 +2204,7 @@ id="patientList">
 
 </section>
 
-
-<!-- =========================
-     VISOR
-========================= -->
+<!-- VISOR -->
 
 <section class="viewer">
 
@@ -1638,7 +2226,6 @@ Conectando con Supabase...
 
 </div>
 
-
 <div
 class="viewer-admin-actions"
 id="viewerAdminActions">
@@ -1657,7 +2244,6 @@ onclick="deleteCurrentStudy()">
 
 </div>
 
-
 <div
 class="image-counter"
 id="imageCounter">
@@ -1665,7 +2251,6 @@ id="imageCounter">
 </div>
 
 </div>
-
 
 <div
 class="viewport"
@@ -1700,7 +2285,6 @@ alt="Imagen radiológica">
 </div>
 
 </div>
-
 
 <div class="toolbar">
 
@@ -1787,7 +2371,6 @@ onclick="openFullscreen()">
 
 </div>
 
-
 <div
 class="thumbnails"
 id="thumbnailList">
@@ -1795,10 +2378,7 @@ id="thumbnailList">
 
 </section>
 
-
-<!-- =========================
-     CALENDARIO
-========================= -->
+<!-- CALENDARIO -->
 
 <section class="panel">
 
@@ -1833,7 +2413,6 @@ onclick="nextMonth()">
 
 </div>
 
-
 <div class="calendar-weekdays">
 
 <div>L</div>
@@ -1846,12 +2425,10 @@ onclick="nextMonth()">
 
 </div>
 
-
 <div
 class="calendar-days"
 id="calendarDays">
 </div>
-
 
 <button
 class="today-button"
@@ -1867,10 +2444,7 @@ IR A HOY
 
 </div>
 
-
-<!-- =========================
-     LOGIN
-========================= -->
+<!-- LOGIN -->
 
 <div
 class="admin-overlay"
@@ -1890,7 +2464,6 @@ Hospital San Martín de Pangoa - Rayos X
 
 </div>
 
-
 <div class="login-body">
 
 <div class="form-group">
@@ -1908,7 +2481,6 @@ placeholder="Correo">
 
 </div>
 
-
 <div class="form-group">
 
 <label class="form-label">
@@ -1923,7 +2495,6 @@ autocomplete="current-password"
 placeholder="Contraseña">
 
 </div>
-
 
 <div class="admin-actions">
 
@@ -1941,7 +2512,6 @@ INGRESAR
 
 </div>
 
-
 <div
 class="status-message"
 id="loginStatus">
@@ -1953,10 +2523,7 @@ id="loginStatus">
 
 </div>
 
-
-<!-- =========================
-     AGREGAR ESTUDIO
-========================= -->
+<!-- AGREGAR ESTUDIO -->
 
 <div
 class="admin-overlay"
@@ -1977,7 +2544,6 @@ onclick="closeAddStudy()">
 </button>
 
 </div>
-
 
 <div class="admin-body">
 
@@ -2030,12 +2596,10 @@ Ningún archivo seleccionado.
 
 </div>
 
-
 <div
 class="status-message"
 id="newStudyStatus">
 </div>
-
 
 <div class="admin-actions">
 
@@ -2059,10 +2623,7 @@ CREAR ESTUDIO
 
 </div>
 
-
-<!-- =========================
-     AÑADIR IMÁGENES
-========================= -->
+<!-- AÑADIR IMÁGENES -->
 
 <div
 class="admin-overlay"
@@ -2084,7 +2645,6 @@ onclick="closeAddImages()">
 
 </div>
 
-
 <div class="admin-body">
 
 <div class="patient-card">
@@ -2104,7 +2664,6 @@ id="addImagesStudy">
 </div>
 
 <br>
-
 
 <div class="form-group">
 
@@ -2128,12 +2687,10 @@ Ningún archivo seleccionado.
 
 </div>
 
-
 <div
 class="status-message"
 id="addImagesStatus">
 </div>
-
 
 <div class="admin-actions">
 
@@ -2157,10 +2714,7 @@ AÑADIR IMÁGENES
 
 </div>
 
-
-<!-- =========================
-     PANTALLA COMPLETA
-========================= -->
+<!-- PANTALLA COMPLETA -->
 
 <div
 class="fullscreen"
@@ -2177,7 +2731,6 @@ id="fullscreenImage"
 alt="Imagen">
 
 </div>
-
 
 <script>
 
@@ -2203,54 +2756,30 @@ const ADMIN_UID =
 const STORAGE_BUCKET =
 "IMAGENES";
 
-
 /* =========================================================
    VARIABLES
 ========================================================= */
 
 let studies=[];
-
 let selectedDate=getTodayString();
-
 let calendarDate=
 new Date(selectedDate+"T00:00:00");
-
 let currentPatient=null;
-
 let currentStudy=0;
-
 let currentImage=0;
-
 let zoom=1;
-
 let rotation=0;
-
 let inverted=false;
-
 let contrast=1;
-
 let imageLoaded=false;
-
-
-/* =========================================================
-   VARIABLES DE DESPLAZAMIENTO
-========================================================= */
 
 let panX=0;
 let panY=0;
-
 let isDragging=false;
-
 let dragStartX=0;
 let dragStartY=0;
-
 let dragOriginX=0;
 let dragOriginY=0;
-
-
-/* =========================================================
-   VARIABLES DE GESTOS TÁCTILES
-========================================================= */
 
 let activePointers=new Map();
 
@@ -2267,9 +2796,7 @@ let pinchStartFocalX=0;
 let pinchStartFocalY=0;
 
 let wasPinching=false;
-
 let suppressNextDrag=false;
-
 
 /* =========================================================
    FECHA
@@ -2285,7 +2812,6 @@ String(today.getDate()).padStart(2,"0");
 
 }
 
-
 function formatDate(dateString){
 
 if(!dateString)return"--";
@@ -2299,7 +2825,6 @@ parts[1]+"/"+
 parts[0];
 
 }
-
 
 /* =========================================================
    URL IMAGEN
@@ -2327,7 +2852,6 @@ file
 
 }
 
-
 /* =========================================================
    RUTA STORAGE
 ========================================================= */
@@ -2353,7 +2877,6 @@ file.split(marker)[1]
 return file;
 
 }
-
 
 /* =========================================================
    NORMALIZAR IMÁGENES
@@ -2402,7 +2925,6 @@ item.trim()!==""
 
 }
 
-
 /* =========================================================
    CARGAR ESTUDIOS
 ========================================================= */
@@ -2427,31 +2949,20 @@ if(error)throw error;
 studies=(data||[]).map(item=>({
 
 id:item.id,
-
 date:item.date||"",
-
 patient:item.patient||"",
-
 history:item.history||"",
-
 birth:item.birth||"",
-
 sex:item.sex||"",
-
 study:item.study||"",
-
 structure:item.structure||"",
-
 modality:item.modality||"",
-
 side:"",
-
 images:normalizeImages(item.images)
 
 }));
 
 renderCalendar();
-
 renderPatients();
 
 document.getElementById(
@@ -2493,7 +3004,6 @@ document.getElementById(
 
 }
 
-
 /* =========================================================
    PACIENTES POR FECHA
 ========================================================= */
@@ -2505,7 +3015,6 @@ item=>item.date===selectedDate
 );
 
 }
-
 
 function getPatientsForDate(){
 
@@ -2528,7 +3037,6 @@ return result;
 
 }
 
-
 /* =========================================================
    ESTUDIOS DEL PACIENTE
 ========================================================= */
@@ -2544,7 +3052,6 @@ item.date===selectedDate
 );
 
 }
-
 
 /* =========================================================
    CALENDARIO
@@ -2683,7 +3190,6 @@ container.appendChild(div);
 
 }
 
-
 /* =========================================================
    CAMBIAR FECHA
 ========================================================= */
@@ -2691,11 +3197,8 @@ container.appendChild(div);
 function selectDate(date){
 
 selectedDate=date;
-
 currentPatient=null;
-
 currentStudy=0;
-
 currentImage=0;
 
 resetView();
@@ -2706,13 +3209,10 @@ document.getElementById(
 formatDate(date);
 
 renderCalendar();
-
 renderPatients();
-
 clearViewer();
 
 }
-
 
 /* =========================================================
    MESES
@@ -2728,7 +3228,6 @@ renderCalendar();
 
 }
 
-
 function nextMonth(){
 
 calendarDate.setMonth(
@@ -2738,7 +3237,6 @@ calendarDate.getMonth()+1
 renderCalendar();
 
 }
-
 
 function goToday(){
 
@@ -2756,7 +3254,6 @@ getTodayString()
 );
 
 }
-
 
 /* =========================================================
    RENDERIZAR PACIENTES
@@ -2844,15 +3341,11 @@ ${patientStudies.length}
 element.onclick=()=>{
 
 currentPatient=name;
-
 currentStudy=0;
-
 currentImage=0;
 
 resetView();
-
 renderPatients();
-
 showFirstStudy();
 
 };
@@ -2865,7 +3358,6 @@ list.appendChild(element);
 });
 
 }
-
 
 /* =========================================================
    BÚSQUEDA DE PACIENTES
@@ -2895,7 +3387,6 @@ return;
 }
 
 const matches=[];
-
 const seen=new Set();
 
 studies.forEach(study=>{
@@ -2911,7 +3402,6 @@ patientName.includes(value) &&
 ){
 
 seen.add(patientName);
-
 matches.push(study);
 
 }
@@ -2989,7 +3479,6 @@ results.style.display="block";
 
 }
 
-
 /* =========================================================
    ABRIR PACIENTE DESDE BÚSQUEDA
 ========================================================= */
@@ -3019,7 +3508,6 @@ currentPatient=
 patientName;
 
 currentStudy=0;
-
 currentImage=0;
 
 resetView();
@@ -3030,9 +3518,7 @@ document.getElementById(
 formatDate(date);
 
 renderCalendar();
-
 renderPatients();
-
 showFirstStudy();
 
 setTimeout(()=>{
@@ -3066,7 +3552,6 @@ block:"center"
 
 }
 
-
 /* =========================================================
    CERRAR RESULTADOS
 ========================================================= */
@@ -3093,7 +3578,6 @@ document.getElementById(
 
 });
 
-
 /* =========================================================
    ESTUDIO ACTUAL
 ========================================================= */
@@ -3119,7 +3603,6 @@ list[0]
 
 }
 
-
 function getCurrentStudy(){
 
 const list=
@@ -3128,7 +3611,6 @@ getPatientStudies();
 return list[currentStudy];
 
 }
-
 
 /* =========================================================
    SELECTOR DE ESTUDIOS
@@ -3183,7 +3665,6 @@ selector.appendChild(option);
 
 }
 
-
 function changeSelectedStudy(
 value
 ){
@@ -3201,7 +3682,6 @@ getPatientStudies();
 if(!list[index])return;
 
 currentStudy=index;
-
 currentImage=0;
 
 resetView();
@@ -3211,7 +3691,6 @@ list[index]
 );
 
 }
-
 
 /* =========================================================
    MOSTRAR ESTUDIO
@@ -3311,7 +3790,6 @@ updateViewerAdminButtons();
 
 }
 
-
 /* =========================================================
    ADMIN
 ========================================================= */
@@ -3331,7 +3809,6 @@ data.session.user.id===ADMIN_UID
 );
 
 }
-
 
 async function updateViewerAdminButtons(){
 
@@ -3372,7 +3849,6 @@ admin?"flex":"none";
 
 }
 
-
 /* =========================================================
    LIMITAR DESPLAZAMIENTO
 ========================================================= */
@@ -3396,12 +3872,6 @@ return;
 
 }
 
-
-/*
-   El tamaño visual real de la imagen
-   considerando el zoom.
-*/
-
 const scaledWidth=
 image.naturalWidth*
 zoom;
@@ -3416,25 +3886,10 @@ viewport.clientWidth;
 const viewportHeight=
 viewport.clientHeight;
 
-
-/*
-   Permitimos que la imagen pueda salir
-   parcialmente del visor, pero siempre
-   conservamos una parte visible.
-*/
-
 const minimumVisible=
 35;
 
-
-/*
-   Si la imagen es menor que el visor,
-   no permitimos que se aleje del centro
-   más allá del espacio disponible.
-*/
-
 let maxPanX;
-
 let maxPanY;
 
 if(scaledWidth<=viewportWidth){
@@ -3471,13 +3926,11 @@ minimumVisible;
 
 }
 
-
 if(!isFinite(maxPanX))
 maxPanX=0;
 
 if(!isFinite(maxPanY))
 maxPanY=0;
-
 
 panX=
 Math.max(
@@ -3498,7 +3951,6 @@ panY
 );
 
 }
-
 
 /* =========================================================
    AJUSTAR IMAGEN AL VISOR
@@ -3542,12 +3994,6 @@ return;
 
 }
 
-
-/*
-   Dejamos un pequeño margen alrededor
-   de la imagen para que se vea completa.
-*/
-
 const isMobile =
 window.matchMedia(
 "(max-width:700px)"
@@ -3589,12 +4035,6 @@ fitZoom=1;
 
 }
 
-
-/*
-   Nunca hacemos la imagen mayor que su
-   tamaño natural durante el ajuste inicial.
-*/
-
 if(fitZoom>1){
 
 fitZoom=1;
@@ -3619,7 +4059,6 @@ imageLoaded=true;
 applyTransform();
 
 }
-
 
 /* =========================================================
    IMAGEN
@@ -3661,11 +4100,6 @@ document.getElementById(
 
 image.onload=()=>{
 
-/*
-   Cada nueva imagen comienza ajustada
-   completamente al visor.
-*/
-
 rotation=0;
 inverted=false;
 contrast=1;
@@ -3681,7 +4115,6 @@ applyTransform();
 image.src=src;
 
 }
-
 
 /* =========================================================
    MINIATURAS
@@ -3767,17 +4200,12 @@ index
 };
 
 item.appendChild(img);
-
-item.appendChild(
-deleteButton
-);
-
+item.appendChild(deleteButton);
 container.appendChild(item);
 
 });
 
 }
-
 
 /* =========================================================
    ELIMINAR IMAGEN
@@ -3793,7 +4221,8 @@ if(!study)return;
 if(
 imageIndex<0||
 imageIndex>=study.images.length
-)return;
+)
+return;
 
 const confirmed=
 confirm(
@@ -3915,7 +4344,6 @@ updatedStudy.images.length-1,
 );
 
 renderPatients();
-
 renderStudy(
 updatedStudy
 );
@@ -3945,7 +4373,6 @@ updateViewerAdminButtons();
 
 }
 
-
 /* =========================================================
    INFORMACIÓN IMAGEN
 ========================================================= */
@@ -3974,7 +4401,6 @@ study.images.length:
 "--";
 
 }
-
 
 /* =========================================================
    NAVEGACIÓN
@@ -4007,11 +4433,9 @@ study.images[currentImage]
 );
 
 renderThumbnails(study);
-
 updateImageInformation(study);
 
 }
-
 
 function previousImage(){
 
@@ -4039,11 +4463,9 @@ study.images[currentImage]
 );
 
 renderThumbnails(study);
-
 updateImageInformation(study);
 
 }
-
 
 /* =========================================================
    ZOOM
@@ -4057,7 +4479,6 @@ zoom+.15
 
 }
 
-
 function zoomOut(){
 
 setZoom(
@@ -4065,7 +4486,6 @@ zoom-.15
 );
 
 }
-
 
 function setZoom(value){
 
@@ -4078,11 +4498,9 @@ if(zoom<.25)
 zoom=.25;
 
 clampPan();
-
 applyTransform();
 
 }
-
 
 /* =========================================================
    ZOOM CON RUEDA
@@ -4133,11 +4551,6 @@ rect.height/2
 const scale=
 newZoom/oldZoom;
 
-
-/*
-   Mantiene el punto bajo el cursor.
-*/
-
 panX=
 mouseX-
 (mouseX-panX)*scale;
@@ -4149,11 +4562,9 @@ mouseY-
 zoom=newZoom;
 
 clampPan();
-
 applyTransform();
 
 }
-
 
 const viewportElement=
 document.getElementById("viewport");
@@ -4186,7 +4597,6 @@ passive:false
 }
 );
 
-
 /* =========================================================
    FUNCIONES DE GESTOS
 ========================================================= */
@@ -4216,7 +4626,6 @@ dy*dy
 
 }
 
-
 function getPointerCenter(){
 
 const points=
@@ -4240,7 +4649,6 @@ points[1].y)/2
 };
 
 }
-
 
 /* =========================================================
    POINTER DOWN
@@ -4275,11 +4683,6 @@ return;
 
 }
 
-
-/*
-   Guardamos la posición exacta de cada dedo.
-*/
-
 activePointers.set(
 event.pointerId,
 {
@@ -4295,11 +4698,6 @@ event.pointerId
 );
 
 }catch(error){}
-
-
-/* =======================================================
-   DOS DEDOS
-======================================================= */
 
 if(activePointers.size===2){
 
@@ -4333,12 +4731,6 @@ if(center){
 const rect=
 viewportElement.getBoundingClientRect();
 
-
-/*
-   Centro del gesto respecto al centro
-   geométrico del visor.
-*/
-
 pinchStartCenterX=
 center.x-
 (
@@ -4352,13 +4744,6 @@ center.y-
 rect.top+
 rect.height/2
 );
-
-
-/*
-   Punto de referencia del zoom.
-   Se calcula como coordenada dentro
-   del sistema de la imagen.
-*/
 
 pinchStartFocalX=
 (
@@ -4380,18 +4765,7 @@ return;
 
 }
 
-
-/* =======================================================
-   UN DEDO
-======================================================= */
-
 if(activePointers.size===1){
-
-/*
-   Si acabamos de terminar un pinch,
-   no convertimos inmediatamente el dedo
-   restante en arrastre.
-*/
 
 if(suppressNextDrag){
 
@@ -4427,7 +4801,6 @@ panY;
 
 });
 
-
 /* =========================================================
    POINTER MOVE
 ========================================================= */
@@ -4453,11 +4826,6 @@ x:event.clientX,
 y:event.clientY
 }
 );
-
-
-/* =======================================================
-   DOS DEDOS = PINCH
-======================================================= */
 
 if(activePointers.size>=2){
 
@@ -4486,7 +4854,6 @@ return;
 const rect=
 viewportElement.getBoundingClientRect();
 
-
 const centerX=
 center.x-
 (
@@ -4501,12 +4868,6 @@ rect.top+
 rect.height/2
 );
 
-
-/*
-   Factor de zoom basado en la distancia
-   original entre los dos dedos.
-*/
-
 let newZoom=
 pinchStartZoom*
 (
@@ -4520,16 +4881,6 @@ newZoom=4;
 if(newZoom<.25)
 newZoom=.25;
 
-
-/*
-   El punto de la imagen que estaba debajo
-   del centro inicial debe permanecer debajo
-   del centro actual del gesto.
-
-   Fórmula:
-   pan = centroActual - puntoImagen * zoom
-*/
-
 panX=
 centerX-
 pinchStartFocalX*
@@ -4540,26 +4891,14 @@ centerY-
 pinchStartFocalY*
 newZoom;
 
-
-/*
-   Si además los dos dedos se trasladan,
-   el centro se mueve con ellos.
-*/
-
 zoom=newZoom;
 
 clampPan();
-
 applyTransform();
 
 return;
 
 }
-
-
-/* =======================================================
-   UN DEDO = ARRASTRE
-======================================================= */
 
 if(
 activePointers.size===1 &&
@@ -4582,13 +4921,11 @@ dragStartY
 );
 
 clampPan();
-
 applyTransform();
 
 }
 
 });
-
 
 /* =========================================================
    POINTER UP / CANCEL
@@ -4608,23 +4945,11 @@ event.pointerId
 
 }catch(error){}
 
-
-/*
-   Todavía quedan dos dedos.
-*/
-
 if(activePointers.size>=2){
 
 return;
 
 }
-
-
-/*
-   Al terminar un pinch dejamos el estado
-   preparado para que el siguiente toque
-   comience un nuevo arrastre limpio.
-*/
 
 if(wasPinching){
 
@@ -4641,11 +4966,6 @@ viewportElement.classList.remove(
 pinchStartDistance=0;
 
 }
-
-
-/*
-   Si no queda ningún dedo.
-*/
 
 if(activePointers.size===0){
 
@@ -4665,12 +4985,6 @@ return;
 
 }
 
-
-/*
-   Si queda un dedo después de un pinch,
-   NO comenzamos automáticamente el arrastre.
-*/
-
 if(activePointers.size===1){
 
 isDragging=false;
@@ -4683,7 +4997,6 @@ viewportElement.classList.remove(
 
 }
 
-
 viewportElement.addEventListener(
 "pointerup",
 handlePointerUp
@@ -4693,7 +5006,6 @@ viewportElement.addEventListener(
 "pointercancel",
 handlePointerUp
 );
-
 
 /* =========================================================
    POINTER LEAVE - SOLO PC
@@ -4718,7 +5030,6 @@ viewportElement.classList.remove(
 
 });
 
-
 /* =========================================================
    ROTACIÓN
 ========================================================= */
@@ -4734,7 +5045,6 @@ applyTransform();
 
 }
 
-
 function rotateLeft(){
 
 rotation-=90;
@@ -4745,7 +5055,6 @@ rotation=270;
 applyTransform();
 
 }
-
 
 /* =========================================================
    INVERSIÓN / CONTRASTE
@@ -4759,7 +5068,6 @@ applyTransform();
 
 }
 
-
 function contrastUp(){
 
 contrast+=.15;
@@ -4771,7 +5079,6 @@ applyTransform();
 
 }
 
-
 function contrastDown(){
 
 contrast-=.15;
@@ -4782,7 +5089,6 @@ contrast=.4;
 applyTransform();
 
 }
-
 
 /* =========================================================
    TRANSFORMACIONES
@@ -4802,12 +5108,6 @@ document.getElementById(
 
 if(!wrapper||!image)
 return;
-
-
-/*
-   Primero limitamos la posición para evitar
-   que la imagen desaparezca completamente.
-*/
 
 clampPan();
 
@@ -4847,7 +5147,6 @@ rotation+
 
 }
 
-
 /* =========================================================
    RESTABLECER IMAGEN
 ========================================================= */
@@ -4855,37 +5154,21 @@ rotation+
 function resetView(){
 
 rotation=0;
-
 inverted=false;
-
 contrast=1;
-
 panX=0;
-
 panY=0;
-
 isDragging=false;
-
 activePointers.clear();
-
 pinchStartDistance=0;
-
 pinchStartZoom=1;
-
 pinchStartCenterX=0;
-
 pinchStartCenterY=0;
-
 pinchStartPanX=0;
-
 pinchStartPanY=0;
-
 pinchStartFocalX=0;
-
 pinchStartFocalY=0;
-
 wasPinching=false;
-
 suppressNextDrag=false;
 
 const viewport=
@@ -4924,7 +5207,6 @@ applyTransform();
 }
 
 }
-
 
 /* =========================================================
    LIMPIAR VISOR
@@ -5004,7 +5286,6 @@ document.getElementById(
 
 }
 
-
 /* =========================================================
    FULLSCREEN
 ========================================================= */
@@ -5031,7 +5312,6 @@ document.getElementById(
 
 }
 
-
 function closeFullscreen(){
 
 document.getElementById(
@@ -5040,7 +5320,6 @@ document.getElementById(
 "none";
 
 }
-
 
 /* =========================================================
    ESCAPE HTML
@@ -5078,7 +5357,6 @@ return String(value)
 
 }
 
-
 /* =========================================================
    LOGIN
 ========================================================= */
@@ -5104,7 +5382,6 @@ document.getElementById(
 
 }
 
-
 function closeLogin(){
 
 document.getElementById(
@@ -5113,7 +5390,6 @@ document.getElementById(
 "none";
 
 }
-
 
 /* =========================================================
    LOGIN ADMIN
@@ -5204,7 +5480,6 @@ error.message||
 
 }
 
-
 /* =========================================================
    SESIÓN
 ========================================================= */
@@ -5270,7 +5545,6 @@ null
 });
 
 }
-
 
 /* =========================================================
    INTERFAZ ADMIN
@@ -5339,7 +5613,6 @@ addStudyButton.style.display=
 }
 
 closeAddImages();
-
 closeAddStudy();
 
 document.getElementById(
@@ -5349,7 +5622,6 @@ document.getElementById(
 }
 
 }
-
 
 /* =========================================================
    LOGOUT
@@ -5364,7 +5636,6 @@ await supabaseClient
 updateAuthInterface(null);
 
 }
-
 
 /* =========================================================
    AGREGAR NUEVO ESTUDIO
@@ -5410,7 +5681,6 @@ document.getElementById(
 
 }
 
-
 function closeAddStudy(){
 
 document.getElementById(
@@ -5419,7 +5689,6 @@ document.getElementById(
 "none";
 
 }
-
 
 /* =========================================================
    ARCHIVOS NUEVO ESTUDIO
@@ -5481,7 +5750,6 @@ escapeHtml(file.name)
 ).join("<br>");
 
 }
-
 
 /* =========================================================
    CREAR NUEVO ESTUDIO
@@ -5664,15 +5932,10 @@ await supabaseClient
 .insert({
 
 patient:patient,
-
 date:date,
-
 study:null,
-
 structure:null,
-
 modality:"CR",
-
 images:newPaths
 
 })
@@ -5703,7 +5966,6 @@ currentPatient=
 patient;
 
 currentStudy=0;
-
 currentImage=0;
 
 await loadStudies();
@@ -5725,7 +5987,6 @@ const createdStudy=
 getCurrentStudy();
 
 renderCalendar();
-
 renderPatients();
 
 if(createdStudy){
@@ -5789,7 +6050,6 @@ cleanError
 
 }
 
-
 /* =========================================================
    AÑADIR IMÁGENES
 ========================================================= */
@@ -5840,7 +6100,6 @@ document.getElementById(
 
 }
 
-
 function closeAddImages(){
 
 document.getElementById(
@@ -5849,7 +6108,6 @@ document.getElementById(
 "none";
 
 }
-
 
 /* =========================================================
    ARCHIVOS ADICIONALES
@@ -5911,7 +6169,6 @@ escapeHtml(file.name)
 ).join("<br>");
 
 }
-
 
 /* =========================================================
    SUBIR IMÁGENES ADICIONALES
@@ -6097,17 +6354,12 @@ throw updateError;
 }
 
 const studyId=study.id;
-
-const patientName=
-study.patient;
-
-const studyDate=
-study.date;
+const patientName=study.patient;
+const studyDate=study.date;
 
 await loadStudies();
 
-selectedDate=
-studyDate;
+selectedDate=studyDate;
 
 calendarDate=
 new Date(
@@ -6143,9 +6395,7 @@ newPaths.length,
 );
 
 renderCalendar();
-
 renderPatients();
-
 renderStudy(
 updatedStudy
 );
@@ -6184,7 +6434,6 @@ error.message||
 }
 
 }
-
 
 /* =========================================================
    ELIMINAR ESTUDIO COMPLETO
@@ -6283,9 +6532,7 @@ storageError
 }
 
 currentPatient=null;
-
 currentStudy=0;
-
 currentImage=0;
 
 await loadStudies();
@@ -6317,7 +6564,6 @@ updateViewerAdminButtons();
 
 }
 
-
 /* =========================================================
    TECLADO
 ========================================================= */
@@ -6329,11 +6575,8 @@ event=>{
 if(event.key==="Escape"){
 
 closeFullscreen();
-
 closeLogin();
-
 closeAddImages();
-
 closeAddStudy();
 
 document.getElementById(
@@ -6349,7 +6592,6 @@ if(event.key==="ArrowLeft")
 previousImage();
 
 });
-
 
 /* =========================================================
    AJUSTE AUTOMÁTICO AL CAMBIAR TAMAÑO
@@ -6371,17 +6613,11 @@ image.naturalWidth>0 &&
 image.naturalHeight>0
 ){
 
-/*
-   Al cambiar el tamaño del dispositivo
-   recalculamos el ajuste inicial.
-*/
-
 fitImageToViewport();
 
 }
 
 });
-
 
 /* =========================================================
    INICIO
