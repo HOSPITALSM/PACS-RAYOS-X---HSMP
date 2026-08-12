@@ -8,1963 +8,531 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-
 :root{
---bg:#08090a;
---panel:#111315;
---panel2:#17191c;
---border:#2c3035;
---text:#eeeeee;
---muted:#858a91;
---selected:#30353a;
---hover:#25292d;
---green:#3ecf8e;
---green-dark:#2fb477;
---warning:#e0a94e;
---shadow-sm:0 2px 8px rgba(0,0,0,.35);
---shadow-md:0 8px 24px rgba(0,0,0,.45);
---ease:.15s ease;
+--bg:#08090a;--panel:#111315;--panel2:#17191c;--border:#2c3035;
+--text:#eeeeee;--muted:#858a91;--selected:#30353a;--hover:#25292d;
+--green:#3ecf8e;--green-dark:#2fb477;--warning:#e0a94e;
+--shadow-sm:0 2px 8px rgba(0,0,0,.35);--shadow-md:0 8px 24px rgba(0,0,0,.45);
+--ease:.15s ease
 }
-
-*{
-box-sizing:border-box
-}
-
-html{
-width:100%;
-min-height:100%;
-background:var(--bg)
-}
-
-body{
-margin:0;
-width:100%;
-min-height:100vh;
-background:var(--bg);
-color:var(--text);
+*{box-sizing:border-box}
+html{width:100%;min-height:100%;background:var(--bg)}
+body{margin:0;width:100%;min-height:100vh;background:var(--bg);color:var(--text);
 font-family:"Inter","Segoe UI",system-ui,Arial,Helvetica,sans-serif;
--webkit-font-smoothing:antialiased;
-overflow-x:hidden;
-overflow-y:auto
-}
+-webkit-font-smoothing:antialiased;overflow-x:hidden;overflow-y:auto}
+button,input,select{font-family:inherit}
 
-button,input,select{
-font-family:"Inter","Segoe UI",system-ui,Arial,Helvetica,sans-serif
-}
-
-/* =========================
-   BARRA SUPERIOR
-========================= */
+/* ========================= BARRA SUPERIOR ========================= */
 
 .topbar{
-min-height:72px;
-background:#101214;
-border-bottom:1px solid var(--border);
-display:flex;
-align-items:center;
-padding:0 16px;
-gap:15px;
-position:relative;
-z-index:10
+min-height:72px;background:#101214;border-bottom:1px solid var(--border);
+display:flex;align-items:center;padding:0 16px;gap:15px;position:relative;z-index:10
 }
-
 .logo{
-width:100px;
-height:100px;
-border:1px solid var(--border);
-border-radius:6px;
-display:flex;
-align-items:center;
-justify-content:center;
-flex-shrink:0;
-overflow:hidden;
-background:#0d0f10
+width:100px;height:100px;border:1px solid var(--border);border-radius:6px;
+display:flex;align-items:center;justify-content:center;flex-shrink:0;
+overflow:hidden;background:#0d0f10
 }
-
-.logo img{
-width:100%;
-height:100%;
-object-fit:contain
-}
-
-.brand{
-min-width:280px
-}
-
-.brand-title{
-font-size:17px;
-font-weight:bold;
-letter-spacing:.5px;
-color:var(--green)
-}
-
-.brand-subtitle{
-color:var(--green);
-font-size:12px;
-margin-top:5px
-}
-
-.search{
-flex:1;
-max-width:430px;
-margin-left:auto;
-position:relative
-}
-
+.logo img{width:100%;height:100%;object-fit:contain}
+.brand{min-width:280px}
+.brand-title{font-size:17px;font-weight:bold;letter-spacing:.5px;color:var(--green)}
+.brand-subtitle{color:var(--green);font-size:12px;margin-top:5px}
+.search{flex:1;max-width:430px;margin-left:auto;position:relative}
 .search input{
-width:100%;
-height:40px;
-background:#1a1d20;
-border:1px solid #353a40;
-border-radius:5px;
-color:white;
-padding:0 13px;
-outline:none;
-font-size:13px;
-transition:border-color var(--ease),box-shadow var(--ease)
+width:100%;height:40px;background:#1a1d20;border:1px solid #353a40;border-radius:5px;
+color:white;padding:0 13px;outline:none;font-size:13px;transition:border-color var(--ease),box-shadow var(--ease)
 }
-
-.search input:focus{
-border-color:var(--green);
-box-shadow:0 0 0 3px rgba(62,207,142,.12)
-}
-
+.search input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(62,207,142,.12)}
 .search-results{
-position:absolute;
-top:45px;
-left:0;
-right:0;
-background:#151719;
-border:1px solid #34383d;
-border-radius:5px;
-box-shadow:var(--shadow-md);
-max-height:300px;
-overflow-y:auto;
-display:none;
-z-index:1000
+position:absolute;top:45px;left:0;right:0;background:#151719;border:1px solid #34383d;
+border-radius:5px;box-shadow:var(--shadow-md);max-height:300px;overflow-y:auto;display:none;z-index:1000
 }
-
-.search-result{
-padding:11px 13px;
-border-bottom:1px solid #282c30;
-cursor:pointer;
-transition:background var(--ease)
-}
-
-.search-result:last-child{
-border-bottom:0
-}
-
-.search-result:hover{
-background:#25292d
-}
-
-.search-result-name{
-font-size:13px;
-color:#eee
-}
-
-.search-result-meta{
-font-size:10px;
-color:#858a91;
-margin-top:4px
-}
-
-.search-no-result{
-padding:15px;
-text-align:center;
-font-size:12px;
-color:#777d83
-}
-
-.current-date{
-color:#a9adb2;
-font-size:13px;
-white-space:nowrap
-}
-
-.auth-area{
-display:flex;
-align-items:center;
-gap:7px
-}
-
+.search-result{padding:11px 13px;border-bottom:1px solid #282c30;cursor:pointer;transition:background var(--ease)}
+.search-result:last-child{border-bottom:0}
+.search-result:hover{background:#25292d}
+.search-result-name{font-size:13px;color:#eee}
+.search-result-meta{font-size:10px;color:#858a91;margin-top:4px}
+.search-no-result{padding:15px;text-align:center;font-size:12px;color:#777d83}
+.current-date{color:#a9adb2;font-size:13px;white-space:nowrap}
+.auth-area{display:flex;align-items:center;gap:7px}
 .auth-button{
-height:38px;
-padding:0 13px;
-background:#202328;
-border:1px solid #34383d;
-border-radius:4px;
-color:#d0d4d8;
-font-size:12px;
-cursor:pointer;
-transition:border-color var(--ease),color var(--ease),background var(--ease)
+height:38px;padding:0 13px;background:#202328;border:1px solid #34383d;border-radius:4px;
+color:#d0d4d8;font-size:12px;cursor:pointer;transition:border-color var(--ease),color var(--ease),background var(--ease)
 }
+.auth-button:hover{border-color:var(--green);color:var(--green)}
+.auth-user{color:var(--green);font-size:11px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.logout-button{display:none}
 
-.auth-button:hover{
-border-color:var(--green);
-color:var(--green)
-}
-
-.auth-user{
-color:var(--green);
-font-size:11px;
-max-width:130px;
-overflow:hidden;
-text-overflow:ellipsis;
-white-space:nowrap
-}
-
-.logout-button{
-display:none
-}
-
-/* =========================
-   APLICACIÓN
-========================= */
+/* ========================= APLICACIÓN ========================= */
 
 .app{
-min-height:calc(100vh - 72px);
-display:grid;
-grid-template-columns:260px 255px 1fr 255px;
-min-width:1050px
+min-height:calc(100vh - 72px);display:grid;
+grid-template-columns:260px 255px 1fr 255px;min-width:1050px
 }
-
-/* =========================
-   PANELES
-========================= */
-
 .panel{
-background:var(--panel);
-border-right:1px solid var(--border);
-display:flex;
-flex-direction:column;
-overflow:hidden;
-min-height:650px
+background:var(--panel);border-right:1px solid var(--border);display:flex;
+flex-direction:column;overflow:hidden;min-height:650px
 }
-
 .panel-header{
-min-height:64px;
-padding:0 15px;
-display:flex;
-align-items:center;
-justify-content:space-between;
-border-bottom:1px solid var(--border);
-flex-shrink:0
+min-height:64px;padding:0 15px;display:flex;align-items:center;
+justify-content:space-between;border-bottom:1px solid var(--border);flex-shrink:0
 }
+.panel-title{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--green)}
+.panel-count{color:#858a91;font-size:12px}
+.panel-body{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-color:#353a40 #0d0f10;scrollbar-width:thin}
+.panel-body::-webkit-scrollbar{width:8px}
+.panel-body::-webkit-scrollbar-track{background:#0d0f10}
+.panel-body::-webkit-scrollbar-thumb{background:#353a40;border-radius:6px}
+.panel-body::-webkit-scrollbar-thumb:hover{background:#4b5259}
 
-.panel-title{
-font-size:12px;
-text-transform:uppercase;
-letter-spacing:1px;
-color:var(--green)
-}
-
-.panel-count{
-color:#858a91;
-font-size:12px
-}
-
-.panel-body{
-flex:1;
-overflow-y:auto;
-overflow-x:hidden
-}
-
-.panel-body{
-scrollbar-color:#353a40 #0d0f10;
-scrollbar-width:thin
-}
-
-.panel-body::-webkit-scrollbar{
-width:8px
-}
-
-.panel-body::-webkit-scrollbar-track{
-background:#0d0f10
-}
-
-.panel-body::-webkit-scrollbar-thumb{
-background:#353a40;
-border-radius:6px
-}
-
-.panel-body::-webkit-scrollbar-thumb:hover{
-background:#4b5259
-}
-
-/* =========================
-   BOTÓN AGREGAR ESTUDIO
-========================= */
+/* ========================= BOTÓN AGREGAR ========================= */
 
 .add-study-button{
-width:100%;
-height:38px;
-margin-top:8px;
-background:var(--green);
-border:0;
-border-radius:5px;
-color:#07120d;
-font-size:12px;
-font-weight:bold;
-cursor:pointer;
-transition:background var(--ease),transform var(--ease)
+width:100%;height:38px;margin-top:8px;background:var(--green);border:0;border-radius:5px;
+color:#07120d;font-size:12px;font-weight:bold;cursor:pointer;transition:background var(--ease),transform var(--ease)
 }
+.add-study-button:hover{background:#55d99d}
+.add-study-button:active{transform:scale(.98)}
 
-.add-study-button:hover{
-background:#55d99d
-}
+/* ========================= CALENDARIO ========================= */
 
-.add-study-button:active{
-transform:scale(.98)
-}
-
-/* =========================
-   CALENDARIO
-========================= */
-
-.calendar{
-padding:14px
-}
-
-.calendar-header{
-display:flex;
-align-items:center;
-justify-content:space-between;
-margin-bottom:14px
-}
-
-.calendar-month{
-font-size:15px;
-font-weight:bold;
-text-transform:capitalize
-}
-
+.calendar{padding:14px}
+.calendar-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.calendar-month{font-size:15px;font-weight:bold;text-transform:capitalize}
 .calendar-button{
-width:32px;
-height:32px;
-background:#202328;
-border:1px solid #34383d;
-color:#ddd;
-border-radius:4px;
-cursor:pointer;
-font-size:17px;
-transition:border-color var(--ease),color var(--ease)
+width:32px;height:32px;background:#202328;border:1px solid #34383d;color:#ddd;
+border-radius:4px;cursor:pointer;font-size:17px;transition:border-color var(--ease),color var(--ease)
 }
-
-.calendar-button:hover{
-border-color:var(--green);
-color:var(--green)
-}
-
-.calendar-weekdays{
-display:grid;
-grid-template-columns:repeat(7,1fr);
-gap:2px;
-margin-bottom:5px
-}
-
-.calendar-weekdays div{
-text-align:center;
-color:#777d83;
-font-size:11px;
-padding:5px 0
-}
-
-.calendar-days{
-display:grid;
-grid-template-columns:repeat(7,1fr);
-gap:3px
-}
-
+.calendar-button:hover{border-color:var(--green);color:var(--green)}
+.calendar-weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:5px}
+.calendar-weekdays div{text-align:center;color:#777d83;font-size:11px;padding:5px 0}
+.calendar-days{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
 .day{
-height:34px;
-display:flex;
-align-items:center;
-justify-content:center;
-border-radius:4px;
-color:#aeb2b7;
-font-size:12px;
-cursor:pointer;
-position:relative;
-transition:background var(--ease),color var(--ease)
+height:34px;display:flex;align-items:center;justify-content:center;border-radius:4px;
+color:#aeb2b7;font-size:12px;cursor:pointer;position:relative;transition:background var(--ease),color var(--ease)
 }
-
-.day:hover{
-background:var(--hover)
-}
-
-.day.other-month{
-color:#3e4247
-}
-
-.day.today{
-border:1px solid #676d74
-}
-
-.day.selected{
-background:#d3d7da;
-color:#111;
-font-weight:bold
-}
-
+.day:hover{background:var(--hover)}
+.day.other-month{color:#3e4247}
+.day.today{border:1px solid #676d74}
+.day.selected{background:#d3d7da;color:#111;font-weight:bold}
 .day.has-studies::after{
-content:"";
-width:5px;
-height:5px;
-background:#aeb3b8;
-border-radius:50%;
-position:absolute;
-bottom:4px
+content:"";width:5px;height:5px;background:#aeb3b8;border-radius:50%;
+position:absolute;bottom:4px
 }
-
-.day.selected.has-studies::after{
-background:#111
-}
-
+.day.selected.has-studies::after{background:#111}
 .today-button{
-width:100%;
-height:36px;
-margin-top:13px;
-background:#202328;
-border:1px solid #34383d;
-color:#bbbfc4;
-border-radius:4px;
-cursor:pointer;
-font-size:12px;
+width:100%;height:36px;margin-top:13px;background:#202328;border:1px solid #34383d;
+color:#bbbfc4;border-radius:4px;cursor:pointer;font-size:12px;
 transition:border-color var(--ease),color var(--ease)
 }
+.today-button:hover{border-color:var(--green);color:var(--green)}
 
-.today-button:hover{
-border-color:var(--green);
-color:var(--green)
-}
-
-/* =========================
-   PACIENTES
-========================= */
+/* ========================= PACIENTES ========================= */
 
 .patient{
-padding:15px;
-border-bottom:1px solid #22262a;
-cursor:pointer;
+padding:15px;border-bottom:1px solid #22262a;cursor:pointer;
 transition:background var(--ease),box-shadow var(--ease)
 }
+.patient:hover{background:var(--hover)}
+.patient.active{background:var(--selected);box-shadow:inset 3px 0 0 var(--green)}
+.patient-name{font-size:14px;margin-bottom:7px}
+.patient-meta{display:flex;justify-content:space-between;color:#858a91;font-size:11px}
+.badge{background:#2a2e33;padding:3px 7px;border-radius:10px;color:#c2c6ca;font-size:11px}
+.no-results{padding:35px 15px;text-align:center;color:#686e74;font-size:13px;line-height:1.7}
 
-.patient:hover{
-background:var(--hover)
-}
-
-.patient.active{
-background:var(--selected);
-box-shadow:inset 3px 0 0 var(--green)
-}
-
-.patient-name{
-font-size:14px;
-margin-bottom:7px
-}
-
-.patient-meta{
-display:flex;
-justify-content:space-between;
-color:#858a91;
-font-size:11px
-}
-
-.badge{
-background:#2a2e33;
-padding:3px 7px;
-border-radius:10px;
-color:#c2c6ca;
-font-size:11px
-}
-
-.no-results{
-padding:35px 15px;
-text-align:center;
-color:#686e74;
-font-size:13px;
-line-height:1.7
-}
-
-/* =========================
-   VISOR
-========================= */
+/* ========================= VISOR ========================= */
 
 .viewer{
-background:#030303;
-display:flex;
-flex-direction:column;
-min-width:0;
-height:840px;
-min-height:840px;
-overflow:hidden
+background:#030303;display:flex;flex-direction:column;min-width:0;
+height:840px;min-height:840px;overflow:hidden
 }
-
 .viewer-header{
-min-height:64px;
-height:64px;
-background:#111315;
-border-bottom:1px solid var(--border);
-display:flex;
-align-items:center;
-justify-content:space-between;
-padding:8px 16px;
-flex-shrink:0;
-gap:10px
+min-height:64px;height:64px;background:#111315;border-bottom:1px solid var(--border);
+display:flex;align-items:center;justify-content:space-between;padding:8px 16px;
+flex-shrink:0;gap:10px
 }
-
-.viewer-title{
-font-size:14px;
-color:var(--green)
-}
-
-.viewer-subtitle{
-color:#80858b;
-font-size:11px;
-margin-top:5px
-}
-
-.viewer-header-left{
-min-width:0
-}
-
-.viewer-admin-actions{
-display:none;
-align-items:center;
-gap:6px;
-flex-shrink:0
-}
-
+.viewer-title{font-size:14px;color:var(--green)}
+.viewer-subtitle{color:#80858b;font-size:11px;margin-top:5px}
+.viewer-header-left{min-width:0}
+.viewer-admin-actions{display:none;align-items:center;gap:6px;flex-shrink:0}
 .viewer-admin-button{
-height:34px;
-padding:0 10px;
-background:#202328;
-border:1px solid #34383d;
-border-radius:4px;
-color:#ccc;
-font-size:11px;
-cursor:pointer;
+height:34px;padding:0 10px;background:#202328;border:1px solid #34383d;
+border-radius:4px;color:#ccc;font-size:11px;cursor:pointer;
 transition:border-color var(--ease),color var(--ease)
 }
+.viewer-admin-button:hover{border-color:var(--green);color:var(--green)}
+.viewer-admin-button.danger:hover{border-color:#d66565;color:#e47777}
+.image-counter{color:#999fa5;font-size:12px;white-space:nowrap}
 
-.viewer-admin-button:hover{
-border-color:var(--green);
-color:var(--green)
-}
-
-.viewer-admin-button.danger:hover{
-border-color:#d66565;
-color:#e47777
-}
-
-.image-counter{
-color:#999fa5;
-font-size:12px;
-white-space:nowrap
-}
-
-/* =========================
-   ÁREA DE IMAGEN
-========================= */
+/* ========================= ÁREA IMAGEN ========================= */
 
 .viewport{
-height:600px;
-min-height:600px;
-max-height:600px;
-position:relative;
-overflow:hidden;
-display:flex;
-align-items:center;
-justify-content:center;
+height:600px;min-height:600px;max-height:600px;position:relative;overflow:hidden;
+display:flex;align-items:center;justify-content:center;
 background:radial-gradient(circle,#151515 0%,#050505 65%,#000 100%);
-flex-shrink:0;
-cursor:grab;
-touch-action:none;
-user-select:none;
--webkit-user-select:none;
--webkit-touch-callout:none;
-overscroll-behavior:none
+flex-shrink:0;cursor:grab;touch-action:none;user-select:none;
+-webkit-user-select:none;-webkit-touch-callout:none;overscroll-behavior:none
 }
-
-.viewport:active{
-cursor:grabbing
-}
-
-.viewport.dragging{
-cursor:grabbing
-}
-
-.overlay-left{
-position:absolute;
-top:14px;
-left:16px;
-color:#777d83;
-font-size:11px;
-z-index:5;
-pointer-events:none
-}
-
-.overlay-right{
-position:absolute;
-top:14px;
-right:16px;
-color:#777d83;
-font-size:11px;
-text-align:right;
-z-index:5;
-pointer-events:none
-}
-
-.empty-message{
-color:#60666c;
-font-size:14px;
-text-align:center;
-padding:20px;
-pointer-events:none
-}
-
+.viewport:active{cursor:grabbing}
+.viewport.dragging{cursor:grabbing}
+.overlay-left{position:absolute;top:14px;left:16px;color:#777d83;font-size:11px;z-index:5;pointer-events:none}
+.overlay-right{position:absolute;top:14px;right:16px;color:#777d83;font-size:11px;text-align:right;z-index:5;pointer-events:none}
+.empty-message{color:#60666c;font-size:14px;text-align:center;padding:20px;pointer-events:none}
 .image-wrapper{
-position:absolute;
-left:50%;
-top:50%;
-width:max-content;
-height:max-content;
-display:flex;
-align-items:center;
-justify-content:center;
-transform:
-translate3d(-50%,-50%,0)
-translate3d(0,0,0)
-scale(1)
-rotate(0deg);
-transform-origin:center center;
-will-change:transform;
-transition:none;
-pointer-events:none;
-touch-action:none
+position:absolute;left:50%;top:50%;width:max-content;height:max-content;
+display:flex;align-items:center;justify-content:center;
+transform:translate3d(-50%,-50%,0) translate3d(0,0,0) scale(1) rotate(0deg);
+transform-origin:center center;will-change:transform;transition:none;pointer-events:none;touch-action:none
 }
-
 .main-image{
-display:block;
-width:auto;
-height:auto;
-max-width:none;
-max-height:none;
-object-fit:contain;
-user-select:none;
--webkit-user-select:none;
--webkit-user-drag:none;
--webkit-touch-callout:none;
-pointer-events:none;
-touch-action:none;
-transform-origin:center center;
-transition:filter .12s ease
+display:block;width:auto;height:auto;max-width:none;max-height:none;object-fit:contain;
+user-select:none;-webkit-user-select:none;-webkit-user-drag:none;-webkit-touch-callout:none;
+pointer-events:none;touch-action:none;transform-origin:center center;transition:filter .12s ease
 }
 
-/* =========================
-   BARRA DE HERRAMIENTAS
-========================= */
+/* ========================= TOOLBAR ========================= */
 
 .toolbar{
-min-height:60px;
-height:60px;
-background:#111315;
-border-top:1px solid var(--border);
-display:flex;
-align-items:center;
-gap:6px;
-padding:9px;
-flex-shrink:0;
-position:relative;
-z-index:20
+min-height:60px;height:60px;background:#111315;border-top:1px solid var(--border);
+display:flex;align-items:center;gap:6px;padding:9px;flex-shrink:0;position:relative;z-index:20
 }
-
 .tool{
-height:38px;
-min-width:38px;
-padding:0 10px;
-background:#202328;
-border:1px solid #34383d;
-border-radius:4px;
-color:#d0d4d8;
-font-size:12px;
-cursor:pointer;
+height:38px;min-width:38px;padding:0 10px;background:#202328;border:1px solid #34383d;
+border-radius:4px;color:#d0d4d8;font-size:12px;cursor:pointer;
 transition:background var(--ease),border-color var(--ease),color var(--ease)
 }
+.tool:hover{background:#2a2e33;border-color:#555b61;color:white}
+.tool:active{transform:scale(.96)}
+.separator{width:1px;height:28px;background:#30343a;margin:0 4px}
 
-.tool:hover{
-background:#2a2e33;
-border-color:#555b61;
-color:white
-}
-
-.tool:active{
-transform:scale(.96)
-}
-
-.separator{
-width:1px;
-height:28px;
-background:#30343a;
-margin:0 4px
-}
-
-/* =========================
-   MINIATURAS
-========================= */
+/* ========================= MINIATURAS ========================= */
 
 .thumbnails{
-min-height:112px;
-height:112px;
-background:#101214;
-border-top:1px solid var(--border);
-display:flex;
-align-items:flex-start;
-gap:8px;
-padding:8px;
-overflow-x:auto;
-overflow-y:hidden;
-flex-shrink:0
+min-height:112px;height:112px;background:#101214;border-top:1px solid var(--border);
+display:flex;align-items:flex-start;gap:8px;padding:8px;overflow-x:auto;overflow-y:hidden;flex-shrink:0;
+scrollbar-color:#353a40 #101214;scrollbar-width:thin
 }
-
-.thumbnails{
-scrollbar-color:#353a40 #101214;
-scrollbar-width:thin
-}
-
-.thumbnail-item{
-width:82px;
-height:92px;
-flex-shrink:0;
-position:relative
-}
-
+.thumbnail-item{width:82px;height:92px;flex-shrink:0;position:relative}
 .thumbnail{
-width:82px;
-height:72px;
-object-fit:cover;
-background:#000;
-border:2px solid #30343a;
-border-radius:3px;
-cursor:pointer;
-display:block;
-transition:border-color var(--ease),opacity var(--ease)
+width:82px;height:72px;object-fit:cover;background:#000;border:2px solid #30343a;
+border-radius:3px;cursor:pointer;display:block;transition:border-color var(--ease),opacity var(--ease)
 }
-
-.thumbnail:hover{
-opacity:.85
-}
-
-.thumbnail.active{
-border-color:var(--green)
-}
-
+.thumbnail:hover{opacity:.85}
+.thumbnail.active{border-color:var(--green)}
 .thumbnail-delete{
-position:absolute;
-right:-4px;
-bottom:0;
-width:20px;
-height:20px;
-padding:0;
-border:1px solid #555;
-border-radius:50%;
-background:#191c1f;
-color:#d96b6b;
-font-size:13px;
-line-height:17px;
-cursor:pointer;
-z-index:3;
-transition:background var(--ease),color var(--ease),border-color var(--ease)
+position:absolute;right:-4px;bottom:0;width:20px;height:20px;padding:0;border:1px solid #555;
+border-radius:50%;background:#191c1f;color:#d96b6b;font-size:13px;line-height:17px;
+cursor:pointer;z-index:3;transition:background var(--ease),color var(--ease),border-color var(--ease)
 }
+.thumbnail-delete:hover{background:#8b3535;color:#fff;border-color:#d66565}
 
-.thumbnail-delete:hover{
-background:#8b3535;
-color:#fff;
-border-color:#d66565
-}
+/* ========================= INFORMACIÓN ========================= */
 
-/* =========================
-   INFORMACIÓN
-========================= */
-
-.info-panel{
-overflow-y:auto;
-overflow-x:hidden
-}
-
-.info-section{
-padding:17px;
-border-bottom:1px solid var(--border)
-}
-
-.info-heading{
-color:var(--green);
-font-size:11px;
-text-transform:uppercase;
-letter-spacing:1px;
-margin-bottom:14px
-}
-
-.info-row{
-margin-bottom:13px
-}
-
-.info-label{
-display:block;
-color:#686e74;
-font-size:10.5px;
-margin-bottom:4px
-}
-
-.info-value{
-color:#d1d4d7;
-font-size:13px
-}
-
-.patient-card{
-background:#191c1f;
-border:1px solid #2b2f34;
-border-radius:5px;
-padding:13px;
-box-shadow:var(--shadow-sm)
-}
-
-.patient-card-name{
-font-size:15px;
-margin-bottom:9px
-}
-
-.patient-card-meta{
-color:#858a91;
-font-size:11px;
-line-height:1.8
-}
-
+.info-panel{overflow-y:auto;overflow-x:hidden}
+.info-section{padding:17px;border-bottom:1px solid var(--border)}
+.info-heading{color:var(--green);font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:14px}
+.info-row{margin-bottom:13px}
+.info-label{display:block;color:#686e74;font-size:10.5px;margin-bottom:4px}
+.info-value{color:#d1d4d7;font-size:13px}
+.patient-card{background:#191c1f;border:1px solid #2b2f34;border-radius:5px;padding:13px;box-shadow:var(--shadow-sm)}
+.patient-card-name{font-size:15px;margin-bottom:9px}
+.patient-card-meta{color:#858a91;font-size:11px;line-height:1.8}
 .study-selector{
-width:100%;
-height:40px;
-background:#1a1d20;
-border:1px solid #34383d;
-border-radius:5px;
-color:#eee;
-padding:0 9px;
-outline:none;
-font-size:12px;
-transition:border-color var(--ease)
+width:100%;height:40px;background:#1a1d20;border:1px solid #34383d;border-radius:5px;
+color:#eee;padding:0 9px;outline:none;font-size:12px;transition:border-color var(--ease)
 }
+.study-selector:focus{border-color:var(--green)}
 
-.study-selector:focus{
-border-color:var(--green)
-}
-
-/* =========================
-   INPUTS
-========================= */
+/* ========================= INPUTS ========================= */
 
 .form-input{
-width:100%;
-height:40px;
-background:#1a1d20;
-border:1px solid #34383d;
-border-radius:5px;
-color:#eee;
-padding:0 11px;
-outline:none;
-font-size:13px;
+width:100%;height:40px;background:#1a1d20;border:1px solid #34383d;border-radius:5px;
+color:#eee;padding:0 11px;outline:none;font-size:13px;
 transition:border-color var(--ease),box-shadow var(--ease)
 }
+.form-input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(62,207,142,.12)}
+.form-input::placeholder{color:#666c72}
 
-.form-input:focus{
-border-color:var(--green);
-box-shadow:0 0 0 3px rgba(62,207,142,.12)
-}
-
-.form-input::placeholder{
-color:#666c72
-}
-
-/* =========================
-   PANTALLA COMPLETA
-========================= */
+/* ========================= PANTALLA COMPLETA ========================= */
 
 .fullscreen{
-position:fixed;
-inset:0;
-background:#000;
-z-index:99999;
-display:none;
-align-items:center;
-justify-content:center
+position:fixed;inset:0;background:#000;z-index:99999;display:none;
+align-items:center;justify-content:center
 }
-
-.fullscreen img{
-max-width:96%;
-max-height:96%;
-object-fit:contain
-}
-
+.fullscreen img{max-width:96%;max-height:96%;object-fit:contain}
 .close-fullscreen{
-position:absolute;
-top:15px;
-right:22px;
-color:white;
-font-size:32px;
-cursor:pointer;
+position:absolute;top:15px;right:22px;color:white;font-size:32px;cursor:pointer;
 transition:color var(--ease),transform var(--ease)
 }
+.close-fullscreen:hover{color:var(--green);transform:scale(1.1)}
 
-.close-fullscreen:hover{
-color:var(--green);
-transform:scale(1.1)
-}
-
-/* =========================
-   MODALES
-========================= */
+/* ========================= MODALES ========================= */
 
 .admin-overlay{
-position:fixed;
-inset:0;
-background:rgba(0,0,0,.78);
-z-index:50000;
-display:none;
-align-items:center;
-justify-content:center;
-padding:20px
+position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:50000;display:none;
+align-items:center;justify-content:center;padding:20px
 }
-
 .admin-box{
-width:100%;
-max-width:650px;
-max-height:90vh;
-overflow-y:auto;
-background:#111315;
-border:1px solid #30353a;
-border-radius:8px;
-box-shadow:var(--shadow-md)
+width:100%;max-width:650px;max-height:90vh;overflow-y:auto;background:#111315;
+border:1px solid #30353a;border-radius:8px;box-shadow:var(--shadow-md)
 }
-
 .admin-header{
-padding:19px 20px;
-border-bottom:1px solid var(--border);
-display:flex;
-align-items:center;
-justify-content:space-between
+padding:19px 20px;border-bottom:1px solid var(--border);display:flex;
+align-items:center;justify-content:space-between
 }
-
-.admin-title{
-color:var(--green);
-font-size:17px;
-font-weight:bold
-}
-
-.admin-close{
-background:none;
-border:0;
-color:#888;
-font-size:26px;
-cursor:pointer;
-transition:color var(--ease)
-}
-
-.admin-close:hover{
-color:#e47777
-}
-
-.admin-body{
-padding:21px
-}
-
-.form-group{
-margin-bottom:16px
-}
-
+.admin-title{color:var(--green);font-size:17px;font-weight:bold}
+.admin-close{background:none;border:0;color:#888;font-size:26px;cursor:pointer;transition:color var(--ease)}
+.admin-close:hover{color:#e47777}
+.admin-body{padding:21px}
+.form-group{margin-bottom:16px}
 .form-label{
-display:block;
-color:#a0a5aa;
-font-size:11px;
-margin-bottom:7px;
-text-transform:uppercase;
-letter-spacing:.6px
+display:block;color:#a0a5aa;font-size:11px;margin-bottom:7px;text-transform:uppercase;letter-spacing:.6px
 }
-
 .file-input{
-width:100%;
-padding:11px;
-background:#1a1d20;
-border:1px dashed #454b51;
-border-radius:5px;
-color:#aaa;
-font-size:12px;
-transition:border-color var(--ease)
+width:100%;padding:11px;background:#1a1d20;border:1px dashed #454b51;
+border-radius:5px;color:#aaa;font-size:12px;transition:border-color var(--ease)
 }
-
-.file-input:hover{
-border-color:var(--green)
-}
-
-.file-list{
-margin-top:9px;
-color:#858a91;
-font-size:11px;
-line-height:1.8;
-max-height:110px;
-overflow-y:auto
-}
-
-.admin-actions{
-display:flex;
-gap:8px;
-margin-top:21px
-}
-
+.file-input:hover{border-color:var(--green)}
+.file-list{margin-top:9px;color:#858a91;font-size:11px;line-height:1.8;max-height:110px;overflow-y:auto}
+.admin-actions{display:flex;gap:8px;margin-top:21px}
 .admin-primary{
-flex:1;
-min-height:42px;
-background:var(--green);
-border:0;
-color:#07120d;
-border-radius:5px;
-font-weight:bold;
-cursor:pointer;
-font-size:12px;
+flex:1;min-height:42px;background:var(--green);border:0;color:#07120d;
+border-radius:5px;font-weight:bold;cursor:pointer;font-size:12px;
 transition:background var(--ease),transform var(--ease)
 }
-
-.admin-primary:hover{
-background:#55d99d
-}
-
-.admin-primary:active{
-transform:scale(.98)
-}
-
+.admin-primary:hover{background:#55d99d}
+.admin-primary:active{transform:scale(.98)}
 .admin-secondary{
-min-height:42px;
-padding:0 19px;
-background:#202328;
-border:1px solid #34383d;
-color:#ccc;
-border-radius:5px;
-cursor:pointer;
-font-size:12px;
-transition:border-color var(--ease),color var(--ease)
+min-height:42px;padding:0 19px;background:#202328;border:1px solid #34383d;color:#ccc;
+border-radius:5px;cursor:pointer;font-size:12px;transition:border-color var(--ease),color var(--ease)
 }
+.admin-secondary:hover{border-color:#555b61;color:#fff}
+.status-message{margin-top:13px;font-size:12px;line-height:1.6}
+.status-success{color:var(--green)}
+.status-error{color:#e47777}
 
-.admin-secondary:hover{
-border-color:#555b61;
-color:#fff
-}
-
-.status-message{
-margin-top:13px;
-font-size:12px;
-line-height:1.6
-}
-
-.status-success{
-color:var(--green)
-}
-
-.status-error{
-color:#e47777
-}
-
-/* =========================
-   LOGIN
-========================= */
+/* ========================= LOGIN ========================= */
 
 .login-box{
-width:100%;
-max-width:390px;
-background:#111315;
-border:1px solid #30353a;
-border-radius:8px;
-box-shadow:var(--shadow-md)
+width:100%;max-width:390px;background:#111315;border:1px solid #30353a;
+border-radius:8px;box-shadow:var(--shadow-md)
 }
+.login-header{padding:25px 24px 19px;text-align:center;border-bottom:1px solid var(--border)}
+.login-title{color:var(--green);font-size:18px;font-weight:bold}
+.login-subtitle{color:#858a91;font-size:12px;margin-top:7px}
+.login-body{padding:25px}
 
-.login-header{
-padding:25px 24px 19px;
-text-align:center;
-border-bottom:1px solid var(--border)
-}
-
-.login-title{
-color:var(--green);
-font-size:18px;
-font-weight:bold
-}
-
-.login-subtitle{
-color:#858a91;
-font-size:12px;
-margin-top:7px
-}
-
-.login-body{
-padding:25px
-}
-
-/* =========================
-   RESPONSIVO
-========================= */
+/* ========================= RESPONSIVO ========================= */
 
 @media(max-width:1250px){
-
-.app{
-grid-template-columns:240px 240px 1fr 235px
-}
-
-.brand{
-min-width:240px
-}
-
+.app{grid-template-columns:240px 240px 1fr 235px}
+.brand{min-width:240px}
 }
 
 @media(max-width:1000px){
-
-body{
-overflow-y:auto
+body{overflow-y:auto}
+.topbar{min-height:72px}
+.app{min-width:0;display:flex;flex-direction:column}
+.panel,.viewer{width:100%;min-height:450px}
+.info-panel{order:1}
+.panel:nth-child(2){order:2}
+.viewer{order:3;height:800px;min-height:800px}
+.viewport{height:560px;min-height:560px;max-height:560px}
+.panel:last-child{order:4}
+.search{display:block;max-width:none;margin-left:0}
+.brand{min-width:0;flex:1}
 }
-
-.topbar{
-min-height:72px
-}
-
-.app{
-min-width:0;
-display:flex;
-flex-direction:column
-}
-
-.panel,
-.viewer{
-width:100%;
-min-height:450px
-}
-
-.info-panel{
-order:1
-}
-
-.panel:nth-child(2){
-order:2
-}
-
-.viewer{
-order:3;
-height:800px;
-min-height:800px
-}
-
-.viewport{
-height:560px;
-min-height:560px;
-max-height:560px
-}
-
-.panel:last-child{
-order:4
-}
-
-.search{
-display:block;
-max-width:none;
-margin-left:0
-}
-
-.brand{
-min-width:0;
-flex:1
-}
-
-}
-
-/* =========================================================
-   INTERFAZ MÓVIL TIPO APLICACIÓN
-   SOLO PRESENTACIÓN / INTERFAZ
-   NO MODIFICA LA LÓGICA DEL VISOR
-========================================================= */
 
 @media(max-width:700px){
 
-html{
-background:#050607;
-}
-
-body{
-background:#050607;
-padding:0;
-overflow-x:hidden;
-}
+html{background:#050607}
+body{background:#050607;padding:0;overflow-x:hidden}
 
 .topbar{
-position:relative;
-min-height:0;
-height:auto;
-padding:
-calc(10px + env(safe-area-inset-top))
-12px
-12px;
-display:grid;
-grid-template-columns:1fr;
-grid-template-areas:
-"logo"
-"brand"
-"search"
-"auth";
-gap:9px;
-align-items:center;
-justify-items:center;
-background:
-linear-gradient(
-180deg,
-#151719 0%,
-#101214 100%
-);
-border-bottom:1px solid #292d31;
-box-shadow:0 4px 18px rgba(0,0,0,.35);
+position:relative;min-height:0;height:auto;
+padding:calc(10px + env(safe-area-inset-top)) 12px 12px;
+display:grid;grid-template-columns:1fr;
+grid-template-areas:"logo" "brand" "search" "auth";
+gap:9px;align-items:center;justify-items:center;
+background:linear-gradient(180deg,#151719 0%,#101214 100%);
+border-bottom:1px solid #292d31;box-shadow:0 4px 18px rgba(0,0,0,.35)
 }
-
 .logo{
-grid-area:logo;
-width:58px;
-height:58px;
-margin:0 auto;
-border-radius:50%;
-border:1px solid #343a3f;
-background:#0c0e0f;
-box-shadow:
-0 3px 12px rgba(0,0,0,.45),
-0 0 0 4px rgba(255,255,255,.025);
+grid-area:logo;width:58px;height:58px;margin:0 auto;border-radius:50%;
+border:1px solid #343a3f;background:#0c0e0f;
+box-shadow:0 3px 12px rgba(0,0,0,.45),0 0 0 4px rgba(255,255,255,.025)
 }
-
 .brand{
-grid-area:brand;
-width:100%;
-min-width:0;
-flex:none;
-text-align:center;
-display:flex;
-flex-direction:column;
-align-items:center;
-justify-content:center;
+grid-area:brand;width:100%;min-width:0;flex:none;text-align:center;
+display:flex;flex-direction:column;align-items:center;justify-content:center
 }
-
 .brand-title{
-width:100%;
-max-width:340px;
-font-size:14px;
-line-height:1.25;
-font-weight:700;
-letter-spacing:.25px;
-text-align:center;
-white-space:normal;
-overflow-wrap:break-word;
+width:100%;max-width:340px;font-size:14px;line-height:1.25;font-weight:700;
+letter-spacing:.25px;text-align:center;white-space:normal;overflow-wrap:break-word
 }
-
 .brand-subtitle{
-width:100%;
-margin-top:4px;
-font-size:9px;
-line-height:1.3;
-text-align:center;
-white-space:normal;
-color:#8edbb8;
-letter-spacing:.4px;
+width:100%;margin-top:4px;font-size:9px;line-height:1.3;text-align:center;
+white-space:normal;color:#8edbb8;letter-spacing:.4px
 }
-
-.search{
-grid-area:search;
-width:100%;
-max-width:none;
-margin:2px 0 0;
-}
-
+.search{grid-area:search;width:100%;max-width:none;margin:2px 0 0}
 .search input{
-width:100%;
-height:42px;
-font-size:13px;
-padding:0 14px;
-border-radius:21px;
-background:#1a1d20;
-border:1px solid #363b40;
-box-shadow:inset 0 1px 2px rgba(0,0,0,.25);
+width:100%;height:42px;font-size:13px;padding:0 14px;border-radius:21px;
+background:#1a1d20;border:1px solid #363b40;box-shadow:inset 0 1px 2px rgba(0,0,0,.25)
 }
-
-.search-results{
-top:46px;
-max-height:250px;
-border-radius:10px;
-}
-
-.search-result{
-padding:13px 14px;
-}
-
-.current-date{
-display:none;
-}
-
+.search-results{top:46px;max-height:250px;border-radius:10px}
+.search-result{padding:13px 14px}
+.current-date{display:none}
 .auth-area{
-grid-area:auth;
-width:100%;
-display:flex;
-justify-content:center;
-align-items:center;
-flex-wrap:wrap;
-gap:7px;
+grid-area:auth;width:100%;display:flex;justify-content:center;align-items:center;
+flex-wrap:wrap;gap:7px
 }
-
-.auth-button{
-height:34px;
-font-size:10px;
-padding:0 13px;
-border-radius:17px;
-}
-
-.auth-user{
-max-width:180px;
-font-size:10px
-}
-
-.app{
-min-width:0;
-display:flex;
-flex-direction:column;
-gap:0;
-background:#050607;
-}
-
-/* Los paneles secundarios quedan debajo del visor,
-   como secciones de una aplicación móvil. */
-
+.auth-button{height:34px;font-size:10px;padding:0 13px;border-radius:17px}
+.auth-user{max-width:180px;font-size:10px}
+.app{min-width:0;display:flex;flex-direction:column;gap:0;background:#050607}
 .info-panel{
-order:4;
-width:100%;
-min-height:0;
-background:#111315;
-border-right:0;
-border-top:1px solid #292d31;
+order:4;width:100%;min-height:0;background:#111315;border-right:0;border-top:1px solid #292d31
 }
-
-.panel:nth-child(2){
-order:3;
-width:100%;
-min-height:0;
-background:#111315;
-border-right:0;
-}
-
-.panel:last-child{
-order:5;
-width:100%;
-min-height:0;
-background:#111315;
-border-right:0;
-}
-
-/* El visor pasa a ser el elemento principal. */
-
+.panel:nth-child(2){order:3;width:100%;min-height:0;background:#111315;border-right:0}
+.panel:last-child{order:5;width:100%;min-height:0;background:#111315;border-right:0}
 .viewer{
-order:2;
-width:100%;
-height:auto;
-min-height:0;
-background:#000;
-border:0;
-display:flex;
-flex-direction:column;
-position:relative;
+order:2;width:100%;height:auto;min-height:0;background:#000;border:0;
+display:flex;flex-direction:column;position:relative
 }
-
-/* Cabecera compacta del visor */
-
 .viewer-header{
-height:54px;
-min-height:54px;
-padding:7px 11px;
-gap:8px;
-background:
-linear-gradient(
-180deg,
-#151719 0%,
-#101214 100%
-);
-border-bottom:1px solid #292d31;
+height:54px;min-height:54px;padding:7px 11px;gap:8px;
+background:linear-gradient(180deg,#151719 0%,#101214 100%);border-bottom:1px solid #292d31
 }
-
-.viewer-header-left{
-min-width:0;
-flex:1;
-overflow:hidden;
-}
-
-.viewer-title{
-font-size:12px;
-font-weight:600;
-white-space:nowrap;
-overflow:hidden;
-text-overflow:ellipsis;
-}
-
-.viewer-subtitle{
-font-size:9px;
-margin-top:3px;
-white-space:nowrap;
-overflow:hidden;
-text-overflow:ellipsis;
-color:#777e85;
-}
-
+.viewer-header-left{min-width:0;flex:1;overflow:hidden}
+.viewer-title{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.viewer-subtitle{font-size:9px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#777e85}
 .image-counter{
-font-size:10px;
-padding:5px 8px;
-border:1px solid #30353a;
-border-radius:12px;
-background:#191c1f;
-flex-shrink:0;
+font-size:10px;padding:5px 8px;border:1px solid #30353a;border-radius:12px;
+background:#191c1f;flex-shrink:0
 }
-
-.viewer-admin-actions{
-gap:4px;
-}
-
-.viewer-admin-button{
-height:30px;
-padding:0 7px;
-font-size:9px;
-border-radius:15px;
-}
-
-/* =========================================================
-   VISOR MÓVIL PROTAGONISTA
-========================================================= */
+.viewer-admin-actions{gap:4px}
+.viewer-admin-button{height:30px;padding:0 7px;font-size:9px;border-radius:15px}
 
 .viewport{
-width:100%;
-height:calc(100svh - 250px);
-min-height:390px;
-max-height:none;
-position:relative;
-overflow:hidden;
-display:flex;
-align-items:center;
-justify-content:center;
-background:
-radial-gradient(
-circle at center,
-#181818 0%,
-#080808 52%,
-#000 100%
-);
-border:0;
-touch-action:none;
-overscroll-behavior:none;
+width:100%;height:calc(100svh - 250px);min-height:390px;max-height:none;
+position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;
+background:radial-gradient(circle at center,#181818 0%,#080808 52%,#000 100%);
+border:0;touch-action:none;overscroll-behavior:none
 }
-
-.overlay-left{
-top:10px;
-left:11px;
-font-size:8px;
-letter-spacing:.3px;
-opacity:.65;
-}
-
+.overlay-left{top:10px;left:11px;font-size:8px;letter-spacing:.3px;opacity:.65}
 .overlay-right{
-top:10px;
-right:11px;
-font-size:8px;
-max-width:45%;
-white-space:nowrap;
-overflow:hidden;
-text-overflow:ellipsis;
-opacity:.65;
+top:10px;right:11px;font-size:8px;max-width:45%;white-space:nowrap;
+overflow:hidden;text-overflow:ellipsis;opacity:.65
 }
-
-.empty-message{
-font-size:12px;
-max-width:270px;
-line-height:1.5;
-padding:18px;
-color:#686e74;
-}
-
-/* La imagen mantiene exactamente su sistema de transformaciones. */
-
-.image-wrapper{
-max-width:none;
-max-height:none;
-touch-action:none;
-will-change:transform;
-}
-
+.empty-message{font-size:12px;max-width:270px;line-height:1.5;padding:18px;color:#686e74}
+.image-wrapper{max-width:none;max-height:none;touch-action:none;will-change:transform}
 .main-image{
-max-width:none;
-max-height:none;
-touch-action:none;
-user-select:none;
--webkit-user-select:none;
--webkit-touch-callout:none;
--webkit-user-drag:none;
+max-width:none;max-height:none;touch-action:none;user-select:none;
+-webkit-user-select:none;-webkit-touch-callout:none;-webkit-user-drag:none
 }
-
-/* =========================================================
-   TOOLBAR TIPO APP
-========================================================= */
-
 .toolbar{
-height:58px;
-min-height:58px;
-width:100%;
-background:
-linear-gradient(
-180deg,
-#151719 0%,
-#101214 100%
-);
-border-top:1px solid #292d31;
-display:flex;
-align-items:center;
-gap:6px;
-padding:7px 8px;
-overflow-x:auto;
-overflow-y:hidden;
--webkit-overflow-scrolling:touch;
-scrollbar-width:none;
+height:58px;min-height:58px;width:100%;
+background:linear-gradient(180deg,#151719 0%,#101214 100%);
+border-top:1px solid #292d31;display:flex;align-items:center;gap:6px;
+padding:7px 8px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;
+scrollbar-width:none
 }
-
-.toolbar::-webkit-scrollbar{
-display:none;
-}
-
+.toolbar::-webkit-scrollbar{display:none}
 .tool{
-height:42px;
-min-width:42px;
-padding:0 10px;
-border-radius:10px;
-background:#202428;
-border:1px solid #34393e;
-color:#d4d8db;
-font-size:13px;
-flex-shrink:0;
-display:flex;
-align-items:center;
-justify-content:center;
--webkit-tap-highlight-color:transparent;
-touch-action:manipulation;
+height:42px;min-width:42px;padding:0 10px;border-radius:10px;background:#202428;
+border:1px solid #34393e;color:#d4d8db;font-size:13px;flex-shrink:0;
+display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;
+touch-action:manipulation
 }
-
-.tool:active{
-transform:scale(.93);
-background:#2b3035;
-}
-
-.separator{
-width:1px;
-height:30px;
-background:#34383d;
-margin:0 2px;
-flex-shrink:0;
-}
-
-/* =========================================================
-   MINIATURAS TIPO GALERÍA
-========================================================= */
-
+.tool:active{transform:scale(.93);background:#2b3035}
+.separator{width:1px;height:30px;background:#34383d;margin:0 2px;flex-shrink:0}
 .thumbnails{
-height:94px;
-min-height:94px;
-width:100%;
-background:#0e1012;
-border-top:1px solid #292d31;
-display:flex;
-align-items:center;
-gap:8px;
-padding:8px 9px;
-overflow-x:auto;
-overflow-y:hidden;
--webkit-overflow-scrolling:touch;
-scrollbar-width:none;
+height:94px;min-height:94px;width:100%;background:#0e1012;border-top:1px solid #292d31;
+display:flex;align-items:center;gap:8px;padding:8px 9px;overflow-x:auto;overflow-y:hidden;
+-webkit-overflow-scrolling:touch;scrollbar-width:none
 }
-
-.thumbnails::-webkit-scrollbar{
-display:none;
-}
-
-.thumbnail-item{
-width:76px;
-height:76px;
-flex-shrink:0;
-position:relative;
-}
-
+.thumbnails::-webkit-scrollbar{display:none}
+.thumbnail-item{width:76px;height:76px;flex-shrink:0;position:relative}
 .thumbnail{
-width:76px;
-height:68px;
-object-fit:cover;
-background:#000;
-border:2px solid #30343a;
-border-radius:7px;
-cursor:pointer;
-display:block;
-transition:border-color var(--ease),opacity var(--ease);
--webkit-tap-highlight-color:transparent;
+width:76px;height:68px;object-fit:cover;background:#000;border:2px solid #30343a;
+border-radius:7px;cursor:pointer;display:block;transition:border-color var(--ease),opacity var(--ease);
+-webkit-tap-highlight-color:transparent
 }
-
-.thumbnail.active{
-border-color:var(--green);
-box-shadow:0 0 0 1px rgba(62,207,142,.15);
-}
-
-.thumbnail-delete{
-right:-3px;
-bottom:0;
-width:21px;
-height:21px;
-font-size:13px;
-}
-
-/* =========================================================
-   INFORMACIÓN COMO TARJETAS
-========================================================= */
-
-.info-section{
-padding:14px 13px;
-border-bottom:1px solid #292d31;
-}
-
-.info-heading{
-font-size:10px;
-margin-bottom:10px;
-letter-spacing:1.1px;
-}
-
-.patient-card{
-padding:12px;
-border-radius:9px;
-background:#181b1e;
-}
-
-.patient-card-name{
-font-size:14px;
-margin-bottom:7px;
-}
-
-.patient-card-meta{
-font-size:10px;
-line-height:1.7;
-}
-
-.study-selector{
-height:42px;
-border-radius:9px;
-font-size:12px;
-}
-
+.thumbnail.active{border-color:var(--green);box-shadow:0 0 0 1px rgba(62,207,142,.15)}
+.thumbnail-delete{right:-3px;bottom:0;width:21px;height:21px;font-size:13px}
+.info-section{padding:14px 13px;border-bottom:1px solid #292d31}
+.info-heading{font-size:10px;margin-bottom:10px;letter-spacing:1.1px}
+.patient-card{padding:12px;border-radius:9px;background:#181b1e}
+.patient-card-name{font-size:14px;margin-bottom:7px}
+.patient-card-meta{font-size:10px;line-height:1.7}
+.study-selector{height:42px;border-radius:9px;font-size:12px}
 .info-row{
-display:flex;
-align-items:center;
-justify-content:space-between;
-margin-bottom:10px;
-padding-bottom:7px;
-border-bottom:1px solid rgba(255,255,255,.035);
+display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;
+padding-bottom:7px;border-bottom:1px solid rgba(255,255,255,.035)
 }
-
-.info-row:last-child{
-margin-bottom:0;
-border-bottom:0;
-}
-
-.info-label{
-font-size:9px;
-margin-bottom:0;
-}
-
-.info-value{
-font-size:12px;
-}
-
-/* =========================================================
-   LISTA DE PACIENTES
-========================================================= */
-
-.panel:nth-child(2) .panel-header{
-height:52px;
-min-height:52px;
-padding:0 13px;
-}
-
-.panel:nth-child(2) .panel-title{
-font-size:10px;
-}
-
-.patient{
-padding:13px;
-min-height:62px;
-}
-
-.patient-name{
-font-size:13px;
-margin-bottom:5px;
-}
-
-.patient-meta{
-font-size:10px;
-}
-
-.badge{
-font-size:10px;
-padding:3px 7px;
-}
-
-/* =========================================================
-   CALENDARIO
-========================================================= */
-
-.panel:last-child .panel-header{
-height:52px;
-min-height:52px;
-padding:0 13px;
-}
-
-.calendar{
-padding:13px;
-}
-
-.calendar-header{
-margin-bottom:10px;
-}
-
-.calendar-month{
-font-size:14px;
-}
-
-.calendar-button{
-width:38px;
-height:38px;
-border-radius:10px;
-font-size:20px;
-}
-
-.calendar-weekdays div{
-font-size:10px;
-padding:6px 0;
-}
-
-.calendar-days{
-gap:3px;
-}
-
-.day{
-height:39px;
-font-size:12px;
-border-radius:8px;
-}
-
-.today-button{
-height:42px;
-margin-top:11px;
-border-radius:10px;
-}
-
-/* =========================================================
-   MODALES MÓVILES
-========================================================= */
-
-.admin-overlay{
-padding:12px;
-align-items:flex-end;
-}
-
-.admin-box{
-width:100%;
-max-width:none;
-max-height:92svh;
-border-radius:14px 14px 8px 8px;
-}
-
-.admin-header{
-padding:16px;
-}
-
-.admin-title{
-font-size:14px;
-}
-
-.admin-body{
-padding:16px;
-}
-
-.login-box{
-max-width:none;
-border-radius:14px;
-}
-
-.login-header{
-padding:21px 18px 16px;
-}
-
-.login-title{
-font-size:16px;
-}
-
-.login-body{
-padding:19px;
-}
-
-.form-input{
-height:42px;
-border-radius:9px;
-}
-
-.file-input{
-border-radius:9px;
-}
-
-.admin-primary,
-.admin-secondary{
-min-height:43px;
-border-radius:9px;
-}
-
-/* =========================================================
-   PANTALLA COMPLETA
-========================================================= */
-
+.info-row:last-child{margin-bottom:0;border-bottom:0}
+.info-label{font-size:9px;margin-bottom:0}
+.info-value{font-size:12px}
+.panel:nth-child(2) .panel-header{height:52px;min-height:52px;padding:0 13px}
+.panel:nth-child(2) .panel-title{font-size:10px}
+.patient{padding:13px;min-height:62px}
+.patient-name{font-size:13px;margin-bottom:5px}
+.patient-meta{font-size:10px}
+.badge{font-size:10px;padding:3px 7px}
+.panel:last-child .panel-header{height:52px;min-height:52px;padding:0 13px}
+.calendar{padding:13px}
+.calendar-header{margin-bottom:10px}
+.calendar-month{font-size:14px}
+.calendar-button{width:38px;height:38px;border-radius:10px;font-size:20px}
+.calendar-weekdays div{font-size:10px;padding:6px 0}
+.calendar-days{gap:3px}
+.day{height:39px;font-size:12px;border-radius:8px}
+.today-button{height:42px;margin-top:11px;border-radius:10px}
+.admin-overlay{padding:12px;align-items:flex-end}
+.admin-box{width:100%;max-width:none;max-height:92svh;border-radius:14px 14px 8px 8px}
+.admin-header{padding:16px}
+.admin-title{font-size:14px}
+.admin-body{padding:16px}
+.login-box{max-width:none;border-radius:14px}
+.login-header{padding:21px 18px 16px}
+.login-title{font-size:16px}
+.login-body{padding:19px}
+.form-input{height:42px;border-radius:9px}
+.file-input{border-radius:9px}
+.admin-primary,.admin-secondary{min-height:43px;border-radius:9px}
 .fullscreen{
-padding:
-env(safe-area-inset-top)
-env(safe-area-inset-right)
-env(safe-area-inset-bottom)
-env(safe-area-inset-left);
+padding:env(safe-area-inset-top) env(safe-area-inset-right)
+env(safe-area-inset-bottom) env(safe-area-inset-left)
 }
-
-.fullscreen img{
-max-width:100%;
-max-height:100%;
+.fullscreen img{max-width:100%;max-height:100%}
+.close-fullscreen{top:calc(10px + env(safe-area-inset-top));right:15px;font-size:34px;z-index:2}
 }
-
-.close-fullscreen{
-top:calc(10px + env(safe-area-inset-top));
-right:15px;
-font-size:34px;
-z-index:2;
-}
-
-}
-
-/* =========================================================
-   MÓVILES MUY PEQUEÑOS
-========================================================= */
 
 @media(max-width:380px){
-
-.brand-title{
-font-size:13px;
+.brand-title{font-size:13px}
+.brand-subtitle{font-size:8px}
+.viewport{height:calc(100svh - 245px);min-height:350px}
+.tool{min-width:40px;height:40px;padding:0 8px;font-size:12px}
+.toolbar{gap:5px;padding:7px}
+.thumbnails{height:88px;min-height:88px}
+.thumbnail-item{width:70px}
+.thumbnail{width:70px;height:62px}
 }
-
-.brand-subtitle{
-font-size:8px;
-}
-
-.viewport{
-height:calc(100svh - 245px);
-min-height:350px;
-}
-
-.tool{
-min-width:40px;
-height:40px;
-padding:0 8px;
-font-size:12px;
-}
-
-.toolbar{
-gap:5px;
-padding:7px;
-}
-
-.thumbnails{
-height:88px;
-min-height:88px;
-}
-
-.thumbnail-item{
-width:70px;
-}
-
-.thumbnail{
-width:70px;
-height:62px;
-}
-
-}
-
-/* =========================================================
-   PANTALLAS MÓVILES HORIZONTALES
-========================================================= */
 
 @media(max-width:900px) and (orientation:landscape){
-
 .topbar{
-grid-template-columns:auto 1fr auto;
-grid-template-areas:
-"logo brand auth"
-"logo search auth";
-justify-items:stretch;
-padding:7px 10px;
-gap:5px 9px;
+grid-template-columns:auto 1fr auto;grid-template-areas:"logo brand auth" "logo search auth";
+justify-items:stretch;padding:7px 10px;gap:5px 9px
 }
-
-.logo{
-grid-area:logo;
-width:48px;
-height:48px;
-align-self:center;
+.logo{grid-area:logo;width:48px;height:48px;align-self:center}
+.brand{text-align:left;align-items:flex-start}
+.brand-title{text-align:left;font-size:12px}
+.brand-subtitle{text-align:left;font-size:8px}
+.search{margin:0}
+.search input{height:34px}
+.auth-area{width:auto}
+.viewport{height:calc(100svh - 175px);min-height:300px}
+.thumbnails{height:82px;min-height:82px}
 }
-
-.brand{
-text-align:left;
-align-items:flex-start;
-}
-
-.brand-title{
-text-align:left;
-font-size:12px;
-}
-
-.brand-subtitle{
-text-align:left;
-font-size:8px;
-}
-
-.search{
-margin:0;
-}
-
-.search input{
-height:34px;
-}
-
-.auth-area{
-width:auto;
-}
-
-.viewport{
-height:calc(100svh - 175px);
-min-height:300px;
-}
-
-.thumbnails{
-height:82px;
-min-height:82px;
-}
-
-}
-
 </style>
 </head>
 
@@ -1977,51 +545,27 @@ min-height:82px;
 </div>
 
 <div class="brand">
-<div class="brand-title">
-HOSPITAL SAN MARTÍN DE PANGOA - RAYOS X
-</div>
-
-<div class="brand-subtitle">
-VISOR DE IMÁGENES RADIOGRÁFICAS
-</div>
+<div class="brand-title">HOSPITAL SAN MARTÍN DE PANGOA - RAYOS X</div>
+<div class="brand-subtitle">VISOR DE IMÁGENES RADIOGRÁFICAS</div>
 </div>
 
 <div class="search">
-
-<input
-id="search"
-type="text"
-placeholder="Buscar paciente..."
-autocomplete="off"
-oninput="searchPatients()"
->
-
+<input id="search" type="text" placeholder="Buscar paciente..." autocomplete="off" oninput="searchPatients()">
 <div class="search-results" id="searchResults"></div>
-
 </div>
 
-<div class="current-date" id="currentDateLabel">
---
-</div>
+<div class="current-date" id="currentDateLabel">--</div>
 
 <div class="auth-area">
-
 <span class="auth-user" id="authUser"></span>
 
-<button
-class="auth-button"
-id="loginButton"
-onclick="openLogin()">
+<button class="auth-button" id="loginButton" onclick="openLogin()">
 ADMINISTRADOR
 </button>
 
-<button
-class="auth-button logout-button"
-id="logoutButton"
-onclick="logoutAdmin()">
+<button class="auth-button logout-button" id="logoutButton" onclick="logoutAdmin()">
 CERRAR SESIÓN
 </button>
-
 </div>
 
 </header>
@@ -2037,130 +581,62 @@ CERRAR SESIÓN
 </div>
 
 <div class="info-section">
-
-<div class="info-heading">
-Paciente
-</div>
+<div class="info-heading">Paciente</div>
 
 <div class="patient-card">
-
-<div
-class="patient-card-name"
-id="infoPatientName">
---
-</div>
-
-<div
-class="patient-card-meta"
-id="infoPatientMeta">
---
-</div>
-
+<div class="patient-card-name" id="infoPatientName">--</div>
+<div class="patient-card-meta" id="infoPatientMeta">--</div>
 </div>
 </div>
 
 <div class="info-section">
 
-<div class="info-heading">
-Estudios
-</div>
+<div class="info-heading">Estudios</div>
 
-<select
-class="study-selector"
-id="studySelector"
-onchange="changeSelectedStudy(this.value)"
->
-
-<option value="">
-Seleccione un estudio
-</option>
-
+<select class="study-selector" id="studySelector" onchange="changeSelectedStudy(this.value)">
+<option value="">Seleccione un estudio</option>
 </select>
 
 </div>
 
 <div class="info-section">
 
-<div class="info-heading">
-Estudio
+<div class="info-heading">Estudio</div>
+
+<div class="info-row">
+<span class="info-label">FECHA</span>
+<span class="info-value" id="infoDate">--</span>
 </div>
 
 <div class="info-row">
-
-<span class="info-label">
-FECHA
-</span>
-
-<span
-class="info-value"
-id="infoDate">
---
-</span>
-
+<span class="info-label">IMÁGENES</span>
+<span class="info-value" id="infoImages">--</span>
 </div>
 
 <div class="info-row">
-
-<span class="info-label">
-IMÁGENES
-</span>
-
-<span
-class="info-value"
-id="infoImages">
---
-</span>
-
+<span class="info-label">ESTUDIO REALIZADO</span>
+<span class="info-value" id="infoStudy">--</span>
 </div>
 
 </div>
 
 <div class="info-section">
 
-<div class="info-heading">
-Visualización
+<div class="info-heading">Visualización</div>
+
+<div class="info-row">
+<span class="info-label">ZOOM</span>
+<span class="info-value" id="infoZoom">100%</span>
 </div>
 
 <div class="info-row">
-
-<span class="info-label">
-ZOOM
-</span>
-
-<span
-class="info-value"
-id="infoZoom">
-100%
-</span>
-
+<span class="info-label">ROTACIÓN</span>
+<span class="info-value" id="infoRotation">0°</span>
 </div>
 
 <div class="info-row">
-
-<span class="info-label">
-ROTACIÓN
-</span>
-
-<span
-class="info-value"
-id="infoRotation">
-0°
-</span>
-
-</div>
-
-<div class="info-row">
-
-<span class="info-label">
-IMAGEN
-</span>
-
-<span
-class="info-value"
-id="infoCurrentImage">
---
-</span>
-
+<span class="info-label">IMAGEN</span>
+<span class="info-value" id="infoCurrentImage">--</span>
 </div>
 
 </div>
@@ -2175,9 +651,7 @@ id="infoCurrentImage">
 
 <div>
 
-<span class="panel-title">
-Pacientes
-</span>
+<span class="panel-title">Pacientes</span>
 
 <button
 class="add-study-button"
@@ -2189,18 +663,11 @@ style="display:none;">
 
 </div>
 
-<span
-class="panel-count"
-id="patientCount">
-0
-</span>
+<span class="panel-count" id="patientCount">0</span>
 
 </div>
 
-<div
-class="panel-body"
-id="patientList">
-</div>
+<div class="panel-body" id="patientList"></div>
 
 </section>
 
@@ -2212,75 +679,47 @@ id="patientList">
 
 <div class="viewer-header-left">
 
-<div
-class="viewer-title"
-id="viewerTitle">
+<div class="viewer-title" id="viewerTitle">
 Seleccione un estudio
 </div>
 
-<div
-class="viewer-subtitle"
-id="viewerSubtitle">
+<div class="viewer-subtitle" id="viewerSubtitle">
 Conectando con Supabase...
 </div>
 
 </div>
 
-<div
-class="viewer-admin-actions"
-id="viewerAdminActions">
+<div class="viewer-admin-actions" id="viewerAdminActions">
 
-<button
-class="viewer-admin-button"
-onclick="addImagesToCurrentStudy()">
+<button class="viewer-admin-button" onclick="addImagesToCurrentStudy()">
 + AÑADIR IMÁGENES
 </button>
 
-<button
-class="viewer-admin-button danger"
-onclick="deleteCurrentStudy()">
+<button class="viewer-admin-button danger" onclick="deleteCurrentStudy()">
 🗑 ELIMINAR ESTUDIO
 </button>
 
 </div>
 
-<div
-class="image-counter"
-id="imageCounter">
---
-</div>
+<div class="image-counter" id="imageCounter">--</div>
 
 </div>
 
-<div
-class="viewport"
-id="viewport">
+<div class="viewport" id="viewport">
 
 <div class="overlay-left">
 PACS RAYOS X · HSMP
 </div>
 
-<div
-class="overlay-right"
-id="overlayRight">
---
-</div>
+<div class="overlay-right" id="overlayRight">--</div>
 
-<div
-class="empty-message"
-id="emptyMessage">
+<div class="empty-message" id="emptyMessage">
 Seleccione un paciente para visualizar sus estudios.
 </div>
 
-<div
-class="image-wrapper"
-id="imageWrapper"
-style="display:none;">
+<div class="image-wrapper" id="imageWrapper" style="display:none;">
 
-<img
-id="mainImage"
-class="main-image"
-alt="Imagen radiológica">
+<img id="mainImage" class="main-image" alt="Imagen radiológica">
 
 </div>
 
@@ -2288,93 +727,27 @@ alt="Imagen radiológica">
 
 <div class="toolbar">
 
-<button
-class="tool"
-title="Acercar"
-onclick="zoomIn()">
-🔍+
-</button>
-
-<button
-class="tool"
-title="Alejar"
-onclick="zoomOut()">
-🔍−
-</button>
-
-<button
-class="tool"
-title="Restablecer imagen"
-onclick="resetView()">
-↺
-</button>
+<button class="tool" title="Acercar" onclick="zoomIn()">🔍+</button>
+<button class="tool" title="Alejar" onclick="zoomOut()">🔍−</button>
+<button class="tool" title="Restablecer imagen" onclick="resetView()">↺</button>
 
 <div class="separator"></div>
 
-<button
-class="tool"
-title="Rotar izquierda"
-onclick="rotateLeft()">
-↶
-</button>
-
-<button
-class="tool"
-title="Rotar derecha"
-onclick="rotateRight()">
-↷
-</button>
-
-<button
-class="tool"
-title="Invertir imagen"
-onclick="invertImage()">
-◐
-</button>
-
-<button
-class="tool"
-title="Aumentar contraste"
-onclick="contrastUp()">
-C+
-</button>
-
-<button
-class="tool"
-title="Disminuir contraste"
-onclick="contrastDown()">
-C−
-</button>
+<button class="tool" title="Rotar izquierda" onclick="rotateLeft()">↶</button>
+<button class="tool" title="Rotar derecha" onclick="rotateRight()">↷</button>
+<button class="tool" title="Invertir imagen" onclick="invertImage()">◐</button>
+<button class="tool" title="Aumentar contraste" onclick="contrastUp()">C+</button>
+<button class="tool" title="Disminuir contraste" onclick="contrastDown()">C−</button>
 
 <div class="separator"></div>
 
-<button
-class="tool"
-title="Imagen anterior"
-onclick="previousImage()">
-◀
-</button>
-
-<button
-class="tool"
-title="Imagen siguiente"
-onclick="nextImage()">
-▶
-</button>
-
-<button
-class="tool"
-title="Pantalla completa"
-onclick="openFullscreen()">
-⛶
-</button>
+<button class="tool" title="Imagen anterior" onclick="previousImage()">◀</button>
+<button class="tool" title="Imagen siguiente" onclick="nextImage()">▶</button>
+<button class="tool" title="Pantalla completa" onclick="openFullscreen()">⛶</button>
 
 </div>
 
-<div
-class="thumbnails"
-id="thumbnailList">
-</div>
+<div class="thumbnails" id="thumbnailList"></div>
 
 </section>
 
@@ -2383,9 +756,7 @@ id="thumbnailList">
 <section class="panel">
 
 <div class="panel-header">
-<span class="panel-title">
-Fecha
-</span>
+<span class="panel-title">Fecha</span>
 </div>
 
 <div class="panel-body">
@@ -2394,47 +765,21 @@ Fecha
 
 <div class="calendar-header">
 
-<button
-class="calendar-button"
-onclick="previousMonth()">
-‹
-</button>
+<button class="calendar-button" onclick="previousMonth()">‹</button>
 
-<div
-class="calendar-month"
-id="calendarMonth">
-</div>
+<div class="calendar-month" id="calendarMonth"></div>
 
-<button
-class="calendar-button"
-onclick="nextMonth()">
-›
-</button>
+<button class="calendar-button" onclick="nextMonth()">›</button>
 
 </div>
 
 <div class="calendar-weekdays">
-
-<div>L</div>
-<div>M</div>
-<div>M</div>
-<div>J</div>
-<div>V</div>
-<div>S</div>
-<div>D</div>
-
+<div>L</div><div>M</div><div>M</div><div>J</div><div>V</div><div>S</div><div>D</div>
 </div>
 
-<div
-class="calendar-days"
-id="calendarDays">
-</div>
+<div class="calendar-days" id="calendarDays"></div>
 
-<button
-class="today-button"
-onclick="goToday()">
-IR A HOY
-</button>
+<button class="today-button" onclick="goToday()">IR A HOY</button>
 
 </div>
 
@@ -2446,17 +791,13 @@ IR A HOY
 
 <!-- LOGIN -->
 
-<div
-class="admin-overlay"
-id="loginOverlay">
+<div class="admin-overlay" id="loginOverlay">
 
 <div class="login-box">
 
 <div class="login-header">
 
-<div class="login-title">
-ACCESO ADMINISTRADOR
-</div>
+<div class="login-title">ACCESO ADMINISTRADOR</div>
 
 <div class="login-subtitle">
 Hospital San Martín de Pangoa - Rayos X
@@ -2468,9 +809,7 @@ Hospital San Martín de Pangoa - Rayos X
 
 <div class="form-group">
 
-<label class="form-label">
-Correo electrónico
-</label>
+<label class="form-label">Correo electrónico</label>
 
 <input
 class="form-input"
@@ -2483,9 +822,7 @@ placeholder="Correo">
 
 <div class="form-group">
 
-<label class="form-label">
-Contraseña
-</label>
+<label class="form-label">Contraseña</label>
 
 <input
 class="form-input"
@@ -2498,24 +835,17 @@ placeholder="Contraseña">
 
 <div class="admin-actions">
 
-<button
-class="admin-secondary"
-onclick="closeLogin()">
+<button class="admin-secondary" onclick="closeLogin()">
 CANCELAR
 </button>
 
-<button
-class="admin-primary"
-onclick="loginAdmin()">
+<button class="admin-primary" onclick="loginAdmin()">
 INGRESAR
 </button>
 
 </div>
 
-<div
-class="status-message"
-id="loginStatus">
-</div>
+<div class="status-message" id="loginStatus"></div>
 
 </div>
 
@@ -2525,9 +855,7 @@ id="loginStatus">
 
 <!-- AGREGAR ESTUDIO -->
 
-<div
-class="admin-overlay"
-id="addStudyOverlay">
+<div class="admin-overlay" id="addStudyOverlay">
 
 <div class="admin-box">
 
@@ -2537,15 +865,13 @@ id="addStudyOverlay">
 AGREGAR NUEVO ESTUDIO
 </div>
 
-<button
-class="admin-close"
-onclick="closeAddStudy()">
-×
-</button>
+<button class="admin-close" onclick="closeAddStudy()">×</button>
 
 </div>
 
 <div class="admin-body">
+
+<!-- 1. NOMBRE DEL PACIENTE -->
 
 <div class="form-group">
 
@@ -2561,6 +887,140 @@ placeholder="Nombre completo del paciente">
 
 </div>
 
+<!-- 2. ESTUDIO RADIOGRÁFICO - OPCIONAL -->
+
+<div class="form-group">
+
+<label class="form-label">
+Estudio radiográfico realizado <span style="color:#686e74;text-transform:none;">(opcional)</span>
+</label>
+
+<select
+class="study-selector"
+id="newStudyType">
+
+<option value="">
+No especificar estudio
+</option>
+
+<option value="Tórax AP">
+Tórax AP
+</option>
+
+<option value="Tórax PA">
+Tórax PA
+</option>
+
+<option value="Tórax AP y lateral">
+Tórax AP y lateral
+</option>
+
+<option value="Columna cervical">
+Columna cervical
+</option>
+
+<option value="Columna dorsal">
+Columna dorsal
+</option>
+
+<option value="Columna lumbar">
+Columna lumbar
+</option>
+
+<option value="Columna lumbosacra">
+Columna lumbosacra
+</option>
+
+<option value="Columna completa">
+Columna completa
+</option>
+
+<option value="Pelvis">
+Pelvis
+</option>
+
+<option value="Cadera">
+Cadera
+</option>
+
+<option value="Rodilla">
+Rodilla
+</option>
+
+<option value="Pierna">
+Pierna
+</option>
+
+<option value="Tobillo">
+Tobillo
+</option>
+
+<option value="Pie">
+Pie
+</option>
+
+<option value="Fémur">
+Fémur
+</option>
+
+<option value="Húmero">
+Húmero
+</option>
+
+<option value="Codo">
+Codo
+</option>
+
+<option value="Antebrazo">
+Antebrazo
+</option>
+
+<option value="Muñeca">
+Muñeca
+</option>
+
+<option value="Mano">
+Mano
+</option>
+
+<option value="Hombro">
+Hombro
+</option>
+
+<option value="Clavícula">
+Clavícula
+</option>
+
+<option value="Costillas">
+Costillas
+</option>
+
+<option value="Senos paranasales">
+Senos paranasales
+</option>
+
+<option value="Cráneo">
+Cráneo
+</option>
+
+<option value="Macizo facial">
+Macizo facial
+</option>
+
+<option value="Abdomen">
+Abdomen
+</option>
+
+<option value="Otro">
+Otro
+</option>
+
+</select>
+
+</div>
+
+<!-- 3. FECHA -->
+
 <div class="form-group">
 
 <label class="form-label">
@@ -2573,6 +1033,8 @@ id="newStudyDate"
 type="date">
 
 </div>
+
+<!-- 4. IMÁGENES JPG -->
 
 <div class="form-group">
 
@@ -2625,9 +1087,7 @@ CREAR ESTUDIO
 
 <!-- AÑADIR IMÁGENES -->
 
-<div
-class="admin-overlay"
-id="addImagesOverlay">
+<div class="admin-overlay" id="addImagesOverlay">
 
 <div class="admin-box">
 
@@ -2637,11 +1097,7 @@ id="addImagesOverlay">
 AÑADIR IMÁGENES AL ESTUDIO
 </div>
 
-<button
-class="admin-close"
-onclick="closeAddImages()">
-×
-</button>
+<button class="admin-close" onclick="closeAddImages()">×</button>
 
 </div>
 
@@ -2649,17 +1105,9 @@ onclick="closeAddImages()">
 
 <div class="patient-card">
 
-<div
-class="patient-card-name"
-id="addImagesPatient">
---
-</div>
+<div class="patient-card-name" id="addImagesPatient">--</div>
 
-<div
-class="patient-card-meta"
-id="addImagesStudy">
---
-</div>
+<div class="patient-card-meta" id="addImagesStudy">--</div>
 
 </div>
 
@@ -2687,22 +1135,15 @@ Ningún archivo seleccionado.
 
 </div>
 
-<div
-class="status-message"
-id="addImagesStatus">
-</div>
+<div class="status-message" id="addImagesStatus"></div>
 
 <div class="admin-actions">
 
-<button
-class="admin-secondary"
-onclick="closeAddImages()">
+<button class="admin-secondary" onclick="closeAddImages()">
 CANCELAR
 </button>
 
-<button
-class="admin-primary"
-onclick="uploadAdditionalImages()">
+<button class="admin-primary" onclick="uploadAdditionalImages()">
 AÑADIR IMÁGENES
 </button>
 
@@ -2716,19 +1157,11 @@ AÑADIR IMÁGENES
 
 <!-- PANTALLA COMPLETA -->
 
-<div
-class="fullscreen"
-id="fullscreenViewer">
+<div class="fullscreen" id="fullscreenViewer">
 
-<div
-class="close-fullscreen"
-onclick="closeFullscreen()">
-×
-</div>
+<div class="close-fullscreen" onclick="closeFullscreen()">×</div>
 
-<img
-id="fullscreenImage"
-alt="Imagen">
+<img id="fullscreenImage" alt="Imagen">
 
 </div>
 
@@ -2762,8 +1195,7 @@ const STORAGE_BUCKET =
 
 let studies=[];
 let selectedDate=getTodayString();
-let calendarDate=
-new Date(selectedDate+"T00:00:00");
+let calendarDate=new Date(selectedDate+"T00:00:00");
 let currentPatient=null;
 let currentStudy=0;
 let currentImage=0;
@@ -2785,13 +1217,10 @@ let activePointers=new Map();
 
 let pinchStartDistance=0;
 let pinchStartZoom=1;
-
 let pinchStartCenterX=0;
 let pinchStartCenterY=0;
-
 let pinchStartPanX=0;
 let pinchStartPanY=0;
-
 let pinchStartFocalX=0;
 let pinchStartFocalY=0;
 
@@ -2845,8 +1274,7 @@ return SUPABASE_URL+
 "/storage/v1/object/public/"+
 STORAGE_BUCKET+
 "/"+
-file
-.split("/")
+file.split("/")
 .map(part=>encodeURIComponent(part))
 .join("/");
 
@@ -3066,18 +1494,8 @@ const month=
 calendarDate.getMonth();
 
 const monthNames=[
-"enero",
-"febrero",
-"marzo",
-"abril",
-"mayo",
-"junio",
-"julio",
-"agosto",
-"septiembre",
-"octubre",
-"noviembre",
-"diciembre"
+"enero","febrero","marzo","abril","mayo","junio",
+"julio","agosto","septiembre","octubre","noviembre","diciembre"
 ];
 
 document.getElementById(
@@ -3360,7 +1778,7 @@ list.appendChild(element);
 }
 
 /* =========================================================
-   BÚSQUEDA DE PACIENTES
+   BÚSQUEDA
 ========================================================= */
 
 function searchPatients(){
@@ -3413,9 +1831,7 @@ if(!matches.length){
 results.innerHTML=`
 
 <div class="search-no-result">
-
 No se encontró ningún paciente.
-
 </div>
 
 `;
@@ -3478,10 +1894,6 @@ results.appendChild(item);
 results.style.display="block";
 
 }
-
-/* =========================================================
-   ABRIR PACIENTE DESDE BÚSQUEDA
-========================================================= */
 
 function openPatientFromSearch(
 patientName,
@@ -3551,10 +1963,6 @@ block:"center"
 },100);
 
 }
-
-/* =========================================================
-   CERRAR RESULTADOS
-========================================================= */
 
 document.addEventListener(
 "click",
@@ -3647,9 +2055,12 @@ document.createElement(
 
 option.value=index;
 
+let studyName=
+study.study||
+"Estudio no especificado";
+
 option.textContent=
-"Estudio "+
-(index+1)+
+studyName+
 " · "+
 formatDate(study.date);
 
@@ -3705,8 +2116,8 @@ renderStudySelector();
 document.getElementById(
 "viewerTitle"
 ).textContent=
-"Estudio · "+
-formatDate(study.date);
+study.study||
+"Estudio no especificado";
 
 document.getElementById(
 "viewerSubtitle"
@@ -3747,6 +2158,12 @@ document.getElementById(
 "infoImages"
 ).textContent=
 study.images.length;
+
+document.getElementById(
+"infoStudy"
+).textContent=
+study.study||
+"No especificado";
 
 currentImage=
 Math.min(
@@ -3873,12 +2290,10 @@ return;
 }
 
 const scaledWidth=
-image.naturalWidth*
-zoom;
+image.naturalWidth*zoom;
 
 const scaledHeight=
-image.naturalHeight*
-zoom;
+image.naturalHeight*zoom;
 
 const viewportWidth=
 viewport.clientWidth;
@@ -3953,20 +2368,16 @@ panY
 }
 
 /* =========================================================
-   AJUSTAR IMAGEN AL VISOR
+   AJUSTAR IMAGEN
 ========================================================= */
 
 function fitImageToViewport(){
 
 const image=
-document.getElementById(
-"mainImage"
-);
+document.getElementById("mainImage");
 
 const viewport=
-document.getElementById(
-"viewport"
-);
+document.getElementById("viewport");
 
 if(
 !image||
@@ -4137,16 +2548,14 @@ document.createElement(
 "div"
 );
 
-item.className=
-"thumbnail-item";
+item.className="thumbnail-item";
 
 const img=
 document.createElement("img");
 
 img.src=src;
 
-img.className=
-"thumbnail";
+img.className="thumbnail";
 
 if(index===currentImage){
 
@@ -4166,16 +2575,12 @@ showImage(src);
 
 renderThumbnails(study);
 
-updateImageInformation(
-study
-);
+updateImageInformation(study);
 
 };
 
 const deleteButton=
-document.createElement(
-"button"
-);
+document.createElement("button");
 
 deleteButton.className=
 "thumbnail-delete";
@@ -4598,7 +3003,7 @@ passive:false
 );
 
 /* =========================================================
-   FUNCIONES DE GESTOS
+   GESTOS
 ========================================================= */
 
 function getPointerDistance(){
@@ -4928,7 +3333,7 @@ applyTransform();
 });
 
 /* =========================================================
-   POINTER UP / CANCEL
+   POINTER UP
 ========================================================= */
 
 function handlePointerUp(event){
@@ -5006,10 +3411,6 @@ viewportElement.addEventListener(
 "pointercancel",
 handlePointerUp
 );
-
-/* =========================================================
-   POINTER LEAVE - SOLO PC
-========================================================= */
 
 viewportElement.addEventListener(
 "pointerleave",
@@ -5148,7 +3549,7 @@ rotation+
 }
 
 /* =========================================================
-   RESTABLECER IMAGEN
+   RESTABLECER
 ========================================================= */
 
 function resetView(){
@@ -5272,6 +3673,10 @@ document.getElementById(
 ).textContent="--";
 
 document.getElementById(
+"infoStudy"
+).textContent="--";
+
+document.getElementById(
 "infoCurrentImage"
 ).textContent="--";
 
@@ -5334,26 +3739,11 @@ value===undefined
 return"";
 
 return String(value)
-.replaceAll(
-"&",
-"&amp;"
-)
-.replaceAll(
-"<",
-"&lt;"
-)
-.replaceAll(
-">",
-"&gt;"
-)
-.replaceAll(
-'"',
-"&quot;"
-)
-.replaceAll(
-"'",
-"&#039;"
-);
+.replaceAll("&","&amp;")
+.replaceAll("<","&lt;")
+.replaceAll(">","&gt;")
+.replaceAll('"',"&quot;")
+.replaceAll("'","&#039;");
 
 }
 
@@ -5647,6 +4037,12 @@ document.getElementById(
 "newPatient"
 ).value="";
 
+/* El estudio se deja vacío por defecto porque es opcional. */
+
+document.getElementById(
+"newStudyType"
+).value="";
+
 document.getElementById(
 "newStudyDate"
 ).value=
@@ -5766,6 +4162,15 @@ const date=
 document.getElementById(
 "newStudyDate"
 ).value;
+
+/* =========================================================
+   NUEVO CAMPO: ESTUDIO RADIOGRÁFICO OPCIONAL
+========================================================= */
+
+const studyType=
+document.getElementById(
+"newStudyType"
+).value.trim();
 
 const input=
 document.getElementById(
@@ -5923,6 +4328,13 @@ newPaths.push(path);
 status.textContent=
 "Creando estudio...";
 
+/*
+   IMPORTANTE:
+   Si el usuario no selecciona un estudio,
+   se guarda NULL.
+   Si selecciona uno, se guarda el texto elegido.
+*/
+
 const{
 data,
 error
@@ -5933,7 +4345,10 @@ await supabaseClient
 
 patient:patient,
 date:date,
-study:null,
+
+/* NUEVO: CAMPO OPCIONAL */
+study:studyType||null,
+
 structure:null,
 modality:"CR",
 images:newPaths
@@ -6077,7 +4492,9 @@ study.patient;
 document.getElementById(
 "addImagesStudy"
 ).textContent=
-"Fecha: "+
+"Estudio: "+
+(study.study||"No especificado")+
+" · Fecha: "+
 formatDate(study.date);
 
 document.getElementById(
@@ -6461,6 +4878,9 @@ confirm(
 "Paciente: "+
 study.patient+
 "\n"+
+"Estudio: "+
+(study.study||"No especificado")+
+"\n"+
 "Fecha: "+
 formatDate(study.date)+
 "\n\n"+
@@ -6551,11 +4971,9 @@ error
 );
 
 alert(
-
 "NO SE PUDO ELIMINAR EL ESTUDIO.\n\n"+
 (error.message||
 "Error desconocido")
-
 );
 
 updateViewerAdminButtons();
@@ -6594,7 +5012,7 @@ previousImage();
 });
 
 /* =========================================================
-   AJUSTE AUTOMÁTICO AL CAMBIAR TAMAÑO
+   AJUSTE AUTOMÁTICO
 ========================================================= */
 
 window.addEventListener(
