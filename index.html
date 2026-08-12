@@ -566,7 +566,6 @@ white-space:nowrap
 
 /* =========================
    ÁREA DE IMAGEN
-   CON ARRASTRE Y ZOOM
 ========================= */
 
 .viewport{
@@ -621,12 +620,6 @@ text-align:center;
 padding:20px;
 pointer-events:none
 }
-
-/*
-El wrapper ocupa únicamente el espacio
-necesario para la imagen y permite aplicar
-transformaciones sin cargar librerías externas.
-*/
 
 .image-wrapper{
 position:absolute;
@@ -1183,137 +1176,136 @@ flex:1
 
 @media(max-width:700px){
 
-    /* =========================
-       ENCABEZADO MÓVIL
-       ========================= */
+/* =========================
+   ENCABEZADO MÓVIL
+========================= */
 
-    .topbar{
-        min-height:0;
-        height:auto;
-        padding:14px 12px 16px;
-        display:grid;
-        grid-template-columns:1fr;
-        grid-template-areas:
-            "logo"
-            "brand"
-            "search"
-            "auth";
-        gap:12px;
-        align-items:center;
-        justify-items:center;
-    }
+.topbar{
+min-height:0;
+height:auto;
+padding:14px 12px 16px;
+display:grid;
+grid-template-columns:1fr;
+grid-template-areas:
+"logo"
+"brand"
+"search"
+"auth";
+gap:12px;
+align-items:center;
+justify-items:center;
+}
 
-    .logo{
-        grid-area:logo;
-        width:72px;
-        height:72px;
-        margin:0 auto;
-        border-radius:7px;
-    }
+.logo{
+grid-area:logo;
+width:72px;
+height:72px;
+margin:0 auto;
+border-radius:7px;
+}
 
-    .brand{
-        grid-area:brand;
-        width:100%;
-        min-width:0;
-        flex:none;
-        text-align:center;
-        display:flex;
-        flex-direction:column;
-        align-items:center;
-        justify-content:center;
-    }
+.brand{
+grid-area:brand;
+width:100%;
+min-width:0;
+flex:none;
+text-align:center;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+}
 
-    .brand-title{
-        width:100%;
-        max-width:360px;
-        font-size:15px;
-        line-height:1.25;
-        font-weight:700;
-        letter-spacing:.35px;
-        text-align:center;
-        white-space:normal;
-        overflow-wrap:break-word;
-    }
+.brand-title{
+width:100%;
+max-width:360px;
+font-size:15px;
+line-height:1.25;
+font-weight:700;
+letter-spacing:.35px;
+text-align:center;
+white-space:normal;
+overflow-wrap:break-word;
+}
 
-    .brand-subtitle{
-        width:100%;
-        margin-top:6px;
-        font-size:10px;
-        line-height:1.3;
-        text-align:center;
-        white-space:normal;
-    }
+.brand-subtitle{
+width:100%;
+margin-top:6px;
+font-size:10px;
+line-height:1.3;
+text-align:center;
+white-space:normal;
+}
 
-    .search{
-        grid-area:search;
-        width:100%;
-        max-width:none;
-        margin:0;
-    }
+.search{
+grid-area:search;
+width:100%;
+max-width:none;
+margin:0;
+}
 
-    .search input{
-        width:100%;
-        height:40px;
-        font-size:13px;
-    }
+.search input{
+width:100%;
+height:40px;
+font-size:13px;
+}
 
-    .search-results{
-        top:44px;
-        max-height:250px;
-    }
+.search-results{
+top:44px;
+max-height:250px;
+}
 
-    .current-date{
-        display:none;
-    }
+.current-date{
+display:none;
+}
 
-    .auth-area{
-        grid-area:auth;
-        width:100%;
-        display:flex;
-        justify-content:center;
-        align-items:center;
-        flex-wrap:wrap;
-        gap:7px;
-    }
+.auth-area{
+grid-area:auth;
+width:100%;
+display:flex;
+justify-content:center;
+align-items:center;
+flex-wrap:wrap;
+gap:7px;
+}
 
-    .auth-button{
-        height:36px;
-        font-size:11px;
-        padding:0 12px;
-    }
+.auth-button{
+height:36px;
+font-size:11px;
+padding:0 12px;
+}
 
-    .auth-user{
-        max-width:180px;
-        font-size:10px;
-    }
+.auth-user{
+max-width:180px;
+font-size:10px;
+}
 
+/* =========================
+   APLICACIÓN MÓVIL
+========================= */
 
-    /* =========================
-       APLICACIÓN MÓVIL
-       ========================= */
+.app{
+min-width:0;
+}
 
-    .app{
-        min-width:0;
-    }
+.viewer{
+height:760px;
+min-height:760px;
+}
 
-    .viewer{
-        height:760px;
-        min-height:760px;
-    }
+.viewport{
+height:530px;
+min-height:530px;
+max-height:530px;
+}
 
-    .viewport{
-        height:530px;
-        min-height:530px;
-        max-height:530px;
-    }
+.toolbar{
+overflow-x:auto;
+}
 
-    .toolbar{
-        overflow-x:auto;
-    }
-
-    .tool{
-        flex-shrink:0;
-    }
+.tool{
+flex-shrink:0;
+}
 
 }
 </style>
@@ -1344,7 +1336,7 @@ id="search"
 type="text"
 placeholder="Buscar paciente..."
 autocomplete="off"
-oninput="searchPatients"
+oninput="searchPatients()"
 >
 
 <div class="search-results" id="searchResults"></div>
@@ -2174,6 +2166,12 @@ let currentStudy=0;
 
 let currentImage=0;
 
+/*
+   IMPORTANTE:
+   zoom ya no representa siempre 100%.
+   Ahora se calcula automáticamente para
+   que la imagen entre completa en el visor.
+*/
 let zoom=1;
 
 let rotation=0;
@@ -2181,6 +2179,13 @@ let rotation=0;
 let inverted=false;
 
 let contrast=1;
+
+/*
+   Guarda si la imagen ya fue cargada.
+   Se utiliza para que RESTABLECER pueda
+   volver al tamaño correcto de la imagen.
+*/
+let imageLoaded=false;
 
 
 /* =========================================================
@@ -2241,8 +2246,6 @@ function getImageUrl(file){
 if(!file||typeof file!=="string")return"";
 
 file=file.trim();
-
-if(!file)return"";
 
 if(
 file.startsWith("http://")||
@@ -3385,6 +3388,178 @@ admin?"flex":"none";
 
 
 /* =========================================================
+   AJUSTAR IMAGEN AL VISOR
+========================================================= */
+
+/*
+   Esta es la parte nueva/importante.
+
+   Calcula automáticamente cuánto debe reducirse
+   o ampliarse la imagen para que entre COMPLETA
+   dentro del viewport.
+
+   No modifica las dimensiones reales de la imagen.
+   Solo modifica el zoom visual.
+
+   Funciona tanto en PC como en celular porque
+   obtiene el tamaño REAL disponible del viewport.
+*/
+
+function fitImageToViewport(){
+
+const image=
+document.getElementById(
+"mainImage"
+);
+
+const viewport=
+document.getElementById(
+"viewport"
+);
+
+if(
+!image||
+!viewport||
+!image.naturalWidth||
+!image.naturalHeight
+){
+
+return;
+
+}
+
+
+const viewportWidth=
+viewport.clientWidth;
+
+const viewportHeight=
+viewport.clientHeight;
+
+
+if(
+viewportWidth<=0||
+viewportHeight<=0
+){
+
+return;
+
+}
+
+
+/*
+   Dejamos un pequeño margen alrededor
+   de la radiografía para que no quede
+   pegada a los bordes.
+*/
+
+const margin=24;
+
+const availableWidth=
+Math.max(
+viewportWidth-margin,
+1
+);
+
+const availableHeight=
+Math.max(
+viewportHeight-margin,
+1
+);
+
+
+/*
+   Tamaño natural de la imagen.
+*/
+
+const imageWidth=
+image.naturalWidth;
+
+const imageHeight=
+image.naturalHeight;
+
+
+/*
+   Calculamos el factor necesario para
+   que entre completamente.
+*/
+
+let fitZoom=
+Math.min(
+availableWidth/imageWidth,
+availableHeight/imageHeight
+);
+
+
+/*
+   Seguridad:
+   nunca permitimos valores inválidos.
+*/
+
+if(
+!isFinite(fitZoom)||
+fitZoom<=0
+){
+
+fitZoom=1;
+
+}
+
+
+/*
+   El visor puede reducir una imagen grande,
+   pero también permite imágenes pequeñas
+   sin forzarlas a crecer demasiado.
+
+   Si la imagen original ya es menor que
+   el visor, se mantiene en su tamaño natural.
+*/
+
+if(fitZoom>1){
+
+fitZoom=1;
+
+}
+
+
+/*
+   Limitamos el mínimo al mismo rango
+   utilizado por el sistema de zoom.
+*/
+
+if(fitZoom<0.25){
+
+fitZoom=0.25;
+
+}
+
+
+zoom=fitZoom;
+
+
+/*
+   Cada vez que ajustamos la imagen al visor,
+   eliminamos el desplazamiento anterior.
+*/
+
+panX=0;
+
+panY=0;
+
+isDragging=false;
+
+viewport.classList.remove(
+"dragging"
+);
+
+
+imageLoaded=true;
+
+applyTransform();
+
+}
+
+
+/* =========================================================
    IMAGEN
 ========================================================= */
 
@@ -3409,7 +3584,18 @@ document.getElementById(
 );
 
 
+/*
+   Mientras se carga la nueva imagen,
+   marcamos que todavía no tenemos
+   dimensiones válidas.
+*/
+
+imageLoaded=false;
+
+
 image.onerror=()=>{
+
+imageLoaded=false;
 
 document.getElementById(
 "emptyMessage"
@@ -3424,6 +3610,13 @@ document.getElementById(
 
 
 image.onload=()=>{
+
+/*
+   IMPORTANTE:
+   aquí calculamos el zoom inicial
+   utilizando las dimensiones reales
+   de la imagen recién cargada.
+*/
 
 fitImageToViewport();
 
@@ -3913,12 +4106,6 @@ if(newZoom===oldZoom)
 return;
 
 
-/*
-Convertimos la posición del cursor
-a coordenadas relativas al centro
-del visor.
-*/
-
 const mouseX=
 clientX-
 (rect.left+
@@ -3929,12 +4116,6 @@ clientY-
 (rect.top+
 rect.height/2);
 
-
-/*
-Ajustamos la posición para que el
-punto bajo el cursor permanezca
-aproximadamente en el mismo lugar.
-*/
 
 const scale=
 newZoom/oldZoom;
@@ -4015,11 +4196,6 @@ return;
 
 }
 
-
-/*
-Solo botón izquierdo del mouse.
-En táctil se permite el puntero principal.
-*/
 
 if(
 event.pointerType==="mouse" &&
@@ -4203,6 +4379,10 @@ document.getElementById(
 );
 
 
+if(!wrapper||!image)
+return;
+
+
 wrapper.style.transform=
 "translate3d(calc(-50% + "+
 panX+
@@ -4248,20 +4428,11 @@ rotation+"°";
 
 function resetView(){
 
-zoom=1;
-
 rotation=0;
 
 inverted=false;
 
 contrast=1;
-
-
-/*
-También eliminamos completamente
-el desplazamiento realizado con
-la mano.
-*/
 
 panX=0;
 
@@ -4284,7 +4455,37 @@ viewport.classList.remove(
 }
 
 
+/*
+   Si la imagen ya está cargada,
+   volvemos a calcular su tamaño
+   correcto dentro del visor.
+
+   Esto es importante porque
+   RESTABLECER ya no debe volver
+   simplemente a zoom 100%.
+*/
+
+const image=
+document.getElementById(
+"mainImage"
+);
+
+if(
+image &&
+image.complete &&
+image.naturalWidth>0 &&
+image.naturalHeight>0
+){
+
+fitImageToViewport();
+
+}else{
+
+zoom=1;
+
 applyTransform();
+
+}
 
 }
 
@@ -4296,6 +4497,8 @@ applyTransform();
 function clearViewer(){
 
 resetView();
+
+imageLoaded=false;
 
 
 document.getElementById(
