@@ -141,8 +141,6 @@ border-color:var(--green);
 box-shadow:0 0 0 3px rgba(62,207,142,.12)
 }
 
-/* RESULTADOS DE BÚSQUEDA */
-
 .search-results{
 position:absolute;
 top:45px;
@@ -282,12 +280,7 @@ font-size:12px
 .panel-body{
 flex:1;
 overflow-y:auto;
-overflow-x:hidden
-}
-
-/* SCROLL PACIENTES */
-
-.panel-body{
+overflow-x:hidden;
 scrollbar-color:#353a40 #0d0f10;
 scrollbar-width:thin
 }
@@ -588,7 +581,6 @@ font-variant-numeric:tabular-nums
 
 /* =========================
    ÁREA DE IMAGEN
-   AUMENTADA UN POCO
 ========================= */
 
 .viewport{
@@ -596,40 +588,22 @@ height:600px;
 min-height:600px;
 max-height:600px;
 position:relative;
-overflow:auto;
+overflow:hidden;
 display:flex;
 align-items:center;
 justify-content:center;
 background:radial-gradient(circle,#151515 0%,#050505 65%,#000 100%);
 flex-shrink:0;
-cursor:grab
+cursor:grab;
+user-select:none
 }
 
 .viewport:active{
 cursor:grabbing
 }
 
-.viewport{
-scrollbar-color:#383838 #080808;
-scrollbar-width:thin
-}
-
-.viewport::-webkit-scrollbar{
-width:9px;
-height:9px
-}
-
-.viewport::-webkit-scrollbar-track{
-background:#080808
-}
-
-.viewport::-webkit-scrollbar-thumb{
-background:#383838;
-border-radius:6px
-}
-
-.viewport::-webkit-scrollbar-thumb:hover{
-background:#505050
+.viewport.measure-mode{
+cursor:crosshair
 }
 
 .overlay-left{
@@ -641,7 +615,7 @@ font-size:10.5px;
 font-family:"SF Mono","Consolas",monospace;
 letter-spacing:.8px;
 text-transform:uppercase;
-z-index:5;
+z-index:20;
 pointer-events:none
 }
 
@@ -655,7 +629,7 @@ font-family:"SF Mono","Consolas",monospace;
 letter-spacing:.8px;
 text-transform:uppercase;
 text-align:right;
-z-index:5;
+z-index:20;
 pointer-events:none
 }
 
@@ -663,7 +637,8 @@ pointer-events:none
 color:#60666c;
 font-size:14px;
 text-align:center;
-padding:20px
+padding:20px;
+z-index:2
 }
 
 .image-wrapper{
@@ -675,7 +650,8 @@ display:flex;
 align-items:center;
 justify-content:center;
 transform-origin:center center;
-transition:transform .12s ease
+will-change:transform;
+transition:transform .08s ease
 }
 
 .main-image{
@@ -686,9 +662,71 @@ height:auto;
 object-fit:contain;
 user-select:none;
 -webkit-user-drag:none;
-transition:filter .12s ease;
+transition:filter .08s ease;
 outline:1px solid rgba(255,255,255,.06);
-box-shadow:0 12px 40px rgba(0,0,0,.6)
+box-shadow:0 12px 40px rgba(0,0,0,.6);
+pointer-events:none
+}
+
+/* =========================
+   CANVAS DE MEDICIONES
+========================= */
+
+.measure-canvas{
+position:absolute;
+inset:0;
+width:100%;
+height:100%;
+z-index:15;
+pointer-events:none
+}
+
+.viewport.measure-mode .measure-canvas{
+pointer-events:auto
+}
+
+/* =========================
+   INDICADORES DE IMAGEN
+========================= */
+
+.image-status{
+position:absolute;
+bottom:12px;
+left:14px;
+z-index:25;
+display:flex;
+gap:6px;
+pointer-events:none
+}
+
+.image-status-item{
+background:rgba(15,17,19,.88);
+border:1px solid #30353a;
+border-radius:4px;
+padding:5px 8px;
+font-family:"SF Mono","Consolas",monospace;
+font-size:10px;
+color:#aeb3b8;
+font-variant-numeric:tabular-nums
+}
+
+.measure-status{
+position:absolute;
+bottom:12px;
+right:14px;
+z-index:25;
+background:rgba(15,17,19,.9);
+border:1px solid #30353a;
+border-radius:4px;
+padding:6px 9px;
+font-size:10px;
+color:#858a91;
+display:none;
+pointer-events:none
+}
+
+.measure-status.active{
+display:block
 }
 
 /* =========================
@@ -706,7 +744,24 @@ gap:6px;
 padding:9px;
 flex-shrink:0;
 position:relative;
-z-index:20
+z-index:20;
+overflow-x:auto;
+overflow-y:hidden;
+scrollbar-width:thin;
+scrollbar-color:#353a40 #111315
+}
+
+.toolbar::-webkit-scrollbar{
+height:5px
+}
+
+.toolbar::-webkit-scrollbar-track{
+background:#111315
+}
+
+.toolbar::-webkit-scrollbar-thumb{
+background:#353a40;
+border-radius:5px
 }
 
 .tool{
@@ -719,7 +774,9 @@ border-radius:4px;
 color:#d0d4d8;
 font-size:12px;
 cursor:pointer;
-transition:background var(--ease),border-color var(--ease),color var(--ease)
+transition:background var(--ease),border-color var(--ease),color var(--ease);
+white-space:nowrap;
+flex-shrink:0
 }
 
 .tool:hover{
@@ -732,11 +789,35 @@ color:white
 transform:scale(.96)
 }
 
+.tool.active{
+background:#263b32;
+border-color:var(--green);
+color:var(--green)
+}
+
+.tool-value{
+height:38px;
+min-width:54px;
+padding:0 8px;
+background:#181b1e;
+border:1px solid #30353a;
+border-radius:4px;
+color:#aeb3b8;
+font-size:10px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-variant-numeric:tabular-nums;
+white-space:nowrap;
+flex-shrink:0
+}
+
 .separator{
 width:1px;
 height:26px;
 background:linear-gradient(to bottom,transparent,#3a3f45 20%,#3a3f45 80%,transparent);
-margin:0 8px
+margin:0 4px;
+flex-shrink:0
 }
 
 /* =========================
@@ -754,10 +835,7 @@ gap:8px;
 padding:8px;
 overflow-x:auto;
 overflow-y:hidden;
-flex-shrink:0
-}
-
-.thumbnails{
+flex-shrink:0;
 scrollbar-color:#353a40 #101214;
 scrollbar-width:thin
 }
@@ -947,7 +1025,8 @@ right:22px;
 color:white;
 font-size:32px;
 cursor:pointer;
-transition:color var(--ease),transform var(--ease)
+transition:color var(--ease),transform var(--ease);
+z-index:5
 }
 
 .close-fullscreen:hover{
@@ -1298,7 +1377,7 @@ id="search"
 type="text"
 placeholder="Buscar paciente..."
 autocomplete="off"
-oninput="searchPatients()"
+oninput="searchPatients"
 >
 
 <div class="search-results" id="searchResults"></div>
@@ -1604,6 +1683,33 @@ alt="Imagen radiológica">
 
 </div>
 
+<canvas
+id="measureCanvas"
+class="measure-canvas">
+</canvas>
+
+<div class="image-status">
+
+<div class="image-status-item" id="zoomStatus">
+ZOOM 100%
+</div>
+
+<div class="image-status-item" id="brightnessStatus">
+BRILLO 100%
+</div>
+
+<div class="image-status-item" id="contrastStatus">
+CONTRASTE 100%
+</div>
+
+</div>
+
+<div
+class="measure-status"
+id="measureStatus">
+MODO MEDICIÓN
+</div>
+
 </div>
 
 
@@ -1611,70 +1717,168 @@ alt="Imagen radiológica">
 
 <button
 class="tool"
+title="Zoom +"
 onclick="zoomIn()">
 🔍+
 </button>
 
 <button
 class="tool"
+title="Zoom −"
 onclick="zoomOut()">
 🔍−
 </button>
 
 <button
+class="tool-value"
+id="zoomToolbarValue">
+100%
+</button>
+
+<button
 class="tool"
-onclick="resetView()">
-↺
+title="Ajustar imagen a la pantalla"
+onclick="fitToScreen()">
+AJUSTAR
+</button>
+
+<button
+class="tool"
+title="Vista al 100%"
+onclick="setActualSize()">
+100%
 </button>
 
 <div class="separator"></div>
 
 <button
 class="tool"
+title="Disminuir brillo"
+onclick="brightnessDown()">
+☀−
+</button>
+
+<button
+class="tool"
+title="Aumentar brillo"
+onclick="brightnessUp()">
+☀+
+</button>
+
+<button
+class="tool-value"
+id="brightnessToolbarValue">
+100%
+</button>
+
+<button
+class="tool"
+title="Disminuir contraste"
+onclick="contrastDown()">
+C−
+</button>
+
+<button
+class="tool"
+title="Aumentar contraste"
+onclick="contrastUp()">
+C+
+</button>
+
+<button
+class="tool-value"
+id="contrastToolbarValue">
+100%
+</button>
+
+<div class="separator"></div>
+
+<button
+class="tool"
+title="Rotar a la izquierda"
 onclick="rotateLeft()">
 ↶
 </button>
 
 <button
 class="tool"
+title="Rotar a la derecha"
 onclick="rotateRight()">
 ↷
 </button>
 
 <button
 class="tool"
+title="Invertir imagen"
 onclick="invertImage()">
 ◐
 </button>
 
 <button
 class="tool"
-onclick="contrastUp()">
-C+
+title="Voltear horizontalmente"
+onclick="flipHorizontal()">
+↔
 </button>
 
 <button
 class="tool"
-onclick="contrastDown()">
-C−
+title="Voltear verticalmente"
+onclick="flipVertical()">
+↕
 </button>
 
 <div class="separator"></div>
 
 <button
 class="tool"
+title="Medir distancia"
+id="measureDistanceButton"
+onclick="toggleDistanceMode()">
+📏
+</button>
+
+<button
+class="tool"
+title="Medir ángulo"
+id="measureAngleButton"
+onclick="toggleAngleMode()">
+📐
+</button>
+
+<button
+class="tool"
+title="Borrar todas las mediciones"
+onclick="clearMeasurements()">
+⌫
+</button>
+
+<div class="separator"></div>
+
+<button
+class="tool"
+title="Imagen anterior"
 onclick="previousImage()">
 ◀
 </button>
 
 <button
 class="tool"
+title="Imagen siguiente"
 onclick="nextImage()">
 ▶
 </button>
 
 <button
 class="tool"
+title="Restablecer vista"
+onclick="resetView()">
+↺
+</button>
+
+<button
+class="tool"
+title="Pantalla completa"
 onclick="openFullscreen()">
 ⛶
 </button>
@@ -2125,6 +2329,30 @@ let inverted=false;
 
 let contrast=1;
 
+let brightness=1;
+
+let flipX=1;
+
+let flipY=1;
+
+let panX=0;
+
+let panY=0;
+
+
+/* =========================================================
+   MEDICIONES
+========================================================= */
+
+let measurementMode=null;
+
+let measurementStart=null;
+
+let measurements=[];
+
+let canvas;
+let canvasContext;
+
 
 /* =========================================================
    FECHA
@@ -2250,13 +2478,11 @@ items=[text];
 }
 
 return items
-
 .filter(
 item=>
 typeof item==="string"&&
 item.trim()!==""
 )
-
 .map(item=>getImageUrl(item));
 
 }
@@ -2314,17 +2540,6 @@ images:normalizeImages(item.images)
 
 
 renderCalendar();
-
-
-/*
- IMPORTANTE:
-
-La lista de pacientes SIEMPRE se
-renderiza completa para la fecha
-seleccionada.
-
-La búsqueda ya NO la filtra.
-*/
 
 renderPatients();
 
@@ -2601,15 +2816,7 @@ formatDate(date);
 
 renderCalendar();
 
-
-/*
- Al cambiar de fecha,
- SIEMPRE mostramos todos los
- pacientes de esa fecha.
-*/
-
 renderPatients();
-
 
 clearViewer();
 
@@ -2662,8 +2869,6 @@ getTodayString()
 
 /* =========================================================
    RENDERIZAR PACIENTES
-   IMPORTANTE:
-   NO SE FILTRA CON EL BUSCADOR
 ========================================================= */
 
 function renderPatients(){
@@ -2754,13 +2959,6 @@ ${patientStudies.length}
 `;
 
 
-/*
- AL HACER CLIC:
- - conserva la lista completa
- - selecciona paciente
- - abre estudio
-*/
-
 element.onclick=()=>{
 
 currentPatient=name;
@@ -2771,29 +2969,12 @@ currentImage=0;
 
 resetView();
 
-
-/*
- IMPORTANTE:
- NO hacemos renderPatients con
- el texto de búsqueda.
-
-Por eso la lista completa
-permanece visible.
-*/
-
 renderPatients();
-
 
 showFirstStudy();
 
 };
 
-
-/*
- Guardamos una referencia para
- poder desplazar hasta el paciente
- cuando venga desde la búsqueda.
-*/
 
 element.dataset.patientName=
 name.toLowerCase();
@@ -2835,11 +3016,6 @@ return;
 
 }
 
-
-/*
- Buscamos en TODOS los estudios,
- no solamente en la fecha actual.
-*/
 
 const matches=[];
 
@@ -2887,10 +3063,6 @@ return;
 
 }
 
-
-/*
- Mostramos resultados de búsqueda.
-*/
 
 matches
 .sort((a,b)=>{
@@ -2959,30 +3131,16 @@ patientName,
 date
 ){
 
-/*
- Cerramos resultados
-*/
-
 document.getElementById(
 "searchResults"
 ).style.display="none";
 
-
-/*
- Limpiamos visualmente el
- buscador.
-*/
 
 document.getElementById(
 "search"
 ).value=
 patientName;
 
-
-/*
- Cambiamos la fecha al día
- donde está el estudio.
-*/
 
 selectedDate=date;
 
@@ -3007,32 +3165,12 @@ document.getElementById(
 formatDate(date);
 
 
-/*
- MUY IMPORTANTE:
-
-Aquí volvemos a mostrar TODOS
-los pacientes de esa fecha.
-
-NO solamente el paciente buscado.
-*/
-
 renderCalendar();
 
 renderPatients();
 
-
-/*
- Abrimos el paciente.
-*/
-
 showFirstStudy();
 
-
-/*
- Intentamos llevar visualmente
- el paciente seleccionado
- al centro de la columna.
-*/
 
 setTimeout(()=>{
 
@@ -3298,6 +3436,8 @@ study.images.length-1,
 );
 
 
+clearMeasurements();
+
 renderThumbnails(study);
 
 
@@ -3438,6 +3578,13 @@ document.getElementById(
 };
 
 
+image.onload=()=>{
+
+fitToScreen();
+
+};
+
+
 image.src=src;
 
 applyTransform();
@@ -3492,6 +3639,8 @@ img.classList.add(
 img.onclick=()=>{
 
 currentImage=index;
+
+resetView();
 
 showImage(src);
 
@@ -3560,7 +3709,8 @@ if(!study)return;
 if(
 imageIndex<0||
 imageIndex>=study.images.length
-)return;
+)
+return;
 
 
 const confirmed=
@@ -3795,6 +3945,8 @@ currentImage=0;
 }
 
 
+resetView();
+
 showImage(
 study.images[currentImage]
 );
@@ -3802,9 +3954,7 @@ study.images[currentImage]
 
 renderThumbnails(study);
 
-updateImageInformation(
-study
-);
+updateImageInformation(study);
 
 }
 
@@ -3832,6 +3982,8 @@ study.images.length-1;
 }
 
 
+resetView();
+
 showImage(
 study.images[currentImage]
 );
@@ -3839,9 +3991,7 @@ study.images[currentImage]
 
 renderThumbnails(study);
 
-updateImageInformation(
-study
-);
+updateImageInformation(study);
 
 }
 
@@ -3852,22 +4002,87 @@ study
 
 function zoomIn(){
 
-zoom+=.15;
-
-if(zoom>4)
-zoom=4;
-
-applyTransform();
+setZoom(
+zoom+.15
+);
 
 }
 
 
 function zoomOut(){
 
-zoom-=.15;
+setZoom(
+zoom-.15
+);
 
-if(zoom<.25)
-zoom=.25;
+}
+
+
+function setZoom(value){
+
+zoom=Math.max(
+.25,
+Math.min(
+4,
+value
+)
+);
+
+applyTransform();
+
+}
+
+
+function zoomAtPoint(
+newZoom,
+clientX,
+clientY
+){
+
+const viewport=
+document.getElementById(
+"viewport"
+);
+
+const rect=
+viewport.getBoundingClientRect();
+
+const mouseX=
+clientX-
+(rect.left+
+rect.width/2);
+
+const mouseY=
+clientY-
+(rect.top+
+rect.height/2);
+
+
+const oldZoom=zoom;
+
+newZoom=Math.max(
+.25,
+Math.min(
+4,
+newZoom
+)
+);
+
+
+if(oldZoom!==newZoom){
+
+panX-=
+mouseX*
+(newZoom/oldZoom-1);
+
+panY-=
+mouseY*
+(newZoom/oldZoom-1);
+
+}
+
+
+zoom=newZoom;
 
 applyTransform();
 
@@ -3903,7 +4118,7 @@ applyTransform();
 
 
 /* =========================================================
-   INVERSIÓN / CONTRASTE
+   INVERSIÓN / CONTRASTE / BRILLO
 ========================================================= */
 
 function invertImage(){
@@ -3917,7 +4132,7 @@ applyTransform();
 
 function contrastUp(){
 
-contrast+=.15;
+contrast+=.1;
 
 if(contrast>2.5)
 contrast=2.5;
@@ -3929,10 +4144,86 @@ applyTransform();
 
 function contrastDown(){
 
-contrast-=.15;
+contrast-=.1;
 
 if(contrast<.4)
 contrast=.4;
+
+applyTransform();
+
+}
+
+
+function brightnessUp(){
+
+brightness+=.1;
+
+if(brightness>2.5)
+brightness=2.5;
+
+applyTransform();
+
+}
+
+
+function brightnessDown(){
+
+brightness-=.1;
+
+if(brightness<.4)
+brightness=.4;
+
+applyTransform();
+
+}
+
+
+/* =========================================================
+   VOLTEO
+========================================================= */
+
+function flipHorizontal(){
+
+flipX*=-1;
+
+applyTransform();
+
+}
+
+
+function flipVertical(){
+
+flipY*=-1;
+
+applyTransform();
+
+}
+
+
+/* =========================================================
+   AJUSTE / 100%
+========================================================= */
+
+function fitToScreen(){
+
+zoom=1;
+
+panX=0;
+
+panY=0;
+
+applyTransform();
+
+}
+
+
+function setActualSize(){
+
+zoom=1;
+
+panX=0;
+
+panY=0;
 
 applyTransform();
 
@@ -3957,14 +4248,29 @@ document.getElementById(
 
 
 wrapper.style.transform=
+"translate3d("+
+panX+
+"px,"+
+panY+
+"px,0) "+
 "scale("+
 zoom+
-") rotate("+
+") "+
+"rotate("+
 rotation+
-"deg)";
+"deg) "+
+"scaleX("+
+flipX+
+") "+
+"scaleY("+
+flipY+
+")";
 
 
 image.style.filter=
+"brightness("+
+brightness+
+") "+
 "contrast("+
 contrast+
 ")"+
@@ -3987,8 +4293,57 @@ document.getElementById(
 ).textContent=
 rotation+"°";
 
+
+document.getElementById(
+"zoomStatus"
+).textContent=
+"ZOOM "+
+Math.round(zoom*100)+
+"%";
+
+
+document.getElementById(
+"brightnessStatus"
+).textContent=
+"BRILLO "+
+Math.round(brightness*100)+
+"%";
+
+
+document.getElementById(
+"contrastStatus"
+).textContent=
+"CONTRASTE "+
+Math.round(contrast*100)+
+"%";
+
+
+document.getElementById(
+"zoomToolbarValue"
+).textContent=
+Math.round(zoom*100)+
+"%";
+
+
+document.getElementById(
+"brightnessToolbarValue"
+).textContent=
+Math.round(brightness*100)+
+"%";
+
+
+document.getElementById(
+"contrastToolbarValue"
+).textContent=
+Math.round(contrast*100)+
+"%";
+
 }
 
+
+/* =========================================================
+   RESTABLECER VISTA
+========================================================= */
 
 function resetView(){
 
@@ -4000,7 +4355,899 @@ inverted=false;
 
 contrast=1;
 
+brightness=1;
+
+flipX=1;
+
+flipY=1;
+
+panX=0;
+
+panY=0;
+
+clearMeasurements();
+
 applyTransform();
+
+}
+
+
+/* =========================================================
+   PAN / ARRASTRE
+========================================================= */
+
+let isDragging=false;
+
+let dragStartX=0;
+
+let dragStartY=0;
+
+let initialPanX=0;
+
+let initialPanY=0;
+
+
+const viewportElement=
+document.getElementById("viewport");
+
+
+viewportElement.addEventListener(
+"mousedown",
+event=>{
+
+if(
+measurementMode||
+event.button!==0
+)
+return;
+
+
+isDragging=true;
+
+dragStartX=event.clientX;
+
+dragStartY=event.clientY;
+
+initialPanX=panX;
+
+initialPanY=panY;
+
+viewportElement.style.cursor=
+"grabbing";
+
+});
+
+
+window.addEventListener(
+"mousemove",
+event=>{
+
+if(!isDragging)return;
+
+panX=
+initialPanX+
+(event.clientX-dragStartX);
+
+panY=
+initialPanY+
+(event.clientY-dragStartY);
+
+applyTransform();
+
+});
+
+
+window.addEventListener(
+"mouseup",
+()=>{
+
+if(!isDragging)return;
+
+isDragging=false;
+
+viewportElement.style.cursor=
+measurementMode?
+"crosshair":
+"grab";
+
+});
+
+
+/* =========================================================
+   RUEDA DEL MOUSE
+========================================================= */
+
+viewportElement.addEventListener(
+"wheel",
+event=>{
+
+if(
+!document.getElementById(
+"mainImage"
+).src
+)
+return;
+
+
+event.preventDefault();
+
+
+const direction=
+event.deltaY<0?
+1:
+-1;
+
+
+const factor=
+direction>0?
+1.12:
+0.89;
+
+
+zoomAtPoint(
+zoom*factor,
+event.clientX,
+event.clientY
+);
+
+},
+{passive:false}
+);
+
+
+/* =========================================================
+   DOBLE CLICK
+========================================================= */
+
+viewportElement.addEventListener(
+"dblclick",
+event=>{
+
+if(measurementMode)
+return;
+
+
+if(zoom<=1.05){
+
+zoomAtPoint(
+2,
+event.clientX,
+event.clientY
+);
+
+}else{
+
+fitToScreen();
+
+}
+
+});
+
+
+/* =========================================================
+   MEDICIONES - CANVAS
+========================================================= */
+
+function initializeMeasurementCanvas(){
+
+canvas=
+document.getElementById(
+"measureCanvas"
+);
+
+canvasContext=
+canvas.getContext("2d");
+
+resizeMeasurementCanvas();
+
+window.addEventListener(
+"resize",
+resizeMeasurementCanvas
+);
+
+}
+
+
+function resizeMeasurementCanvas(){
+
+if(!canvas)return;
+
+const rect=
+canvas.getBoundingClientRect();
+
+const ratio=
+window.devicePixelRatio||1;
+
+canvas.width=
+Math.round(rect.width*ratio);
+
+canvas.height=
+Math.round(rect.height*ratio);
+
+canvasContext.setTransform(
+ratio,
+0,
+0,
+ratio,
+0,
+0
+);
+
+drawMeasurements();
+
+}
+
+
+function getCanvasPoint(event){
+
+const rect=
+canvas.getBoundingClientRect();
+
+return{
+
+x:event.clientX-rect.left,
+
+y:event.clientY-rect.top
+
+};
+
+}
+
+
+function distanceBetween(a,b){
+
+const dx=
+b.x-a.x;
+
+const dy=
+b.y-a.y;
+
+return Math.sqrt(
+dx*dx+
+dy*dy
+);
+
+}
+
+
+function angleBetween(
+a,
+b,
+c
+){
+
+const abx=
+a.x-b.x;
+
+const aby=
+a.y-b.y;
+
+const cbx=
+c.x-b.x;
+
+const cby=
+c.y-b.y;
+
+
+const dot=
+abx*cbx+
+aby*cby;
+
+
+const mag1=
+Math.sqrt(
+abx*abx+
+aby*aby
+);
+
+const mag2=
+Math.sqrt(
+cbx*cbx+
+cby*cby
+);
+
+
+if(!mag1||!mag2)
+return 0;
+
+
+let cosine=
+dot/
+(mag1*mag2);
+
+
+cosine=
+Math.max(
+-1,
+Math.min(
+1,
+cosine
+)
+);
+
+
+return Math.acos(
+cosine
+)*180/Math.PI;
+
+}
+
+
+/* =========================================================
+   MODO DISTANCIA
+========================================================= */
+
+function toggleDistanceMode(){
+
+if(measurementMode==="distance"){
+
+measurementMode=null;
+
+measurementStart=null;
+
+updateMeasurementModeUI();
+
+return;
+
+}
+
+
+measurementMode="distance";
+
+measurementStart=null;
+
+updateMeasurementModeUI();
+
+}
+
+
+/* =========================================================
+   MODO ÁNGULO
+========================================================= */
+
+function toggleAngleMode(){
+
+if(measurementMode==="angle"){
+
+measurementMode=null;
+
+measurementStart=null;
+
+updateMeasurementModeUI();
+
+return;
+
+}
+
+
+measurementMode="angle";
+
+measurementStart=null;
+
+updateMeasurementModeUI();
+
+}
+
+
+/* =========================================================
+   UI MEDICIONES
+========================================================= */
+
+function updateMeasurementModeUI(){
+
+const viewport=
+document.getElementById("viewport");
+
+const distanceButton=
+document.getElementById(
+"measureDistanceButton"
+);
+
+const angleButton=
+document.getElementById(
+"measureAngleButton"
+);
+
+const status=
+document.getElementById(
+"measureStatus"
+);
+
+
+distanceButton.classList.toggle(
+"active",
+measurementMode==="distance"
+);
+
+angleButton.classList.toggle(
+"active",
+measurementMode==="angle"
+);
+
+
+if(measurementMode){
+
+viewport.classList.add(
+"measure-mode"
+);
+
+status.classList.add(
+"active"
+);
+
+status.textContent=
+measurementMode==="distance"?
+"MODO DISTANCIA":
+"MODO ÁNGULO";
+
+}else{
+
+viewport.classList.remove(
+"measure-mode"
+);
+
+status.classList.remove(
+"active"
+);
+
+}
+
+
+drawMeasurements();
+
+}
+
+
+/* =========================================================
+   CLICK PARA MEDIR
+========================================================= */
+
+canvas.addEventListener(
+"click",
+event=>{
+
+if(!measurementMode)
+return;
+
+
+const point=
+getCanvasPoint(event);
+
+
+if(measurementMode==="distance"){
+
+if(!measurementStart){
+
+measurementStart=point;
+
+drawMeasurements(point);
+
+}else{
+
+const distance=
+distanceBetween(
+measurementStart,
+point
+);
+
+
+measurements.push({
+
+type:"distance",
+
+start:measurementStart,
+
+end:point,
+
+value:distance
+
+});
+
+
+measurementStart=null;
+
+drawMeasurements();
+
+}
+
+}
+
+
+else if(
+measurementMode==="angle"
+){
+
+if(!measurementStart){
+
+measurementStart={
+points:[point]
+};
+
+drawMeasurements();
+
+}else{
+
+measurementStart.points.push(point);
+
+
+if(
+measurementStart.points.length===3
+){
+
+const points=
+measurementStart.points;
+
+
+const angle=
+angleBetween(
+points[0],
+points[1],
+points[2]
+);
+
+
+measurements.push({
+
+type:"angle",
+
+points:[
+points[0],
+points[1],
+points[2]
+],
+
+value:angle
+
+});
+
+
+measurementStart=null;
+
+drawMeasurements();
+
+}else{
+
+drawMeasurements();
+
+}
+
+}
+
+}
+
+});
+
+
+/* =========================================================
+   DIBUJAR MEDICIONES
+========================================================= */
+
+function drawMeasurements(
+temporaryPoint=null
+){
+
+if(!canvasContext)return;
+
+
+const rect=
+canvas.getBoundingClientRect();
+
+canvasContext.clearRect(
+0,
+0,
+rect.width,
+rect.height
+);
+
+
+canvasContext.lineWidth=2;
+
+canvasContext.font=
+"12px Arial";
+
+canvasContext.textBaseline=
+"middle";
+
+
+measurements.forEach(
+measurement=>{
+
+if(
+measurement.type==="distance"
+){
+
+drawDistanceMeasurement(
+measurement.start,
+measurement.end,
+measurement.value
+);
+
+}
+
+else if(
+measurement.type==="angle"
+){
+
+drawAngleMeasurement(
+measurement.points,
+measurement.value
+);
+
+}
+
+});
+
+
+if(
+measurementMode==="distance" &&
+measurementStart &&
+temporaryPoint
+){
+
+drawDistanceMeasurement(
+measurementStart,
+temporaryPoint,
+distanceBetween(
+measurementStart,
+temporaryPoint
+),
+true
+);
+
+}
+
+
+if(
+measurementMode==="angle" &&
+measurementStart &&
+measurementStart.points
+){
+
+const points=
+measurementStart.points;
+
+
+if(points.length===1){
+
+drawPoint(
+points[0]
+);
+
+}
+
+if(
+points.length===2 &&
+temporaryPoint
+){
+
+drawAngleMeasurement(
+[
+points[0],
+points[1],
+temporaryPoint
+],
+angleBetween(
+points[0],
+points[1],
+temporaryPoint
+),
+true
+);
+
+}
+
+}
+
+}
+
+
+function drawPoint(point){
+
+canvasContext.beginPath();
+
+canvasContext.arc(
+point.x,
+point.y,
+4,
+0,
+Math.PI*2
+);
+
+canvasContext.fillStyle=
+"#3ecf8e";
+
+canvasContext.fill();
+
+}
+
+
+function drawDistanceMeasurement(
+start,
+end,
+value,
+temporary=false
+){
+
+canvasContext.beginPath();
+
+canvasContext.moveTo(
+start.x,
+start.y
+);
+
+canvasContext.lineTo(
+end.x,
+end.y
+);
+
+canvasContext.strokeStyle=
+"#3ecf8e";
+
+canvasContext.lineWidth=2;
+
+canvasContext.stroke();
+
+
+drawPoint(start);
+
+drawPoint(end);
+
+
+const midX=
+(start.x+end.x)/2;
+
+const midY=
+(start.y+end.y)/2;
+
+
+const text=
+Math.round(value)+
+" px";
+
+
+canvasContext.fillStyle=
+"rgba(10,12,13,.88)";
+
+const width=
+canvasContext.measureText(text).width+
+14;
+
+
+canvasContext.fillRect(
+midX-width/2,
+midY-11,
+width,
+22
+);
+
+
+canvasContext.fillStyle=
+"#ffffff";
+
+canvasContext.textAlign=
+"center";
+
+canvasContext.fillText(
+text,
+midX,
+midY
+);
+
+}
+
+
+function drawAngleMeasurement(
+points,
+value,
+temporary=false
+){
+
+if(!points||points.length<3)
+return;
+
+
+const a=points[0];
+
+const b=points[1];
+
+const c=points[2];
+
+
+canvasContext.beginPath();
+
+canvasContext.moveTo(
+a.x,
+a.y
+);
+
+canvasContext.lineTo(
+b.x,
+b.y
+);
+
+canvasContext.lineTo(
+c.x,
+c.y
+);
+
+canvasContext.strokeStyle=
+"#3ecf8e";
+
+canvasContext.lineWidth=2;
+
+canvasContext.stroke();
+
+
+points.forEach(drawPoint);
+
+
+const text=
+value.toFixed(1)+
+"°";
+
+
+canvasContext.fillStyle=
+"rgba(10,12,13,.88)";
+
+
+canvasContext.fillRect(
+b.x+10,
+b.y-11,
+48,
+22
+);
+
+
+canvasContext.fillStyle=
+"#ffffff";
+
+canvasContext.textAlign=
+"center";
+
+canvasContext.fillText(
+text,
+b.x+34,
+b.y
+);
+
+}
+
+
+/* =========================================================
+   PREVISUALIZACIÓN DE MEDICIONES
+========================================================= */
+
+canvas.addEventListener(
+"mousemove",
+event=>{
+
+if(!measurementMode)
+return;
+
+
+const point=
+getCanvasPoint(event);
+
+drawMeasurements(point);
+
+});
+
+
+/* =========================================================
+   BORRAR MEDICIONES
+========================================================= */
+
+function clearMeasurements(){
+
+measurements=[];
+
+measurementStart=null;
+
+if(canvasContext){
+
+drawMeasurements();
+
+}
 
 }
 
@@ -4010,6 +5257,15 @@ applyTransform();
 ========================================================= */
 
 function clearViewer(){
+
+measurementMode=null;
+
+measurementStart=null;
+
+measurements=[];
+
+updateMeasurementModeUI();
+
 
 document.getElementById(
 "viewerTitle"
@@ -4090,6 +5346,27 @@ document.getElementById(
 document.getElementById(
 "viewerAdminActions"
 ).style.display="none";
+
+
+zoom=1;
+
+rotation=0;
+
+brightness=1;
+
+contrast=1;
+
+inverted=false;
+
+flipX=1;
+
+flipY=1;
+
+panX=0;
+
+panY=0;
+
+applyTransform();
 
 }
 
@@ -4755,7 +6032,7 @@ const file=files[i];
 
 const safeName=
 file.name.replace(
-/[^a-zA-Z0-9.\_-]/g,
+/[^a-zA-Z0-9._-]/g,
 "_"
 );
 
@@ -5205,7 +6482,7 @@ file.name+
 
 const safeName=
 file.name.replace(
-/[^a-zA-Z0-9.\_-]/g,
+/[^a-zA-Z0-9._-]/g,
 "_"
 );
 
@@ -5257,8 +6534,7 @@ study.images
 .filter(path=>path);
 
 
-const combinedPaths=
-[
+const combinedPaths=[
 ...existingPaths,
 ...newPaths
 ];
@@ -5548,6 +6824,7 @@ updateViewerAdminButtons();
 
 /* =========================================================
    TECLADO
+   SE CONSERVA LA FUNCIÓN ORIGINAL
 ========================================================= */
 
 document.addEventListener(
@@ -5585,6 +6862,8 @@ previousImage();
    INICIO
 ========================================================= */
 
+initializeMeasurementCanvas();
+
 renderCalendar();
 
 clearViewer();
@@ -5594,6 +6873,14 @@ document.getElementById(
 "currentDateLabel"
 ).textContent=
 formatDate(selectedDate);
+
+
+document.getElementById(
+"search"
+).addEventListener(
+"input",
+searchPatients
+);
 
 
 checkAuth();
