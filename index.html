@@ -128,8 +128,6 @@ border-color:var(--green);
 box-shadow:0 0 0 3px rgba(62,207,142,.12)
 }
 
-/* RESULTADOS DE BÚSQUEDA */
-
 .search-results{
 position:absolute;
 top:45px;
@@ -271,8 +269,6 @@ flex:1;
 overflow-y:auto;
 overflow-x:hidden
 }
-
-/* SCROLL PACIENTES */
 
 .panel-body{
 scrollbar-color:#353a40 #0d0f10;
@@ -570,7 +566,7 @@ white-space:nowrap
 
 /* =========================
    ÁREA DE IMAGEN
-   AUMENTADA UN POCO
+   CON ARRASTRE Y ZOOM
 ========================= */
 
 .viewport{
@@ -578,35 +574,23 @@ height:600px;
 min-height:600px;
 max-height:600px;
 position:relative;
-overflow:auto;
+overflow:hidden;
 display:flex;
 align-items:center;
 justify-content:center;
 background:radial-gradient(circle,#151515 0%,#050505 65%,#000 100%);
-flex-shrink:0
+flex-shrink:0;
+cursor:grab;
+touch-action:none;
+user-select:none
 }
 
-.viewport{
-scrollbar-color:#383838 #080808;
-scrollbar-width:thin
+.viewport:active{
+cursor:grabbing
 }
 
-.viewport::-webkit-scrollbar{
-width:9px;
-height:9px
-}
-
-.viewport::-webkit-scrollbar-track{
-background:#080808
-}
-
-.viewport::-webkit-scrollbar-thumb{
-background:#383838;
-border-radius:6px
-}
-
-.viewport::-webkit-scrollbar-thumb:hover{
-background:#505050
+.viewport.dragging{
+cursor:grabbing
 }
 
 .overlay-left{
@@ -634,22 +618,38 @@ pointer-events:none
 color:#60666c;
 font-size:14px;
 text-align:center;
-padding:20px
+padding:20px;
+pointer-events:none
 }
 
+/*
+El wrapper ocupa únicamente el espacio
+necesario para la imagen y permite aplicar
+transformaciones sin cargar librerías externas.
+*/
+
 .image-wrapper{
-width:100%;
-height:100%;
-min-width:100%;
-min-height:100%;
+position:absolute;
+left:50%;
+top:50%;
+width:max-content;
+height:max-content;
 display:flex;
 align-items:center;
 justify-content:center;
+transform:
+translate3d(-50%,-50%,0)
+translate3d(0,0,0)
+scale(1)
+rotate(0deg);
 transform-origin:center center;
-transition:transform .12s ease
+will-change:transform;
+transition:none;
+pointer-events:none
 }
 
 .main-image{
+display:block;
 max-width:92%;
 max-height:92%;
 width:auto;
@@ -657,6 +657,8 @@ height:auto;
 object-fit:contain;
 user-select:none;
 -webkit-user-drag:none;
+pointer-events:none;
+transform-origin:center center;
 transition:filter .12s ease
 }
 
@@ -1259,7 +1261,7 @@ id="search"
 type="text"
 placeholder="Buscar paciente..."
 autocomplete="off"
-oninput="searchPatients()"
+oninput="searchPatients"
 >
 
 <div class="search-results" id="searchResults"></div>
@@ -1572,18 +1574,21 @@ alt="Imagen radiológica">
 
 <button
 class="tool"
+title="Acercar"
 onclick="zoomIn()">
 🔍+
 </button>
 
 <button
 class="tool"
+title="Alejar"
 onclick="zoomOut()">
 🔍−
 </button>
 
 <button
 class="tool"
+title="Restablecer imagen"
 onclick="resetView()">
 ↺
 </button>
@@ -1592,30 +1597,35 @@ onclick="resetView()">
 
 <button
 class="tool"
+title="Rotar izquierda"
 onclick="rotateLeft()">
 ↶
 </button>
 
 <button
 class="tool"
+title="Rotar derecha"
 onclick="rotateRight()">
 ↷
 </button>
 
 <button
 class="tool"
+title="Invertir imagen"
 onclick="invertImage()">
 ◐
 </button>
 
 <button
 class="tool"
+title="Aumentar contraste"
 onclick="contrastUp()">
 C+
 </button>
 
 <button
 class="tool"
+title="Disminuir contraste"
 onclick="contrastDown()">
 C−
 </button>
@@ -1624,18 +1634,21 @@ C−
 
 <button
 class="tool"
+title="Imagen anterior"
 onclick="previousImage()">
 ◀
 </button>
 
 <button
 class="tool"
+title="Imagen siguiente"
 onclick="nextImage()">
 ▶
 </button>
 
 <button
 class="tool"
+title="Pantalla completa"
 onclick="openFullscreen()">
 ⛶
 </button>
@@ -2088,6 +2101,25 @@ let contrast=1;
 
 
 /* =========================================================
+   VARIABLES DEL ARRASTRE
+========================================================= */
+
+let panX=0;
+
+let panY=0;
+
+let isDragging=false;
+
+let dragStartX=0;
+
+let dragStartY=0;
+
+let dragOriginX=0;
+
+let dragOriginY=0;
+
+
+/* =========================================================
    FECHA
 ========================================================= */
 
@@ -2275,17 +2307,6 @@ images:normalizeImages(item.images)
 
 
 renderCalendar();
-
-
-/*
- IMPORTANTE:
-
-La lista de pacientes SIEMPRE se
-renderiza completa para la fecha
-seleccionada.
-
-La búsqueda ya NO la filtra.
-*/
 
 renderPatients();
 
@@ -2562,15 +2583,7 @@ formatDate(date);
 
 renderCalendar();
 
-
-/*
- Al cambiar de fecha,
- SIEMPRE mostramos todos los
- pacientes de esa fecha.
-*/
-
 renderPatients();
-
 
 clearViewer();
 
@@ -2623,8 +2636,6 @@ getTodayString()
 
 /* =========================================================
    RENDERIZAR PACIENTES
-   IMPORTANTE:
-   NO SE FILTRA CON EL BUSCADOR
 ========================================================= */
 
 function renderPatients(){
@@ -2715,13 +2726,6 @@ ${patientStudies.length}
 `;
 
 
-/*
- AL HACER CLIC:
- - conserva la lista completa
- - selecciona paciente
- - abre estudio
-*/
-
 element.onclick=()=>{
 
 currentPatient=name;
@@ -2732,33 +2736,15 @@ currentImage=0;
 
 resetView();
 
-
-/*
- IMPORTANTE:
- NO hacemos renderPatients con
- el texto de búsqueda.
-
-Por eso la lista completa
-permanece visible.
-*/
-
 renderPatients();
-
 
 showFirstStudy();
 
 };
 
 
-/*
- Guardamos una referencia para
- poder desplazar hasta el paciente
- cuando venga desde la búsqueda.
-*/
-
 element.dataset.patientName=
 name.toLowerCase();
-
 
 list.appendChild(element);
 
@@ -2796,11 +2782,6 @@ return;
 
 }
 
-
-/*
- Buscamos en TODOS los estudios,
- no solamente en la fecha actual.
-*/
 
 const matches=[];
 
@@ -2848,10 +2829,6 @@ return;
 
 }
 
-
-/*
- Mostramos resultados de búsqueda.
-*/
 
 matches
 .sort((a,b)=>{
@@ -2920,30 +2897,16 @@ patientName,
 date
 ){
 
-/*
- Cerramos resultados
-*/
-
 document.getElementById(
 "searchResults"
 ).style.display="none";
 
-
-/*
- Limpiamos visualmente el
- buscador.
-*/
 
 document.getElementById(
 "search"
 ).value=
 patientName;
 
-
-/*
- Cambiamos la fecha al día
- donde está el estudio.
-*/
 
 selectedDate=date;
 
@@ -2968,32 +2931,12 @@ document.getElementById(
 formatDate(date);
 
 
-/*
- MUY IMPORTANTE:
-
-Aquí volvemos a mostrar TODOS
-los pacientes de esa fecha.
-
-NO solamente el paciente buscado.
-*/
-
 renderCalendar();
 
 renderPatients();
 
-
-/*
- Abrimos el paciente.
-*/
-
 showFirstStudy();
 
-
-/*
- Intentamos llevar visualmente
- el paciente seleccionado
- al centro de la columna.
-*/
 
 setTimeout(()=>{
 
@@ -3143,9 +3086,7 @@ option.selected=true;
 
 }
 
-selector.appendChild(
-option
-);
+selector.appendChild(option);
 
 });
 
@@ -3454,6 +3395,8 @@ img.onclick=()=>{
 
 currentImage=index;
 
+resetView();
+
 showImage(src);
 
 renderThumbnails(study);
@@ -3756,6 +3699,8 @@ currentImage=0;
 }
 
 
+resetView();
+
 showImage(
 study.images[currentImage]
 );
@@ -3763,9 +3708,7 @@ study.images[currentImage]
 
 renderThumbnails(study);
 
-updateImageInformation(
-study
-);
+updateImageInformation(study);
 
 }
 
@@ -3793,6 +3736,8 @@ study.images.length-1;
 }
 
 
+resetView();
+
 showImage(
 study.images[currentImage]
 );
@@ -3800,9 +3745,7 @@ study.images[currentImage]
 
 renderThumbnails(study);
 
-updateImageInformation(
-study
-);
+updateImageInformation(study);
 
 }
 
@@ -3813,19 +3756,28 @@ study
 
 function zoomIn(){
 
-zoom+=.15;
-
-if(zoom>4)
-zoom=4;
-
-applyTransform();
+setZoom(
+zoom+.15
+);
 
 }
 
 
 function zoomOut(){
 
-zoom-=.15;
+setZoom(
+zoom-.15
+);
+
+}
+
+
+function setZoom(value){
+
+zoom=value;
+
+if(zoom>4)
+zoom=4;
 
 if(zoom<.25)
 zoom=.25;
@@ -3833,6 +3785,250 @@ zoom=.25;
 applyTransform();
 
 }
+
+
+/* =========================================================
+   ZOOM CON SCROLL
+========================================================= */
+
+function zoomAtPoint(
+delta,
+clientX,
+clientY
+){
+
+const viewport=
+document.getElementById(
+"viewport"
+);
+
+const rect=
+viewport.getBoundingClientRect();
+
+
+const oldZoom=zoom;
+
+let newZoom=
+zoom+(delta>0?.15:-.15);
+
+
+if(newZoom>4)
+newZoom=4;
+
+if(newZoom<.25)
+newZoom=.25;
+
+
+if(newZoom===oldZoom)
+return;
+
+
+/*
+Convertimos la posición del cursor
+a coordenadas relativas al centro
+del visor.
+*/
+
+const mouseX=
+clientX-
+(rect.left+
+rect.width/2);
+
+const mouseY=
+clientY-
+(rect.top+
+rect.height/2);
+
+
+/*
+Ajustamos la posición para que el
+punto bajo el cursor permanezca
+aproximadamente en el mismo lugar.
+*/
+
+const scale=
+newZoom/oldZoom;
+
+panX=
+mouseX-
+(mouseX-panX)*scale;
+
+panY=
+mouseY-
+(mouseY-panY)*scale;
+
+zoom=newZoom;
+
+applyTransform();
+
+}
+
+
+const viewportElement=
+document.getElementById("viewport");
+
+
+viewportElement.addEventListener(
+"wheel",
+event=>{
+
+if(
+!document.getElementById(
+"imageWrapper"
+).style.display||
+document.getElementById(
+"imageWrapper"
+).style.display==="none"
+){
+
+return;
+
+}
+
+
+event.preventDefault();
+
+zoomAtPoint(
+event.deltaY<0?1:-1,
+event.clientX,
+event.clientY
+);
+
+},
+{
+passive:false
+}
+);
+
+
+/* =========================================================
+   ARRASTRAR IMAGEN
+========================================================= */
+
+viewportElement.addEventListener(
+"pointerdown",
+event=>{
+
+const image=
+document.getElementById(
+"mainImage"
+);
+
+if(
+!image.src||
+document.getElementById(
+"imageWrapper"
+).style.display==="none"
+){
+
+return;
+
+}
+
+
+/*
+Solo botón izquierdo del mouse.
+En táctil se permite el puntero principal.
+*/
+
+if(
+event.pointerType==="mouse" &&
+event.button!==0
+){
+
+return;
+
+}
+
+
+isDragging=true;
+
+viewportElement.classList.add(
+"dragging"
+);
+
+dragStartX=event.clientX;
+
+dragStartY=event.clientY;
+
+dragOriginX=panX;
+
+dragOriginY=panY;
+
+viewportElement.setPointerCapture(
+event.pointerId
+);
+
+});
+
+
+viewportElement.addEventListener(
+"pointermove",
+event=>{
+
+if(!isDragging)
+return;
+
+
+panX=
+dragOriginX+
+(event.clientX-dragStartX);
+
+panY=
+dragOriginY+
+(event.clientY-dragStartY);
+
+applyTransform();
+
+});
+
+
+function stopDragging(event){
+
+if(!isDragging)
+return;
+
+isDragging=false;
+
+viewportElement.classList.remove(
+"dragging"
+);
+
+try{
+
+viewportElement.releasePointerCapture(
+event.pointerId
+);
+
+}catch(error){}
+
+}
+
+
+viewportElement.addEventListener(
+"pointerup",
+stopDragging
+);
+
+viewportElement.addEventListener(
+"pointercancel",
+stopDragging
+);
+
+viewportElement.addEventListener(
+"pointerleave",
+event=>{
+
+if(
+event.pointerType==="mouse" &&
+isDragging
+){
+
+stopDragging(event);
+
+}
+
+});
 
 
 /* =========================================================
@@ -3918,6 +4114,11 @@ document.getElementById(
 
 
 wrapper.style.transform=
+"translate3d(calc(-50% + "+
+panX+
+"px),calc(-50% + "+
+panY+
+"px),0) "+
 "scale("+
 zoom+
 ") rotate("+
@@ -3951,6 +4152,10 @@ rotation+"°";
 }
 
 
+/* =========================================================
+   RESTABLECER IMAGEN
+========================================================= */
+
 function resetView(){
 
 zoom=1;
@@ -3960,6 +4165,34 @@ rotation=0;
 inverted=false;
 
 contrast=1;
+
+
+/*
+También eliminamos completamente
+el desplazamiento realizado con
+la mano.
+*/
+
+panX=0;
+
+panY=0;
+
+isDragging=false;
+
+
+const viewport=
+document.getElementById(
+"viewport"
+);
+
+if(viewport){
+
+viewport.classList.remove(
+"dragging"
+);
+
+}
+
 
 applyTransform();
 
@@ -3971,6 +4204,9 @@ applyTransform();
 ========================================================= */
 
 function clearViewer(){
+
+resetView();
+
 
 document.getElementById(
 "viewerTitle"
