@@ -22,9 +22,7 @@
     --green-dark:#2fb477;
 }
 
-*{
-    box-sizing:border-box;
-}
+*{box-sizing:border-box;}
 
 html,body{
     margin:0;
@@ -35,13 +33,9 @@ html,body{
     font-family:Arial,Helvetica,sans-serif;
 }
 
-body{
-    overflow:hidden;
-}
+body{overflow:hidden;}
 
-button,input,select{
-    font-family:Arial,Helvetica,sans-serif;
-}
+button,input,select{font-family:Arial,Helvetica,sans-serif;}
 
 .topbar{
     height:64px;
@@ -70,9 +64,7 @@ button,input,select{
     object-fit:contain;
 }
 
-.brand{
-    min-width:280px;
-}
+.brand{min-width:280px;}
 
 .brand-title{
     font-size:15px;
@@ -104,9 +96,7 @@ button,input,select{
     outline:none;
 }
 
-.search input:focus{
-    border-color:var(--green);
-}
+.search input:focus{border-color:var(--green);}
 
 .current-date{
     color:#a9adb2;
@@ -149,9 +139,7 @@ button,input,select{
     cursor:pointer;
 }
 
-.admin-top-button:hover{
-    background:#55d99d;
-}
+.admin-top-button:hover{background:#55d99d;}
 
 .auth-user{
     color:var(--green);
@@ -204,9 +192,7 @@ button,input,select{
     overflow-y:auto;
 }
 
-.calendar{
-    padding:12px;
-}
+.calendar{padding:12px;}
 
 .calendar-header{
     display:flex;
@@ -263,17 +249,9 @@ button,input,select{
     position:relative;
 }
 
-.day:hover{
-    background:var(--hover);
-}
-
-.day.other-month{
-    color:#3e4247;
-}
-
-.day.today{
-    border:1px solid #676d74;
-}
+.day:hover{background:var(--hover);}
+.day.other-month{color:#3e4247;}
+.day.today{border:1px solid #676d74;}
 
 .day.selected{
     background:#d3d7da;
@@ -291,9 +269,7 @@ button,input,select{
     bottom:4px;
 }
 
-.day.selected.has-studies::after{
-    background:#111;
-}
+.day.selected.has-studies::after{background:#111;}
 
 .today-button{
     width:100%;
@@ -313,9 +289,7 @@ button,input,select{
     cursor:pointer;
 }
 
-.patient:hover{
-    background:var(--hover);
-}
+.patient:hover{background:var(--hover);}
 
 .patient.active{
     background:var(--selected);
@@ -371,9 +345,7 @@ button,input,select{
     margin-top:4px;
 }
 
-.viewer-header-left{
-    min-width:0;
-}
+.viewer-header-left{min-width:0;}
 
 .viewer-admin-actions{
     display:none;
@@ -528,9 +500,7 @@ button,input,select{
     display:block;
 }
 
-.thumbnail.active{
-    border-color:var(--green);
-}
+.thumbnail.active{border-color:var(--green);}
 
 .thumbnail-delete{
     position:absolute;
@@ -555,9 +525,7 @@ button,input,select{
     border-color:#d66565;
 }
 
-.info-panel{
-    overflow-y:auto;
-}
+.info-panel{overflow-y:auto;}
 
 .info-section{
     padding:15px;
@@ -572,9 +540,7 @@ button,input,select{
     margin-bottom:13px;
 }
 
-.info-row{
-    margin-bottom:11px;
-}
+.info-row{margin-bottom:11px;}
 
 .info-label{
     display:block;
@@ -618,9 +584,7 @@ button,input,select{
     font-size:10px;
 }
 
-.study-selector:focus{
-    border-color:var(--green);
-}
+.study-selector:focus{border-color:var(--green);}
 
 .no-results{
     padding:30px 15px;
@@ -699,13 +663,9 @@ button,input,select{
     cursor:pointer;
 }
 
-.admin-body{
-    padding:20px;
-}
+.admin-body{padding:20px;}
 
-.form-group{
-    margin-bottom:15px;
-}
+.form-group{margin-bottom:15px;}
 
 .form-label{
     display:block;
@@ -769,9 +729,7 @@ button,input,select{
     cursor:pointer;
 }
 
-.admin-primary:hover{
-    background:#55d99d;
-}
+.admin-primary:hover{background:#55d99d;}
 
 .admin-secondary{
     height:40px;
@@ -789,13 +747,8 @@ button,input,select{
     line-height:1.5;
 }
 
-.status-success{
-    color:var(--green);
-}
-
-.status-error{
-    color:#e47777;
-}
+.status-success{color:var(--green);}
+.status-error{color:#e47777;}
 
 .login-box{
     width:100%;
@@ -824,30 +777,20 @@ button,input,select{
     margin-top:6px;
 }
 
-.login-body{
-    padding:24px;
-}
+.login-body{padding:24px;}
 
-.logout-button{
-    display:none;
-}
+.logout-button{display:none;}
 
 @media(max-width:1100px){
-
     .app{
         grid-template-columns:220px 220px 1fr 230px;
     }
 
-    .brand{
-        min-width:250px;
-    }
+    .brand{min-width:250px;}
 }
 
 @media(max-width:800px){
-
-    body{
-        overflow:auto;
-    }
+    body{overflow:auto;}
 
     .app{
         display:flex;
@@ -861,21 +804,11 @@ button,input,select{
         max-height:300px;
     }
 
-    .viewer{
-        height:650px;
-    }
+    .viewer{height:650px;}
+    .info-panel{width:100%;}
+    .search{display:none;}
 
-    .info-panel{
-        width:100%;
-    }
-
-    .search{
-        display:none;
-    }
-
-    .viewer-admin-actions{
-        flex-wrap:wrap;
-    }
+    .viewer-admin-actions{flex-wrap:wrap;}
 }
 </style>
 </head>
@@ -1545,7 +1478,7 @@ button,input,select{
 <div class="form-group">
 
     <label class="form-label">
-        Imágenes JPG *
+        Imágenes JPG
     </label>
 
     <input
@@ -1580,7 +1513,7 @@ button,input,select{
     <button
         class="admin-primary"
         onclick="createStudyAndUpload()">
-        CREAR ESTUDIO Y SUBIR IMÁGENES
+        CREAR ESTUDIO
     </button>
 
 </div>
@@ -1713,7 +1646,7 @@ const SUPABASE_URL =
     "https://tapjgdzwmsfgthxncero.supabase.co";
 
 const SUPABASE_KEY =
-    "sb_publishable_5L4-txz5pZzI6dU6UAw86w_5gXbHZr0";
+    "sb_publishable_5L4-txz5pZzI6dU6UAw_5gXbHZr0";
 
 const supabaseClient =
     window.supabase.createClient(
@@ -1742,15 +1675,10 @@ function getTodayString(){
     return (
         today.getFullYear() +
         "-" +
-        String(
-            today.getMonth() + 1
-        ).padStart(2,"0") +
+        String(today.getMonth()+1).padStart(2,"0") +
         "-" +
-        String(
-            today.getDate()
-        ).padStart(2,"0")
+        String(today.getDate()).padStart(2,"0")
     );
-
 }
 
 let selectedDate =
@@ -1792,7 +1720,6 @@ function formatDate(dateString){
         parts[1] + "/" +
         parts[0]
     );
-
 }
 
 
@@ -1818,9 +1745,7 @@ function getImageUrl(file){
         file.startsWith("http://") ||
         file.startsWith("https://")
     ){
-
         return file;
-
     }
 
     return (
@@ -1836,7 +1761,6 @@ function getImageUrl(file){
             )
             .join("/")
     );
-
 }
 
 
@@ -1865,11 +1789,9 @@ function getStoragePath(file){
         return decodeURIComponent(
             file.split(marker)[1]
         );
-
     }
 
     return file;
-
 }
 
 
@@ -1913,7 +1835,6 @@ function normalizeImages(value){
             items = [text];
 
         }
-
     }
 
     return items
@@ -1926,7 +1847,6 @@ function normalizeImages(value){
             item =>
                 getImageUrl(item)
         );
-
 }
 
 
@@ -1971,28 +1891,10 @@ async function loadStudies(){
                         birth:item.birth || "",
                         sex:item.sex || "",
                         study:item.study || "",
-
-                        /*
-                         * Si structure existe,
-                         * se utilizará.
-                         * Si no existe,
-                         * queda vacío.
-                         */
-
-                        structure:
-                            item.structure ||
-                            "",
-
-                        modality:
-                            item.modality ||
-                            "",
-
+                        structure:item.structure || "",
+                        modality:item.modality || "",
                         side:"",
-
-                        images:
-                            normalizeImages(
-                                item.images
-                            )
+                        images:normalizeImages(item.images)
 
                     };
 
@@ -2046,7 +1948,6 @@ async function loadStudies(){
             "Error de conexión con Supabase.";
 
     }
-
 }
 
 
@@ -2061,7 +1962,6 @@ function getStudiesForDate(){
             item.date ===
             selectedDate
     );
-
 }
 
 function getPatientsForDate(){
@@ -2088,7 +1988,6 @@ function getPatientsForDate(){
     );
 
     return result;
-
 }
 
 function getPatientStudies(){
@@ -2108,7 +2007,6 @@ function getPatientStudies(){
                 item.date ===
                 selectedDate
         );
-
 }
 
 
@@ -2125,7 +2023,6 @@ function renderCalendar(){
         calendarDate.getMonth();
 
     const monthNames = [
-
         "enero",
         "febrero",
         "marzo",
@@ -2138,7 +2035,6 @@ function renderCalendar(){
         "octubre",
         "noviembre",
         "diciembre"
-
     ];
 
     document.getElementById(
@@ -2198,7 +2094,6 @@ function renderCalendar(){
         container.appendChild(
             div
         );
-
     }
 
     for(
@@ -2218,9 +2113,7 @@ function renderCalendar(){
         const dateString =
             year +
             "-" +
-            String(
-                month + 1
-            ).padStart(2,"0") +
+            String(month + 1).padStart(2,"0") +
             "-" +
             String(day).padStart(2,"0");
 
@@ -2234,22 +2127,18 @@ function renderCalendar(){
                     dateString
             )
         ){
-
             div.classList.add(
                 "has-studies"
             );
-
         }
 
         if(
             dateString ===
             selectedDate
         ){
-
             div.classList.add(
                 "selected"
             );
-
         }
 
         const todayString =
@@ -2259,11 +2148,9 @@ function renderCalendar(){
             dateString ===
             todayString
         ){
-
             div.classList.add(
                 "today"
             );
-
         }
 
         div.onclick =
@@ -2275,9 +2162,7 @@ function renderCalendar(){
         container.appendChild(
             div
         );
-
     }
-
 }
 
 function selectDate(date){
@@ -2306,7 +2191,6 @@ function selectDate(date){
     renderCalendar();
     renderPatients();
     clearViewer();
-
 }
 
 function previousMonth(){
@@ -2316,7 +2200,6 @@ function previousMonth(){
     );
 
     renderCalendar();
-
 }
 
 function nextMonth(){
@@ -2326,7 +2209,6 @@ function nextMonth(){
     );
 
     renderCalendar();
-
 }
 
 function goToday(){
@@ -2344,7 +2226,6 @@ function goToday(){
     selectDate(
         getTodayString()
     );
-
 }
 
 
@@ -2375,7 +2256,6 @@ function renderPatients(filter=""){
                             filter.toLowerCase()
                         )
             );
-
     }
 
     document.getElementById(
@@ -2398,7 +2278,6 @@ function renderPatients(filter=""){
         `;
 
         return;
-
     }
 
     patients.forEach(
@@ -2424,11 +2303,9 @@ function renderPatients(filter=""){
                 currentPatient ===
                 name
             ){
-
                 element.classList.add(
                     "active"
                 );
-
             }
 
             element.innerHTML = `
@@ -2442,16 +2319,12 @@ function renderPatients(filter=""){
                 <div class="patient-meta">
 
                     <span>
-
                         ${patientStudies.length}
                         estudio(s)
-
                     </span>
 
                     <span class="badge">
-
                         ${patientStudies.length}
-
                     </span>
 
                 </div>
@@ -2488,7 +2361,6 @@ function renderPatients(filter=""){
 
         }
     );
-
 }
 
 
@@ -2506,7 +2378,6 @@ function showFirstStudy(){
         clearViewer();
 
         return;
-
     }
 
     currentStudy =
@@ -2515,7 +2386,6 @@ function showFirstStudy(){
     renderStudy(
         list[0]
     );
-
 }
 
 function getCurrentStudy(){
@@ -2524,7 +2394,6 @@ function getCurrentStudy(){
         getPatientStudies();
 
     return list[currentStudy];
-
 }
 
 
@@ -2550,7 +2419,6 @@ function renderStudySelector(){
             '<option value="">Seleccione un estudio</option>';
 
         return;
-
     }
 
     list.forEach(
@@ -2599,7 +2467,6 @@ function renderStudySelector(){
 
         }
     );
-
 }
 
 function changeSelectedStudy(value){
@@ -2633,7 +2500,6 @@ function changeSelectedStudy(value){
     renderStudy(
         list[index]
     );
-
 }
 
 
@@ -2778,7 +2644,6 @@ function renderStudy(study){
     );
 
     updateViewerAdminButtons();
-
 }
 
 
@@ -2802,7 +2667,6 @@ async function isAdminLogged(){
         data.session.user.id ===
         ADMIN_UID
     );
-
 }
 
 async function updateViewerAdminButtons(){
@@ -2821,7 +2685,6 @@ async function updateViewerAdminButtons(){
             "none";
 
         return;
-
     }
 
     const admin =
@@ -2831,7 +2694,6 @@ async function updateViewerAdminButtons(){
         admin
         ? "flex"
         : "none";
-
 }
 
 
@@ -2878,7 +2740,6 @@ function showImage(src){
         src;
 
     applyTransform();
-
 }
 
 
@@ -2921,11 +2782,9 @@ function renderThumbnails(study){
                 index ===
                 currentImage
             ){
-
                 img.classList.add(
                     "active"
                 );
-
             }
 
             img.onclick =
@@ -2991,7 +2850,6 @@ function renderThumbnails(study){
 
         }
     );
-
 }
 
 
@@ -3033,7 +2891,6 @@ async function deleteImageFromStudy(
         );
 
         return;
-
     }
 
     try{
@@ -3110,7 +2967,6 @@ async function deleteImageFromStudy(
                 );
 
             }
-
         }
 
         const studyId =
@@ -3181,9 +3037,7 @@ async function deleteImageFromStudy(
         );
 
         updateViewerAdminButtons();
-
     }
-
 }
 
 
@@ -3211,7 +3065,6 @@ function updateImageInformation(study){
           " / " +
           study.images.length
         : "--";
-
 }
 
 
@@ -3236,9 +3089,7 @@ function nextImage(){
         currentImage >=
         study.images.length
     ){
-
         currentImage = 0;
-
     }
 
     showImage(
@@ -3254,7 +3105,6 @@ function nextImage(){
     updateImageInformation(
         study
     );
-
 }
 
 function previousImage(){
@@ -3273,10 +3123,8 @@ function previousImage(){
     if(
         currentImage < 0
     ){
-
         currentImage =
             study.images.length - 1;
-
     }
 
     showImage(
@@ -3292,7 +3140,6 @@ function previousImage(){
     updateImageInformation(
         study
     );
-
 }
 
 
@@ -3308,7 +3155,6 @@ function zoomIn(){
         zoom = 4;
 
     applyTransform();
-
 }
 
 function zoomOut(){
@@ -3319,7 +3165,6 @@ function zoomOut(){
         zoom = .25;
 
     applyTransform();
-
 }
 
 
@@ -3335,7 +3180,6 @@ function rotateRight(){
         rotation = 0;
 
     applyTransform();
-
 }
 
 function rotateLeft(){
@@ -3346,7 +3190,6 @@ function rotateLeft(){
         rotation = 270;
 
     applyTransform();
-
 }
 
 
@@ -3360,7 +3203,6 @@ function invertImage(){
         !inverted;
 
     applyTransform();
-
 }
 
 function contrastUp(){
@@ -3371,7 +3213,6 @@ function contrastUp(){
         contrast = 2.5;
 
     applyTransform();
-
 }
 
 function contrastDown(){
@@ -3382,7 +3223,6 @@ function contrastDown(){
         contrast = .4;
 
     applyTransform();
-
 }
 
 
@@ -3430,7 +3270,6 @@ function applyTransform(){
         "infoRotation"
     ).textContent =
         rotation + "°";
-
 }
 
 function resetView(){
@@ -3441,7 +3280,6 @@ function resetView(){
     contrast = 1;
 
     applyTransform();
-
 }
 
 
@@ -3550,7 +3388,6 @@ function clearViewer(){
         "viewerAdminActions"
     ).style.display =
         "none";
-
 }
 
 
@@ -3568,7 +3405,6 @@ function searchPatients(){
     renderPatients(
         value
     );
-
 }
 
 
@@ -3598,7 +3434,6 @@ function openFullscreen(){
         "fullscreenViewer"
     ).style.display =
         "flex";
-
 }
 
 function closeFullscreen(){
@@ -3607,7 +3442,6 @@ function closeFullscreen(){
         "fullscreenViewer"
     ).style.display =
         "none";
-
 }
 
 
@@ -3624,27 +3458,11 @@ function escapeHtml(value){
         return "";
 
     return String(value)
-        .replaceAll(
-            "&",
-            "&amp;"
-        )
-        .replaceAll(
-            "<",
-            "&lt;"
-        )
-        .replaceAll(
-            ">",
-            "&gt;"
-        )
-        .replaceAll(
-            '"',
-            "&quot;"
-        )
-        .replaceAll(
-            "'",
-            "&#039;"
-        );
-
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
 }
 
 
@@ -3674,7 +3492,6 @@ function openLogin(){
         },
         100
     );
-
 }
 
 function closeLogin(){
@@ -3683,7 +3500,6 @@ function closeLogin(){
         "loginOverlay"
     ).style.display =
         "none";
-
 }
 
 
@@ -3720,7 +3536,6 @@ async function loginAdmin(){
             "Ingresa el correo y la contraseña.";
 
         return;
-
     }
 
     status.className =
@@ -3738,10 +3553,8 @@ async function loginAdmin(){
             await supabaseClient
                 .auth
                 .signInWithPassword({
-
                     email:email,
                     password:password
-
                 });
 
         if(error)
@@ -3760,7 +3573,6 @@ async function loginAdmin(){
             throw new Error(
                 "Esta cuenta no tiene permisos de administrador."
             );
-
         }
 
         closeLogin();
@@ -3778,9 +3590,7 @@ async function loginAdmin(){
         status.textContent =
             error.message ||
             "No se pudo iniciar sesión.";
-
     }
-
 }
 
 
@@ -3820,7 +3630,6 @@ async function checkAuth(){
                 .signOut();
 
         }
-
     }
 
     supabaseClient.auth.onAuthStateChange(
@@ -3851,7 +3660,6 @@ async function checkAuth(){
 
         }
     );
-
 }
 
 
@@ -3920,9 +3728,7 @@ function updateAuthInterface(user){
             "viewerAdminActions"
         ).style.display =
             "none";
-
     }
-
 }
 
 
@@ -3977,7 +3783,6 @@ function openAdmin(){
         "adminOverlay"
     ).style.display =
         "flex";
-
 }
 
 function closeAdmin(){
@@ -3986,7 +3791,6 @@ function closeAdmin(){
         "adminOverlay"
     ).style.display =
         "none";
-
 }
 
 
@@ -4003,7 +3807,6 @@ async function logoutAdmin(){
     updateAuthInterface(
         null
     );
-
 }
 
 
@@ -4032,7 +3835,6 @@ function showSelectedFiles(){
             "Ningún archivo seleccionado.";
 
         return;
-
     }
 
     const files =
@@ -4056,7 +3858,6 @@ function showSelectedFiles(){
             "</span>";
 
         return;
-
     }
 
     list.innerHTML =
@@ -4072,15 +3873,13 @@ function showSelectedFiles(){
                         file.name
                     )
             )
-            .join(
-                "<br>"
-            );
-
+            .join("<br>");
 }
 
 
 /* =========================================================
    CREAR ESTUDIO
+   SOLO EL NOMBRE ES OBLIGATORIO
 ========================================================= */
 
 async function createStudyAndUpload(){
@@ -4120,6 +3919,11 @@ async function createStudyAndUpload(){
             "adminStatus"
         );
 
+
+    /* =====================================================
+       ÚNICO CAMPO OBLIGATORIO
+    ===================================================== */
+
     if(!patient){
 
         status.className =
@@ -4129,23 +3933,12 @@ async function createStudyAndUpload(){
             "Ingresa el nombre del paciente.";
 
         return;
-
     }
 
-    if(
-        !fileInput.files ||
-        fileInput.files.length === 0
-    ){
 
-        status.className =
-            "status-message status-error";
-
-        status.textContent =
-            "Selecciona al menos una imagen JPG.";
-
-        return;
-
-    }
+    /* =====================================================
+       VERIFICAR SESIÓN
+    ===================================================== */
 
     const {
         data:sessionData,
@@ -4164,7 +3957,6 @@ async function createStudyAndUpload(){
             sessionError.message;
 
         return;
-
     }
 
     if(
@@ -4182,15 +3974,46 @@ async function createStudyAndUpload(){
             "La sesión de administrador no es válida.";
 
         return;
-
     }
 
+
+    /* =====================================================
+       IMÁGENES OPCIONALES
+    ===================================================== */
+
     const files =
-        Array.from(
+        fileInput.files
+        ? Array.from(
             fileInput.files
+          )
+        : [];
+
+
+    /* =====================================================
+       VALIDAR IMÁGENES SI EXISTEN
+    ===================================================== */
+
+    const invalidFiles =
+        files.filter(
+            file =>
+                !file.type ||
+                !file.type.includes("jpeg")
         );
 
+    if(invalidFiles.length){
+
+        status.className =
+            "status-message status-error";
+
+        status.textContent =
+            "Solo se permiten imágenes JPG/JPEG.";
+
+        return;
+    }
+
+
     const uploadedPaths = [];
+
 
     try{
 
@@ -4198,127 +4021,127 @@ async function createStudyAndUpload(){
             "status-message";
 
         status.textContent =
-            "Preparando subida...";
+            "Preparando estudio...";
+
+
+        /* =================================================
+           FECHA OPCIONAL
+           
+           Si no se selecciona:
+           se usa la fecha actual.
+        ================================================= */
 
         const finalDate =
             date ||
             getTodayString();
 
-        const folder =
-            finalDate +
-            "/" +
-            crypto.randomUUID();
 
-        for(
-            let i = 0;
-            i < files.length;
-            i++
-        ){
+        /* =================================================
+           SUBIR IMÁGENES SOLO SI EXISTEN
+        ================================================= */
 
-            const file =
-                files[i];
+        if(files.length > 0){
 
-            if(
-                !file.type ||
-                !file.type.includes(
-                    "jpeg"
-                )
+            const folder =
+                finalDate +
+                "/" +
+                crypto.randomUUID();
+
+
+            for(
+                let i = 0;
+                i < files.length;
+                i++
             ){
 
-                throw new Error(
-                    "El archivo " +
-                    file.name +
-                    " no es JPG/JPEG."
-                );
+                const file =
+                    files[i];
 
-            }
-
-            const safeName =
-                file.name.replace(
-                    /[^a-zA-Z0-9._-]/g,
-                    "_"
-                );
-
-            const path =
-                folder +
-                "/" +
-                String(
-                    i + 1
-                ).padStart(
-                    3,
-                    "0"
-                ) +
-                "_" +
-                safeName;
-
-            status.textContent =
-                "Subiendo imagen " +
-                (i + 1) +
-                " de " +
-                files.length +
-                "...";
-
-            const {
-                error:uploadError
-            } =
-                await supabaseClient
-                    .storage
-                    .from(
-                        STORAGE_BUCKET
-                    )
-                    .upload(
-                        path,
-                        file,
-                        {
-                            cacheControl:
-                                "3600",
-                            upsert:
-                                false,
-                            contentType:
-                                "image/jpeg"
-                        }
+                const safeName =
+                    file.name.replace(
+                        /[^a-zA-Z0-9._-]/g,
+                        "_"
                     );
 
-            if(uploadError)
-                throw uploadError;
+                const path =
+                    folder +
+                    "/" +
+                    String(
+                        i + 1
+                    ).padStart(
+                        3,
+                        "0"
+                    ) +
+                    "_" +
+                    safeName;
 
-            uploadedPaths.push(
-                path
-            );
+                status.textContent =
+                    "Subiendo imagen " +
+                    (i + 1) +
+                    " de " +
+                    files.length +
+                    "...";
 
+
+                const {
+                    error:uploadError
+                } =
+                    await supabaseClient
+                        .storage
+                        .from(
+                            STORAGE_BUCKET
+                        )
+                        .upload(
+                            path,
+                            file,
+                            {
+                                cacheControl:
+                                    "3600",
+                                upsert:
+                                    false,
+                                contentType:
+                                    "image/jpeg"
+                            }
+                        );
+
+                if(uploadError)
+                    throw uploadError;
+
+                uploadedPaths.push(
+                    path
+                );
+            }
         }
 
 
-        /* =====================================================
+        /* =================================================
            GUARDAR ESTUDIO
            
-           PRIMERO intenta guardar structure.
-           
-           Si Supabase responde que la columna structure
-           no existe, automáticamente vuelve a intentar
-           SIN structure.
-        ===================================================== */
+           IMPORTANTE:
+           study se guarda como "" si está vacío.
+           Esto evita el error NOT NULL.
+        ================================================= */
 
         status.textContent =
             "Guardando estudio en Supabase...";
 
+
         const studyDataWithStructure = {
 
-            date:finalDate,
+            date:
+                finalDate,
 
-            patient:patient,
+            patient:
+                patient,
 
             study:
-                study ||
-                null,
+                study || "",
 
             structure:
-                structure ||
-                null,
+                structure || null,
 
             modality:
-                modality ||
-                null,
+                modality || null,
 
             images:
                 uploadedPaths
@@ -4330,9 +4153,9 @@ async function createStudyAndUpload(){
         let insertError = null;
 
 
-        /*
-         * PRIMER INTENTO
-         */
+        /* =================================================
+           PRIMER INTENTO
+        ================================================= */
 
         const firstInsert =
             await supabaseClient
@@ -4343,6 +4166,7 @@ async function createStudyAndUpload(){
                 .select()
                 .single();
 
+
         insertedStudy =
             firstInsert.data;
 
@@ -4350,13 +4174,13 @@ async function createStudyAndUpload(){
             firstInsert.error;
 
 
-        /*
-         * SI STRUCTURE NO EXISTE:
-         * REINTENTAR SIN ESA COLUMNA.
-         */
+        /* =================================================
+           SI STRUCTURE NO EXISTE
+        ================================================= */
 
         if(
             insertError &&
+            insertError.message &&
             (
                 insertError.message
                     .toLowerCase()
@@ -4372,26 +4196,28 @@ async function createStudyAndUpload(){
             );
 
             status.textContent =
-                "La base de datos no tiene 'structure'. Guardando el estudio sin ese campo...";
+                "Guardando estudio...";
+
 
             const fallbackData = {
 
-                date:finalDate,
+                date:
+                    finalDate,
 
-                patient:patient,
+                patient:
+                    patient,
 
                 study:
-                    study ||
-                    null,
+                    study || "",
 
                 modality:
-                    modality ||
-                    null,
+                    modality || null,
 
                 images:
                     uploadedPaths
 
             };
+
 
             const secondInsert =
                 await supabaseClient
@@ -4402,6 +4228,7 @@ async function createStudyAndUpload(){
                     .select()
                     .single();
 
+
             insertedStudy =
                 secondInsert.data;
 
@@ -4411,26 +4238,33 @@ async function createStudyAndUpload(){
         }
 
 
-        /*
-         * SI TODAVÍA HAY ERROR:
-         * BORRAMOS LAS IMÁGENES QUE YA SE SUBIERON.
-         */
+        /* =================================================
+           SI FALLA EL INSERT
+        ================================================= */
 
         if(insertError){
 
-            await supabaseClient
-                .storage
-                .from(
-                    STORAGE_BUCKET
-                )
-                .remove(
-                    uploadedPaths
-                );
+            if(
+                uploadedPaths.length
+            ){
+
+                await supabaseClient
+                    .storage
+                    .from(
+                        STORAGE_BUCKET
+                    )
+                    .remove(
+                        uploadedPaths
+                    );
+            }
 
             throw insertError;
-
         }
 
+
+        /* =================================================
+           ACTUALIZAR INTERFAZ
+        ================================================= */
 
         selectedDate =
             finalDate;
@@ -4450,10 +4284,13 @@ async function createStudyAndUpload(){
         currentImage =
             0;
 
+
         await loadStudies();
+
 
         const patientStudies =
             getPatientStudies();
+
 
         const createdIndex =
             patientStudies.findIndex(
@@ -4463,6 +4300,7 @@ async function createStudyAndUpload(){
                         insertedStudy.id
                     )
             );
+
 
         if(createdIndex >= 0){
 
@@ -4477,17 +4315,20 @@ async function createStudyAndUpload(){
                     patientStudies.length - 1,
                     0
                 );
-
         }
+
 
         currentImage =
             0;
 
+
         renderCalendar();
         renderPatients();
 
+
         const current =
             getCurrentStudy();
+
 
         if(current){
 
@@ -4502,34 +4343,20 @@ async function createStudyAndUpload(){
 
         }
 
+
         status.className =
             "status-message status-success";
 
-        /*
-         * Aviso solamente si structure no existe.
-         */
+        status.textContent =
+            "Estudio creado correctamente.";
 
-        if(
-            !structure &&
-            insertedStudy
-        ){
-
-            status.textContent =
-                "Estudio creado correctamente.";
-
-        }
-        else{
-
-            status.textContent =
-                "Estudio creado correctamente.";
-
-        }
 
         setTimeout(
             () =>
                 closeAdmin(),
             800
         );
+
 
     }
     catch(error){
@@ -4547,7 +4374,6 @@ async function createStudyAndUpload(){
             "No se pudo crear el estudio.";
 
     }
-
 }
 
 
@@ -4567,7 +4393,6 @@ function addImagesToCurrentStudy(){
         );
 
         return;
-
     }
 
     document.getElementById(
@@ -4608,7 +4433,6 @@ function addImagesToCurrentStudy(){
         "addImagesOverlay"
     ).style.display =
         "flex";
-
 }
 
 function closeAddImages(){
@@ -4617,7 +4441,6 @@ function closeAddImages(){
         "addImagesOverlay"
     ).style.display =
         "none";
-
 }
 
 function showAdditionalFiles(){
@@ -4641,7 +4464,6 @@ function showAdditionalFiles(){
             "Ningún archivo seleccionado.";
 
         return;
-
     }
 
     const files =
@@ -4665,7 +4487,6 @@ function showAdditionalFiles(){
             "</span>";
 
         return;
-
     }
 
     list.innerHTML =
@@ -4681,10 +4502,7 @@ function showAdditionalFiles(){
                         file.name
                     )
             )
-            .join(
-                "<br>"
-            );
-
+            .join("<br>");
 }
 
 
@@ -4716,7 +4534,6 @@ async function uploadAdditionalImages(){
             "No hay un estudio seleccionado.";
 
         return;
-
     }
 
     if(
@@ -4731,7 +4548,6 @@ async function uploadAdditionalImages(){
             "Selecciona al menos una imagen JPG.";
 
         return;
-
     }
 
     const admin =
@@ -4746,7 +4562,6 @@ async function uploadAdditionalImages(){
             "La sesión de administrador no es válida.";
 
         return;
-
     }
 
     const files =
@@ -4793,7 +4608,6 @@ async function uploadAdditionalImages(){
                     file.name +
                     " no es JPG/JPEG."
                 );
-
             }
 
             const safeName =
@@ -4820,6 +4634,7 @@ async function uploadAdditionalImages(){
                 " de " +
                 files.length +
                 "...";
+
 
             const {
                 error:uploadError
@@ -4848,8 +4663,8 @@ async function uploadAdditionalImages(){
             newPaths.push(
                 path
             );
-
         }
+
 
         const existingPaths =
             study.images
@@ -4869,8 +4684,10 @@ async function uploadAdditionalImages(){
             ...newPaths
         ];
 
+
         status.textContent =
             "Actualizando estudio...";
+
 
         const {
             error:updateError
@@ -4898,8 +4715,8 @@ async function uploadAdditionalImages(){
                 );
 
             throw updateError;
-
         }
+
 
         const studyId =
             study.id;
@@ -4910,7 +4727,9 @@ async function uploadAdditionalImages(){
         const studyDate =
             study.date;
 
+
         await loadStudies();
+
 
         selectedDate =
             studyDate;
@@ -4918,8 +4737,10 @@ async function uploadAdditionalImages(){
         currentPatient =
             patientName;
 
+
         const patientList =
             getPatientStudies();
+
 
         currentStudy =
             patientList.findIndex(
@@ -4928,11 +4749,14 @@ async function uploadAdditionalImages(){
                     String(studyId)
             );
 
+
         if(currentStudy < 0)
             currentStudy = 0;
 
+
         const updatedStudy =
             getCurrentStudy();
+
 
         if(updatedStudy){
 
@@ -4957,17 +4781,20 @@ async function uploadAdditionalImages(){
 
         }
 
+
         status.className =
             "status-message status-success";
 
         status.textContent =
             "Imágenes añadidas correctamente.";
 
+
         setTimeout(
             () =>
                 closeAddImages(),
             800
         );
+
 
     }
     catch(error){
@@ -4983,9 +4810,7 @@ async function uploadAdditionalImages(){
         status.textContent =
             error.message ||
             "No se pudieron añadir las imágenes.";
-
     }
-
 }
 
 
@@ -5005,7 +4830,6 @@ async function deleteCurrentStudy(){
         );
 
         return;
-
     }
 
     const description =
@@ -5036,6 +4860,7 @@ async function deleteCurrentStudy(){
     if(!confirmed)
         return;
 
+
     const admin =
         await isAdminLogged();
 
@@ -5046,8 +4871,8 @@ async function deleteCurrentStudy(){
         );
 
         return;
-
     }
+
 
     try{
 
@@ -5055,6 +4880,7 @@ async function deleteCurrentStudy(){
             "viewerSubtitle"
         ).textContent =
             "Eliminando estudio...";
+
 
         const paths =
             study.images
@@ -5069,6 +4895,7 @@ async function deleteCurrentStudy(){
                         path
                 );
 
+
         const {
             error:deleteError
         } =
@@ -5080,8 +4907,10 @@ async function deleteCurrentStudy(){
                     study.id
                 );
 
+
         if(deleteError)
             throw deleteError;
+
 
         if(paths.length){
 
@@ -5105,8 +4934,8 @@ async function deleteCurrentStudy(){
                 );
 
             }
-
         }
+
 
         currentPatient =
             null;
@@ -5117,13 +4946,16 @@ async function deleteCurrentStudy(){
         currentImage =
             0;
 
+
         await loadStudies();
 
         clearViewer();
 
+
         alert(
             "Estudio eliminado correctamente."
         );
+
 
     }
     catch(error){
@@ -5142,9 +4974,7 @@ async function deleteCurrentStudy(){
         );
 
         updateViewerAdminButtons();
-
     }
-
 }
 
 
