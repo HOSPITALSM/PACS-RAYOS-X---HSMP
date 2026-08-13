@@ -1282,6 +1282,90 @@ button.delete:hover,
 }
 </style>
 
+
+<style>
+/* V7 — encabezado móvil: logo y título separados */
+@media(max-width:700px){
+  .topbar{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    grid-template-areas:"logo" "brand" "auth" "search" "date"!important;
+    justify-items:center!important;
+    align-items:center!important;
+    row-gap:8px!important;
+    min-height:190px!important;
+    height:auto!important;
+    padding:10px 10px 14px!important;
+    box-sizing:border-box!important;
+  }
+  .logo{
+    grid-area:logo!important;
+    width:70px!important;
+    height:70px!important;
+    margin:0!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    flex-shrink:0!important;
+  }
+  .logo img{
+    width:70px!important;
+    height:70px!important;
+    max-width:70px!important;
+    max-height:70px!important;
+    object-fit:contain!important;
+  }
+  .brand{
+    grid-area:brand!important;
+    width:100%!important;
+    min-width:0!important;
+    margin:0!important;
+    text-align:center!important;
+  }
+  .brand-title{
+    display:block!important;
+    width:100%!important;
+    font-size:13px!important;
+    line-height:1.25!important;
+    white-space:normal!important;
+    overflow:visible!important;
+  }
+  .brand-subtitle{
+    display:block!important;
+    width:100%!important;
+    margin-top:2px!important;
+    font-size:9px!important;
+    line-height:1.25!important;
+  }
+  .auth{
+    grid-area:auth!important;
+    width:auto!important;
+    margin:0!important;
+  }
+  .search{
+    grid-area:search!important;
+    width:100%!important;
+    max-width:420px!important;
+    margin:0!important;
+  }
+  .search input{
+    width:100%!important;
+    box-sizing:border-box!important;
+  }
+  .current-date{
+    grid-area:date!important;
+    justify-self:center!important;
+    margin:0!important;
+  }
+  .topbar{
+    border-bottom:2px solid #292d31!important;
+  }
+  .app{
+    min-height:calc(100vh - 190px)!important;
+  }
+}
+</style>
+
 </head>
 <body>
 <header class="topbar">
