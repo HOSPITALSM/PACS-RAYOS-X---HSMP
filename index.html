@@ -38,8 +38,8 @@ overflow:hidden;background:#0d0f10
 }
 .logo img{width:100%;height:100%;object-fit:contain}
 .brand{min-width:280px}
-.brand-title{font-size:19px;font-weight:bold;letter-spacing:.5px;color:var(--green)}
-.brand-subtitle{color:var(--green);font-size:14px;margin-top:5px}
+.brand-title{font-size:17px;font-weight:bold;letter-spacing:.5px;color:var(--green)}
+.brand-subtitle{color:var(--green);font-size:12px;margin-top:5px}
 .search{flex:1;max-width:430px;margin-left:auto;position:relative}
 .search input{
 width:100%;height:40px;background:#1a1d20;border:1px solid #353a40;border-radius:5px;
@@ -80,8 +80,8 @@ flex-direction:column;overflow:hidden;min-height:650px
 min-height:64px;padding:0 15px;display:flex;align-items:center;
 justify-content:space-between;border-bottom:1px solid var(--border);flex-shrink:0
 }
-.panel-title{font-size:14px;text-transform:uppercase;letter-spacing:1px;color:var(--green)}
-.panel-count{color:#858a91;font-size:14px}
+.panel-title{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--green)}
+.panel-count{color:#858a91;font-size:12px}
 .panel-body{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-color:#353a40 #0d0f10;scrollbar-width:thin}
 .panel-body::-webkit-scrollbar{width:8px}
 .panel-body::-webkit-scrollbar-track{background:#0d0f10}
@@ -138,9 +138,9 @@ transition:background var(--ease),box-shadow var(--ease)
 }
 .patient:hover{background:var(--hover)}
 .patient.active{background:var(--selected);box-shadow:inset 3px 0 0 var(--green)}
-.patient-name{font-size:16px;margin-bottom:7px}
-.patient-meta{display:flex;justify-content:space-between;color:#858a91;font-size:13px}
-.badge{background:#2a2e33;padding:3px 7px;border-radius:10px;color:#c2c6ca;font-size:13px}
+.patient-name{font-size:14px;margin-bottom:7px}
+.patient-meta{display:flex;justify-content:space-between;color:#858a91;font-size:11px}
+.badge{background:#2a2e33;padding:3px 7px;border-radius:10px;color:#c2c6ca;font-size:11px}
 .no-results{padding:35px 15px;text-align:center;color:#686e74;font-size:13px;line-height:1.7}
 
 /* ========================= VISOR ========================= */
@@ -233,10 +233,10 @@ cursor:pointer;z-index:3;transition:background var(--ease),color var(--ease),bor
 
 .info-panel{overflow-y:auto;overflow-x:hidden}
 .info-section{padding:17px;border-bottom:1px solid var(--border)}
-.info-heading{color:var(--green);font-size:13px;text-transform:uppercase;letter-spacing:1px;margin-bottom:14px}
+.info-heading{color:var(--green);font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:14px}
 .info-row{margin-bottom:13px}
-.info-label{display:block;color:#686e74;font-size:12px;margin-bottom:4px}
-.info-value{color:#d1d4d7;font-size:15px}
+.info-label{display:block;color:#686e74;font-size:10.5px;margin-bottom:4px}
+.info-value{color:#d1d4d7;font-size:13px}
 .patient-card{background:#191c1f;border:1px solid #2b2f34;border-radius:5px;padding:13px;box-shadow:var(--shadow-sm)}
 .patient-card-name{font-size:15px;margin-bottom:9px}
 .patient-card-meta{color:#858a91;font-size:11px;line-height:1.8}
@@ -558,7 +558,7 @@ justify-items:stretch;padding:7px 10px;gap:5px 9px
 }
 
 html,body{background:var(--ris-bg)}
-body{overflow:hidden;font-size:15px}
+body{overflow:hidden}
 
 .topbar{
   height:56px;min-height:56px;padding:0 12px;gap:10px;
@@ -628,6 +628,7 @@ body{overflow:hidden;font-size:15px}
 
 .viewport{
   flex:1;height:auto;min-height:0;max-height:none;
+  margin:10px 14px;border-radius:6px;
   background:radial-gradient(circle at center,#161b1e 0%,#07090a 58%,#010202 100%);
 }
 .overlay-left,.overlay-right{top:10px;font-size:8px;color:#626d75}
@@ -696,7 +697,7 @@ body{overflow:hidden;font-size:15px}
 
   .viewer-header{height:44px;min-height:44px}
   .viewer-statusbar{display:none}
-  .viewport{height:auto;min-height:0;flex:1}
+  .viewport{height:auto;min-height:0;flex:1;margin:6px;border-radius:5px}
   .toolbar{height:50px;min-height:50px;padding:6px 7px}
   .tool{height:38px;min-width:38px}
   .thumbnails{height:72px;min-height:72px;padding:5px 7px}
@@ -749,6 +750,55 @@ body{overflow:hidden;font-size:15px}
   .brand-title{font-size:9px}
   .search input{font-size:10px}
   .tool{min-width:35px;height:35px;padding:0 7px}
+}
+</style>
+<style id="fuente-mas-grande">
+body{font-size:16px}
+.brand-title{font-size:15px}
+.brand-subtitle{font-size:11px}
+.search input{font-size:14px}
+.current-date{font-size:13px}
+.auth-button{font-size:12px}
+.auth-user{font-size:12px}
+.panel-title{font-size:12px}
+.panel-count{font-size:12px}
+.patient-name{font-size:14px}
+.patient-meta{font-size:11px}
+.badge{font-size:11px}
+.no-results{font-size:13px}
+.viewer-title{font-size:14px}
+.viewer-subtitle{font-size:11px}
+.viewer-admin-button{font-size:11px}
+.image-counter{font-size:12px}
+.viewer-statusbar{font-size:10px}
+.overlay-left,.overlay-right{font-size:10px}
+.tool{font-size:13px}
+.info-heading{font-size:11px}
+.patient-card-name{font-size:15px}
+.patient-card-meta{font-size:11px}
+.study-selector{font-size:12px}
+.info-label{font-size:10px}
+.info-value{font-size:12px}
+.calendar-month{font-size:15px}
+.day{font-size:12px}
+.today-button{font-size:12px}
+.mobile-nav button{font-size:10px}
+.admin-title{font-size:16px}
+.form-label{font-size:12px}
+.form-input{font-size:14px}
+.file-input{font-size:13px}
+.login-title{font-size:17px}
+.login-subtitle{font-size:13px}
+.status-message{font-size:13px}
+
+@media(max-width:700px){
+  .brand-title{font-size:12px}
+  .current-date #currentDateLabel{font-size:10px}
+  .auth-button{font-size:10px}
+  .viewer-title{font-size:12px}
+  .viewer-subtitle{font-size:10px}
+  .image-counter{font-size:10px}
+  .tool{font-size:12px}
 }
 </style>
 </head>
@@ -808,6 +858,7 @@ CERRAR SESIÓN
 <div class="patient-card">
 <div class="patient-card-name" id="infoPatientName">--</div>
 <div class="patient-card-meta" id="infoPatientMeta">--</div>
+<button class="viewer-admin-button" id="editPatientButton" type="button" onclick="openEditPatient()" style="display:none;margin-top:9px;width:100%;">✎ EDITAR PACIENTE</button>
 </div>
 </div>
 
@@ -838,6 +889,11 @@ CERRAR SESIÓN
 <div class="info-row">
 <span class="info-label">ESTUDIO REALIZADO</span>
 <span class="info-value" id="infoStudy">--</span>
+</div>
+
+<div class="info-row">
+<span class="info-label">ESTRUCTURA DE LA IMAGEN ACTUAL</span>
+<span class="info-value" id="infoImageStructure">--</span>
 </div>
 
 </div>
@@ -1093,6 +1149,61 @@ INGRESAR
 </div>
 
 <div class="status-message" id="loginStatus"></div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- EDITAR PACIENTE -->
+
+<div class="admin-overlay" id="editPatientOverlay">
+
+<div class="admin-box">
+
+<div class="admin-header">
+
+<div class="admin-title">
+EDITAR INFORMACIÓN DEL PACIENTE
+</div>
+
+<button class="admin-close" onclick="closeEditPatient()">×</button>
+
+</div>
+
+<div class="admin-body">
+
+<div class="form-group">
+<label class="form-label">Nombre del paciente</label>
+<input class="form-input" id="editPatientName" type="text" placeholder="Nombre completo del paciente">
+</div>
+
+<div class="form-group">
+<label class="form-label">Fecha de nacimiento <span style="color:#686e74;text-transform:none;">(opcional)</span></label>
+<input class="form-input" id="editPatientBirth" type="date">
+</div>
+
+<div class="form-group">
+<label class="form-label">Sexo <span style="color:#686e74;text-transform:none;">(opcional)</span></label>
+<select class="study-selector" id="editPatientSex">
+<option value="">No especificar</option>
+<option value="Masculino">Masculino</option>
+<option value="Femenino">Femenino</option>
+</select>
+</div>
+
+<div class="form-group">
+<label class="form-label">Historia clínica <span style="color:#686e74;text-transform:none;">(opcional)</span></label>
+<input class="form-input" id="editPatientHistory" type="text" placeholder="Número de historia clínica">
+</div>
+
+<div class="status-message" id="editPatientStatus"></div>
+
+<div class="admin-actions">
+<button class="admin-secondary" onclick="closeEditPatient()">CANCELAR</button>
+<button class="admin-primary" onclick="saveEditPatient()">GUARDAR CAMBIOS</button>
+</div>
 
 </div>
 
@@ -1363,6 +1474,50 @@ AÑADIR IMÁGENES AL ESTUDIO
 <div class="form-group">
 
 <label class="form-label">
+Estructura o zona de estas imágenes <span style="color:#686e74;text-transform:none;">(opcional)</span>
+</label>
+
+<select class="study-selector" id="additionalStructure">
+<option value="">No especificar</option>
+<option value="Tórax AP">Tórax AP</option>
+<option value="Tórax PA">Tórax PA</option>
+<option value="Tórax AP y lateral">Tórax AP y lateral</option>
+<option value="Columna cervical">Columna cervical</option>
+<option value="Columna dorsal">Columna dorsal</option>
+<option value="Columna lumbar">Columna lumbar</option>
+<option value="Columna lumbosacra">Columna lumbosacra</option>
+<option value="Columna completa">Columna completa</option>
+<option value="Pelvis">Pelvis</option>
+<option value="Cadera">Cadera</option>
+<option value="Rodilla">Rodilla</option>
+<option value="Pierna">Pierna</option>
+<option value="Tobillo">Tobillo</option>
+<option value="Pie">Pie</option>
+<option value="Fémur">Fémur</option>
+<option value="Húmero">Húmero</option>
+<option value="Codo">Codo</option>
+<option value="Antebrazo">Antebrazo</option>
+<option value="Muñeca">Muñeca</option>
+<option value="Mano">Mano</option>
+<option value="Hombro">Hombro</option>
+<option value="Clavícula">Clavícula</option>
+<option value="Costillas">Costillas</option>
+<option value="Senos paranasales">Senos paranasales</option>
+<option value="Cráneo">Cráneo</option>
+<option value="Macizo facial">Macizo facial</option>
+<option value="Abdomen">Abdomen</option>
+<option value="Otro">Otro</option>
+</select>
+
+<div style="color:#686e74;font-size:11px;margin-top:6px;">
+Esta estructura se asignará solo a las imágenes que subas ahora. Si necesitas subir imágenes de otra zona, hazlo en otro lote usando este mismo botón.
+</div>
+
+</div>
+
+<div class="form-group">
+
+<label class="form-label">
 Seleccionar nuevas imágenes JPG
 </label>
 
@@ -1595,13 +1750,54 @@ items=[text];
 
 }
 
+/*
+   Cada imagen puede venir en dos formatos:
+   - string: ruta o URL directa (formato antiguo, sin estructura)
+   - objeto {path, structure}: formato nuevo, con estructura anatómica
+*/
+
 return items
-.filter(
-item=>
+.map(item=>{
+
+if(
 typeof item==="string"&&
 item.trim()!==""
-)
-.map(item=>getImageUrl(item));
+){
+
+return{
+
+path:item.trim(),
+url:getImageUrl(item.trim()),
+structure:""
+
+};
+
+}
+
+if(
+item&&
+typeof item==="object"&&
+typeof item.path==="string"&&
+item.path.trim()!==""
+){
+
+return{
+
+path:item.path.trim(),
+url:getImageUrl(item.path.trim()),
+structure:
+typeof item.structure==="string"?
+item.structure:
+""
+
+};
+
+}
+
+return null;
+
+})
+.filter(item=>item!==null);
 
 }
 
@@ -2422,7 +2618,7 @@ renderThumbnails(study);
 if(study.images.length){
 
 showImage(
-study.images[currentImage]
+study.images[currentImage].url
 );
 
 }else{
@@ -2482,6 +2678,11 @@ document.getElementById(
 "addStudyButton"
 );
 
+const editPatientButton=
+document.getElementById(
+"editPatientButton"
+);
+
 const study=
 getCurrentStudy();
 
@@ -2492,6 +2693,13 @@ if(addStudyButton){
 
 addStudyButton.style.display=
 admin?"block":"none";
+
+}
+
+if(editPatientButton){
+
+editPatientButton.style.display=
+(admin&&currentPatient)?"block":"none";
 
 }
 
@@ -2784,7 +2992,7 @@ document.getElementById(
 container.innerHTML="";
 
 study.images.forEach(
-(src,index)=>{
+(imageObj,index)=>{
 
 const item=
 document.createElement(
@@ -2796,9 +3004,15 @@ item.className="thumbnail-item";
 const img=
 document.createElement("img");
 
-img.src=src;
+img.src=imageObj.url;
 
 img.className="thumbnail";
+
+if(imageObj.structure){
+
+img.title=imageObj.structure;
+
+}
 
 if(index===currentImage){
 
@@ -2814,7 +3028,7 @@ currentImage=index;
 
 resetView();
 
-showImage(src);
+showImage(imageObj.url);
 
 renderThumbnails(study);
 
@@ -2900,11 +3114,8 @@ document.getElementById(
 ).textContent=
 "Eliminando imagen...";
 
-const imageUrl=
-study.images[imageIndex];
-
 const storagePath=
-getStoragePath(imageUrl);
+study.images[imageIndex].path;
 
 const remainingImages=
 study.images
@@ -2912,10 +3123,13 @@ study.images
 (_,index)=>index!==imageIndex
 )
 .map(
-image=>getStoragePath(image)
+image=>({
+path:image.path,
+structure:image.structure||""
+})
 )
 .filter(
-path=>path
+image=>image.path
 );
 
 const{
@@ -3048,6 +3262,16 @@ study.images.length?
 study.images.length:
 "--";
 
+const currentImageObj=
+study.images[currentImage];
+
+document.getElementById(
+"infoImageStructure"
+).textContent=
+(currentImageObj&&currentImageObj.structure)?
+currentImageObj.structure:
+(study.study||"No especificado");
+
 }
 
 /* =========================================================
@@ -3077,7 +3301,7 @@ currentImage=0;
 resetView();
 
 showImage(
-study.images[currentImage]
+study.images[currentImage].url
 );
 
 renderThumbnails(study);
@@ -3107,7 +3331,7 @@ study.images.length-1;
 resetView();
 
 showImage(
-study.images[currentImage]
+study.images[currentImage].url
 );
 
 renderThumbnails(study);
@@ -3951,7 +4175,7 @@ if(
 document.getElementById(
 "fullscreenImage"
 ).src=
-study.images[currentImage];
+study.images[currentImage].url;
 
 document.getElementById(
 "fullscreenViewer"
@@ -4021,6 +4245,239 @@ document.getElementById(
 "loginOverlay"
 ).style.display=
 "none";
+
+}
+
+/* =========================================================
+   EDITAR PACIENTE
+========================================================= */
+
+function openEditPatient(){
+
+if(!currentPatient){
+
+alert(
+"Primero selecciona un paciente."
+);
+
+return;
+
+}
+
+const patientStudies=
+getPatientStudies();
+
+const reference=
+patientStudies[0]||{};
+
+document.getElementById(
+"editPatientName"
+).value=
+currentPatient||"";
+
+document.getElementById(
+"editPatientBirth"
+).value=
+reference.birth||"";
+
+document.getElementById(
+"editPatientSex"
+).value=
+reference.sex||"";
+
+document.getElementById(
+"editPatientHistory"
+).value=
+reference.history||"";
+
+document.getElementById(
+"editPatientStatus"
+).textContent="";
+
+document.getElementById(
+"editPatientOverlay"
+).style.display=
+"flex";
+
+setTimeout(()=>{
+
+document.getElementById(
+"editPatientName"
+).focus();
+
+},100);
+
+}
+
+function closeEditPatient(){
+
+const overlay=
+document.getElementById(
+"editPatientOverlay"
+);
+
+if(overlay){
+
+overlay.style.display=
+"none";
+
+}
+
+}
+
+async function saveEditPatient(){
+
+if(!currentPatient){
+
+closeEditPatient();
+
+return;
+
+}
+
+const newName=
+document.getElementById(
+"editPatientName"
+).value.trim();
+
+const birth=
+document.getElementById(
+"editPatientBirth"
+).value||null;
+
+const sex=
+document.getElementById(
+"editPatientSex"
+).value||null;
+
+const history=
+document.getElementById(
+"editPatientHistory"
+).value.trim()||null;
+
+const status=
+document.getElementById(
+"editPatientStatus"
+);
+
+if(!newName){
+
+status.className=
+"status-message status-error";
+
+status.textContent=
+"El nombre del paciente no puede estar vacío.";
+
+return;
+
+}
+
+const admin=
+await isAdminLogged();
+
+if(!admin){
+
+status.className=
+"status-message status-error";
+
+status.textContent=
+"La sesión de administrador no es válida.";
+
+return;
+
+}
+
+try{
+
+status.className=
+"status-message";
+
+status.textContent=
+"Guardando cambios...";
+
+const previousPatient=
+currentPatient;
+
+const{
+error
+}=
+await supabaseClient
+.from("studies")
+.update({
+
+patient:newName,
+birth:birth,
+sex:sex,
+history:history
+
+})
+.eq(
+"patient",
+previousPatient
+)
+.eq(
+"date",
+selectedDate
+);
+
+if(error)
+throw error;
+
+currentPatient=
+newName;
+
+await loadStudies();
+
+renderCalendar();
+renderPatients();
+
+const patientStudies=
+getPatientStudies();
+
+if(patientStudies.length){
+
+currentStudy=
+Math.min(
+currentStudy,
+patientStudies.length-1
+);
+
+renderStudy(
+patientStudies[currentStudy]
+);
+
+}else{
+
+clearViewer();
+
+}
+
+status.className=
+"status-message status-success";
+
+status.textContent=
+"Información del paciente actualizada.";
+
+setTimeout(
+()=>closeEditPatient(),
+700
+);
+
+}catch(error){
+
+console.error(
+"ERROR AL EDITAR PACIENTE:",
+error
+);
+
+status.className=
+"status-message status-error";
+
+status.textContent=
+error.message||
+"No se pudo actualizar la información del paciente.";
+
+}
 
 }
 
@@ -4247,10 +4704,23 @@ addStudyButton.style.display=
 
 closeAddImages();
 closeAddStudy();
+closeEditPatient();
 
 document.getElementById(
 "viewerAdminActions"
 ).style.display="none";
+
+const editPatientButton=
+document.getElementById(
+"editPatientButton"
+);
+
+if(editPatientButton){
+
+editPatientButton.style.display=
+"none";
+
+}
 
 }
 
@@ -4594,7 +5064,12 @@ study:studyType||null,
 
 structure:null,
 modality:"CR",
-images:newPaths
+images:newPaths.map(
+path=>({
+path:path,
+structure:studyType||""
+})
+)
 
 })
 .select()
@@ -4844,6 +5319,16 @@ document.getElementById(
 "additionalFiles"
 );
 
+const structureSelect=
+document.getElementById(
+"additionalStructure"
+);
+
+const selectedStructure=
+structureSelect?
+structureSelect.value.trim():
+"";
+
 const status=
 document.getElementById(
 "addImagesStatus"
@@ -4974,14 +5459,25 @@ newPaths.push(path);
 
 }
 
-const existingPaths=
+const existingImages=
 study.images
-.map(image=>getStoragePath(image))
-.filter(path=>path);
+.map(image=>({
+path:image.path,
+structure:image.structure||""
+}))
+.filter(image=>image.path);
 
-const combinedPaths=[
-...existingPaths,
-...newPaths
+const newImages=
+newPaths.map(
+path=>({
+path:path,
+structure:selectedStructure
+})
+);
+
+const combinedImages=[
+...existingImages,
+...newImages
 ];
 
 status.textContent=
@@ -4993,7 +5489,7 @@ error:updateError
 await supabaseClient
 .from("studies")
 .update({
-images:combinedPaths
+images:combinedImages
 })
 .eq(
 "id",
@@ -5156,7 +5652,7 @@ document.getElementById(
 
 const paths=
 study.images
-.map(image=>getStoragePath(image))
+.map(image=>image.path)
 .filter(path=>path);
 
 const{
@@ -5239,6 +5735,7 @@ closeFullscreen();
 closeLogin();
 closeAddImages();
 closeAddStudy();
+closeEditPatient();
 
 document.getElementById(
 "searchResults"
