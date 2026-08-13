@@ -2,7 +2,10 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover,maximum-scale=1.0,user-scalable=no">
+<meta name="theme-color" content="#0b0e10">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Hospital San Martín de Pangoa - Rayos X</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -29,7 +32,7 @@ min-height:72px;background:#101214;border-bottom:1px solid var(--border);
 display:flex;align-items:center;padding:0 16px;gap:15px;position:relative;z-index:10
 }
 .logo{
-width:100px;height:100px;border:1px solid var(--border);border-radius:6px;
+ width:120px;height:120px;border:1px solid var(--border);border-radius:6px;
 display:flex;align-items:center;justify-content:center;flex-shrink:0;
 overflow:hidden;background:#0d0f10
 }
@@ -358,7 +361,7 @@ background:linear-gradient(180deg,#151719 0%,#101214 100%);
 border-bottom:1px solid #292d31;box-shadow:0 4px 18px rgba(0,0,0,.35)
 }
 .logo{
-grid-area:logo;width:58px;height:58px;margin:0 auto;border-radius:50%;
+grid-area:logo;width:70px;height:70px;margin:0 auto;border-radius:50%;
 border:1px solid #343a3f;background:#0c0e0f;
 box-shadow:0 3px 12px rgba(0,0,0,.45),0 0 0 4px rgba(255,255,255,.025)
 }
@@ -534,6 +537,270 @@ justify-items:stretch;padding:7px 10px;gap:5px 9px
 .thumbnails{height:82px;min-height:82px}
 }
 </style>
+
+<style id="ris-redesign-overrides">
+/* =========================================================
+   RIS-STYLE REDESIGN — VISOR RADIOGRÁFICO
+   Capa visual sobre la interfaz existente.
+   No cambia la lógica del visor ni las funciones de Supabase.
+========================================================= */
+:root{
+  --ris-bg:#080b0d;
+  --ris-surface:#0f1316;
+  --ris-surface-2:#151a1e;
+  --ris-surface-3:#1b2126;
+  --ris-border:#2b3339;
+  --ris-muted:#7f8a92;
+  --ris-text:#e7ebee;
+  --ris-accent:#59d7ae;
+  --ris-accent-soft:rgba(89,215,174,.12);
+  --ris-shadow:0 10px 32px rgba(0,0,0,.34);
+}
+
+html,body{background:var(--ris-bg)}
+body{overflow:hidden}
+
+.topbar{
+  height:56px;min-height:56px;padding:0 12px;gap:10px;
+  background:#0c1012;border-bottom:1px solid var(--ris-border);
+  box-shadow:0 4px 18px rgba(0,0,0,.22);
+}
+.logo{width:40px;height:40px;border-radius:5px;background:#0a0d0f}
+.brand{min-width:225px}
+.brand-title{font-size:13px;letter-spacing:.35px}
+.brand-subtitle{font-size:9px;margin-top:2px;color:#8dbbab}
+.search{max-width:480px;margin-left:12px}
+.search input{height:34px;border-radius:5px;background:#151a1e;border-color:#30383e;font-size:12px}
+.current-date{
+  margin-left:auto;width:auto;height:34px;padding:0 10px;display:flex;align-items:center;gap:7px;
+  background:#151a1e;border:1px solid #30383e;border-radius:5px;color:#cad0d4;
+  cursor:pointer;white-space:nowrap;font-size:11px;
+}
+.current-date:hover{border-color:var(--ris-accent);color:#fff}
+.date-icon{font-size:13px;color:var(--ris-accent)}
+.date-chevron{font-size:11px;color:#78828a}
+.auth-area{gap:5px}
+.auth-button{height:34px;border-radius:5px;font-size:10px;padding:0 10px}
+.auth-user{font-size:10px}
+
+.app{
+  height:calc(100vh - 56px);min-height:0;min-width:0;
+  display:grid;grid-template-columns:270px minmax(0,1fr) 290px;
+  grid-template-areas:"patients viewer info";
+  background:#080b0d;
+}
+.panel{min-height:0;height:100%;background:var(--ris-surface);border-right:1px solid var(--ris-border)}
+.panel:nth-child(2){grid-area:patients;border-left:1px solid #0a0d0f}
+.info-panel{grid-area:info;border-right:0;border-left:1px solid var(--ris-border)}
+.panel:last-child{grid-area:calendar;position:fixed;z-index:3000;top:64px;right:12px;width:290px;height:auto;min-height:0;max-height:calc(100vh - 76px);display:none;border:1px solid var(--ris-border);border-radius:8px;box-shadow:var(--ris-shadow)}
+.panel:last-child.calendar-open{display:flex}
+
+.panel-header{height:48px;min-height:48px;padding:0 12px;border-bottom:1px solid #252d33}
+.panel-title{font-size:10px;letter-spacing:1.1px;font-weight:700;color:#aeb7bd}
+.panel-count{font-size:10px;color:#66727b}
+.mobile-panel-close{display:none}
+
+/* Worklist */
+.panel:nth-child(2) .panel-header{position:sticky;top:0;z-index:2;background:#0f1316}
+.panel:nth-child(2) .panel-header>div{display:flex;align-items:center;gap:10px;width:100%}
+.panel:nth-child(2) .add-study-button{height:30px;margin-top:0;width:auto;padding:0 9px;border-radius:5px;font-size:9px}
+.panel:nth-child(2) .panel-header .add-study-button{margin-left:auto}
+.patient{padding:11px 12px;border-bottom:1px solid #20272c}
+.patient-name{font-size:12px;margin-bottom:5px;font-weight:600;color:#e3e7e9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.patient-meta{font-size:9px}
+.badge{font-size:9px;padding:2px 6px;background:#20272c}
+.patient.active{box-shadow:inset 3px 0 0 var(--ris-accent);background:linear-gradient(90deg,rgba(89,215,174,.10),rgba(89,215,174,.03))}
+.patient:hover{background:#151b1f}
+.no-results{font-size:11px;padding:28px 12px}
+
+/* Viewer */
+.viewer{
+  grid-area:viewer;height:100%;min-height:0;background:#020303;border-right:1px solid var(--ris-border);
+}
+.viewer-header{height:50px;min-height:50px;padding:6px 12px;background:#0f1316;border-bottom:1px solid #252d33}
+.viewer-title{font-size:12px;color:#e4ece8;font-weight:600}
+.viewer-subtitle{font-size:9px;margin-top:3px;color:#76828a}
+.viewer-admin-button{height:28px;font-size:9px;padding:0 8px}
+.image-counter{font-size:10px;padding:4px 7px;background:#14191d;border:1px solid #293238;border-radius:10px}
+.viewer-statusbar{height:22px;min-height:22px;display:flex;align-items:center;gap:6px;padding:0 10px;background:#090d0f;border-bottom:1px solid #1e252a;color:#65717a;font-size:8px;letter-spacing:.25px}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--ris-accent);box-shadow:0 0 7px rgba(89,215,174,.4)}
+.status-separator{color:#394248}
+
+.viewport{
+  flex:1;height:auto;min-height:0;max-height:none;
+  margin:10px 14px;border-radius:6px;
+  background:radial-gradient(circle at center,#161b1e 0%,#07090a 58%,#010202 100%);
+}
+.overlay-left,.overlay-right{top:10px;font-size:8px;color:#626d75}
+.toolbar{height:52px;min-height:52px;padding:7px 8px;background:#0f1316;border-top:1px solid #252d33;gap:5px}
+.tool{height:36px;min-width:36px;padding:0 9px;border-radius:5px;font-size:11px;background:#171d21;border-color:#2d363c}
+.tool:hover{background:#20272c;border-color:#4a565e}
+.separator{height:24px;margin:0 3px;background:#293238}
+.thumbnails{height:82px;min-height:82px;padding:6px 8px;gap:7px;background:#0b0f11;border-top:1px solid #222a2f}
+.thumbnail-item{width:66px;height:68px}
+.thumbnail{width:66px;height:54px;border-radius:3px}
+.thumbnail-delete{width:18px;height:18px;right:-3px;font-size:11px;line-height:15px}
+
+/* Info / contexto clínico */
+.info-panel{background:#0f1316}
+.info-section{padding:13px;border-bottom:1px solid #232b30}
+.info-heading{font-size:9px;margin-bottom:9px;letter-spacing:1.2px;color:#7e8a92}
+.patient-card{padding:11px;border-radius:5px;background:#151a1e;border-color:#2a3339}
+.patient-card-name{font-size:13px;font-weight:600;margin-bottom:6px}
+.patient-card-meta{font-size:9px;line-height:1.8}
+.study-selector{height:36px;border-radius:5px;font-size:10px;background:#151a1e}
+.info-row{margin-bottom:9px;padding-bottom:5px}
+.info-label{font-size:8px}
+.info-value{font-size:10px;color:#d7dcdf}
+
+/* Popover de fecha */
+.panel:last-child .panel-header{background:#11161a}
+.calendar{padding:12px}
+.calendar-header{margin-bottom:10px}
+.calendar-month{font-size:13px}
+.calendar-button{width:29px;height:29px;font-size:16px}
+.day{height:31px;font-size:10px}
+.today-button{height:32px;margin-top:10px;font-size:10px}
+
+/* Mejor encaje inicial de la imagen */
+.main-image{max-width:none;max-height:none}
+
+/* Evita que modales pesados afecten el visor */
+.admin-overlay{backdrop-filter:blur(2px)}
+
+/* ================= MOBILE APP MODE ================= */
+.mobile-nav{display:none}
+
+@media(max-width:1000px){
+  body{overflow:hidden}
+  .topbar{height:54px;min-height:54px;padding:0 9px}
+  .logo{width:36px;height:36px}
+  .brand{min-width:0;flex:1}
+  .brand-title{font-size:11px}
+  .brand-subtitle{font-size:8px}
+  .search{margin-left:5px;max-width:none}
+  .search input{height:32px}
+  .current-date{margin-left:0;height:32px;padding:0 8px}
+  .auth-area .auth-user{display:none}
+  .auth-button{height:32px}
+
+  .app{height:calc(100vh - 54px);display:block;position:relative}
+  .viewer{height:100%;width:100%;border:0}
+  .panel:nth-child(2),.info-panel{
+    position:fixed;z-index:7000;top:54px;bottom:62px;width:min(86vw,340px);height:auto;
+    background:#101519;box-shadow:0 12px 40px rgba(0,0,0,.52);transition:transform .18s ease;
+  }
+  .panel:nth-child(2){left:0;transform:translateX(-105%);border-right:1px solid #2a3339}
+  .info-panel{right:0;transform:translateX(105%);border-left:1px solid #2a3339;border-right:0}
+  .panel:nth-child(2).mobile-open,.info-panel.mobile-open{transform:translateX(0)}
+  .mobile-panel-close{display:block;background:none;border:0;color:#8f9aa1;font-size:22px;line-height:1;cursor:pointer;padding:4px}
+
+  .viewer-header{height:44px;min-height:44px}
+  .viewer-statusbar{display:none}
+  .viewport{height:auto;min-height:0;flex:1;margin:6px;border-radius:5px}
+  .toolbar{height:50px;min-height:50px;padding:6px 7px}
+  .tool{height:38px;min-width:38px}
+  .thumbnails{height:72px;min-height:72px;padding:5px 7px}
+  .thumbnail-item{width:58px;height:61px}
+  .thumbnail{width:58px;height:48px}
+
+  .panel:last-child{
+    position:fixed;z-index:8000;top:auto;right:0;bottom:62px;left:0;width:100%;max-height:78vh;
+    margin:0;border:1px solid #2c343a;border-radius:14px 14px 0 0;box-shadow:0 -15px 45px rgba(0,0,0,.55);
+  }
+
+  .mobile-nav{
+    position:fixed;z-index:9000;left:0;right:0;bottom:0;height:62px;min-height:62px;
+    display:grid;grid-template-columns:repeat(4,1fr);padding-bottom:env(safe-area-inset-bottom);
+    background:rgba(11,15,17,.96);border-top:1px solid #2a3339;backdrop-filter:blur(10px);
+  }
+  .mobile-nav button{
+    border:0;background:transparent;color:#7f8a92;font-size:8px;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:3px;cursor:pointer;
+  }
+  .mobile-nav button.active,.mobile-nav button:active{color:var(--ris-accent)}
+  .mobile-nav-icon{font-size:16px;line-height:1}
+
+  .date-icon{font-size:12px}
+  .date-chevron{display:none}
+}
+
+@media(max-width:700px){
+  .topbar{height:50px;min-height:50px;padding:0 8px;gap:6px}
+  .logo{width:32px;height:32px}
+  .brand-title{font-size:10px;line-height:1.1}
+  .brand-subtitle{display:none}
+  .search{flex:1;max-width:none}
+  .search input{height:31px;border-radius:17px;font-size:11px;padding:0 11px}
+  .current-date{height:31px;padding:0 7px}
+  .current-date #currentDateLabel{font-size:9px}
+  .auth-button{font-size:8px;padding:0 8px}
+  .app{height:calc(100vh - 50px)}
+  .panel:nth-child(2),.info-panel{top:50px;bottom:62px}
+  .viewer-header{height:42px;min-height:42px;padding:5px 9px}
+  .viewer-title{font-size:10px}
+  .viewer-subtitle{font-size:8px}
+  .image-counter{font-size:8px}
+  .toolbar{height:49px;min-height:49px}
+  .tool{height:37px;min-width:37px;font-size:11px;border-radius:9px}
+  .thumbnails{height:68px;min-height:68px}
+}
+
+@media(max-width:380px){
+  .brand-title{font-size:9px}
+  .search input{font-size:10px}
+  .tool{min-width:35px;height:35px;padding:0 7px}
+}
+</style>
+<style id="fuente-mas-grande">
+body{font-size:16px}
+.brand-title{font-size:15px}
+.brand-subtitle{font-size:11px}
+.search input{font-size:14px}
+.current-date{font-size:13px}
+.auth-button{font-size:12px}
+.auth-user{font-size:12px}
+.panel-title{font-size:12px}
+.panel-count{font-size:12px}
+.patient-name{font-size:14px}
+.patient-meta{font-size:11px}
+.badge{font-size:11px}
+.no-results{font-size:13px}
+.viewer-title{font-size:14px}
+.viewer-subtitle{font-size:11px}
+.viewer-admin-button{font-size:11px}
+.image-counter{font-size:12px}
+.viewer-statusbar{font-size:10px}
+.overlay-left,.overlay-right{font-size:10px}
+.tool{font-size:13px}
+.info-heading{font-size:11px}
+.patient-card-name{font-size:15px}
+.patient-card-meta{font-size:11px}
+.study-selector{font-size:12px}
+.info-label{font-size:10px}
+.info-value{font-size:12px}
+.calendar-month{font-size:15px}
+.day{font-size:12px}
+.today-button{font-size:12px}
+.mobile-nav button{font-size:10px}
+.admin-title{font-size:16px}
+.form-label{font-size:12px}
+.form-input{font-size:14px}
+.file-input{font-size:13px}
+.login-title{font-size:17px}
+.login-subtitle{font-size:13px}
+.status-message{font-size:13px}
+
+@media(max-width:700px){
+  .brand-title{font-size:12px}
+  .current-date #currentDateLabel{font-size:10px}
+  .auth-button{font-size:10px}
+  .viewer-title{font-size:12px}
+  .viewer-subtitle{font-size:10px}
+  .image-counter{font-size:10px}
+  .tool{font-size:12px}
+}
+</style>
 </head>
 
 <body>
@@ -554,7 +821,11 @@ justify-items:stretch;padding:7px 10px;gap:5px 9px
 <div class="search-results" id="searchResults"></div>
 </div>
 
-<div class="current-date" id="currentDateLabel">--</div>
+<button class="current-date" id="dateFilterButton" type="button" onclick="toggleDatePopover(event)" aria-label="Seleccionar fecha">
+  <span class="date-icon" aria-hidden="true">▣</span>
+  <span id="currentDateLabel">--</span>
+  <span class="date-chevron" aria-hidden="true">⌄</span>
+</button>
 
 <div class="auth-area">
 <span class="auth-user" id="authUser"></span>
@@ -578,6 +849,7 @@ CERRAR SESIÓN
 
 <div class="panel-header">
 <span class="panel-title">Información</span>
+<button class="mobile-panel-close" type="button" onclick="closeMobilePanels()" aria-label="Cerrar">×</button>
 </div>
 
 <div class="info-section">
@@ -586,6 +858,7 @@ CERRAR SESIÓN
 <div class="patient-card">
 <div class="patient-card-name" id="infoPatientName">--</div>
 <div class="patient-card-meta" id="infoPatientMeta">--</div>
+<button class="viewer-admin-button" id="editPatientButton" type="button" onclick="openEditPatient()" style="display:none;margin-top:9px;width:100%;">✎ EDITAR PACIENTE</button>
 </div>
 </div>
 
@@ -616,6 +889,11 @@ CERRAR SESIÓN
 <div class="info-row">
 <span class="info-label">ESTUDIO REALIZADO</span>
 <span class="info-value" id="infoStudy">--</span>
+</div>
+
+<div class="info-row">
+<span class="info-label">ESTRUCTURA DE LA IMAGEN ACTUAL</span>
+<span class="info-value" id="infoImageStructure">--</span>
 </div>
 
 </div>
@@ -652,6 +930,7 @@ CERRAR SESIÓN
 <div>
 
 <span class="panel-title">Pacientes</span>
+<button class="mobile-panel-close" type="button" onclick="closeMobilePanels()" aria-label="Cerrar">×</button>
 
 <button
 class="add-study-button"
@@ -703,6 +982,13 @@ Conectando con Supabase...
 
 <div class="image-counter" id="imageCounter">--</div>
 
+</div>
+
+<div class="viewer-statusbar">
+  <span class="status-dot"></span>
+  <span>Visor radiográfico</span>
+  <span class="status-separator">•</span>
+  <span id="viewerModeLabel">Ajuste automático</span>
 </div>
 
 <div class="viewport" id="viewport">
@@ -757,6 +1043,7 @@ Seleccione un paciente para visualizar sus estudios.
 
 <div class="panel-header">
 <span class="panel-title">Fecha</span>
+<button class="mobile-panel-close" type="button" onclick="toggleDatePopover(event)" aria-label="Cerrar">×</button>
 </div>
 
 <div class="panel-body">
@@ -788,6 +1075,22 @@ Seleccione un paciente para visualizar sus estudios.
 </section>
 
 </div>
+
+<!-- NAVEGACIÓN MÓVIL -->
+<nav class="mobile-nav" aria-label="Navegación del visor">
+  <button type="button" onclick="toggleMobilePanel('patients')">
+    <span class="mobile-nav-icon">☷</span><span>Pacientes</span>
+  </button>
+  <button type="button" class="active" onclick="focusViewer()">
+    <span class="mobile-nav-icon">◉</span><span>Visor</span>
+  </button>
+  <button type="button" onclick="toggleMobilePanel('info')">
+    <span class="mobile-nav-icon">ⓘ</span><span>Info</span>
+  </button>
+  <button type="button" onclick="toggleDatePopover(event)">
+    <span class="mobile-nav-icon">▣</span><span>Fecha</span>
+  </button>
+</nav>
 
 <!-- LOGIN -->
 
@@ -846,6 +1149,61 @@ INGRESAR
 </div>
 
 <div class="status-message" id="loginStatus"></div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- EDITAR PACIENTE -->
+
+<div class="admin-overlay" id="editPatientOverlay">
+
+<div class="admin-box">
+
+<div class="admin-header">
+
+<div class="admin-title">
+EDITAR INFORMACIÓN DEL PACIENTE
+</div>
+
+<button class="admin-close" onclick="closeEditPatient()">×</button>
+
+</div>
+
+<div class="admin-body">
+
+<div class="form-group">
+<label class="form-label">Nombre del paciente</label>
+<input class="form-input" id="editPatientName" type="text" placeholder="Nombre completo del paciente">
+</div>
+
+<div class="form-group">
+<label class="form-label">Fecha de nacimiento <span style="color:#686e74;text-transform:none;">(opcional)</span></label>
+<input class="form-input" id="editPatientBirth" type="date">
+</div>
+
+<div class="form-group">
+<label class="form-label">Sexo <span style="color:#686e74;text-transform:none;">(opcional)</span></label>
+<select class="study-selector" id="editPatientSex">
+<option value="">No especificar</option>
+<option value="Masculino">Masculino</option>
+<option value="Femenino">Femenino</option>
+</select>
+</div>
+
+<div class="form-group">
+<label class="form-label">Historia clínica <span style="color:#686e74;text-transform:none;">(opcional)</span></label>
+<input class="form-input" id="editPatientHistory" type="text" placeholder="Número de historia clínica">
+</div>
+
+<div class="status-message" id="editPatientStatus"></div>
+
+<div class="admin-actions">
+<button class="admin-secondary" onclick="closeEditPatient()">CANCELAR</button>
+<button class="admin-primary" onclick="saveEditPatient()">GUARDAR CAMBIOS</button>
+</div>
 
 </div>
 
@@ -1116,6 +1474,50 @@ AÑADIR IMÁGENES AL ESTUDIO
 <div class="form-group">
 
 <label class="form-label">
+Estructura o zona de estas imágenes <span style="color:#686e74;text-transform:none;">(opcional)</span>
+</label>
+
+<select class="study-selector" id="additionalStructure">
+<option value="">No especificar</option>
+<option value="Tórax AP">Tórax AP</option>
+<option value="Tórax PA">Tórax PA</option>
+<option value="Tórax AP y lateral">Tórax AP y lateral</option>
+<option value="Columna cervical">Columna cervical</option>
+<option value="Columna dorsal">Columna dorsal</option>
+<option value="Columna lumbar">Columna lumbar</option>
+<option value="Columna lumbosacra">Columna lumbosacra</option>
+<option value="Columna completa">Columna completa</option>
+<option value="Pelvis">Pelvis</option>
+<option value="Cadera">Cadera</option>
+<option value="Rodilla">Rodilla</option>
+<option value="Pierna">Pierna</option>
+<option value="Tobillo">Tobillo</option>
+<option value="Pie">Pie</option>
+<option value="Fémur">Fémur</option>
+<option value="Húmero">Húmero</option>
+<option value="Codo">Codo</option>
+<option value="Antebrazo">Antebrazo</option>
+<option value="Muñeca">Muñeca</option>
+<option value="Mano">Mano</option>
+<option value="Hombro">Hombro</option>
+<option value="Clavícula">Clavícula</option>
+<option value="Costillas">Costillas</option>
+<option value="Senos paranasales">Senos paranasales</option>
+<option value="Cráneo">Cráneo</option>
+<option value="Macizo facial">Macizo facial</option>
+<option value="Abdomen">Abdomen</option>
+<option value="Otro">Otro</option>
+</select>
+
+<div style="color:#686e74;font-size:11px;margin-top:6px;">
+Esta estructura se asignará solo a las imágenes que subas ahora. Si necesitas subir imágenes de otra zona, hazlo en otro lote usando este mismo botón.
+</div>
+
+</div>
+
+<div class="form-group">
+
+<label class="form-label">
 Seleccionar nuevas imágenes JPG
 </label>
 
@@ -1231,6 +1633,11 @@ let suppressNextDrag=false;
    FECHA
 ========================================================= */
 
+function setDateLabel(date){
+  const el=document.getElementById('currentDateLabel');
+  if(el)el.textContent=formatDate(date);
+}
+
 function getTodayString(){
 
 const today=new Date();
@@ -1343,13 +1750,54 @@ items=[text];
 
 }
 
+/*
+   Cada imagen puede venir en dos formatos:
+   - string: ruta o URL directa (formato antiguo, sin estructura)
+   - objeto {path, structure}: formato nuevo, con estructura anatómica
+*/
+
 return items
-.filter(
-item=>
+.map(item=>{
+
+if(
 typeof item==="string"&&
 item.trim()!==""
-)
-.map(item=>getImageUrl(item));
+){
+
+return{
+
+path:item.trim(),
+url:getImageUrl(item.trim()),
+structure:""
+
+};
+
+}
+
+if(
+item&&
+typeof item==="object"&&
+typeof item.path==="string"&&
+item.path.trim()!==""
+){
+
+return{
+
+path:item.path.trim(),
+url:getImageUrl(item.path.trim()),
+structure:
+typeof item.structure==="string"?
+item.structure:
+""
+
+};
+
+}
+
+return null;
+
+})
+.filter(item=>item!==null);
 
 }
 
@@ -1393,10 +1841,7 @@ images:normalizeImages(item.images)
 renderCalendar();
 renderPatients();
 
-document.getElementById(
-"currentDateLabel"
-).textContent=
-formatDate(selectedDate);
+setDateLabel(selectedDate);
 
 }catch(error){
 
@@ -1621,10 +2066,7 @@ currentImage=0;
 
 resetView();
 
-document.getElementById(
-"currentDateLabel"
-).textContent=
-formatDate(date);
+setDateLabel(date);
 
 renderCalendar();
 renderPatients();
@@ -1924,10 +2366,7 @@ currentImage=0;
 
 resetView();
 
-document.getElementById(
-"currentDateLabel"
-).textContent=
-formatDate(date);
+setDateLabel(date);
 
 renderCalendar();
 renderPatients();
@@ -2179,7 +2618,7 @@ renderThumbnails(study);
 if(study.images.length){
 
 showImage(
-study.images[currentImage]
+study.images[currentImage].url
 );
 
 }else{
@@ -2239,6 +2678,11 @@ document.getElementById(
 "addStudyButton"
 );
 
+const editPatientButton=
+document.getElementById(
+"editPatientButton"
+);
+
 const study=
 getCurrentStudy();
 
@@ -2249,6 +2693,13 @@ if(addStudyButton){
 
 addStudyButton.style.display=
 admin?"block":"none";
+
+}
+
+if(editPatientButton){
+
+editPatientButton.style.display=
+(admin&&currentPatient)?"block":"none";
 
 }
 
@@ -2541,7 +2992,7 @@ document.getElementById(
 container.innerHTML="";
 
 study.images.forEach(
-(src,index)=>{
+(imageObj,index)=>{
 
 const item=
 document.createElement(
@@ -2553,9 +3004,15 @@ item.className="thumbnail-item";
 const img=
 document.createElement("img");
 
-img.src=src;
+img.src=imageObj.url;
 
 img.className="thumbnail";
+
+if(imageObj.structure){
+
+img.title=imageObj.structure;
+
+}
 
 if(index===currentImage){
 
@@ -2571,7 +3028,7 @@ currentImage=index;
 
 resetView();
 
-showImage(src);
+showImage(imageObj.url);
 
 renderThumbnails(study);
 
@@ -2657,11 +3114,8 @@ document.getElementById(
 ).textContent=
 "Eliminando imagen...";
 
-const imageUrl=
-study.images[imageIndex];
-
 const storagePath=
-getStoragePath(imageUrl);
+study.images[imageIndex].path;
 
 const remainingImages=
 study.images
@@ -2669,10 +3123,13 @@ study.images
 (_,index)=>index!==imageIndex
 )
 .map(
-image=>getStoragePath(image)
+image=>({
+path:image.path,
+structure:image.structure||""
+})
 )
 .filter(
-path=>path
+image=>image.path
 );
 
 const{
@@ -2805,6 +3262,16 @@ study.images.length?
 study.images.length:
 "--";
 
+const currentImageObj=
+study.images[currentImage];
+
+document.getElementById(
+"infoImageStructure"
+).textContent=
+(currentImageObj&&currentImageObj.structure)?
+currentImageObj.structure:
+(study.study||"No especificado");
+
 }
 
 /* =========================================================
@@ -2834,7 +3301,7 @@ currentImage=0;
 resetView();
 
 showImage(
-study.images[currentImage]
+study.images[currentImage].url
 );
 
 renderThumbnails(study);
@@ -2864,7 +3331,7 @@ study.images.length-1;
 resetView();
 
 showImage(
-study.images[currentImage]
+study.images[currentImage].url
 );
 
 renderThumbnails(study);
@@ -3708,7 +4175,7 @@ if(
 document.getElementById(
 "fullscreenImage"
 ).src=
-study.images[currentImage];
+study.images[currentImage].url;
 
 document.getElementById(
 "fullscreenViewer"
@@ -3778,6 +4245,239 @@ document.getElementById(
 "loginOverlay"
 ).style.display=
 "none";
+
+}
+
+/* =========================================================
+   EDITAR PACIENTE
+========================================================= */
+
+function openEditPatient(){
+
+if(!currentPatient){
+
+alert(
+"Primero selecciona un paciente."
+);
+
+return;
+
+}
+
+const patientStudies=
+getPatientStudies();
+
+const reference=
+patientStudies[0]||{};
+
+document.getElementById(
+"editPatientName"
+).value=
+currentPatient||"";
+
+document.getElementById(
+"editPatientBirth"
+).value=
+reference.birth||"";
+
+document.getElementById(
+"editPatientSex"
+).value=
+reference.sex||"";
+
+document.getElementById(
+"editPatientHistory"
+).value=
+reference.history||"";
+
+document.getElementById(
+"editPatientStatus"
+).textContent="";
+
+document.getElementById(
+"editPatientOverlay"
+).style.display=
+"flex";
+
+setTimeout(()=>{
+
+document.getElementById(
+"editPatientName"
+).focus();
+
+},100);
+
+}
+
+function closeEditPatient(){
+
+const overlay=
+document.getElementById(
+"editPatientOverlay"
+);
+
+if(overlay){
+
+overlay.style.display=
+"none";
+
+}
+
+}
+
+async function saveEditPatient(){
+
+if(!currentPatient){
+
+closeEditPatient();
+
+return;
+
+}
+
+const newName=
+document.getElementById(
+"editPatientName"
+).value.trim();
+
+const birth=
+document.getElementById(
+"editPatientBirth"
+).value||null;
+
+const sex=
+document.getElementById(
+"editPatientSex"
+).value||null;
+
+const history=
+document.getElementById(
+"editPatientHistory"
+).value.trim()||null;
+
+const status=
+document.getElementById(
+"editPatientStatus"
+);
+
+if(!newName){
+
+status.className=
+"status-message status-error";
+
+status.textContent=
+"El nombre del paciente no puede estar vacío.";
+
+return;
+
+}
+
+const admin=
+await isAdminLogged();
+
+if(!admin){
+
+status.className=
+"status-message status-error";
+
+status.textContent=
+"La sesión de administrador no es válida.";
+
+return;
+
+}
+
+try{
+
+status.className=
+"status-message";
+
+status.textContent=
+"Guardando cambios...";
+
+const previousPatient=
+currentPatient;
+
+const{
+error
+}=
+await supabaseClient
+.from("studies")
+.update({
+
+patient:newName,
+birth:birth,
+sex:sex,
+history:history
+
+})
+.eq(
+"patient",
+previousPatient
+)
+.eq(
+"date",
+selectedDate
+);
+
+if(error)
+throw error;
+
+currentPatient=
+newName;
+
+await loadStudies();
+
+renderCalendar();
+renderPatients();
+
+const patientStudies=
+getPatientStudies();
+
+if(patientStudies.length){
+
+currentStudy=
+Math.min(
+currentStudy,
+patientStudies.length-1
+);
+
+renderStudy(
+patientStudies[currentStudy]
+);
+
+}else{
+
+clearViewer();
+
+}
+
+status.className=
+"status-message status-success";
+
+status.textContent=
+"Información del paciente actualizada.";
+
+setTimeout(
+()=>closeEditPatient(),
+700
+);
+
+}catch(error){
+
+console.error(
+"ERROR AL EDITAR PACIENTE:",
+error
+);
+
+status.className=
+"status-message status-error";
+
+status.textContent=
+error.message||
+"No se pudo actualizar la información del paciente.";
+
+}
 
 }
 
@@ -4004,10 +4704,23 @@ addStudyButton.style.display=
 
 closeAddImages();
 closeAddStudy();
+closeEditPatient();
 
 document.getElementById(
 "viewerAdminActions"
 ).style.display="none";
+
+const editPatientButton=
+document.getElementById(
+"editPatientButton"
+);
+
+if(editPatientButton){
+
+editPatientButton.style.display=
+"none";
+
+}
 
 }
 
@@ -4351,7 +5064,12 @@ study:studyType||null,
 
 structure:null,
 modality:"CR",
-images:newPaths
+images:newPaths.map(
+path=>({
+path:path,
+structure:studyType||""
+})
+)
 
 })
 .select()
@@ -4601,6 +5319,16 @@ document.getElementById(
 "additionalFiles"
 );
 
+const structureSelect=
+document.getElementById(
+"additionalStructure"
+);
+
+const selectedStructure=
+structureSelect?
+structureSelect.value.trim():
+"";
+
 const status=
 document.getElementById(
 "addImagesStatus"
@@ -4731,14 +5459,25 @@ newPaths.push(path);
 
 }
 
-const existingPaths=
+const existingImages=
 study.images
-.map(image=>getStoragePath(image))
-.filter(path=>path);
+.map(image=>({
+path:image.path,
+structure:image.structure||""
+}))
+.filter(image=>image.path);
 
-const combinedPaths=[
-...existingPaths,
-...newPaths
+const newImages=
+newPaths.map(
+path=>({
+path:path,
+structure:selectedStructure
+})
+);
+
+const combinedImages=[
+...existingImages,
+...newImages
 ];
 
 status.textContent=
@@ -4750,7 +5489,7 @@ error:updateError
 await supabaseClient
 .from("studies")
 .update({
-images:combinedPaths
+images:combinedImages
 })
 .eq(
 "id",
@@ -4913,7 +5652,7 @@ document.getElementById(
 
 const paths=
 study.images
-.map(image=>getStoragePath(image))
+.map(image=>image.path)
 .filter(path=>path);
 
 const{
@@ -4996,6 +5735,7 @@ closeFullscreen();
 closeLogin();
 closeAddImages();
 closeAddStudy();
+closeEditPatient();
 
 document.getElementById(
 "searchResults"
@@ -5038,6 +5778,61 @@ fitImageToViewport();
 });
 
 /* =========================================================
+   UI — CONTROLES RIS / MÓVIL
+========================================================= */
+function toggleDatePopover(event){
+  if(event){ event.preventDefault(); event.stopPropagation(); }
+  const calendarPanel=document.querySelector('.panel:last-child');
+  if(!calendarPanel)return;
+  const isOpen=calendarPanel.classList.toggle('calendar-open');
+  if(isOpen){
+    closeMobilePanels();
+    renderCalendar();
+  }
+}
+
+function toggleMobilePanel(type){
+  const patients=document.querySelector('.panel:nth-child(2)');
+  const info=document.querySelector('.info-panel');
+  const calendar=document.querySelector('.panel:last-child');
+  if(calendar)calendar.classList.remove('calendar-open');
+  if(type==='patients'){
+    info?.classList.remove('mobile-open');
+    patients?.classList.toggle('mobile-open');
+  }else if(type==='info'){
+    patients?.classList.remove('mobile-open');
+    info?.classList.toggle('mobile-open');
+  }
+}
+
+function closeMobilePanels(){
+  document.querySelector('.panel:nth-child(2)')?.classList.remove('mobile-open');
+  document.querySelector('.info-panel')?.classList.remove('mobile-open');
+}
+
+function focusViewer(){
+  closeMobilePanels();
+  document.querySelector('.panel:last-child')?.classList.remove('calendar-open');
+  const viewer=document.querySelector('.viewer');
+  if(viewer)viewer.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+document.addEventListener('click',function(event){
+  const calendar=document.querySelector('.panel:last-child');
+  const button=document.getElementById('dateFilterButton');
+  if(calendar && calendar.classList.contains('calendar-open') && !calendar.contains(event.target) && !button?.contains(event.target)){
+    calendar.classList.remove('calendar-open');
+  }
+});
+
+window.addEventListener('resize',function(){
+  const img=document.getElementById('mainImage');
+  if(img && img.complete && img.naturalWidth>0){
+    requestAnimationFrame(()=>{ if(typeof fitImageToViewport==='function')fitImageToViewport(); });
+  }
+});
+
+/* =========================================================
    INICIO
 ========================================================= */
 
@@ -5045,10 +5840,7 @@ renderCalendar();
 
 clearViewer();
 
-document.getElementById(
-"currentDateLabel"
-).textContent=
-formatDate(selectedDate);
+setDateLabel(selectedDate);
 
 checkAuth();
 
