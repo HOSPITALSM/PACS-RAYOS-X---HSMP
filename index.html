@@ -714,8 +714,9 @@ body{font-size:16px}
   .tool{font-size:12px}
 }
 </style>
+
 <style>
-/* AJUSTES SOLICITADOS */
+/* AJUSTES SOLICITADOS — V2 */
 body{font-size:15px}
 .panel-title{font-size:15px}
 .panel-body,.info-section,.info-row{font-size:14px}
@@ -723,61 +724,89 @@ body{font-size:15px}
 .viewer-subtitle{font-size:13px}
 button,input,select{font-size:14px}
 
+.logo{
+width:52px!important;
+height:52px!important;
+flex-shrink:0!important;
+}
+
 .logo img{
-width:auto!important;
-height:auto!important;
-max-width:100%!important;
-max-height:48px!important;
-object-fit:contain;
+width:100%!important;
+height:100%!important;
+object-fit:contain!important;
 }
 
 @media(max-width:700px){
+
 .topbar{
 height:auto!important;
 min-height:0!important;
 padding:8px 9px!important;
 display:grid!important;
-grid-template-columns:1fr auto!important;
+grid-template-columns:52px 1fr auto!important;
 grid-template-areas:
-"logo auth"
-"brand brand"
-"search search"
-"date date"!important;
+"logo brand auth"
+"search search search"
+"date date date"!important;
 gap:7px!important;
 align-items:center!important;
 }
+
 .logo{
 grid-area:logo!important;
-width:44px!important;
-height:44px!important;
+width:48px!important;
+height:48px!important;
 display:flex!important;
 align-items:center!important;
 justify-content:center!important;
 }
-.logo img{max-width:44px!important;max-height:44px!important}
+
+.logo img{
+width:48px!important;
+height:48px!important;
+}
+
 .brand{
 grid-area:brand!important;
 min-width:0!important;
-width:100%!important;
-text-align:center!important;
+width:auto!important;
+text-align:left!important;
+align-items:flex-start!important;
 }
-.brand-title{font-size:12px!important;line-height:1.2!important}
-.brand-subtitle{display:block!important;font-size:9px!important;line-height:1.2!important}
+
+.brand-title{
+font-size:12px!important;
+line-height:1.2!important;
+}
+
+.brand-subtitle{
+display:block!important;
+font-size:9px!important;
+line-height:1.2!important;
+}
+
 .search{
 grid-area:search!important;
 width:100%!important;
 max-width:none!important;
 margin:0!important;
 }
+
 .search input{
 width:100%!important;
 height:36px!important;
 box-sizing:border-box!important;
 font-size:13px!important;
 }
-.current-date{grid-area:date!important;justify-self:center!important}
+
+.current-date{
+grid-area:date!important;
+justify-self:center!important;
+}
+
 }
 </style>
+
 </head>
 <body>
 <header class="topbar">
@@ -1021,10 +1050,7 @@ EDITAR INFORMACIÓN DEL PACIENTE
 <label class="form-label">Nombre del paciente</label>
 <input class="form-input" id="editPatientName" type="text" placeholder="Nombre completo del paciente">
 </div>
-<div class="form-group">
-<label class="form-label">Fecha de nacimiento <span style="color:#686e74;text-transform:none;">(opcional)</span></label>
-<input class="form-input" id="editPatientBirth" type="date">
-</div>
+
 
 
 <div class="status-message" id="editPatientStatus"></div>
@@ -1859,95 +1885,65 @@ document.createElement(
 "option"
 );
 
-option.value=
-"study:"+index;
+option.value=index;
 
-const studyName=
+const currentImageObj=
+study.images[currentImage];
+
+const currentStructure=
+currentImageObj&&
+currentImageObj.structure?
+currentImageObj.structure.trim():
+"";
+
+let studyName=
 study.study||
 "Estudio no especificado";
+
+/*
+   El desplegable sigue representando el estudio,
+   pero cuando la imagen actual tiene una estructura
+   (por ejemplo Tórax), esa estructura pasa a ser
+   el texto visible de la opción seleccionada.
+*/
+if(index===currentStudy&&currentStructure){
+
+studyName=currentStructure;
+
+}
 
 option.textContent=
 studyName+
 " · "+
 formatDate(study.date);
 
-if(index===currentStudy)
+if(index===currentStudy){
+
 option.selected=true;
+
+}
 
 selector.appendChild(
 option
 );
 
-if(index===currentStudy){
+});
 
-const structures=[];
+}
 
-study.images.forEach(
-(image,imageIndex)=>{
-
-const structure=
-(image.structure||"").trim();
-
-if(
-structure &&
-!structures.some(
-item=>item.name===structure
-)
+function changeSelectedStudy(
+value
 ){
-
-structures.push({
-name:structure,
-imageIndex:imageIndex
-});
-
-}
-
-});
-
-structures.forEach(
-item=>{
-
-const structureOption=
-document.createElement(
-"option"
-);
-
-structureOption.value=
-"image:"+
-index+
-":"+
-item.imageIndex;
-
-structureOption.textContent=
-"↳ "+
-item.name;
-
-selector.appendChild(
-structureOption
-);
-
-});
-
-}
-
-});
-
-}
-
-function changeSelectedStudy(value){
 
 if(value==="")return;
 
-const parts=
-String(value).split(":");
-
-if(parts[0]==="study"){
-
-const index=parseInt(parts[1],10);
+const index=
+parseInt(value,10);
 
 if(isNaN(index))return;
 
-const list=getPatientStudies();
+const list=
+getPatientStudies();
 
 if(!list[index])return;
 
@@ -1955,35 +1951,10 @@ currentStudy=index;
 currentImage=0;
 
 resetView();
-renderStudy(list[index]);
 
-return;
-
-}
-
-if(parts[0]==="image"){
-
-const studyIndex=parseInt(parts[1],10);
-const imageIndex=parseInt(parts[2],10);
-
-if(
-isNaN(studyIndex)||
-isNaN(imageIndex)
-)return;
-
-const list=getPatientStudies();
-const study=list[studyIndex];
-
-if(!study||!study.images[imageIndex])
-return;
-
-currentStudy=studyIndex;
-currentImage=imageIndex;
-
-resetView();
-renderStudy(study);
-
-}
+renderStudy(
+list[index]
+);
 
 }
 
@@ -3137,10 +3108,7 @@ document.getElementById(
 "editPatientName"
 ).value=
 currentPatient||"";
-document.getElementById(
-"editPatientBirth"
-).value=
-reference.birth||"";
+
 
 
 document.getElementById(
@@ -3167,117 +3135,147 @@ overlay.style.display=
 }
 }
 async function saveEditPatient(){
+
 if(!currentPatient){
+
 closeEditPatient();
+
 return;
+
 }
+
 const newName=
 document.getElementById(
 "editPatientName"
 ).value.trim();
-const birth=
-document.getElementById(
-"editPatientBirth"
-).value||null;
-
 
 const status=
 document.getElementById(
 "editPatientStatus"
 );
+
 if(!newName){
+
 status.className=
 "status-message status-error";
+
 status.textContent=
 "El nombre del paciente no puede estar vacío.";
+
 return;
+
 }
+
 const admin=
 await isAdminLogged();
+
 if(!admin){
+
 status.className=
 "status-message status-error";
+
 status.textContent=
 "La sesión de administrador no es válida.";
+
 return;
+
 }
+
 try{
+
 status.className=
 "status-message";
+
 status.textContent=
 "Guardando cambios...";
-const patientStudiesToUpdate=
-getPatientStudies().filter(
-study=>study.id
-);
 
-if(!patientStudiesToUpdate.length){
-throw new Error(
-"No se encontraron estudios del paciente para actualizar."
-);
-}
-
-for(const study of patientStudiesToUpdate){
+const previousPatient=
+currentPatient;
 
 const{
-error:updateError
+error
 }=
 await supabaseClient
 .from("studies")
 .update({
-patient:newName,
-birth:birth
+patient:newName
 })
 .eq(
-"id",
-study.id
+"patient",
+previousPatient
+)
+.eq(
+"date",
+selectedDate
 );
 
-if(updateError)
-throw updateError;
-
-}
 if(error)
 throw error;
+
 currentPatient=
 newName;
+
+/*
+   Recargamos Supabase y volvemos a pintar la columna
+   Pacientes. Así el nombre nuevo queda visible allí.
+*/
 await loadStudies();
+
 renderCalendar();
 renderPatients();
+
 const patientStudies=
 getPatientStudies();
+
 if(patientStudies.length){
+
 currentStudy=
 Math.min(
 currentStudy,
 patientStudies.length-1
 );
+
 renderStudy(
 patientStudies[currentStudy]
 );
+
 }else{
+
 clearViewer();
+
 }
+
 status.className=
 "status-message status-success";
+
 status.textContent=
 "Información del paciente actualizada.";
+
 setTimeout(
-()=>closeEditPatient(),
+()=>{
+closeEditPatient();
+},
 700
 );
+
 }catch(error){
+
 console.error(
 "ERROR AL EDITAR PACIENTE:",
 error
 );
+
 status.className=
 "status-message status-error";
+
 status.textContent=
 error.message||
 "No se pudo actualizar la información del paciente.";
+
 }
+
 }
+
 async function loginAdmin(){
 const email=
 document.getElementById(
