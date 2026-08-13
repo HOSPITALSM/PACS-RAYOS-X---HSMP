@@ -965,6 +965,63 @@ object-fit:cover!important;
 }
 </style>
 
+
+<style>
+/* V5 — más espacio para el logo y separación clara del encabezado */
+@media(min-width:701px){
+
+.topbar{
+height:72px!important;
+min-height:72px!important;
+box-sizing:border-box!important;
+}
+
+.app{
+height:calc(100vh - 72px)!important;
+}
+
+.logo{
+width:60px!important;
+height:60px!important;
+}
+
+.logo img{
+width:60px!important;
+height:60px!important;
+}
+
+}
+
+@media(max-width:700px){
+
+.topbar{
+min-height:104px!important;
+height:auto!important;
+box-sizing:border-box!important;
+padding-top:10px!important;
+padding-bottom:16px!important;
+border-bottom:2px solid #292d31!important;
+}
+
+.logo{
+width:78px!important;
+height:78px!important;
+margin-bottom:2px!important;
+}
+
+.logo img{
+width:78px!important;
+height:78px!important;
+}
+
+.app{
+min-height:calc(100vh - 104px)!important;
+height:auto!important;
+}
+
+}
+</style>
+
 </head>
 <body>
 <header class="topbar">
@@ -4372,5 +4429,140 @@ setDateLabel(selectedDate);
 checkAuth();
 loadStudies();
 </script>
+
+<script>
+/* V5 — cierre de paneles móviles mediante gesto horizontal */
+(function(){
+
+  const enablePanelSwipe=(panelSelector,direction)=>{
+
+    const panel=document.querySelector(panelSelector);
+
+    if(!panel)return;
+
+    let startX=0;
+    let startY=0;
+    let tracking=false;
+    let horizontal=false;
+
+    panel.addEventListener(
+      "touchstart",
+      function(event){
+
+        if(!event.touches||event.touches.length!==1)return;
+
+        startX=event.touches[0].clientX;
+        startY=event.touches[0].clientY;
+
+        tracking=true;
+        horizontal=false;
+
+      },
+      {passive:true}
+    );
+
+    panel.addEventListener(
+      "touchmove",
+      function(event){
+
+        if(!tracking||!event.touches||event.touches.length!==1)
+          return;
+
+        const dx=
+          event.touches[0].clientX-startX;
+
+        const dy=
+          event.touches[0].clientY-startY;
+
+        if(
+          Math.abs(dx)>12 &&
+          Math.abs(dx)>Math.abs(dy)
+        ){
+
+          horizontal=true;
+
+          /* Bloquea el scroll vertical solo durante
+             un gesto claramente horizontal. */
+          event.preventDefault();
+
+        }
+
+      },
+      {passive:false}
+    );
+
+    panel.addEventListener(
+      "touchend",
+      function(event){
+
+        if(!tracking)return;
+
+        tracking=false;
+
+        const touch=
+          event.changedTouches&&
+          event.changedTouches[0];
+
+        if(!touch)return;
+
+        const dx=
+          touch.clientX-startX;
+
+        const dy=
+          touch.clientY-startY;
+
+        const validHorizontal=
+          horizontal&&
+          Math.abs(dx)>=65&&
+          Math.abs(dx)>Math.abs(dy)*1.2;
+
+        if(!validHorizontal)return;
+
+        if(
+          (direction==="left"&&dx<0)||
+          (direction==="right"&&dx>0)
+        ){
+
+          closeMobilePanels();
+
+        }
+
+      },
+      {passive:true}
+    );
+
+  };
+
+  const initPanelSwipes=()=>{
+
+    enablePanelSwipe(
+      ".panel:nth-child(2)",
+      "left"
+    );
+
+    enablePanelSwipe(
+      ".info-panel",
+      "right"
+    );
+
+  };
+
+  if(document.readyState==="loading"){
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      initPanelSwipes,
+      {once:true}
+    );
+
+  }else{
+
+    initPanelSwipes();
+
+  }
+
+})();
+</script>
+
 </body>
 </html>
