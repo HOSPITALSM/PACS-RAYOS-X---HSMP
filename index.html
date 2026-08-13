@@ -857,30 +857,111 @@ overflow:visible!important;
 
 }
 </style>
+<style>
+/* V4 — logo ligeramente más grande */
+@media(min-width:701px){
+.logo{
+width:60px!important;
+height:60px!important;
+}
+.logo img{
+width:60px!important;
+height:60px!important;
+}
+}
+</style>
 
 
 <style>
+/* V4 — móvil: desplazamiento vertical normal con un dedo */
 @media(max-width:700px){
-#mobileBackTop{
-position:fixed!important;
-right:12px!important;
-bottom:12px!important;
-z-index:1200!important;
-width:42px!important;
-height:42px!important;
-border-radius:50%!important;
-border:1px solid #3b454b!important;
-background:#15191c!important;
-color:#d8dde0!important;
-font-size:20px!important;
+
+html{
+height:auto!important;
+min-height:100%!important;
+overflow-y:auto!important;
+}
+
+body{
+height:auto!important;
+min-height:100vh!important;
+overflow-x:hidden!important;
+overflow-y:auto!important;
+-webkit-overflow-scrolling:touch!important;
+}
+
+.app{
+height:auto!important;
+min-height:0!important;
+overflow:visible!important;
+}
+
+.viewer{
+height:auto!important;
+min-height:0!important;
+overflow:visible!important;
+}
+
+.viewport{
+height:calc(100svh - 250px)!important;
+min-height:350px!important;
+max-height:none!important;
+
+/* Permite el scroll vertical normal de la página */
+touch-action:pan-y!important;
+overscroll-behavior-y:auto!important;
+}
+
+.image-wrapper{
+touch-action:none!important;
+}
+
+.main-image{
+touch-action:none!important;
+}
+
+}
+
+/* En pantallas muy pequeñas conservamos un visor compacto */
+@media(max-width:380px){
+.viewport{
+height:calc(100svh - 245px)!important;
+min-height:320px!important;
+}
+}
+</style>
+
+
+<style>
+/* V4 — miniaturas debajo del visor en móvil */
+@media(max-width:700px){
+
+.thumbnails{
 display:flex!important;
-align-items:center!important;
-justify-content:center!important;
-box-shadow:0 4px 16px rgba(0,0,0,.4)!important;
+order:initial!important;
+width:100%!important;
+height:94px!important;
+min-height:94px!important;
+box-sizing:border-box!important;
+overflow-x:auto!important;
+overflow-y:hidden!important;
+-webkit-overflow-scrolling:touch!important;
+touch-action:pan-x!important;
+scroll-snap-type:x proximity;
 }
+
+.thumbnail-item{
+flex:0 0 76px!important;
+width:76px!important;
+height:76px!important;
 }
-@media(min-width:701px){
-#mobileBackTop{display:none!important}
+
+.thumbnail{
+width:76px!important;
+height:68px!important;
+object-fit:cover!important;
+}
+
 }
 </style>
 
@@ -913,15 +994,6 @@ CERRAR SESIÓN
 </button>
 </div>
 </header>
-
-<button
-id="mobileBackTop"
-type="button"
-aria-label="Volver arriba"
-onclick="window.scrollTo({top:0,behavior:'smooth'})">
-↑
-</button>
-
 <div class="app">
 <aside class="panel info-panel">
 <div class="panel-header">
