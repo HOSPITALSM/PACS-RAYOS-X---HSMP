@@ -1481,13 +1481,14 @@ button.delete:hover,
 </style>
 
 
-<style id="v12-final-layout">
+<style id="v13-final-layout">
 /* =========================================================
-   V12 — DISTRIBUCIÓN FINAL
+   V13 — LAYOUT FINAL
    ========================================================= */
 
-/* Encabezado PC:
-   BUSCAR PACIENTE → FECHA → CORREO → CERRAR SESIÓN */
+/* HEADER:
+   logo/hospital remains untouched.
+   Right block: Buscar -> Fecha -> Correo -> Cerrar sesión. */
 @media(min-width:701px){
 
   .topbar{
@@ -1496,53 +1497,47 @@ button.delete:hover,
     gap:10px!important;
   }
 
-  .search{
-    order:1!important;
-    margin-left:0!important;
+  .topbar .search{
+    order:10!important;
+    margin-left:auto!important;
     margin-right:0!important;
-    width:310px!important;
-    max-width:310px!important;
-    flex:0 0 310px!important;
+    width:300px!important;
+    max-width:300px!important;
+    flex:0 0 300px!important;
   }
 
-  .current-date{
-    order:2!important;
+  .topbar .current-date{
+    order:20!important;
     margin-left:0!important;
     margin-right:0!important;
     flex:0 0 auto!important;
   }
 
-  .auth-area{
-    order:3!important;
+  .topbar .auth-area{
+    order:30!important;
     margin-left:0!important;
     margin-right:0!important;
     display:flex!important;
     align-items:center!important;
-    gap:6px!important;
+    gap:7px!important;
   }
 
-  .auth-user{
+  .topbar .auth-area .auth-user{
     order:1!important;
   }
 
-  .auth-area .logout-button{
+  .topbar .auth-area .logout-button{
     order:2!important;
   }
 
-  .auth-area #loginButton{
+  .topbar .auth-area #loginButton{
     order:3!important;
-  }
-
-  /* No empujar Fecha ni Autenticación al extremo derecho. */
-  .current-date{
-    margin-left:0!important;
   }
 }
 
-/* PC:
-   el visor conserva sus dimensiones existentes.
-   La lista de estudios ocupa la misma columna central,
-   pero en una segunda fila. */
+/* CENTRAL COLUMN:
+   viewer and thumbnails stay in the original central area.
+   Studies are below them, centered in the same central column. */
 @media(min-width:701px){
 
   html,
@@ -1557,33 +1552,42 @@ button.delete:hover,
     height:auto!important;
     min-height:calc(100vh - 56px)!important;
     overflow:visible!important;
-    grid-template-rows:auto auto!important;
     align-items:start!important;
   }
 
-  /* NO se modifica .viewer, .viewport, .toolbar ni .thumbnails.
-     Solo se define dónde cae la sección nueva. */
+  .viewer{
+    min-height:0!important;
+    overflow:visible!important;
+  }
+
   .patient-studies-below{
-    grid-column:3!important;
-    grid-row:2!important;
-    width:100%!important;
-    box-sizing:border-box!important;
     display:none;
+    grid-column:2!important;
+    grid-row:auto!important;
+    width:100%!important;
+    max-width:none!important;
+    box-sizing:border-box!important;
     margin:0!important;
-    padding:12px 0 28px!important;
+    padding:14px 8px 32px!important;
     border-top:1px solid #293238!important;
     background:#080b0d!important;
     overflow:visible!important;
+    justify-self:stretch!important;
   }
 
   .patient-studies-below.has-studies{
     display:block!important;
   }
 
+  .patient-studies-title{
+    text-align:center!important;
+  }
+
   .patient-studies-below-list{
     display:flex!important;
     flex-direction:column!important;
     gap:6px!important;
+    width:100%!important;
     max-height:none!important;
     overflow:visible!important;
   }
@@ -1592,19 +1596,16 @@ button.delete:hover,
     width:100%!important;
     box-sizing:border-box!important;
   }
-
 }
 
-/* La lista inferior NO tiene scroll propio.
-   Se usa el scroll normal de toda la página. */
+/* Page scroll, NOT an internal scroll for studies. */
 .patient-studies-scroll{
   max-height:none!important;
   overflow:visible!important;
   padding-right:0!important;
 }
 
-/* En móvil mantenemos el scroll normal de página que ya habíamos
-   conseguido y no alteramos el tamaño de visor/miniaturas actual. */
+/* Mobile: normal page scrolling; no forced internal list scroll. */
 @media(max-width:700px){
 
   html,
@@ -1624,11 +1625,6 @@ button.delete:hover,
     box-sizing:border-box!important;
     margin-top:0!important;
     padding:10px 10px 24px!important;
-    overflow:visible!important;
-  }
-
-  .patient-studies-scroll{
-    max-height:none!important;
     overflow:visible!important;
   }
 
@@ -2164,6 +2160,8 @@ const STORAGE_BUCKET =
 "IMAGENES";
 let studies=[];
 let selectedDate=getTodayString();
+/* La columna Pacientes mantiene la fecha seleccionada por calendario. */
+let patientListDate=selectedDate;
 let calendarDate=new Date(selectedDate+"T00:00:00");
 let currentPatient=null;
 let currentStudy=0;
@@ -2344,7 +2342,7 @@ item=>item.date===selectedDate
 }
 function getPatientsForDate(){
 const result=[];
-getStudiesForDate().forEach(item=>{
+studies.filter(item=>item.date===patientListDate).forEach(item=>{
 if(
 item.patient&&
 !result.includes(item.patient)
@@ -2453,6 +2451,7 @@ container.appendChild(div);
 }
 function selectDate(date){
 selectedDate=date;
+patientListDate=date;
 currentPatient=null;
 currentStudy=0;
 currentImage=0;
@@ -5199,6 +5198,7 @@ loadStudies();
 /* V10 — estudios históricos debajo de las miniaturas.
    No reemplaza el visor: el visor permanece visible. */
 
+
 function renderPatientStudiesBelow(){
 
   const list=
@@ -5218,10 +5218,8 @@ function renderPatientStudiesBelow(){
   list.innerHTML="";
 
   if(!currentPatient){
-
     section.classList.remove("has-studies");
     return;
-
   }
 
   const patientStudies=
@@ -5236,31 +5234,21 @@ function renderPatientStudiesBelow(){
           new Date(a.date||0)
       );
 
-  /* Agrupar por fecha: una fila por fecha y cantidad total
-     de imágenes de esa fecha. No se muestra estructura. */
   const byDate=new Map();
 
   patientStudies.forEach(
     study=>{
-
-      const date=
-        study.date||
-        "Sin fecha";
-
+      const date=study.date||"Sin fecha";
       if(!byDate.has(date)){
         byDate.set(date,[]);
       }
-
       byDate.get(date).push(study);
-
     }
   );
 
   if(!byDate.size){
-
     section.classList.remove("has-studies");
     return;
-
   }
 
   section.classList.add("has-studies");
@@ -5307,12 +5295,10 @@ function renderPatientStudiesBelow(){
       row.addEventListener(
         "click",
         function(){
-
           openPatientDateStudies(
             currentPatient,
             dateStudies
           );
-
         }
       );
 
@@ -5320,8 +5306,65 @@ function renderPatientStudiesBelow(){
 
     }
   );
-
 }
+
+function openPatientDateStudies(
+  patientName,
+  dateStudies
+){
+
+  if(
+    !patientName||
+    !dateStudies||
+    !dateStudies.length
+  ){
+    return;
+  }
+
+  const firstStudy=dateStudies[0];
+
+  /* Esta fecha solo controla el estudio del visor.
+     NO modifica patientListDate ni la lista de Pacientes. */
+  selectedDate=firstStudy.date;
+
+  if(firstStudy.date){
+    calendarDate=
+      new Date(
+        firstStudy.date+
+        "T00:00:00"
+      );
+
+    setDateLabel(firstStudy.date);
+    renderCalendar();
+  }
+
+  currentPatient=patientName;
+
+  const sameDateStudies=
+    studies.filter(
+      item=>
+        item.patient===patientName &&
+        item.date===firstStudy.date
+    );
+
+  const index=
+    sameDateStudies.findIndex(
+      item=>item.id===firstStudy.id
+    );
+
+  currentStudy=index>=0?index:0;
+  currentImage=0;
+
+  resetView();
+
+  renderStudy(firstStudy);
+
+  /* La lista Pacientes se vuelve a pintar con patientListDate,
+     no con selectedDate. */
+  renderPatients();
+  renderPatientStudiesBelow();
+}
+
 
 function openPatientDateStudies(
   patientName,
