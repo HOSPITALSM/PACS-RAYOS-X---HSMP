@@ -1637,24 +1637,56 @@ button.delete:hover,
 </style>
 
 
-<style id="v14-viewer-height">
-/* V14 — únicamente aumenta la altura del visor.
-   Miniaturas y estudios inferiores conservan su tamaño y se desplazan hacia abajo. */
-@media(min-width:701px){
 
+
+
+<style id="v15-real-viewer-height">
+/* V15 — Aumentar REALMENTE la altura del área de imagen del visor.
+   Las miniaturas conservan exactamente su altura; simplemente bajan. */
+
+@media (min-width:701px){
+
+  /* El contenedor central debe poder crecer verticalmente. */
+  .app{
+    align-items:start!important;
+    overflow:visible!important;
+  }
+
+  /* Bloque completo del visor: más alto. */
   .viewer{
-    min-height:720px!important;
-    height:720px!important;
+    height:820px!important;
+    min-height:820px!important;
+    max-height:none!important;
+    overflow:visible!important;
     box-sizing:border-box!important;
   }
 
-  /* El área de imagen ocupa el espacio adicional del visor. */
+  /* Área negra donde aparece la radiografía: recibe el aumento. */
   .viewer .viewport{
-    min-height:0!important;
-    height:auto!important;
+    height:calc(100% - 145px)!important;
+    min-height:600px!important;
+    max-height:none!important;
     flex:1 1 auto!important;
+    box-sizing:border-box!important;
   }
 
+  /* Barra de herramientas y miniaturas NO aumentan de altura. */
+  .viewer .toolbar{
+    flex:0 0 auto!important;
+  }
+
+  .viewer .thumbnails,
+  .viewer .thumbnail-strip,
+  #thumbnailList{
+    flex:0 0 auto!important;
+  }
+
+  /* La sección inferior permanece después del visor. */
+  .patient-studies-below{
+    margin-top:0!important;
+    position:relative!important;
+    top:auto!important;
+  }
 }
 </style>
 
