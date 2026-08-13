@@ -9,11 +9,711 @@
 <title>Hospital San Martín de Pangoa - Rayos X</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
 </script>
-<link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/ris-overrides.css">
-<link rel="stylesheet" href="css/typography.css">
-
-
+<style>
+:root{
+--bg:#08090a;--panel:#111315;--panel2:#17191c;--border:#2c3035;
+--text:#eeeeee;--muted:#858a91;--selected:#30353a;--hover:#25292d;
+--green:#3ecf8e;--green-dark:#2fb477;--warning:#e0a94e;
+--shadow-sm:0 2px 8px rgba(0,0,0,.35);--shadow-md:0 8px 24px rgba(0,0,0,.45);
+--ease:.15s ease
+}
+*{box-sizing:border-box}
+html{width:100%;min-height:100%;background:var(--bg)}
+body{margin:0;width:100%;min-height:100vh;background:var(--bg);color:var(--text);
+font-family:"Inter","Segoe UI",system-ui,Arial,Helvetica,sans-serif;
+-webkit-font-smoothing:antialiased;overflow-x:hidden;overflow-y:auto}
+button,input,select{font-family:inherit}
+.topbar{
+min-height:72px;background:#101214;border-bottom:1px solid var(--border);
+display:flex;align-items:center;padding:0 16px;gap:15px;position:relative;z-index:10
+}
+.logo{
+ width:120px;height:120px;border:1px solid var(--border);border-radius:6px;
+display:flex;align-items:center;justify-content:center;flex-shrink:0;
+overflow:hidden;background:#0d0f10
+}
+.logo img{width:100%;height:100%;object-fit:contain}
+.brand{min-width:280px}
+.brand-title{font-size:17px;font-weight:bold;letter-spacing:.5px;color:var(--green)}
+.brand-subtitle{color:var(--green);font-size:12px;margin-top:5px}
+.search{flex:1;max-width:430px;margin-left:auto;position:relative}
+.search input{
+width:100%;height:40px;background:#1a1d20;border:1px solid #353a40;border-radius:5px;
+color:white;padding:0 13px;outline:none;font-size:13px;transition:border-color var(--ease),box-shadow var(--ease)
+}
+.search input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(62,207,142,.12)}
+.search-results{
+position:absolute;top:45px;left:0;right:0;background:#151719;border:1px solid #34383d;
+border-radius:5px;box-shadow:var(--shadow-md);max-height:300px;overflow-y:auto;display:none;z-index:1000
+}
+.search-result{padding:11px 13px;border-bottom:1px solid #282c30;cursor:pointer;transition:background var(--ease)}
+.search-result:last-child{border-bottom:0}
+.search-result:hover{background:#25292d}
+.search-result-name{font-size:13px;color:#eee}
+.search-result-meta{font-size:10px;color:#858a91;margin-top:4px}
+.search-no-result{padding:15px;text-align:center;font-size:12px;color:#777d83}
+.current-date{color:#a9adb2;font-size:13px;white-space:nowrap}
+.auth-area{display:flex;align-items:center;gap:7px}
+.auth-button{
+height:38px;padding:0 13px;background:#202328;border:1px solid #34383d;border-radius:4px;
+color:#d0d4d8;font-size:12px;cursor:pointer;transition:border-color var(--ease),color var(--ease),background var(--ease)
+}
+.auth-button:hover{border-color:var(--green);color:var(--green)}
+.auth-user{color:var(--green);font-size:11px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.logout-button{display:none}
+.app{
+min-height:calc(100vh - 72px);display:grid;
+grid-template-columns:260px 255px 1fr 255px;min-width:1050px
+}
+.panel{
+background:var(--panel);border-right:1px solid var(--border);display:flex;
+flex-direction:column;overflow:hidden;min-height:650px
+}
+.panel-header{
+min-height:64px;padding:0 15px;display:flex;align-items:center;
+justify-content:space-between;border-bottom:1px solid var(--border);flex-shrink:0
+}
+.panel-title{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--green)}
+.panel-count{color:#858a91;font-size:12px}
+.panel-body{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-color:#353a40 #0d0f10;scrollbar-width:thin}
+.panel-body::-webkit-scrollbar{width:8px}
+.panel-body::-webkit-scrollbar-track{background:#0d0f10}
+.panel-body::-webkit-scrollbar-thumb{background:#353a40;border-radius:6px}
+.panel-body::-webkit-scrollbar-thumb:hover{background:#4b5259}
+.add-study-button{
+width:100%;height:38px;margin-top:8px;background:var(--green);border:0;border-radius:5px;
+color:#07120d;font-size:12px;font-weight:bold;cursor:pointer;transition:background var(--ease),transform var(--ease)
+}
+.add-study-button:hover{background:#55d99d}
+.add-study-button:active{transform:scale(.98)}
+.calendar{padding:14px}
+.calendar-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.calendar-month{font-size:15px;font-weight:bold;text-transform:capitalize}
+.calendar-button{
+width:32px;height:32px;background:#202328;border:1px solid #34383d;color:#ddd;
+border-radius:4px;cursor:pointer;font-size:17px;transition:border-color var(--ease),color var(--ease)
+}
+.calendar-button:hover{border-color:var(--green);color:var(--green)}
+.calendar-weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:5px}
+.calendar-weekdays div{text-align:center;color:#777d83;font-size:11px;padding:5px 0}
+.calendar-days{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.day{
+height:34px;display:flex;align-items:center;justify-content:center;border-radius:4px;
+color:#aeb2b7;font-size:12px;cursor:pointer;position:relative;transition:background var(--ease),color var(--ease)
+}
+.day:hover{background:var(--hover)}
+.day.other-month{color:#3e4247}
+.day.today{border:1px solid #676d74}
+.day.selected{background:#d3d7da;color:#111;font-weight:bold}
+.day.has-studies::after{
+content:"";width:5px;height:5px;background:#aeb3b8;border-radius:50%;
+position:absolute;bottom:4px
+}
+.day.selected.has-studies::after{background:#111}
+.today-button{
+width:100%;height:36px;margin-top:13px;background:#202328;border:1px solid #34383d;
+color:#bbbfc4;border-radius:4px;cursor:pointer;font-size:12px;
+transition:border-color var(--ease),color var(--ease)
+}
+.today-button:hover{border-color:var(--green);color:var(--green)}
+.patient{
+padding:15px;border-bottom:1px solid #22262a;cursor:pointer;
+transition:background var(--ease),box-shadow var(--ease)
+}
+.patient:hover{background:var(--hover)}
+.patient.active{background:var(--selected);box-shadow:inset 3px 0 0 var(--green)}
+.patient-name{font-size:14px;margin-bottom:7px}
+.patient-meta{display:flex;justify-content:space-between;color:#858a91;font-size:11px}
+.badge{background:#2a2e33;padding:3px 7px;border-radius:10px;color:#c2c6ca;font-size:11px}
+.no-results{padding:35px 15px;text-align:center;color:#686e74;font-size:13px;line-height:1.7}
+.viewer{
+background:#030303;display:flex;flex-direction:column;min-width:0;
+height:840px;min-height:840px;overflow:hidden
+}
+.viewer-header{
+min-height:64px;height:64px;background:#111315;border-bottom:1px solid var(--border);
+display:flex;align-items:center;justify-content:space-between;padding:8px 16px;
+flex-shrink:0;gap:10px
+}
+.viewer-title{font-size:14px;color:var(--green)}
+.viewer-subtitle{color:#80858b;font-size:11px;margin-top:5px}
+.viewer-header-left{min-width:0}
+.viewer-admin-actions{display:none;align-items:center;gap:6px;flex-shrink:0}
+.viewer-admin-button{
+height:34px;padding:0 10px;background:#202328;border:1px solid #34383d;
+border-radius:4px;color:#ccc;font-size:11px;cursor:pointer;
+transition:border-color var(--ease),color var(--ease)
+}
+.viewer-admin-button:hover{border-color:var(--green);color:var(--green)}
+.viewer-admin-button.danger:hover{border-color:#d66565;color:#e47777}
+.image-counter{color:#999fa5;font-size:12px;white-space:nowrap}
+.viewport{
+height:600px;min-height:600px;max-height:600px;position:relative;overflow:hidden;
+display:flex;align-items:center;justify-content:center;
+background:radial-gradient(circle,#151515 0%,#050505 65%,#000 100%);
+flex-shrink:0;cursor:grab;touch-action:none;user-select:none;
+-webkit-user-select:none;-webkit-touch-callout:none;overscroll-behavior:none
+}
+.viewport:active{cursor:grabbing}
+.viewport.dragging{cursor:grabbing}
+.overlay-left{position:absolute;top:14px;left:16px;color:#777d83;font-size:11px;z-index:5;pointer-events:none}
+.overlay-right{position:absolute;top:14px;right:16px;color:#777d83;font-size:11px;text-align:right;z-index:5;pointer-events:none}
+.empty-message{color:#60666c;font-size:14px;text-align:center;padding:20px;pointer-events:none}
+.image-wrapper{
+position:absolute;left:50%;top:50%;width:max-content;height:max-content;
+display:flex;align-items:center;justify-content:center;
+transform:translate3d(-50%,-50%,0) translate3d(0,0,0) scale(1) rotate(0deg);
+transform-origin:center center;will-change:transform;transition:none;pointer-events:none;touch-action:none
+}
+.main-image{
+display:block;width:auto;height:auto;max-width:none;max-height:none;object-fit:contain;
+user-select:none;-webkit-user-select:none;-webkit-user-drag:none;-webkit-touch-callout:none;
+pointer-events:none;touch-action:none;transform-origin:center center;transition:filter .12s ease
+}
+.toolbar{
+min-height:60px;height:60px;background:#111315;border-top:1px solid var(--border);
+display:flex;align-items:center;gap:6px;padding:9px;flex-shrink:0;position:relative;z-index:20
+}
+.tool{
+height:38px;min-width:38px;padding:0 10px;background:#202328;border:1px solid #34383d;
+border-radius:4px;color:#d0d4d8;font-size:12px;cursor:pointer;
+transition:background var(--ease),border-color var(--ease),color var(--ease)
+}
+.tool:hover{background:#2a2e33;border-color:#555b61;color:white}
+.tool:active{transform:scale(.96)}
+.separator{width:1px;height:28px;background:#30343a;margin:0 4px}
+.thumbnails{
+min-height:112px;height:112px;background:#101214;border-top:1px solid var(--border);
+display:flex;align-items:flex-start;gap:8px;padding:8px;overflow-x:auto;overflow-y:hidden;flex-shrink:0;
+scrollbar-color:#353a40 #101214;scrollbar-width:thin
+}
+.thumbnail-item{width:82px;height:92px;flex-shrink:0;position:relative}
+.thumbnail{
+width:82px;height:72px;object-fit:cover;background:#000;border:2px solid #30343a;
+border-radius:3px;cursor:pointer;display:block;transition:border-color var(--ease),opacity var(--ease)
+}
+.thumbnail:hover{opacity:.85}
+.thumbnail.active{border-color:var(--green)}
+.thumbnail-delete{
+position:absolute;right:-4px;bottom:0;width:20px;height:20px;padding:0;border:1px solid #555;
+border-radius:50%;background:#191c1f;color:#d96b6b;font-size:13px;line-height:17px;
+cursor:pointer;z-index:3;transition:background var(--ease),color var(--ease),border-color var(--ease)
+}
+.thumbnail-delete:hover{background:#8b3535;color:#fff;border-color:#d66565}
+.info-panel{overflow-y:auto;overflow-x:hidden}
+.info-section{padding:17px;border-bottom:1px solid var(--border)}
+.info-heading{color:var(--green);font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:14px}
+.info-row{margin-bottom:13px}
+.info-label{display:block;color:#686e74;font-size:10.5px;margin-bottom:4px}
+.info-value{color:#d1d4d7;font-size:13px}
+.patient-card{background:#191c1f;border:1px solid #2b2f34;border-radius:5px;padding:13px;box-shadow:var(--shadow-sm)}
+.patient-card-name{font-size:15px;margin-bottom:9px}
+.patient-card-meta{color:#858a91;font-size:11px;line-height:1.8}
+.study-selector{
+width:100%;height:40px;background:#1a1d20;border:1px solid #34383d;border-radius:5px;
+color:#eee;padding:0 9px;outline:none;font-size:12px;transition:border-color var(--ease)
+}
+.study-selector:focus{border-color:var(--green)}
+.form-input{
+width:100%;height:40px;background:#1a1d20;border:1px solid #34383d;border-radius:5px;
+color:#eee;padding:0 11px;outline:none;font-size:13px;
+transition:border-color var(--ease),box-shadow var(--ease)
+}
+.form-input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(62,207,142,.12)}
+.form-input::placeholder{color:#666c72}
+.fullscreen{
+position:fixed;inset:0;background:#000;z-index:99999;display:none;
+align-items:center;justify-content:center
+}
+.fullscreen img{max-width:96%;max-height:96%;object-fit:contain}
+.close-fullscreen{
+position:absolute;top:15px;right:22px;color:white;font-size:32px;cursor:pointer;
+transition:color var(--ease),transform var(--ease)
+}
+.close-fullscreen:hover{color:var(--green);transform:scale(1.1)}
+.admin-overlay{
+position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:50000;display:none;
+align-items:center;justify-content:center;padding:20px
+}
+.admin-box{
+width:100%;max-width:650px;max-height:90vh;overflow-y:auto;background:#111315;
+border:1px solid #30353a;border-radius:8px;box-shadow:var(--shadow-md)
+}
+.admin-header{
+padding:19px 20px;border-bottom:1px solid var(--border);display:flex;
+align-items:center;justify-content:space-between
+}
+.admin-title{color:var(--green);font-size:17px;font-weight:bold}
+.admin-close{background:none;border:0;color:#888;font-size:26px;cursor:pointer;transition:color var(--ease)}
+.admin-close:hover{color:#e47777}
+.admin-body{padding:21px}
+.form-group{margin-bottom:16px}
+.form-label{
+display:block;color:#a0a5aa;font-size:11px;margin-bottom:7px;text-transform:uppercase;letter-spacing:.6px
+}
+.file-input{
+width:100%;padding:11px;background:#1a1d20;border:1px dashed #454b51;
+border-radius:5px;color:#aaa;font-size:12px;transition:border-color var(--ease)
+}
+.file-input:hover{border-color:var(--green)}
+.file-list{margin-top:9px;color:#858a91;font-size:11px;line-height:1.8;max-height:110px;overflow-y:auto}
+.admin-actions{display:flex;gap:8px;margin-top:21px}
+.admin-primary{
+flex:1;min-height:42px;background:var(--green);border:0;color:#07120d;
+border-radius:5px;font-weight:bold;cursor:pointer;font-size:12px;
+transition:background var(--ease),transform var(--ease)
+}
+.admin-primary:hover{background:#55d99d}
+.admin-primary:active{transform:scale(.98)}
+.admin-secondary{
+min-height:42px;padding:0 19px;background:#202328;border:1px solid #34383d;color:#ccc;
+border-radius:5px;cursor:pointer;font-size:12px;transition:border-color var(--ease),color var(--ease)
+}
+.admin-secondary:hover{border-color:#555b61;color:#fff}
+.status-message{margin-top:13px;font-size:12px;line-height:1.6}
+.status-success{color:var(--green)}
+.status-error{color:#e47777}
+.login-box{
+width:100%;max-width:390px;background:#111315;border:1px solid #30353a;
+border-radius:8px;box-shadow:var(--shadow-md)
+}
+.login-header{padding:25px 24px 19px;text-align:center;border-bottom:1px solid var(--border)}
+.login-title{color:var(--green);font-size:18px;font-weight:bold}
+.login-subtitle{color:#858a91;font-size:12px;margin-top:7px}
+.login-body{padding:25px}
+@media(max-width:1250px){
+.app{grid-template-columns:240px 240px 1fr 235px}
+.brand{min-width:240px}
+}
+@media(max-width:1000px){
+body{overflow-y:auto}
+.topbar{min-height:72px}
+.app{min-width:0;display:flex;flex-direction:column}
+.panel,.viewer{width:100%;min-height:450px}
+.info-panel{order:1}
+.panel:nth-child(2){order:2}
+.viewer{order:3;height:800px;min-height:800px}
+.viewport{height:560px;min-height:560px;max-height:560px}
+.panel:last-child{order:4}
+.search{display:block;max-width:none;margin-left:0}
+.brand{min-width:0;flex:1}
+}
+@media(max-width:700px){
+html{background:#050607}
+body{background:#050607;padding:0;overflow-x:hidden}
+.topbar{
+position:relative;min-height:0;height:auto;
+padding:calc(10px + env(safe-area-inset-top)) 12px 12px;
+display:grid;grid-template-columns:1fr;
+grid-template-areas:"logo" "brand" "search" "auth";
+gap:9px;align-items:center;justify-items:center;
+background:linear-gradient(180deg,#151719 0%,#101214 100%);
+border-bottom:1px solid #292d31;box-shadow:0 4px 18px rgba(0,0,0,.35)
+}
+.logo{
+grid-area:logo;width:70px;height:70px;margin:0 auto;border-radius:50%;
+border:1px solid #343a3f;background:#0c0e0f;
+box-shadow:0 3px 12px rgba(0,0,0,.45),0 0 0 4px rgba(255,255,255,.025)
+}
+.brand{
+grid-area:brand;width:100%;min-width:0;flex:none;text-align:center;
+display:flex;flex-direction:column;align-items:center;justify-content:center
+}
+.brand-title{
+width:100%;max-width:340px;font-size:14px;line-height:1.25;font-weight:700;
+letter-spacing:.25px;text-align:center;white-space:normal;overflow-wrap:break-word
+}
+.brand-subtitle{
+width:100%;margin-top:4px;font-size:9px;line-height:1.3;text-align:center;
+white-space:normal;color:#8edbb8;letter-spacing:.4px
+}
+.search{grid-area:search;width:100%;max-width:none;margin:2px 0 0}
+.search input{
+width:100%;height:42px;font-size:13px;padding:0 14px;border-radius:21px;
+background:#1a1d20;border:1px solid #363b40;box-shadow:inset 0 1px 2px rgba(0,0,0,.25)
+}
+.search-results{top:46px;max-height:250px;border-radius:10px}
+.search-result{padding:13px 14px}
+.current-date{display:none}
+.auth-area{
+grid-area:auth;width:100%;display:flex;justify-content:center;align-items:center;
+flex-wrap:wrap;gap:7px
+}
+.auth-button{height:34px;font-size:10px;padding:0 13px;border-radius:17px}
+.auth-user{max-width:180px;font-size:10px}
+.app{min-width:0;display:flex;flex-direction:column;gap:0;background:#050607}
+.info-panel{
+order:4;width:100%;min-height:0;background:#111315;border-right:0;border-top:1px solid #292d31
+}
+.panel:nth-child(2){order:3;width:100%;min-height:0;background:#111315;border-right:0}
+.panel:last-child{order:5;width:100%;min-height:0;background:#111315;border-right:0}
+.viewer{
+order:2;width:100%;height:auto;min-height:0;background:#000;border:0;
+display:flex;flex-direction:column;position:relative
+}
+.viewer-header{
+height:54px;min-height:54px;padding:7px 11px;gap:8px;
+background:linear-gradient(180deg,#151719 0%,#101214 100%);border-bottom:1px solid #292d31
+}
+.viewer-header-left{min-width:0;flex:1;overflow:hidden}
+.viewer-title{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.viewer-subtitle{font-size:9px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#777e85}
+.image-counter{
+font-size:10px;padding:5px 8px;border:1px solid #30353a;border-radius:12px;
+background:#191c1f;flex-shrink:0
+}
+.viewer-admin-actions{gap:4px}
+.viewer-admin-button{height:30px;padding:0 7px;font-size:9px;border-radius:15px}
+.viewport{
+width:100%;height:calc(100svh - 250px);min-height:390px;max-height:none;
+position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;
+background:radial-gradient(circle at center,#181818 0%,#080808 52%,#000 100%);
+border:0;touch-action:none;overscroll-behavior:none
+}
+.overlay-left{top:10px;left:11px;font-size:8px;letter-spacing:.3px;opacity:.65}
+.overlay-right{
+top:10px;right:11px;font-size:8px;max-width:45%;white-space:nowrap;
+overflow:hidden;text-overflow:ellipsis;opacity:.65
+}
+.empty-message{font-size:12px;max-width:270px;line-height:1.5;padding:18px;color:#686e74}
+.image-wrapper{max-width:none;max-height:none;touch-action:none;will-change:transform}
+.main-image{
+max-width:none;max-height:none;touch-action:none;user-select:none;
+-webkit-user-select:none;-webkit-touch-callout:none;-webkit-user-drag:none
+}
+.toolbar{
+height:58px;min-height:58px;width:100%;
+background:linear-gradient(180deg,#151719 0%,#101214 100%);
+border-top:1px solid #292d31;display:flex;align-items:center;gap:6px;
+padding:7px 8px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;
+scrollbar-width:none
+}
+.toolbar::-webkit-scrollbar{display:none}
+.tool{
+height:42px;min-width:42px;padding:0 10px;border-radius:10px;background:#202428;
+border:1px solid #34393e;color:#d4d8db;font-size:13px;flex-shrink:0;
+display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;
+touch-action:manipulation
+}
+.tool:active{transform:scale(.93);background:#2b3035}
+.separator{width:1px;height:30px;background:#34383d;margin:0 2px;flex-shrink:0}
+.thumbnails{
+height:94px;min-height:94px;width:100%;background:#0e1012;border-top:1px solid #292d31;
+display:flex;align-items:center;gap:8px;padding:8px 9px;overflow-x:auto;overflow-y:hidden;
+-webkit-overflow-scrolling:touch;scrollbar-width:none
+}
+.thumbnails::-webkit-scrollbar{display:none}
+.thumbnail-item{width:76px;height:76px;flex-shrink:0;position:relative}
+.thumbnail{
+width:76px;height:68px;object-fit:cover;background:#000;border:2px solid #30343a;
+border-radius:7px;cursor:pointer;display:block;transition:border-color var(--ease),opacity var(--ease);
+-webkit-tap-highlight-color:transparent
+}
+.thumbnail.active{border-color:var(--green);box-shadow:0 0 0 1px rgba(62,207,142,.15)}
+.thumbnail-delete{right:-3px;bottom:0;width:21px;height:21px;font-size:13px}
+.info-section{padding:14px 13px;border-bottom:1px solid #292d31}
+.info-heading{font-size:10px;margin-bottom:10px;letter-spacing:1.1px}
+.patient-card{padding:12px;border-radius:9px;background:#181b1e}
+.patient-card-name{font-size:14px;margin-bottom:7px}
+.patient-card-meta{font-size:10px;line-height:1.7}
+.study-selector{height:42px;border-radius:9px;font-size:12px}
+.info-row{
+display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;
+padding-bottom:7px;border-bottom:1px solid rgba(255,255,255,.035)
+}
+.info-row:last-child{margin-bottom:0;border-bottom:0}
+.info-label{font-size:9px;margin-bottom:0}
+.info-value{font-size:12px}
+.panel:nth-child(2) .panel-header{height:52px;min-height:52px;padding:0 13px}
+.panel:nth-child(2) .panel-title{font-size:10px}
+.patient{padding:13px;min-height:62px}
+.patient-name{font-size:13px;margin-bottom:5px}
+.patient-meta{font-size:10px}
+.badge{font-size:10px;padding:3px 7px}
+.panel:last-child .panel-header{height:52px;min-height:52px;padding:0 13px}
+.calendar{padding:13px}
+.calendar-header{margin-bottom:10px}
+.calendar-month{font-size:14px}
+.calendar-button{width:38px;height:38px;border-radius:10px;font-size:20px}
+.calendar-weekdays div{font-size:10px;padding:6px 0}
+.calendar-days{gap:3px}
+.day{height:39px;font-size:12px;border-radius:8px}
+.today-button{height:42px;margin-top:11px;border-radius:10px}
+.admin-overlay{padding:12px;align-items:flex-end}
+.admin-box{width:100%;max-width:none;max-height:92svh;border-radius:14px 14px 8px 8px}
+.admin-header{padding:16px}
+.admin-title{font-size:14px}
+.admin-body{padding:16px}
+.login-box{max-width:none;border-radius:14px}
+.login-header{padding:21px 18px 16px}
+.login-title{font-size:16px}
+.login-body{padding:19px}
+.form-input{height:42px;border-radius:9px}
+.file-input{border-radius:9px}
+.admin-primary,.admin-secondary{min-height:43px;border-radius:9px}
+.fullscreen{
+padding:env(safe-area-inset-top) env(safe-area-inset-right)
+env(safe-area-inset-bottom) env(safe-area-inset-left)
+}
+.fullscreen img{max-width:100%;max-height:100%}
+.close-fullscreen{top:calc(10px + env(safe-area-inset-top));right:15px;font-size:34px;z-index:2}
+}
+@media(max-width:380px){
+.brand-title{font-size:13px}
+.brand-subtitle{font-size:8px}
+.viewport{height:calc(100svh - 245px);min-height:350px}
+.tool{min-width:40px;height:40px;padding:0 8px;font-size:12px}
+.toolbar{gap:5px;padding:7px}
+.thumbnails{height:88px;min-height:88px}
+.thumbnail-item{width:70px}
+.thumbnail{width:70px;height:62px}
+}
+@media(max-width:900px) and (orientation:landscape){
+.topbar{
+grid-template-columns:auto 1fr auto;grid-template-areas:"logo brand auth" "logo search auth";
+justify-items:stretch;padding:7px 10px;gap:5px 9px
+}
+.logo{grid-area:logo;width:48px;height:48px;align-self:center}
+.brand{text-align:left;align-items:flex-start}
+.brand-title{text-align:left;font-size:12px}
+.brand-subtitle{text-align:left;font-size:8px}
+.search{margin:0}
+.search input{height:34px}
+.auth-area{width:auto}
+.viewport{height:calc(100svh - 175px);min-height:300px}
+.thumbnails{height:82px;min-height:82px}
+}
+</style>
+<style id="ris-redesign-overrides">
+:root{
+  --ris-bg:#080b0d;
+  --ris-surface:#0f1316;
+  --ris-surface-2:#151a1e;
+  --ris-surface-3:#1b2126;
+  --ris-border:#2b3339;
+  --ris-muted:#7f8a92;
+  --ris-text:#e7ebee;
+  --ris-accent:#59d7ae;
+  --ris-accent-soft:rgba(89,215,174,.12);
+  --ris-shadow:0 10px 32px rgba(0,0,0,.34);
+}
+html,body{background:var(--ris-bg)}
+body{overflow:hidden}
+.topbar{
+  height:56px;min-height:56px;padding:0 12px;gap:10px;
+  background:#0c1012;border-bottom:1px solid var(--ris-border);
+  box-shadow:0 4px 18px rgba(0,0,0,.22);
+}
+.logo{width:40px;height:40px;border-radius:5px;background:#0a0d0f}
+.brand{min-width:225px}
+.brand-title{font-size:13px;letter-spacing:.35px}
+.brand-subtitle{font-size:9px;margin-top:2px;color:#8dbbab}
+.search{max-width:480px;margin-left:12px}
+.search input{height:34px;border-radius:5px;background:#151a1e;border-color:#30383e;font-size:12px}
+.current-date{
+  margin-left:auto;width:auto;height:34px;padding:0 10px;display:flex;align-items:center;gap:7px;
+  background:#151a1e;border:1px solid #30383e;border-radius:5px;color:#cad0d4;
+  cursor:pointer;white-space:nowrap;font-size:11px;
+}
+.current-date:hover{border-color:var(--ris-accent);color:#fff}
+.date-icon{font-size:13px;color:var(--ris-accent)}
+.date-chevron{font-size:11px;color:#78828a}
+.auth-area{gap:5px}
+.auth-button{height:34px;border-radius:5px;font-size:10px;padding:0 10px}
+.auth-user{font-size:10px}
+.app{
+  height:calc(100vh - 56px);min-height:0;min-width:0;
+  display:grid;grid-template-columns:270px minmax(0,1fr) 290px;
+  grid-template-areas:"patients viewer info";
+  background:#080b0d;
+}
+.panel{min-height:0;height:100%;background:var(--ris-surface);border-right:1px solid var(--ris-border)}
+.panel:nth-child(2){grid-area:patients;border-left:1px solid #0a0d0f}
+.info-panel{grid-area:info;border-right:0;border-left:1px solid var(--ris-border)}
+.panel:last-child{grid-area:calendar;position:fixed;z-index:3000;top:64px;right:12px;width:290px;height:auto;min-height:0;max-height:calc(100vh - 76px);display:none;border:1px solid var(--ris-border);border-radius:8px;box-shadow:var(--ris-shadow)}
+.panel:last-child.calendar-open{display:flex}
+.panel-header{height:48px;min-height:48px;padding:0 12px;border-bottom:1px solid #252d33}
+.panel-title{font-size:10px;letter-spacing:1.1px;font-weight:700;color:#aeb7bd}
+.panel-count{font-size:10px;color:#66727b}
+.mobile-panel-close{display:none}
+.panel:nth-child(2) .panel-header{position:sticky;top:0;z-index:2;background:#0f1316}
+.panel:nth-child(2) .panel-header>div{display:flex;align-items:center;gap:10px;width:100%}
+.panel:nth-child(2) .add-study-button{height:30px;margin-top:0;width:auto;padding:0 9px;border-radius:5px;font-size:9px}
+.panel:nth-child(2) .panel-header .add-study-button{margin-left:auto}
+.patient{padding:11px 12px;border-bottom:1px solid #20272c}
+.patient-name{font-size:12px;margin-bottom:5px;font-weight:600;color:#e3e7e9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.patient-meta{font-size:9px}
+.badge{font-size:9px;padding:2px 6px;background:#20272c}
+.patient.active{box-shadow:inset 3px 0 0 var(--ris-accent);background:linear-gradient(90deg,rgba(89,215,174,.10),rgba(89,215,174,.03))}
+.patient:hover{background:#151b1f}
+.no-results{font-size:11px;padding:28px 12px}
+.viewer{
+  grid-area:viewer;height:100%;min-height:0;background:#020303;border-right:1px solid var(--ris-border);
+}
+.viewer-header{height:50px;min-height:50px;padding:6px 12px;background:#0f1316;border-bottom:1px solid #252d33}
+.viewer-title{font-size:12px;color:#e4ece8;font-weight:600}
+.viewer-subtitle{font-size:9px;margin-top:3px;color:#76828a}
+.viewer-admin-button{height:28px;font-size:9px;padding:0 8px}
+.image-counter{font-size:10px;padding:4px 7px;background:#14191d;border:1px solid #293238;border-radius:10px}
+.viewer-statusbar{height:22px;min-height:22px;display:flex;align-items:center;gap:6px;padding:0 10px;background:#090d0f;border-bottom:1px solid #1e252a;color:#65717a;font-size:8px;letter-spacing:.25px}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--ris-accent);box-shadow:0 0 7px rgba(89,215,174,.4)}
+.status-separator{color:#394248}
+.viewport{
+  flex:1;height:auto;min-height:0;max-height:none;
+  margin:10px 14px;border-radius:6px;
+  background:radial-gradient(circle at center,#161b1e 0%,#07090a 58%,#010202 100%);
+}
+.overlay-left,.overlay-right{top:10px;font-size:8px;color:#626d75}
+.toolbar{height:52px;min-height:52px;padding:7px 8px;background:#0f1316;border-top:1px solid #252d33;gap:5px}
+.tool{height:36px;min-width:36px;padding:0 9px;border-radius:5px;font-size:11px;background:#171d21;border-color:#2d363c}
+.tool:hover{background:#20272c;border-color:#4a565e}
+.separator{height:24px;margin:0 3px;background:#293238}
+.thumbnails{height:82px;min-height:82px;padding:6px 8px;gap:7px;background:#0b0f11;border-top:1px solid #222a2f}
+.thumbnail-item{width:66px;height:68px}
+.thumbnail{width:66px;height:54px;border-radius:3px}
+.thumbnail-delete{width:18px;height:18px;right:-3px;font-size:11px;line-height:15px}
+.info-panel{background:#0f1316}
+.info-section{padding:13px;border-bottom:1px solid #232b30}
+.info-heading{font-size:9px;margin-bottom:9px;letter-spacing:1.2px;color:#7e8a92}
+.patient-card{padding:11px;border-radius:5px;background:#151a1e;border-color:#2a3339}
+.patient-card-name{font-size:13px;font-weight:600;margin-bottom:6px}
+.patient-card-meta{font-size:9px;line-height:1.8}
+.study-selector{height:36px;border-radius:5px;font-size:10px;background:#151a1e}
+.info-row{margin-bottom:9px;padding-bottom:5px}
+.info-label{font-size:8px}
+.info-value{font-size:10px;color:#d7dcdf}
+.panel:last-child .panel-header{background:#11161a}
+.calendar{padding:12px}
+.calendar-header{margin-bottom:10px}
+.calendar-month{font-size:13px}
+.calendar-button{width:29px;height:29px;font-size:16px}
+.day{height:31px;font-size:10px}
+.today-button{height:32px;margin-top:10px;font-size:10px}
+.main-image{max-width:none;max-height:none}
+.admin-overlay{backdrop-filter:blur(2px)}
+.mobile-nav{display:none}
+@media(max-width:1000px){
+  body{overflow:hidden}
+  .topbar{height:54px;min-height:54px;padding:0 9px}
+  .logo{width:36px;height:36px}
+  .brand{min-width:0;flex:1}
+  .brand-title{font-size:11px}
+  .brand-subtitle{font-size:8px}
+  .search{margin-left:5px;max-width:none}
+  .search input{height:32px}
+  .current-date{margin-left:0;height:32px;padding:0 8px}
+  .auth-area .auth-user{display:none}
+  .auth-button{height:32px}
+  .app{height:calc(100vh - 54px);display:block;position:relative}
+  .viewer{height:100%;width:100%;border:0}
+  .panel:nth-child(2),.info-panel{
+    position:fixed;z-index:7000;top:54px;bottom:62px;width:min(86vw,340px);height:auto;
+    background:#101519;box-shadow:0 12px 40px rgba(0,0,0,.52);transition:transform .18s ease;
+  }
+  .panel:nth-child(2){left:0;transform:translateX(-105%);border-right:1px solid #2a3339}
+  .info-panel{right:0;transform:translateX(105%);border-left:1px solid #2a3339;border-right:0}
+  .panel:nth-child(2).mobile-open,.info-panel.mobile-open{transform:translateX(0)}
+  .mobile-panel-close{display:block;background:none;border:0;color:#8f9aa1;font-size:22px;line-height:1;cursor:pointer;padding:4px}
+  .viewer-header{height:44px;min-height:44px}
+  .viewer-statusbar{display:none}
+  .viewport{height:auto;min-height:0;flex:1;margin:6px;border-radius:5px}
+  .toolbar{height:50px;min-height:50px;padding:6px 7px}
+  .tool{height:38px;min-width:38px}
+  .thumbnails{height:72px;min-height:72px;padding:5px 7px}
+  .thumbnail-item{width:58px;height:61px}
+  .thumbnail{width:58px;height:48px}
+  .panel:last-child{
+    position:fixed;z-index:8000;top:auto;right:0;bottom:62px;left:0;width:100%;max-height:78vh;
+    margin:0;border:1px solid #2c343a;border-radius:14px 14px 0 0;box-shadow:0 -15px 45px rgba(0,0,0,.55);
+  }
+  .mobile-nav{
+    position:fixed;z-index:9000;left:0;right:0;bottom:0;height:62px;min-height:62px;
+    display:grid;grid-template-columns:repeat(4,1fr);padding-bottom:env(safe-area-inset-bottom);
+    background:rgba(11,15,17,.96);border-top:1px solid #2a3339;backdrop-filter:blur(10px);
+  }
+  .mobile-nav button{
+    border:0;background:transparent;color:#7f8a92;font-size:8px;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:3px;cursor:pointer;
+  }
+  .mobile-nav button.active,.mobile-nav button:active{color:var(--ris-accent)}
+  .mobile-nav-icon{font-size:16px;line-height:1}
+  .date-icon{font-size:12px}
+  .date-chevron{display:none}
+}
+@media(max-width:700px){
+  .topbar{height:50px;min-height:50px;padding:0 8px;gap:6px}
+  .logo{width:32px;height:32px}
+  .brand-title{font-size:10px;line-height:1.1}
+  .brand-subtitle{display:none}
+  .search{flex:1;max-width:none}
+  .search input{height:31px;border-radius:17px;font-size:11px;padding:0 11px}
+  .current-date{height:31px;padding:0 7px}
+  .current-date #currentDateLabel{font-size:9px}
+  .auth-button{font-size:8px;padding:0 8px}
+  .app{height:calc(100vh - 50px)}
+  .panel:nth-child(2),.info-panel{top:50px;bottom:62px}
+  .viewer-header{height:42px;min-height:42px;padding:5px 9px}
+  .viewer-title{font-size:10px}
+  .viewer-subtitle{font-size:8px}
+  .image-counter{font-size:8px}
+  .toolbar{height:49px;min-height:49px}
+  .tool{height:37px;min-width:37px;font-size:11px;border-radius:9px}
+  .thumbnails{height:68px;min-height:68px}
+}
+@media(max-width:380px){
+  .brand-title{font-size:9px}
+  .search input{font-size:10px}
+  .tool{min-width:35px;height:35px;padding:0 7px}
+}
+</style>
+<style id="fuente-mas-grande">
+body{font-size:16px}
+.brand-title{font-size:15px}
+.brand-subtitle{font-size:11px}
+.search input{font-size:14px}
+.current-date{font-size:13px}
+.auth-button{font-size:12px}
+.auth-user{font-size:12px}
+.panel-title{font-size:12px}
+.panel-count{font-size:12px}
+.patient-name{font-size:14px}
+.patient-meta{font-size:11px}
+.badge{font-size:11px}
+.no-results{font-size:13px}
+.viewer-title{font-size:14px}
+.viewer-subtitle{font-size:11px}
+.viewer-admin-button{font-size:11px}
+.image-counter{font-size:12px}
+.viewer-statusbar{font-size:10px}
+.overlay-left,.overlay-right{font-size:10px}
+.tool{font-size:13px}
+.info-heading{font-size:11px}
+.patient-card-name{font-size:15px}
+.patient-card-meta{font-size:11px}
+.study-selector{font-size:12px}
+.info-label{font-size:10px}
+.info-value{font-size:12px}
+.calendar-month{font-size:15px}
+.day{font-size:12px}
+.today-button{font-size:12px}
+.mobile-nav button{font-size:10px}
+.admin-title{font-size:16px}
+.form-label{font-size:12px}
+.form-input{font-size:14px}
+.file-input{font-size:13px}
+.login-title{font-size:17px}
+.login-subtitle{font-size:13px}
+.status-message{font-size:13px}
+@media(max-width:700px){
+  .brand-title{font-size:12px}
+  .current-date #currentDateLabel{font-size:10px}
+  .auth-button{font-size:10px}
+  .viewer-title{font-size:12px}
+  .viewer-subtitle{font-size:10px}
+  .image-counter{font-size:10px}
+  .tool{font-size:12px}
+}
+</style>
 </head>
 <body>
 <header class="topbar">
@@ -527,13 +1227,2834 @@ AÑADIR IMÁGENES
 <div class="close-fullscreen" onclick="closeFullscreen()">×</div>
 <img id="fullscreenImage" alt="Imagen">
 </div>
-<script src="js/config.js"></script>
-<script src="js/supabase.js"></script>
-<script src="js/data.js"></script>
-<script src="js/calendar.js"></script>
-<script src="js/patients.js"></script>
-<script src="js/viewer.js"></script>
-<script src="js/admin.js"></script>
-<script src="js/mobile.js"></script>
+<script>
+const SUPABASE_URL =
+"https://tapjgdzwmsfgthxncero.supabase.co";
+const SUPABASE_KEY =
+"sb_publishable_5L4-txz5pZzI6dU6UAw86w_5gXbHZr0";
+const supabaseClient =
+window.supabase.createClient(
+SUPABASE_URL,
+SUPABASE_KEY
+);
+const ADMIN_UID =
+"622de888-2abd-4f4c-b1ba-488c7472b767";
+const STORAGE_BUCKET =
+"IMAGENES";
+let studies=[];
+let selectedDate=getTodayString();
+let calendarDate=new Date(selectedDate+"T00:00:00");
+let currentPatient=null;
+let currentStudy=0;
+let currentImage=0;
+let zoom=1;
+let rotation=0;
+let inverted=false;
+let contrast=1;
+let imageLoaded=false;
+let panX=0;
+let panY=0;
+let isDragging=false;
+let dragStartX=0;
+let dragStartY=0;
+let dragOriginX=0;
+let dragOriginY=0;
+let activePointers=new Map();
+let pinchStartDistance=0;
+let pinchStartZoom=1;
+let pinchStartCenterX=0;
+let pinchStartCenterY=0;
+let pinchStartPanX=0;
+let pinchStartPanY=0;
+let pinchStartFocalX=0;
+let pinchStartFocalY=0;
+let wasPinching=false;
+let suppressNextDrag=false;
+function setDateLabel(date){
+  const el=document.getElementById('currentDateLabel');
+  if(el)el.textContent=formatDate(date);
+}
+function getTodayString(){
+const today=new Date();
+return today.getFullYear()+"-"+
+String(today.getMonth()+1).padStart(2,"0")+"-"+
+String(today.getDate()).padStart(2,"0");
+}
+function formatDate(dateString){
+if(!dateString)return"--";
+const parts=dateString.split("-");
+if(parts.length!==3)return dateString;
+return parts[2]+"/"+
+parts[1]+"/"+
+parts[0];
+}
+function getImageUrl(file){
+if(!file||typeof file!=="string")return"";
+file=file.trim();
+if(
+file.startsWith("http://")||
+file.startsWith("https://")
+)return file;
+return SUPABASE_URL+
+"/storage/v1/object/public/"+
+STORAGE_BUCKET+
+"/"+
+file.split("/")
+.map(part=>encodeURIComponent(part))
+.join("/");
+}
+function getStoragePath(file){
+if(!file||typeof file!=="string")return"";
+file=file.trim();
+const marker=
+"/storage/v1/object/public/"+
+STORAGE_BUCKET+"/";
+if(file.includes(marker)){
+return decodeURIComponent(
+file.split(marker)[1]
+);
+}
+return file;
+}
+function normalizeImages(value){
+if(!value)return[];
+let items=[];
+if(Array.isArray(value)){
+items=value;
+}else if(typeof value==="string"){
+const text=value.trim();
+if(!text)return[];
+try{
+const parsed=JSON.parse(text);
+if(Array.isArray(parsed))
+items=parsed;
+else
+items=[text];
+}catch(error){
+items=[text];
+}
+}
+return items
+.map(item=>{
+if(
+typeof item==="string"&&
+item.trim()!==""
+){
+return{
+path:item.trim(),
+url:getImageUrl(item.trim()),
+structure:""
+};
+}
+if(
+item&&
+typeof item==="object"&&
+typeof item.path==="string"&&
+item.path.trim()!==""
+){
+return{
+path:item.path.trim(),
+url:getImageUrl(item.path.trim()),
+structure:
+typeof item.structure==="string"?
+item.structure:
+""
+};
+}
+return null;
+})
+.filter(item=>item!==null);
+}
+async function loadStudies(){
+try{
+document.getElementById(
+"viewerSubtitle"
+).textContent=
+"Conectando con Supabase...";
+const{data,error}=
+await supabaseClient
+.from("studies")
+.select("*")
+.order("date",{ascending:false});
+if(error)throw error;
+studies=(data||[]).map(item=>({
+id:item.id,
+date:item.date||"",
+patient:item.patient||"",
+history:item.history||"",
+birth:item.birth||"",
+sex:item.sex||"",
+study:item.study||"",
+structure:item.structure||"",
+modality:item.modality||"",
+side:"",
+images:normalizeImages(item.images)
+}));
+renderCalendar();
+renderPatients();
+setDateLabel(selectedDate);
+}catch(error){
+console.error(
+"ERROR AL CARGAR ESTUDIOS:",
+error
+);
+document.getElementById(
+"patientList"
+).innerHTML=`
+<div class="no-results">
+Error al conectar con<br>
+Supabase.<br><br>
+${escapeHtml(
+error.message||
+"Error desconocido"
+)}
+</div>
+`;
+document.getElementById(
+"viewerSubtitle"
+).textContent=
+"Error de conexión con Supabase.";
+}
+}
+function getStudiesForDate(){
+return studies.filter(
+item=>item.date===selectedDate
+);
+}
+function getPatientsForDate(){
+const result=[];
+getStudiesForDate().forEach(item=>{
+if(
+item.patient&&
+!result.includes(item.patient)
+){
+result.push(item.patient);
+}
+});
+return result;
+}
+function getPatientStudies(){
+if(!currentPatient)return[];
+return studies.filter(
+item=>
+item.patient===currentPatient &&
+item.date===selectedDate
+);
+}
+function renderCalendar(){
+const year=
+calendarDate.getFullYear();
+const month=
+calendarDate.getMonth();
+const monthNames=[
+"enero","febrero","marzo","abril","mayo","junio",
+"julio","agosto","septiembre","octubre","noviembre","diciembre"
+];
+document.getElementById(
+"calendarMonth"
+).textContent=
+monthNames[month]+" "+year;
+const container=
+document.getElementById(
+"calendarDays"
+);
+container.innerHTML="";
+let firstDay=
+new Date(
+year,
+month,
+1
+).getDay();
+firstDay=
+firstDay===0?
+6:
+firstDay-1;
+const daysInMonth=
+new Date(
+year,
+month+1,
+0
+).getDate();
+for(
+let i=firstDay-1;
+i>=0;
+i--
+){
+const div=
+document.createElement("div");
+div.className=
+"day other-month";
+div.textContent=
+new Date(
+year,
+month,
+0
+).getDate()-i;
+container.appendChild(div);
+}
+for(
+let day=1;
+day<=daysInMonth;
+day++
+){
+const div=
+document.createElement("div");
+div.className="day";
+const dateString=
+year+"-"+
+String(month+1).padStart(2,"0")+"-"+
+String(day).padStart(2,"0");
+div.textContent=day;
+if(
+studies.some(
+item=>item.date===dateString
+)
+){
+div.classList.add(
+"has-studies"
+);
+}
+if(dateString===selectedDate){
+div.classList.add(
+"selected"
+);
+}
+if(dateString===getTodayString()){
+div.classList.add(
+"today"
+);
+}
+div.onclick=()=>selectDate(
+dateString
+);
+container.appendChild(div);
+}
+}
+function selectDate(date){
+selectedDate=date;
+currentPatient=null;
+currentStudy=0;
+currentImage=0;
+resetView();
+setDateLabel(date);
+renderCalendar();
+renderPatients();
+clearViewer();
+}
+function previousMonth(){
+calendarDate.setMonth(
+calendarDate.getMonth()-1
+);
+renderCalendar();
+}
+function nextMonth(){
+calendarDate.setMonth(
+calendarDate.getMonth()+1
+);
+renderCalendar();
+}
+function goToday(){
+const today=new Date();
+calendarDate=
+new Date(
+today.getFullYear(),
+today.getMonth(),
+today.getDate()
+);
+selectDate(
+getTodayString()
+);
+}
+function renderPatients(){
+const list=
+document.getElementById(
+"patientList"
+);
+list.innerHTML="";
+const patients=
+getPatientsForDate();
+document.getElementById(
+"patientCount"
+).textContent=
+patients.length;
+if(!patients.length){
+list.innerHTML=`
+<div class="no-results">
+No hay pacientes<br>
+registrados para<br>
+esta fecha.
+</div>
+`;
+return;
+}
+patients.forEach(name=>{
+const patientStudies=
+getStudiesForDate()
+.filter(
+item=>item.patient===name
+);
+const element=
+document.createElement("div");
+element.className="patient";
+if(currentPatient===name){
+element.classList.add(
+"active"
+);
+}
+element.innerHTML=`
+<div class="patient-name">
+${escapeHtml(name)}
+</div>
+<div class="patient-meta">
+<span>
+${patientStudies.length}
+estudio(s)
+</span>
+<span class="badge">
+${patientStudies.length}
+</span>
+</div>
+`;
+element.onclick=()=>{
+currentPatient=name;
+currentStudy=0;
+currentImage=0;
+resetView();
+renderPatients();
+showFirstStudy();
+};
+element.dataset.patientName=
+name.toLowerCase();
+list.appendChild(element);
+});
+}
+function searchPatients(){
+const input=
+document.getElementById("search");
+const results=
+document.getElementById(
+"searchResults"
+);
+const value=
+input.value.trim().toLowerCase();
+results.innerHTML="";
+if(!value){
+results.style.display="none";
+return;
+}
+const matches=[];
+const seen=new Set();
+studies.forEach(study=>{
+if(!study.patient)return;
+const patientName=
+study.patient.toLowerCase();
+if(
+patientName.includes(value) &&
+!seen.has(patientName)
+){
+seen.add(patientName);
+matches.push(study);
+}
+});
+if(!matches.length){
+results.innerHTML=`
+<div class="search-no-result">
+No se encontró ningún paciente.
+</div>
+`;
+results.style.display="block";
+return;
+}
+matches
+.sort((a,b)=>{
+if(a.date===b.date)return 0;
+return a.date>b.date?-1:1;
+})
+.slice(0,30)
+.forEach(study=>{
+const item=
+document.createElement("div");
+item.className=
+"search-result";
+item.innerHTML=`
+<div class="search-result-name">
+${escapeHtml(
+study.patient
+)}
+</div>
+<div class="search-result-meta">
+Fecha del estudio:
+${formatDate(study.date)}
+</div>
+`;
+item.onclick=()=>{
+openPatientFromSearch(
+study.patient,
+study.date
+);
+};
+results.appendChild(item);
+});
+results.style.display="block";
+}
+function openPatientFromSearch(
+patientName,
+date
+){
+document.getElementById(
+"searchResults"
+).style.display="none";
+document.getElementById(
+"search"
+).value=
+patientName;
+selectedDate=date;
+calendarDate=
+new Date(
+date+"T00:00:00"
+);
+currentPatient=
+patientName;
+currentStudy=0;
+currentImage=0;
+resetView();
+setDateLabel(date);
+renderCalendar();
+renderPatients();
+showFirstStudy();
+setTimeout(()=>{
+const patientElements=
+document.querySelectorAll(
+"#patientList .patient"
+);
+patientElements.forEach(
+element=>{
+const name=
+element.dataset.patientName||"";
+if(
+name===
+patientName.toLowerCase()
+){
+element.scrollIntoView({
+behavior:"smooth",
+block:"center"
+});
+}
+});
+},100);
+}
+document.addEventListener(
+"click",
+function(event){
+const searchBox=
+document.querySelector(
+".search"
+);
+if(
+searchBox &&
+!searchBox.contains(event.target)
+){
+document.getElementById(
+"searchResults"
+).style.display="none";
+}
+});
+function showFirstStudy(){
+const list=
+getPatientStudies();
+if(!list.length){
+clearViewer();
+return;
+}
+currentStudy=0;
+renderStudy(
+list[0]
+);
+}
+function getCurrentStudy(){
+const list=
+getPatientStudies();
+return list[currentStudy];
+}
+function renderStudySelector(){
+const selector=
+document.getElementById(
+"studySelector"
+);
+selector.innerHTML="";
+const list=
+getPatientStudies();
+if(!list.length){
+selector.innerHTML=
+'<option value="">Seleccione un estudio</option>';
+return;
+}
+list.forEach(
+(study,index)=>{
+const option=
+document.createElement(
+"option"
+);
+option.value=index;
+let studyName=
+study.study||
+"Estudio no especificado";
+option.textContent=
+studyName+
+" · "+
+formatDate(study.date);
+if(index===currentStudy){
+option.selected=true;
+}
+selector.appendChild(option);
+});
+}
+function changeSelectedStudy(
+value
+){
+if(value==="")return;
+const index=
+parseInt(value,10);
+if(isNaN(index))return;
+const list=
+getPatientStudies();
+if(!list[index])return;
+currentStudy=index;
+currentImage=0;
+resetView();
+renderStudy(
+list[index]
+);
+}
+function renderStudy(study){
+if(!study)return;
+renderStudySelector();
+document.getElementById(
+"viewerTitle"
+).textContent=
+study.study||
+"Estudio no especificado";
+document.getElementById(
+"viewerSubtitle"
+).textContent=
+study.patient+
+(
+study.date?
+" · "+
+formatDate(study.date):
+""
+);
+document.getElementById(
+"overlayRight"
+).innerHTML=
+escapeHtml(
+study.patient||""
+);
+document.getElementById(
+"infoPatientName"
+).textContent=
+study.patient||"--";
+document.getElementById(
+"infoPatientMeta"
+).textContent=
+study.sex?
+"Sexo: "+study.sex:
+"";
+document.getElementById(
+"infoDate"
+).textContent=
+formatDate(study.date);
+document.getElementById(
+"infoImages"
+).textContent=
+study.images.length;
+document.getElementById(
+"infoStudy"
+).textContent=
+study.study||
+"No especificado";
+currentImage=
+Math.min(
+currentImage,
+Math.max(
+study.images.length-1,
+0
+)
+);
+renderThumbnails(study);
+if(study.images.length){
+showImage(
+study.images[currentImage].url
+);
+}else{
+document.getElementById(
+"imageWrapper"
+).style.display="none";
+document.getElementById(
+"emptyMessage"
+).textContent=
+"No hay imágenes asociadas a este estudio.";
+document.getElementById(
+"emptyMessage"
+).style.display="block";
+}
+updateImageInformation(
+study
+);
+updateViewerAdminButtons();
+}
+async function isAdminLogged(){
+const{data}=
+await supabaseClient
+.auth
+.getSession();
+return !!(
+data &&
+data.session &&
+data.session.user &&
+data.session.user.id===ADMIN_UID
+);
+}
+async function updateViewerAdminButtons(){
+const buttons=
+document.getElementById(
+"viewerAdminActions"
+);
+const addStudyButton=
+document.getElementById(
+"addStudyButton"
+);
+const editPatientButton=
+document.getElementById(
+"editPatientButton"
+);
+const study=
+getCurrentStudy();
+const admin=
+await isAdminLogged();
+if(addStudyButton){
+addStudyButton.style.display=
+admin?"block":"none";
+}
+if(editPatientButton){
+editPatientButton.style.display=
+(admin&&currentPatient)?"block":"none";
+}
+if(!study){
+buttons.style.display=
+"none";
+return;
+}
+buttons.style.display=
+admin?"flex":"none";
+}
+function clampPan(){
+const viewport=
+document.getElementById("viewport");
+const image=
+document.getElementById("mainImage");
+if(
+!viewport||
+!image||
+!image.naturalWidth||
+!image.naturalHeight
+){
+return;
+}
+const scaledWidth=
+image.naturalWidth*zoom;
+const scaledHeight=
+image.naturalHeight*zoom;
+const viewportWidth=
+viewport.clientWidth;
+const viewportHeight=
+viewport.clientHeight;
+const minimumVisible=
+35;
+let maxPanX;
+let maxPanY;
+if(scaledWidth<=viewportWidth){
+maxPanX=
+Math.max(
+0,
+(viewportWidth-scaledWidth)/2
+);
+}else{
+maxPanX=
+(scaledWidth/2)+
+(viewportWidth/2)-
+minimumVisible;
+}
+if(scaledHeight<=viewportHeight){
+maxPanY=
+Math.max(
+0,
+(viewportHeight-scaledHeight)/2
+);
+}else{
+maxPanY=
+(scaledHeight/2)+
+(viewportHeight/2)-
+minimumVisible;
+}
+if(!isFinite(maxPanX))
+maxPanX=0;
+if(!isFinite(maxPanY))
+maxPanY=0;
+panX=
+Math.max(
+-maxPanX,
+Math.min(
+maxPanX,
+panX
+)
+);
+panY=
+Math.max(
+-maxPanY,
+Math.min(
+maxPanY,
+panY
+)
+);
+}
+function fitImageToViewport(){
+const image=
+document.getElementById("mainImage");
+const viewport=
+document.getElementById("viewport");
+if(
+!image||
+!viewport||
+!image.naturalWidth||
+!image.naturalHeight
+){
+return;
+}
+const viewportWidth=
+viewport.clientWidth;
+const viewportHeight=
+viewport.clientHeight;
+if(
+viewportWidth<=0||
+viewportHeight<=0
+){
+return;
+}
+const isMobile =
+window.matchMedia(
+"(max-width:700px)"
+).matches;
+const margin =
+isMobile ? 12 : 24;
+const availableWidth=
+Math.max(
+viewportWidth-margin,
+1
+);
+const availableHeight=
+Math.max(
+viewportHeight-margin,
+1
+);
+const imageWidth=
+image.naturalWidth;
+const imageHeight=
+image.naturalHeight;
+let fitZoom=
+Math.min(
+availableWidth/imageWidth,
+availableHeight/imageHeight
+);
+if(
+!isFinite(fitZoom)||
+fitZoom<=0
+){
+fitZoom=1;
+}
+if(fitZoom>1){
+fitZoom=1;
+}
+if(fitZoom<0.25){
+fitZoom=0.25;
+}
+zoom=fitZoom;
+panX=0;
+panY=0;
+isDragging=false;
+imageLoaded=true;
+applyTransform();
+}
+function showImage(src){
+if(!src)return;
+document.getElementById(
+"emptyMessage"
+).style.display="none";
+document.getElementById(
+"imageWrapper"
+).style.display="flex";
+const image=
+document.getElementById(
+"mainImage"
+);
+imageLoaded=false;
+image.onerror=()=>{
+imageLoaded=false;
+document.getElementById(
+"emptyMessage"
+).textContent=
+"No se pudo cargar la imagen.";
+document.getElementById(
+"emptyMessage"
+).style.display="block";
+};
+image.onload=()=>{
+rotation=0;
+inverted=false;
+contrast=1;
+panX=0;
+panY=0;
+fitImageToViewport();
+applyTransform();
+};
+image.src=src;
+}
+function renderThumbnails(study){
+const container=
+document.getElementById(
+"thumbnailList"
+);
+container.innerHTML="";
+study.images.forEach(
+(imageObj,index)=>{
+const item=
+document.createElement(
+"div"
+);
+item.className="thumbnail-item";
+const img=
+document.createElement("img");
+img.src=imageObj.url;
+img.className="thumbnail";
+if(imageObj.structure){
+img.title=imageObj.structure;
+}
+if(index===currentImage){
+img.classList.add(
+"active"
+);
+}
+img.onclick=()=>{
+currentImage=index;
+resetView();
+showImage(imageObj.url);
+renderThumbnails(study);
+updateImageInformation(study);
+};
+const deleteButton=
+document.createElement("button");
+deleteButton.className=
+"thumbnail-delete";
+deleteButton.type="button";
+deleteButton.title=
+"Eliminar imagen";
+deleteButton.textContent="×";
+deleteButton.onclick=
+event=>{
+event.stopPropagation();
+deleteImageFromStudy(
+study,
+index
+);
+};
+item.appendChild(img);
+item.appendChild(deleteButton);
+container.appendChild(item);
+});
+}
+async function deleteImageFromStudy(
+study,
+imageIndex
+){
+if(!study)return;
+if(
+imageIndex<0||
+imageIndex>=study.images.length
+)
+return;
+const confirmed=
+confirm(
+"¿Deseas eliminar esta imagen?\n\n"+
+"Esta acción no se puede deshacer."
+);
+if(!confirmed)return;
+const admin=
+await isAdminLogged();
+if(!admin){
+alert(
+"La sesión de administrador no es válida."
+);
+return;
+}
+try{
+document.getElementById(
+"viewerSubtitle"
+).textContent=
+"Eliminando imagen...";
+const storagePath=
+study.images[imageIndex].path;
+const remainingImages=
+study.images
+.filter(
+(_,index)=>index!==imageIndex
+)
+.map(
+image=>({
+path:image.path,
+structure:image.structure||""
+})
+)
+.filter(
+image=>image.path
+);
+const{
+error:updateError
+}=
+await supabaseClient
+.from("studies")
+.update({
+images:remainingImages
+})
+.eq(
+"id",
+study.id
+);
+if(updateError)
+throw updateError;
+if(storagePath){
+const{
+error:storageError
+}=
+await supabaseClient
+.storage
+.from(STORAGE_BUCKET)
+.remove([
+storagePath
+]);
+if(storageError)
+console.error(
+"ADVERTENCIA STORAGE:",
+storageError
+);
+}
+const studyId=study.id;
+const patientName=
+study.patient;
+await loadStudies();
+currentPatient=
+patientName;
+const patientStudies=
+getPatientStudies();
+currentStudy=
+patientStudies.findIndex(
+item=>
+String(item.id)===
+String(studyId)
+);
+if(currentStudy<0)
+currentStudy=0;
+const updatedStudy=
+getCurrentStudy();
+if(updatedStudy){
+currentImage=
+Math.min(
+imageIndex,
+Math.max(
+updatedStudy.images.length-1,
+0
+)
+);
+renderPatients();
+renderStudy(
+updatedStudy
+);
+}else{
+clearViewer();
+}
+}catch(error){
+console.error(
+"ERROR AL ELIMINAR IMAGEN:",
+error
+);
+alert(
+"No se pudo eliminar la imagen:\n\n"+
+(error.message||
+"Error desconocido")
+);
+updateViewerAdminButtons();
+}
+}
+function updateImageInformation(
+study
+){
+document.getElementById(
+"imageCounter"
+).textContent=
+study.images.length?
+"Imagen "+
+(currentImage+1)+
+" / "+
+study.images.length:
+"--";
+document.getElementById(
+"infoCurrentImage"
+).textContent=
+study.images.length?
+(currentImage+1)+
+" / "+
+study.images.length:
+"--";
+const currentImageObj=
+study.images[currentImage];
+document.getElementById(
+"infoImageStructure"
+).textContent=
+(currentImageObj&&currentImageObj.structure)?
+currentImageObj.structure:
+(study.study||"No especificado");
+}
+function nextImage(){
+const study=
+getCurrentStudy();
+if(
+!study||
+!study.images.length
+)return;
+currentImage++;
+if(
+currentImage>=study.images.length
+){
+currentImage=0;
+}
+resetView();
+showImage(
+study.images[currentImage].url
+);
+renderThumbnails(study);
+updateImageInformation(study);
+}
+function previousImage(){
+const study=
+getCurrentStudy();
+if(
+!study||
+!study.images.length
+)return;
+currentImage--;
+if(currentImage<0){
+currentImage=
+study.images.length-1;
+}
+resetView();
+showImage(
+study.images[currentImage].url
+);
+renderThumbnails(study);
+updateImageInformation(study);
+}
+function zoomIn(){
+setZoom(
+zoom+.15
+);
+}
+function zoomOut(){
+setZoom(
+zoom-.15
+);
+}
+function setZoom(value){
+zoom=value;
+if(zoom>4)
+zoom=4;
+if(zoom<.25)
+zoom=.25;
+clampPan();
+applyTransform();
+}
+function zoomAtPoint(
+delta,
+clientX,
+clientY
+){
+const viewport=
+document.getElementById(
+"viewport"
+);
+const rect=
+viewport.getBoundingClientRect();
+const oldZoom=zoom;
+let newZoom=
+zoom+(delta>0?.15:-.15);
+if(newZoom>4)
+newZoom=4;
+if(newZoom<.25)
+newZoom=.25;
+if(newZoom===oldZoom)
+return;
+const mouseX=
+clientX-
+(
+rect.left+
+rect.width/2
+);
+const mouseY=
+clientY-
+(
+rect.top+
+rect.height/2
+);
+const scale=
+newZoom/oldZoom;
+panX=
+mouseX-
+(mouseX-panX)*scale;
+panY=
+mouseY-
+(mouseY-panY)*scale;
+zoom=newZoom;
+clampPan();
+applyTransform();
+}
+const viewportElement=
+document.getElementById("viewport");
+viewportElement.addEventListener(
+"wheel",
+event=>{
+if(
+document.getElementById(
+"imageWrapper"
+).style.display==="none"
+){
+return;
+}
+event.preventDefault();
+zoomAtPoint(
+event.deltaY<0?1:-1,
+event.clientX,
+event.clientY
+);
+},
+{
+passive:false
+}
+);
+function getPointerDistance(){
+const points=
+Array.from(
+activePointers.values()
+);
+if(points.length<2)
+return 0;
+const dx=
+points[1].x-
+points[0].x;
+const dy=
+points[1].y-
+points[0].y;
+return Math.sqrt(
+dx*dx+
+dy*dy
+);
+}
+function getPointerCenter(){
+const points=
+Array.from(
+activePointers.values()
+);
+if(points.length<2)
+return null;
+return{
+x:
+(points[0].x+
+points[1].x)/2,
+y:
+(points[0].y+
+points[1].y)/2
+};
+}
+viewportElement.addEventListener(
+"pointerdown",
+event=>{
+const image=
+document.getElementById(
+"mainImage"
+);
+if(
+!image.src||
+document.getElementById(
+"imageWrapper"
+).style.display==="none"
+){
+return;
+}
+if(
+event.pointerType==="mouse" &&
+event.button!==0
+){
+return;
+}
+activePointers.set(
+event.pointerId,
+{
+x:event.clientX,
+y:event.clientY
+}
+);
+try{
+viewportElement.setPointerCapture(
+event.pointerId
+);
+}catch(error){}
+if(activePointers.size===2){
+isDragging=false;
+wasPinching=true;
+suppressNextDrag=true;
+viewportElement.classList.remove(
+"dragging"
+);
+pinchStartDistance=
+getPointerDistance();
+pinchStartZoom=
+zoom;
+pinchStartPanX=
+panX;
+pinchStartPanY=
+panY;
+const center=
+getPointerCenter();
+if(center){
+const rect=
+viewportElement.getBoundingClientRect();
+pinchStartCenterX=
+center.x-
+(
+rect.left+
+rect.width/2
+);
+pinchStartCenterY=
+center.y-
+(
+rect.top+
+rect.height/2
+);
+pinchStartFocalX=
+(
+pinchStartCenterX-
+pinchStartPanX
+)/
+pinchStartZoom;
+pinchStartFocalY=
+(
+pinchStartCenterY-
+pinchStartPanY
+)/
+pinchStartZoom;
+}
+return;
+}
+if(activePointers.size===1){
+if(suppressNextDrag){
+isDragging=false;
+viewportElement.classList.remove(
+"dragging"
+);
+return;
+}
+isDragging=true;
+viewportElement.classList.add(
+"dragging"
+);
+dragStartX=
+event.clientX;
+dragStartY=
+event.clientY;
+dragOriginX=
+panX;
+dragOriginY=
+panY;
+}
+});
+viewportElement.addEventListener(
+"pointermove",
+event=>{
+if(
+!activePointers.has(
+event.pointerId
+)
+){
+return;
+}
+activePointers.set(
+event.pointerId,
+{
+x:event.clientX,
+y:event.clientY
+}
+);
+if(activePointers.size>=2){
+isDragging=false;
+viewportElement.classList.remove(
+"dragging"
+);
+const distance=
+getPointerDistance();
+const center=
+getPointerCenter();
+if(
+!distance||
+!pinchStartDistance||
+!center
+){
+return;
+}
+const rect=
+viewportElement.getBoundingClientRect();
+const centerX=
+center.x-
+(
+rect.left+
+rect.width/2
+);
+const centerY=
+center.y-
+(
+rect.top+
+rect.height/2
+);
+let newZoom=
+pinchStartZoom*
+(
+distance/
+pinchStartDistance
+);
+if(newZoom>4)
+newZoom=4;
+if(newZoom<.25)
+newZoom=.25;
+panX=
+centerX-
+pinchStartFocalX*
+newZoom;
+panY=
+centerY-
+pinchStartFocalY*
+newZoom;
+zoom=newZoom;
+clampPan();
+applyTransform();
+return;
+}
+if(
+activePointers.size===1 &&
+isDragging &&
+!suppressNextDrag
+){
+panX=
+dragOriginX+
+(
+event.clientX-
+dragStartX
+);
+panY=
+dragOriginY+
+(
+event.clientY-
+dragStartY
+);
+clampPan();
+applyTransform();
+}
+});
+function handlePointerUp(event){
+activePointers.delete(
+event.pointerId
+);
+try{
+viewportElement.releasePointerCapture(
+event.pointerId
+);
+}catch(error){}
+if(activePointers.size>=2){
+return;
+}
+if(wasPinching){
+isDragging=false;
+suppressNextDrag=true;
+wasPinching=false;
+viewportElement.classList.remove(
+"dragging"
+);
+pinchStartDistance=0;
+}
+if(activePointers.size===0){
+isDragging=false;
+pinchStartDistance=0;
+pinchStartZoom=zoom;
+suppressNextDrag=false;
+viewportElement.classList.remove(
+"dragging"
+);
+return;
+}
+if(activePointers.size===1){
+isDragging=false;
+viewportElement.classList.remove(
+"dragging"
+);
+}
+}
+viewportElement.addEventListener(
+"pointerup",
+handlePointerUp
+);
+viewportElement.addEventListener(
+"pointercancel",
+handlePointerUp
+);
+viewportElement.addEventListener(
+"pointerleave",
+event=>{
+if(
+event.pointerType==="mouse" &&
+isDragging
+){
+isDragging=false;
+viewportElement.classList.remove(
+"dragging"
+);
+}
+});
+function rotateRight(){
+rotation+=90;
+if(rotation>=360)
+rotation=0;
+applyTransform();
+}
+function rotateLeft(){
+rotation-=90;
+if(rotation<0)
+rotation=270;
+applyTransform();
+}
+function invertImage(){
+inverted=!inverted;
+applyTransform();
+}
+function contrastUp(){
+contrast+=.15;
+if(contrast>2.5)
+contrast=2.5;
+applyTransform();
+}
+function contrastDown(){
+contrast-=.15;
+if(contrast<.4)
+contrast=.4;
+applyTransform();
+}
+function applyTransform(){
+const wrapper=
+document.getElementById(
+"imageWrapper"
+);
+const image=
+document.getElementById(
+"mainImage"
+);
+if(!wrapper||!image)
+return;
+clampPan();
+wrapper.style.transform=
+"translate3d(calc(-50% + "+
+panX+
+"px),calc(-50% + "+
+panY+
+"px),0) "+
+"scale("+
+zoom+
+") rotate("+
+rotation+
+"deg)";
+image.style.filter=
+"contrast("+
+contrast+
+")"+
+(
+inverted?
+" invert(1)":
+" invert(0)"
+);
+document.getElementById(
+"infoZoom"
+).textContent=
+Math.round(zoom*100)+
+"%";
+document.getElementById(
+"infoRotation"
+).textContent=
+rotation+
+"°";
+}
+function resetView(){
+rotation=0;
+inverted=false;
+contrast=1;
+panX=0;
+panY=0;
+isDragging=false;
+activePointers.clear();
+pinchStartDistance=0;
+pinchStartZoom=1;
+pinchStartCenterX=0;
+pinchStartCenterY=0;
+pinchStartPanX=0;
+pinchStartPanY=0;
+pinchStartFocalX=0;
+pinchStartFocalY=0;
+wasPinching=false;
+suppressNextDrag=false;
+const viewport=
+document.getElementById(
+"viewport"
+);
+if(viewport){
+viewport.classList.remove(
+"dragging"
+);
+}
+const image=
+document.getElementById(
+"mainImage"
+);
+if(
+image &&
+image.complete &&
+image.naturalWidth>0 &&
+image.naturalHeight>0
+){
+fitImageToViewport();
+}else{
+zoom=1;
+applyTransform();
+}
+}
+function clearViewer(){
+resetView();
+imageLoaded=false;
+document.getElementById(
+"viewerTitle"
+).textContent=
+"Sin estudio seleccionado";
+document.getElementById(
+"viewerSubtitle"
+).textContent=
+"Fecha: "+
+formatDate(selectedDate);
+document.getElementById(
+"imageCounter"
+).textContent="--";
+document.getElementById(
+"overlayRight"
+).innerHTML="--";
+document.getElementById(
+"imageWrapper"
+).style.display="none";
+document.getElementById(
+"emptyMessage"
+).textContent=
+"Seleccione un paciente para visualizar sus estudios.";
+document.getElementById(
+"emptyMessage"
+).style.display="block";
+document.getElementById(
+"thumbnailList"
+).innerHTML="";
+document.getElementById(
+"infoPatientName"
+).textContent="--";
+document.getElementById(
+"infoPatientMeta"
+).textContent="--";
+document.getElementById(
+"infoDate"
+).textContent=
+formatDate(selectedDate);
+document.getElementById(
+"infoImages"
+).textContent="--";
+document.getElementById(
+"infoStudy"
+).textContent="--";
+document.getElementById(
+"infoCurrentImage"
+).textContent="--";
+document.getElementById(
+"studySelector"
+).innerHTML=
+'<option value="">Seleccione un estudio</option>';
+document.getElementById(
+"viewerAdminActions"
+).style.display="none";
+}
+function openFullscreen(){
+const study=
+getCurrentStudy();
+if(
+!study||
+!study.images.length
+)return;
+document.getElementById(
+"fullscreenImage"
+).src=
+study.images[currentImage].url;
+document.getElementById(
+"fullscreenViewer"
+).style.display=
+"flex";
+}
+function closeFullscreen(){
+document.getElementById(
+"fullscreenViewer"
+).style.display=
+"none";
+}
+function escapeHtml(value){
+if(
+value===null||
+value===undefined
+)
+return"";
+return String(value)
+.replaceAll("&","&amp;")
+.replaceAll("<","&lt;")
+.replaceAll(">","&gt;")
+.replaceAll('"',"&quot;")
+.replaceAll("'","&#039;");
+}
+function openLogin(){
+document.getElementById(
+"loginStatus"
+).textContent="";
+document.getElementById(
+"loginOverlay"
+).style.display=
+"flex";
+setTimeout(()=>{
+document.getElementById(
+"loginEmail"
+).focus();
+},100);
+}
+function closeLogin(){
+document.getElementById(
+"loginOverlay"
+).style.display=
+"none";
+}
+function openEditPatient(){
+if(!currentPatient){
+alert(
+"Primero selecciona un paciente."
+);
+return;
+}
+const patientStudies=
+getPatientStudies();
+const reference=
+patientStudies[0]||{};
+document.getElementById(
+"editPatientName"
+).value=
+currentPatient||"";
+document.getElementById(
+"editPatientBirth"
+).value=
+reference.birth||"";
+document.getElementById(
+"editPatientSex"
+).value=
+reference.sex||"";
+document.getElementById(
+"editPatientHistory"
+).value=
+reference.history||"";
+document.getElementById(
+"editPatientStatus"
+).textContent="";
+document.getElementById(
+"editPatientOverlay"
+).style.display=
+"flex";
+setTimeout(()=>{
+document.getElementById(
+"editPatientName"
+).focus();
+},100);
+}
+function closeEditPatient(){
+const overlay=
+document.getElementById(
+"editPatientOverlay"
+);
+if(overlay){
+overlay.style.display=
+"none";
+}
+}
+async function saveEditPatient(){
+if(!currentPatient){
+closeEditPatient();
+return;
+}
+const newName=
+document.getElementById(
+"editPatientName"
+).value.trim();
+const birth=
+document.getElementById(
+"editPatientBirth"
+).value||null;
+const sex=
+document.getElementById(
+"editPatientSex"
+).value||null;
+const history=
+document.getElementById(
+"editPatientHistory"
+).value.trim()||null;
+const status=
+document.getElementById(
+"editPatientStatus"
+);
+if(!newName){
+status.className=
+"status-message status-error";
+status.textContent=
+"El nombre del paciente no puede estar vacío.";
+return;
+}
+const admin=
+await isAdminLogged();
+if(!admin){
+status.className=
+"status-message status-error";
+status.textContent=
+"La sesión de administrador no es válida.";
+return;
+}
+try{
+status.className=
+"status-message";
+status.textContent=
+"Guardando cambios...";
+const previousPatient=
+currentPatient;
+const{
+error
+}=
+await supabaseClient
+.from("studies")
+.update({
+patient:newName,
+birth:birth,
+sex:sex,
+history:history
+})
+.eq(
+"patient",
+previousPatient
+)
+.eq(
+"date",
+selectedDate
+);
+if(error)
+throw error;
+currentPatient=
+newName;
+await loadStudies();
+renderCalendar();
+renderPatients();
+const patientStudies=
+getPatientStudies();
+if(patientStudies.length){
+currentStudy=
+Math.min(
+currentStudy,
+patientStudies.length-1
+);
+renderStudy(
+patientStudies[currentStudy]
+);
+}else{
+clearViewer();
+}
+status.className=
+"status-message status-success";
+status.textContent=
+"Información del paciente actualizada.";
+setTimeout(
+()=>closeEditPatient(),
+700
+);
+}catch(error){
+console.error(
+"ERROR AL EDITAR PACIENTE:",
+error
+);
+status.className=
+"status-message status-error";
+status.textContent=
+error.message||
+"No se pudo actualizar la información del paciente.";
+}
+}
+async function loginAdmin(){
+const email=
+document.getElementById(
+"loginEmail"
+).value.trim();
+const password=
+document.getElementById(
+"loginPassword"
+).value;
+const status=
+document.getElementById(
+"loginStatus"
+);
+if(!email||!password){
+status.className=
+"status-message status-error";
+status.textContent=
+"Ingresa el correo y la contraseña.";
+return;
+}
+status.className=
+"status-message";
+status.textContent=
+"Verificando acceso...";
+try{
+const{
+data,
+error
+}=
+await supabaseClient
+.auth
+.signInWithPassword({
+email:email,
+password:password
+});
+if(error)
+throw error;
+if(
+!data.user||
+data.user.id!==ADMIN_UID
+){
+await supabaseClient
+.auth
+.signOut();
+throw new Error(
+"Esta cuenta no tiene permisos de administrador."
+);
+}
+closeLogin();
+updateAuthInterface(
+data.user
+);
+}catch(error){
+status.className=
+"status-message status-error";
+status.textContent=
+error.message||
+"No se pudo iniciar sesión.";
+}
+}
+async function checkAuth(){
+const{
+data
+}=
+await supabaseClient
+.auth
+.getSession();
+if(
+data&&
+data.session&&
+data.session.user
+){
+if(
+data.session.user.id===
+ADMIN_UID
+){
+updateAuthInterface(
+data.session.user
+);
+}else{
+await supabaseClient
+.auth
+.signOut();
+}
+}
+supabaseClient
+.auth
+.onAuthStateChange(
+async(event,session)=>{
+if(
+session&&
+session.user&&
+session.user.id===
+ADMIN_UID
+){
+updateAuthInterface(
+session.user
+);
+}else{
+updateAuthInterface(
+null
+);
+}
+});
+}
+function updateAuthInterface(
+user
+){
+const loginButton=
+document.getElementById(
+"loginButton"
+);
+const logoutButton=
+document.getElementById(
+"logoutButton"
+);
+const authUser=
+document.getElementById(
+"authUser"
+);
+const addStudyButton=
+document.getElementById(
+"addStudyButton"
+);
+if(user){
+loginButton.style.display=
+"none";
+logoutButton.style.display=
+"inline-block";
+authUser.textContent=
+user.email||
+"Administrador";
+if(addStudyButton){
+addStudyButton.style.display=
+"block";
+}
+updateViewerAdminButtons();
+}else{
+loginButton.style.display=
+"inline-block";
+logoutButton.style.display=
+"none";
+authUser.textContent="";
+if(addStudyButton){
+addStudyButton.style.display=
+"none";
+}
+closeAddImages();
+closeAddStudy();
+closeEditPatient();
+document.getElementById(
+"viewerAdminActions"
+).style.display="none";
+const editPatientButton=
+document.getElementById(
+"editPatientButton"
+);
+if(editPatientButton){
+editPatientButton.style.display=
+"none";
+}
+}
+}
+async function logoutAdmin(){
+await supabaseClient
+.auth
+.signOut();
+updateAuthInterface(null);
+}
+function openAddStudy(){
+document.getElementById(
+"newPatient"
+).value="";
+document.getElementById(
+"newStudyType"
+).value="";
+document.getElementById(
+"newStudyDate"
+).value=
+selectedDate||
+getTodayString();
+document.getElementById(
+"newStudyFiles"
+).value="";
+document.getElementById(
+"newStudyFileList"
+).textContent=
+"Ningún archivo seleccionado.";
+document.getElementById(
+"newStudyStatus"
+).textContent="";
+document.getElementById(
+"addStudyOverlay"
+).style.display=
+"flex";
+setTimeout(()=>{
+document.getElementById(
+"newPatient"
+).focus();
+},100);
+}
+function closeAddStudy(){
+document.getElementById(
+"addStudyOverlay"
+).style.display=
+"none";
+}
+function showNewStudyFiles(){
+const input=
+document.getElementById(
+"newStudyFiles"
+);
+const list=
+document.getElementById(
+"newStudyFileList"
+);
+if(
+!input.files||
+input.files.length===0
+){
+list.textContent=
+"Ningún archivo seleccionado.";
+return;
+}
+const files=
+Array.from(input.files);
+const invalid=
+files.filter(
+file=>
+!(
+file.type==="image/jpeg"||
+/\.jpe?g$/i.test(file.name)
+)
+);
+if(invalid.length){
+list.innerHTML=
+'<span style="color:#e47777">'+
+"Solo se permiten imágenes JPG/JPEG."+
+"</span>";
+return;
+}
+list.innerHTML=
+files.map(
+(file,index)=>
+(index+1)+
+". "+
+escapeHtml(file.name)
+).join("<br>");
+}
+async function createNewStudy(){
+const patient=
+document.getElementById(
+"newPatient"
+).value.trim();
+const date=
+document.getElementById(
+"newStudyDate"
+).value;
+const studyType=
+document.getElementById(
+"newStudyType"
+).value.trim();
+const input=
+document.getElementById(
+"newStudyFiles"
+);
+const status=
+document.getElementById(
+"newStudyStatus"
+);
+if(!patient){
+status.className=
+"status-message status-error";
+status.textContent=
+"Ingresa el nombre del paciente.";
+return;
+}
+if(!date){
+status.className=
+"status-message status-error";
+status.textContent=
+"Selecciona la fecha.";
+return;
+}
+if(
+!input.files||
+input.files.length===0
+){
+status.className=
+"status-message status-error";
+status.textContent=
+"Selecciona al menos una imagen JPG.";
+return;
+}
+const admin=
+await isAdminLogged();
+if(!admin){
+status.className=
+"status-message status-error";
+status.textContent=
+"La sesión de administrador no es válida.";
+return;
+}
+const files=
+Array.from(input.files);
+const invalid=
+files.filter(
+file=>
+!(
+file.type==="image/jpeg"||
+/\.jpe?g$/i.test(file.name)
+)
+);
+if(invalid.length){
+status.className=
+"status-message status-error";
+status.textContent=
+"Todos los archivos deben ser JPG/JPEG.";
+return;
+}
+const newPaths=[];
+try{
+status.className=
+"status-message";
+status.textContent=
+"Preparando estudio...";
+const folder=
+date+
+"/"+
+crypto.randomUUID();
+for(
+let i=0;
+i<files.length;
+i++
+){
+const file=files[i];
+const safeName=
+file.name.replace(
+/[^a-zA-Z0-9.\_-]/g,
+"_"
+);
+const path=
+folder+
+"/"+
+String(i+1).padStart(3,"0")+
+"_"+safeName;
+status.textContent=
+"Subiendo imagen "+
+(i+1)+
+" de "+
+files.length+
+"...";
+const{
+error:uploadError
+}=
+await supabaseClient
+.storage
+.from(STORAGE_BUCKET)
+.upload(
+path,
+file,
+{
+cacheControl:"3600",
+upsert:false,
+contentType:"image/jpeg"
+}
+);
+if(uploadError)
+throw uploadError;
+newPaths.push(path);
+}
+status.textContent=
+"Creando estudio...";
+const{
+data,
+error
+}=
+await supabaseClient
+.from("studies")
+.insert({
+patient:patient,
+date:date,
+study:studyType||null,
+structure:null,
+modality:"CR",
+images:newPaths.map(
+path=>({
+path:path,
+structure:studyType||""
+})
+)
+})
+.select()
+.single();
+if(error){
+await supabaseClient
+.storage
+.from(STORAGE_BUCKET)
+.remove(
+newPaths
+);
+throw error;
+}
+selectedDate=date;
+calendarDate=
+new Date(
+date+"T00:00:00"
+);
+currentPatient=
+patient;
+currentStudy=0;
+currentImage=0;
+await loadStudies();
+const patientStudies=
+getPatientStudies();
+currentStudy=
+patientStudies.findIndex(
+item=>
+String(item.id)===
+String(data.id)
+);
+if(currentStudy<0)
+currentStudy=0;
+const createdStudy=
+getCurrentStudy();
+renderCalendar();
+renderPatients();
+if(createdStudy){
+renderStudy(
+createdStudy
+);
+}
+status.className=
+"status-message status-success";
+status.textContent=
+"Estudio creado correctamente.";
+setTimeout(
+()=>{
+closeAddStudy();
+},
+700
+);
+}catch(error){
+console.error(
+"ERROR AL CREAR ESTUDIO:",
+error
+);
+status.className=
+"status-message status-error";
+status.textContent=
+error.message||
+"No se pudo crear el estudio.";
+if(newPaths.length){
+try{
+await supabaseClient
+.storage
+.from(STORAGE_BUCKET)
+.remove(
+newPaths
+);
+}catch(cleanError){
+console.error(
+"ERROR DE LIMPIEZA:",
+cleanError
+);
+}
+}
+}
+}
+function addImagesToCurrentStudy(){
+const study=
+getCurrentStudy();
+if(!study){
+alert(
+"Primero selecciona un estudio."
+);
+return;
+}
+document.getElementById(
+"addImagesPatient"
+).textContent=
+study.patient;
+document.getElementById(
+"addImagesStudy"
+).textContent=
+"Estudio: "+
+(study.study||"No especificado")+
+" · Fecha: "+
+formatDate(study.date);
+document.getElementById(
+"additionalFiles"
+).value="";
+document.getElementById(
+"additionalFileList"
+).textContent=
+"Ningún archivo seleccionado.";
+document.getElementById(
+"addImagesStatus"
+).textContent="";
+document.getElementById(
+"addImagesOverlay"
+).style.display=
+"flex";
+}
+function closeAddImages(){
+document.getElementById(
+"addImagesOverlay"
+).style.display=
+"none";
+}
+function showAdditionalFiles(){
+const input=
+document.getElementById(
+"additionalFiles"
+);
+const list=
+document.getElementById(
+"additionalFileList"
+);
+if(
+!input.files||
+input.files.length===0
+){
+list.textContent=
+"Ningún archivo seleccionado.";
+return;
+}
+const files=
+Array.from(input.files);
+const invalid=
+files.filter(
+file=>
+!(
+file.type==="image/jpeg"||
+/\.jpe?g$/i.test(file.name)
+)
+);
+if(invalid.length){
+list.innerHTML=
+'<span style="color:#e47777">'+
+"Solo se permiten imágenes JPG/JPEG."+
+"</span>";
+return;
+}
+list.innerHTML=
+files.map(
+(file,index)=>
+(index+1)+
+". "+
+escapeHtml(file.name)
+).join("<br>");
+}
+async function uploadAdditionalImages(){
+const study=
+getCurrentStudy();
+const input=
+document.getElementById(
+"additionalFiles"
+);
+const structureSelect=
+document.getElementById(
+"additionalStructure"
+);
+const selectedStructure=
+structureSelect?
+structureSelect.value.trim():
+"";
+const status=
+document.getElementById(
+"addImagesStatus"
+);
+if(!study){
+status.className=
+"status-message status-error";
+status.textContent=
+"No hay un estudio seleccionado.";
+return;
+}
+if(
+!input.files||
+input.files.length===0
+){
+status.className=
+"status-message status-error";
+status.textContent=
+"Selecciona al menos una imagen JPG.";
+return;
+}
+const admin=
+await isAdminLogged();
+if(!admin){
+status.className=
+"status-message status-error";
+status.textContent=
+"La sesión de administrador no es válida.";
+return;
+}
+const files=
+Array.from(input.files);
+const newPaths=[];
+try{
+status.className=
+"status-message";
+status.textContent=
+"Preparando subida...";
+const folder=
+(study.date||getTodayString())+
+"/"+
+crypto.randomUUID();
+for(
+let i=0;
+i<files.length;
+i++
+){
+const file=files[i];
+if(
+!(
+file.type==="image/jpeg"||
+/\.jpe?g$/i.test(file.name)
+)
+){
+throw new Error(
+"El archivo "+
+file.name+
+" no es JPG/JPEG."
+);
+}
+const safeName=
+file.name.replace(
+/[^a-zA-Z0-9.\_-]/g,
+"_"
+);
+const path=
+folder+
+"/"+
+String(i+1).padStart(3,"0")+
+"_"+safeName;
+status.textContent=
+"Subiendo imagen "+
+(i+1)+
+" de "+
+files.length+
+"...";
+const{
+error:uploadError
+}=
+await supabaseClient
+.storage
+.from(STORAGE_BUCKET)
+.upload(
+path,
+file,
+{
+cacheControl:"3600",
+upsert:false,
+contentType:"image/jpeg"
+}
+);
+if(uploadError)
+throw uploadError;
+newPaths.push(path);
+}
+const existingImages=
+study.images
+.map(image=>({
+path:image.path,
+structure:image.structure||""
+}))
+.filter(image=>image.path);
+const newImages=
+newPaths.map(
+path=>({
+path:path,
+structure:selectedStructure
+})
+);
+const combinedImages=[
+...existingImages,
+...newImages
+];
+status.textContent=
+"Actualizando estudio...";
+const{
+error:updateError
+}=
+await supabaseClient
+.from("studies")
+.update({
+images:combinedImages
+})
+.eq(
+"id",
+study.id
+);
+if(updateError){
+await supabaseClient
+.storage
+.from(STORAGE_BUCKET)
+.remove(
+newPaths
+);
+throw updateError;
+}
+const studyId=study.id;
+const patientName=study.patient;
+const studyDate=study.date;
+await loadStudies();
+selectedDate=studyDate;
+calendarDate=
+new Date(
+studyDate+"T00:00:00"
+);
+currentPatient=
+patientName;
+const patientList=
+getPatientStudies();
+currentStudy=
+patientList.findIndex(
+item=>
+String(item.id)===
+String(studyId)
+);
+if(currentStudy<0)
+currentStudy=0;
+const updatedStudy=
+getCurrentStudy();
+if(updatedStudy){
+currentImage=
+Math.max(
+updatedStudy.images.length-
+newPaths.length,
+0
+);
+renderCalendar();
+renderPatients();
+renderStudy(
+updatedStudy
+);
+}else{
+clearViewer();
+}
+status.className=
+"status-message status-success";
+status.textContent=
+"Imágenes añadidas correctamente.";
+setTimeout(
+()=>closeAddImages(),
+800
+);
+}catch(error){
+console.error(
+"ERROR AL AÑADIR IMÁGENES:",
+error
+);
+status.className=
+"status-message status-error";
+status.textContent=
+error.message||
+"No se pudieron añadir las imágenes.";
+}
+}
+async function deleteCurrentStudy(){
+const study=
+getCurrentStudy();
+if(!study){
+alert(
+"Primero selecciona un estudio."
+);
+return;
+}
+const confirmed=
+confirm(
+"¿Está seguro de eliminar este estudio?\n\n"+
+"Paciente: "+
+study.patient+
+"\n"+
+"Estudio: "+
+(study.study||"No especificado")+
+"\n"+
+"Fecha: "+
+formatDate(study.date)+
+"\n\n"+
+"También se eliminarán todas las imágenes asociadas.\n\n"+
+"Esta acción no se puede deshacer."
+);
+if(!confirmed)return;
+const admin=
+await isAdminLogged();
+if(!admin){
+alert(
+"La sesión de administrador no es válida."
+);
+return;
+}
+try{
+document.getElementById(
+"viewerSubtitle"
+).textContent=
+"Eliminando estudio...";
+const paths=
+study.images
+.map(image=>image.path)
+.filter(path=>path);
+const{
+error:deleteError
+}=
+await supabaseClient
+.from("studies")
+.delete()
+.eq(
+"id",
+study.id
+);
+if(deleteError)
+throw deleteError;
+if(paths.length){
+const{
+error:storageError
+}=
+await supabaseClient
+.storage
+.from(STORAGE_BUCKET)
+.remove(paths);
+if(storageError){
+console.error(
+"ADVERTENCIA STORAGE:",
+storageError
+);
+}
+}
+currentPatient=null;
+currentStudy=0;
+currentImage=0;
+await loadStudies();
+clearViewer();
+alert(
+"Estudio eliminado correctamente."
+);
+}catch(error){
+console.error(
+"ERROR AL ELIMINAR ESTUDIO:",
+error
+);
+alert(
+"NO SE PUDO ELIMINAR EL ESTUDIO.\n\n"+
+(error.message||
+"Error desconocido")
+);
+updateViewerAdminButtons();
+}
+}
+document.addEventListener(
+"keydown",
+event=>{
+if(event.key==="Escape"){
+closeFullscreen();
+closeLogin();
+closeAddImages();
+closeAddStudy();
+closeEditPatient();
+document.getElementById(
+"searchResults"
+).style.display="none";
+}
+if(event.key==="ArrowRight")
+nextImage();
+if(event.key==="ArrowLeft")
+previousImage();
+});
+window.addEventListener(
+"resize",
+()=>{
+const image=
+document.getElementById(
+"mainImage"
+);
+if(
+image &&
+image.complete &&
+image.naturalWidth>0 &&
+image.naturalHeight>0
+){
+fitImageToViewport();
+}
+});
+function toggleDatePopover(event){
+  if(event){ event.preventDefault(); event.stopPropagation(); }
+  const calendarPanel=document.querySelector('.panel:last-child');
+  if(!calendarPanel)return;
+  const isOpen=calendarPanel.classList.toggle('calendar-open');
+  if(isOpen){
+    closeMobilePanels();
+    renderCalendar();
+  }
+}
+function toggleMobilePanel(type){
+  const patients=document.querySelector('.panel:nth-child(2)');
+  const info=document.querySelector('.info-panel');
+  const calendar=document.querySelector('.panel:last-child');
+  if(calendar)calendar.classList.remove('calendar-open');
+  if(type==='patients'){
+    info?.classList.remove('mobile-open');
+    patients?.classList.toggle('mobile-open');
+  }else if(type==='info'){
+    patients?.classList.remove('mobile-open');
+    info?.classList.toggle('mobile-open');
+  }
+}
+function closeMobilePanels(){
+  document.querySelector('.panel:nth-child(2)')?.classList.remove('mobile-open');
+  document.querySelector('.info-panel')?.classList.remove('mobile-open');
+}
+function focusViewer(){
+  closeMobilePanels();
+  document.querySelector('.panel:last-child')?.classList.remove('calendar-open');
+  const viewer=document.querySelector('.viewer');
+  if(viewer)viewer.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+document.addEventListener('click',function(event){
+  const calendar=document.querySelector('.panel:last-child');
+  const button=document.getElementById('dateFilterButton');
+  if(calendar && calendar.classList.contains('calendar-open') && !calendar.contains(event.target) && !button?.contains(event.target)){
+    calendar.classList.remove('calendar-open');
+  }
+});
+window.addEventListener('resize',function(){
+  const img=document.getElementById('mainImage');
+  if(img && img.complete && img.naturalWidth>0){
+    requestAnimationFrame(()=>{ if(typeof fitImageToViewport==='function')fitImageToViewport(); });
+  }
+});
+renderCalendar();
+clearViewer();
+setDateLabel(selectedDate);
+checkAuth();
+loadStudies();
+</script>
 </body>
 </html>
