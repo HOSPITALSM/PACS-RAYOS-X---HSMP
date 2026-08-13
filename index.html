@@ -1022,6 +1022,266 @@ height:auto!important;
 }
 </style>
 
+
+<style>
+/* =========================================================
+   V6 — MODERNIZACIÓN VISUAL
+   No modifica la lógica de Supabase ni las funciones del visor.
+   ========================================================= */
+
+:root{
+  --ui-bg:#101417;
+  --ui-panel:#171c20;
+  --ui-panel-2:#1d2328;
+  --ui-border:#30383e;
+  --ui-text:#edf1f3;
+  --ui-muted:#9da8ae;
+  --ui-accent:#5bc7b1;
+  --ui-accent-soft:rgba(91,199,177,.14);
+  --ui-danger:#ef6b73;
+  --ui-radius:10px;
+}
+
+/* Tipografía */
+html,body{
+  font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif!important;
+  letter-spacing:.01em;
+}
+
+body{
+  color:var(--ui-text);
+}
+
+/* Encabezado */
+.topbar{
+  background:linear-gradient(180deg,#171d21 0%,#12171a 100%)!important;
+  border-bottom:1px solid var(--ui-border)!important;
+  box-shadow:0 2px 14px rgba(0,0,0,.22)!important;
+}
+
+/* Logo: un poco más grande, pero contenido dentro del encabezado */
+@media(min-width:701px){
+  .logo{
+    width:68px!important;
+    height:68px!important;
+  }
+  .logo img{
+    width:68px!important;
+    height:68px!important;
+  }
+}
+
+/* Texto de marca */
+.brand-title{
+  font-weight:700!important;
+  letter-spacing:.025em!important;
+}
+
+.brand-subtitle{
+  color:var(--ui-muted)!important;
+  letter-spacing:.045em!important;
+}
+
+/* Búsqueda: un poco más a la derecha, próxima a la fecha */
+.search{
+  margin-left:auto!important;
+}
+
+.search input{
+  background:#0f1316!important;
+  border:1px solid #39434a!important;
+  border-radius:20px!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025)!important;
+  transition:border-color .18s ease,box-shadow .18s ease!important;
+}
+
+.search input:focus{
+  outline:none!important;
+  border-color:var(--ui-accent)!important;
+  box-shadow:0 0 0 3px var(--ui-accent-soft)!important;
+}
+
+/* Paneles */
+.panel,
+.info-panel{
+  background:var(--ui-panel)!important;
+  border-color:var(--ui-border)!important;
+}
+
+.panel-header,
+.info-header{
+  border-bottom-color:var(--ui-border)!important;
+}
+
+.panel-title,
+.viewer-title{
+  font-weight:650!important;
+  letter-spacing:.015em!important;
+}
+
+/* Botones: apariencia moderna, conservando sus eventos */
+button{
+  border-radius:8px!important;
+  transition:transform .12s ease,background .16s ease,border-color .16s ease,box-shadow .16s ease!important;
+}
+
+button:hover{
+  box-shadow:0 3px 12px rgba(0,0,0,.22)!important;
+}
+
+button:active{
+  transform:translateY(1px)!important;
+}
+
+/* Barra de herramientas del visor */
+.toolbar{
+  background:rgba(17,21,24,.96)!important;
+  border-top:1px solid var(--ui-border)!important;
+  border-bottom:1px solid var(--ui-border)!important;
+  gap:6px!important;
+}
+
+.toolbar button{
+  min-width:34px!important;
+  min-height:32px!important;
+  background:#1c2328!important;
+  border:1px solid #343e45!important;
+  color:#dce3e6!important;
+}
+
+.toolbar button:hover{
+  background:#263038!important;
+  border-color:#4a5961!important;
+}
+
+.toolbar button.active,
+.toolbar button[aria-pressed="true"]{
+  background:var(--ui-accent-soft)!important;
+  border-color:var(--ui-accent)!important;
+  color:#8ce1d0!important;
+}
+
+/* Selector de estudios */
+.study-selector,
+#studySelector,
+select{
+  background:#151b1f!important;
+  color:var(--ui-text)!important;
+  border:1px solid #3a454c!important;
+  border-radius:8px!important;
+}
+
+.study-selector:focus,
+#studySelector:focus,
+select:focus{
+  outline:none!important;
+  border-color:var(--ui-accent)!important;
+  box-shadow:0 0 0 3px var(--ui-accent-soft)!important;
+}
+
+/* Campos */
+input,
+.search input{
+  color:var(--ui-text)!important;
+}
+
+input::placeholder{
+  color:#7f8a91!important;
+}
+
+/* Miniaturas */
+.thumbnail-item{
+  border:1px solid transparent!important;
+  border-radius:8px!important;
+  overflow:hidden!important;
+  transition:border-color .16s ease,transform .16s ease,box-shadow .16s ease!important;
+}
+
+.thumbnail-item:hover{
+  transform:translateY(-1px)!important;
+}
+
+.thumbnail-item.active{
+  border-color:var(--ui-accent)!important;
+  box-shadow:0 0 0 2px var(--ui-accent-soft)!important;
+}
+
+/* Separadores y etiquetas */
+.section-title,
+.form-label{
+  letter-spacing:.025em!important;
+}
+
+/* Acciones peligrosas */
+button.delete,
+.delete-button,
+[data-action="delete"]{
+  border-color:rgba(239,107,115,.45)!important;
+}
+
+button.delete:hover,
+.delete-button:hover,
+[data-action="delete"]:hover{
+  background:rgba(239,107,115,.12)!important;
+  border-color:var(--ui-danger)!important;
+}
+
+/* Móvil: mantener la experiencia ya corregida */
+@media(max-width:700px){
+  .logo{
+    width:78px!important;
+    height:78px!important;
+  }
+  .logo img{
+    width:78px!important;
+    height:78px!important;
+  }
+
+  .search{
+    margin-left:0!important;
+  }
+
+  .toolbar{
+    gap:4px!important;
+  }
+
+  .toolbar button{
+    min-width:32px!important;
+    min-height:32px!important;
+    padding:5px!important;
+  }
+}
+
+/* Preferencia de accesibilidad */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    transition:none!important;
+    scroll-behavior:auto!important;
+  }
+}
+</style>
+
+
+<style>
+@media(min-width:701px){
+  .topbar{
+    display:flex!important;
+    align-items:center!important;
+    gap:10px!important;
+  }
+
+  .search{
+    margin-left:auto!important;
+    margin-right:4px!important;
+    width:min(310px,30vw)!important;
+  }
+
+  .current-date{
+    flex:0 0 auto!important;
+  }
+}
+</style>
+
 </head>
 <body>
 <header class="topbar">
