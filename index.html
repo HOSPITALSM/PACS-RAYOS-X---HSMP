@@ -28,7 +28,7 @@ min-height:72px;background:#101214;border-bottom:1px solid var(--border);
 display:flex;align-items:center;padding:0 16px;gap:15px;position:relative;z-index:10
 }
 .logo{
- width:135px;height:135px;border:1px solid var(--border);border-radius:6px;
+ width:120px;height:120px;border:1px solid var(--border);border-radius:6px;
 display:flex;align-items:center;justify-content:center;flex-shrink:0;
 overflow:hidden;background:#0d0f10
 }
@@ -1686,6 +1686,22 @@ button.delete:hover,
     margin-top:0!important;
     position:relative!important;
     top:auto!important;
+  }
+}
+</style>
+
+
+<style id="v16-logo-mas-grande">
+/* V16 — logo más grande. No modifica el contenido ni las funcionalidades. */
+@media(min-width:701px){
+  .logo{
+    width:82px!important;
+    height:82px!important;
+  }
+  .logo img{
+    width:82px!important;
+    height:82px!important;
+    object-fit:contain!important;
   }
 }
 </style>
