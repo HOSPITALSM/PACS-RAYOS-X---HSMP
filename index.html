@@ -1553,6 +1553,9 @@ button.delete:hover,
 
 </style>
 
+<style id="v9-patient-list">
+/* La columna Pacientes conserva su fecha de referencia mientras se navega por estudios históricos. */
+</style>
 </head>
 <body>
 <header class="topbar">
@@ -2080,6 +2083,8 @@ const STORAGE_BUCKET =
 "IMAGENES";
 let studies=[];
 let selectedDate=getTodayString();
+/* Fecha independiente para la lista de Pacientes. */
+let patientListDate=selectedDate;
 let calendarDate=new Date(selectedDate+"T00:00:00");
 let currentPatient=null;
 let currentStudy=0;
@@ -2260,7 +2265,11 @@ item=>item.date===selectedDate
 }
 function getPatientsForDate(){
 const result=[];
-getStudiesForDate().forEach(item=>{
+studies
+.filter(
+item=>item.date===patientListDate
+)
+.forEach(item=>{
 if(
 item.patient&&
 !result.includes(item.patient)
@@ -2369,6 +2378,7 @@ container.appendChild(div);
 }
 function selectDate(date){
 selectedDate=date;
+patientListDate=date;
 currentPatient=null;
 currentStudy=0;
 currentImage=0;
@@ -2407,14 +2417,34 @@ const list=
 document.getElementById(
 "patientList"
 );
+
 list.innerHTML="";
-const patients=
-getPatientsForDate();
+
+const listStudies=
+studies.filter(
+item=>item.date===patientListDate
+);
+
+const patients=[];
+
+listStudies.forEach(
+item=>{
+if(
+item.patient &&
+!patients.includes(item.patient)
+){
+patients.push(item.patient);
+}
+}
+);
+
 document.getElementById(
 "patientCount"
 ).textContent=
 patients.length;
+
 if(!patients.length){
+
 list.innerHTML=`
 <div class="no-results">
 No hay pacientes<br>
@@ -2422,22 +2452,30 @@ registrados para<br>
 esta fecha.
 </div>
 `;
+
 return;
+
 }
-patients.forEach(name=>{
+
+patients.forEach(
+name=>{
+
 const patientStudies=
-getStudiesForDate()
-.filter(
+listStudies.filter(
 item=>item.patient===name
 );
+
 const element=
-document.createElement("div");
-element.className="patient";
-if(currentPatient===name){
-element.classList.add(
-"active"
+document.createElement(
+"div"
 );
+
+element.className="patient";
+
+if(currentPatient===name){
+element.classList.add("active");
 }
+
 element.innerHTML=`
 <div class="patient-name">
 ${escapeHtml(name)}
@@ -2452,6 +2490,7 @@ ${patientStudies.length}
 </span>
 </div>
 `;
+
 element.onclick=()=>{
 currentPatient=name;
 currentStudy=0;
@@ -2462,11 +2501,16 @@ showPatientStudyHistory(
 currentPatient
 );
 };
+
 element.dataset.patientName=
 name.toLowerCase();
+
 list.appendChild(element);
+
 });
+
 }
+
 function searchPatients(){
 const input=
 document.getElementById("search");
