@@ -1481,7 +1481,13 @@ button.delete:hover,
 </style>
 
 
-<style id="v11-header-layout">
+<style id="v12-final-layout">
+/* =========================================================
+   V12 — DISTRIBUCIÓN FINAL
+   ========================================================= */
+
+/* Encabezado PC:
+   BUSCAR PACIENTE → FECHA → CORREO → CERRAR SESIÓN */
 @media(min-width:701px){
 
   .topbar{
@@ -1490,7 +1496,6 @@ button.delete:hover,
     gap:10px!important;
   }
 
-  /* Exact requested order */
   .search{
     order:1!important;
     margin-left:0!important;
@@ -1502,81 +1507,134 @@ button.delete:hover,
 
   .current-date{
     order:2!important;
-    flex:0 0 auto!important;
     margin-left:0!important;
+    margin-right:0!important;
+    flex:0 0 auto!important;
   }
 
-  .user-email,
-  .email,
-  .account-email{
+  .auth-area{
+    order:3!important;
+    margin-left:0!important;
+    margin-right:0!important;
+    display:flex!important;
+    align-items:center!important;
+    gap:6px!important;
+  }
+
+  .auth-user{
+    order:1!important;
+  }
+
+  .auth-area .logout-button{
+    order:2!important;
+  }
+
+  .auth-area #loginButton{
     order:3!important;
   }
 
-  .auth,
-  .logout,
-  .logout-button,
-  .btn-logout{
-    order:4!important;
-  }
-
-  /* Do not push any of the four elements apart. */
-  .topbar .search + *{
+  /* No empujar Fecha ni Autenticación al extremo derecho. */
+  .current-date{
     margin-left:0!important;
   }
 }
-</style>
 
+/* PC:
+   el visor conserva sus dimensiones existentes.
+   La lista de estudios ocupa la misma columna central,
+   pero en una segunda fila. */
+@media(min-width:701px){
 
-<style id="v11-study-scroll">
-/* V11 — el visor y sus miniaturas conservan su espacio original.
-   Solo la lista inferior tiene scroll propio. */
+  html,
+  body{
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    height:auto!important;
+    min-height:100%!important;
+  }
 
-.patient-studies-below{
-  flex:0 0 auto!important;
-  width:100%!important;
-  max-height:190px!important;
-  min-height:0!important;
-  box-sizing:border-box!important;
-  overflow:hidden!important;
-  margin-top:10px!important;
-  padding:10px 0 0!important;
-  border-top:1px solid #293238!important;
+  .app{
+    height:auto!important;
+    min-height:calc(100vh - 56px)!important;
+    overflow:visible!important;
+    grid-template-rows:auto auto!important;
+    align-items:start!important;
+  }
+
+  /* NO se modifica .viewer, .viewport, .toolbar ni .thumbnails.
+     Solo se define dónde cae la sección nueva. */
+  .patient-studies-below{
+    grid-column:3!important;
+    grid-row:2!important;
+    width:100%!important;
+    box-sizing:border-box!important;
+    display:none;
+    margin:0!important;
+    padding:12px 0 28px!important;
+    border-top:1px solid #293238!important;
+    background:#080b0d!important;
+    overflow:visible!important;
+  }
+
+  .patient-studies-below.has-studies{
+    display:block!important;
+  }
+
+  .patient-studies-below-list{
+    display:flex!important;
+    flex-direction:column!important;
+    gap:6px!important;
+    max-height:none!important;
+    overflow:visible!important;
+  }
+
+  .patient-study-row{
+    width:100%!important;
+    box-sizing:border-box!important;
+  }
+
 }
 
-.patient-studies-below-list{
-  display:flex!important;
-  flex-direction:column!important;
-  gap:5px!important;
+/* La lista inferior NO tiene scroll propio.
+   Se usa el scroll normal de toda la página. */
+.patient-studies-scroll{
   max-height:none!important;
   overflow:visible!important;
+  padding-right:0!important;
 }
 
-.patient-studies-scroll{
-  max-height:145px!important;
-  overflow-y:auto!important;
-  overflow-x:hidden!important;
-  padding-right:4px!important;
-  -webkit-overflow-scrolling:touch!important;
-  scrollbar-width:thin;
-}
-
-/* The viewer itself keeps its established dimensions and does not
-   participate in the study-list scroll. */
-.viewer{
-  flex:1 1 auto!important;
-  min-height:0!important;
-}
-
+/* En móvil mantenemos el scroll normal de página que ya habíamos
+   conseguido y no alteramos el tamaño de visor/miniaturas actual. */
 @media(max-width:700px){
 
+  html,
+  body{
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+  }
+
+  .app{
+    height:auto!important;
+    min-height:0!important;
+    overflow:visible!important;
+  }
+
   .patient-studies-below{
-    max-height:170px!important;
-    margin-top:8px!important;
-    padding-top:8px!important;
+    width:100%!important;
+    box-sizing:border-box!important;
+    margin-top:0!important;
+    padding:10px 10px 24px!important;
+    overflow:visible!important;
   }
 
   .patient-studies-scroll{
-    max-height:125px!important;
+    max-height:none!important;
+    overflow:visible!important;
+  }
+
+  .patient-studies-below-list{
+    max-height:none!important;
+    overflow:visible!important;
   }
 
 }
@@ -1738,16 +1796,14 @@ Seleccione un paciente para visualizar sus estudios.
 </div>
 <div class="thumbnails" id="thumbnailList"></div>
 
+
+
+</section>
 <section id="patientStudiesBelow" class="patient-studies-below" aria-label="Estudios del paciente">
   <div class="patient-studies-title">ESTUDIOS DEL PACIENTE</div>
-  
-<div class="patient-studies-scroll">
   <div id="patientStudiesBelowList" class="patient-studies-below-list"></div>
-</div>
-
 </section>
 
-</section>
 <section class="panel">
 <div class="panel-header">
 <span class="panel-title">Fecha</span>
