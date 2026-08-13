@@ -1636,6 +1636,28 @@ button.delete:hover,
 }
 </style>
 
+
+<style id="v14-viewer-height">
+/* V14 — únicamente aumenta la altura del visor.
+   Miniaturas y estudios inferiores conservan su tamaño y se desplazan hacia abajo. */
+@media(min-width:701px){
+
+  .viewer{
+    min-height:720px!important;
+    height:720px!important;
+    box-sizing:border-box!important;
+  }
+
+  /* El área de imagen ocupa el espacio adicional del visor. */
+  .viewer .viewport{
+    min-height:0!important;
+    height:auto!important;
+    flex:1 1 auto!important;
+  }
+
+}
+</style>
+
 </head>
 <body>
 <header class="topbar">
