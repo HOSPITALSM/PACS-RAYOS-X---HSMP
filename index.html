@@ -801,6 +801,26 @@ body{font-size:16px}
   .tool{font-size:12px}
 }
 </style>
+   <style>
+/* FIX AUTOMÁTICO: LOGO Y MÓVIL */
+.topbar { height: 68px !important; min-height: 68px !important; padding: 0 20px !important; background: #0c1012 !important; gap: 16px !important; }
+.logo { width: 52px !important; height: 52px !important; border-radius: 8px !important; background: #0a0d0f !important; border: 1px solid #2b3339 !important; box-shadow: 0 2px 8px rgba(0,0,0,0.4) !important; }
+.brand-title { font-size: 15px !important; font-weight: 700 !important; color: #59d7ae !important; }
+.brand-subtitle { font-size: 11px !important; color: #8da1b0 !important; }
+
+@media (max-width: 768px) {
+  .topbar { height: auto !important; min-height: 60px !important; padding: 10px 12px !important; display: flex !important; flex-wrap: wrap !important; align-items: center !important; justify-content: space-between !important; gap: 8px !important; }
+  .logo { width: 38px !important; height: 38px !important; }
+  .brand { min-width: 0 !important; flex: 1 !important; }
+  .brand-title { font-size: 12px !important; line-height: 1.2 !important; }
+  .brand-subtitle { font-size: 9px !important; }
+  .current-date { display: none !important; }
+  .search { order: 3 !important; width: 100% !important; max-width: 100% !important; margin: 4px 0 2px 0 !important; }
+  .search input { height: 36px !important; }
+  .auth-area { order: 2 !important; }
+  .auth-user { display: none !important; }
+}
+</style>
 </head>
 
 <body>
