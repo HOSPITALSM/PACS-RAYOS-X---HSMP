@@ -1368,75 +1368,47 @@ button.delete:hover,
 
 
 <style>
-/* =========================================================
-   V8 — LISTA DE ESTUDIOS EN EL ESPACIO DEL VISOR
-   ========================================================= */
-
-.patient-study-history{
+/* V10 — historial compacto debajo de miniaturas */
+.patient-studies-below{
   display:none;
-  grid-area:viewer;
-  min-width:0;
-  min-height:0;
-  height:100%;
+  width:100%;
   box-sizing:border-box;
-  overflow-y:auto;
-  overflow-x:hidden;
-  background:#080b0d;
-  color:#edf1f3;
-  padding:24px;
-  -webkit-overflow-scrolling:touch;
+  margin-top:10px;
+  padding:10px 0 0;
+  border-top:1px solid #293238;
 }
 
-.patient-study-history.visible{
-  display:flex;
-  flex-direction:column;
+.patient-studies-below.has-studies{
+  display:block;
 }
 
-.history-header{
-  display:flex;
-  align-items:center;
-  padding:4px 0 18px;
-  border-bottom:1px solid #293238;
-}
-
-.history-kicker{
+.patient-studies-title{
   color:#65c9b3;
   font-size:10px;
   font-weight:700;
-  letter-spacing:1.2px;
-  margin-bottom:6px;
+  letter-spacing:1.1px;
+  margin:0 0 7px;
 }
 
-.history-header h2{
-  margin:0;
-  color:#e8edef;
-  font-size:20px;
-  font-weight:700;
-}
-
-.history-count{
-  margin-top:5px;
-  color:#7f8b92;
-  font-size:11px;
-}
-
-.history-study-list{
+.patient-studies-below-list{
   display:flex;
   flex-direction:column;
-  gap:8px;
-  padding-top:16px;
+  gap:5px;
+  max-height:170px;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
 }
 
-.history-study-card{
+.patient-study-row{
   width:100%;
-  min-height:68px;
+  min-height:34px;
   display:grid;
-  grid-template-columns:minmax(0,1fr) auto 20px;
+  grid-template-columns:minmax(0,1fr) auto 18px;
   align-items:center;
-  gap:14px;
-  padding:12px 14px!important;
+  gap:10px;
+  padding:7px 9px!important;
   border:1px solid #293238!important;
-  border-radius:8px!important;
+  border-radius:7px!important;
   background:#11171b!important;
   color:#e8edef!important;
   text-align:left;
@@ -1444,118 +1416,70 @@ button.delete:hover,
   box-sizing:border-box;
 }
 
-.history-study-card:hover{
+.patient-study-row:hover{
   background:#182025!important;
   border-color:#46545c!important;
 }
 
-.history-study-card:active{
-  transform:translateY(1px)!important;
-}
-
-.history-study-main{
-  display:flex;
-  flex-direction:column;
-  gap:5px;
-  min-width:0;
-}
-
-.history-study-main strong{
-  color:#e8edef;
-  font-size:13px;
-  font-weight:650;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-
-.history-study-main span{
-  color:#7f8b92;
+.patient-study-date{
   font-size:11px;
+  font-weight:600;
 }
 
-.history-study-images{
-  color:#9ca8ae;
+.patient-study-images{
+  color:#8f9aa0;
   font-size:10px;
   white-space:nowrap;
 }
 
-.history-study-arrow{
+.patient-study-arrow{
   color:#65c9b3;
-  font-size:23px;
-  line-height:1;
+  font-size:18px;
   text-align:center;
 }
 
-.history-empty{
-  margin-top:16px;
-  padding:28px 18px;
-  border:1px dashed #354148;
-  border-radius:8px;
-  color:#7f8b92;
-  text-align:center;
-  font-size:12px;
-}
-
-.history-viewer-hidden{
-  display:none!important;
-}
-
-/* El historial ocupa la columna central y no altera Pacientes ni Info. */
-@media(min-width:701px){
-
-.patient-study-history{
-  grid-column:auto;
-}
-
-}
-
-/* En móvil mantiene scroll normal con un dedo. */
 @media(max-width:700px){
 
-.patient-study-history{
-  height:auto;
-  min-height:calc(100svh - 190px);
-  padding:16px 12px 24px;
+.patient-studies-below{
+  margin-top:8px;
+  padding-top:8px;
 }
 
-.history-header{
-  padding-bottom:14px;
+.patient-studies-below-list{
+  max-height:145px;
 }
 
-.history-header h2{
-  font-size:17px;
-}
-
-.history-study-list{
-  gap:7px;
-}
-
-.history-study-card{
-  min-height:64px;
-  grid-template-columns:minmax(0,1fr) auto 18px;
-  padding:11px!important;
-}
-
-.history-study-main strong{
-  font-size:12px;
-}
-
-.history-study-main span{
-  font-size:10px;
-}
-
-.history-study-images{
-  font-size:9px;
+.patient-study-row{
+  min-height:36px;
+  padding:7px 8px!important;
 }
 
 }
 
+/* V10 — búsqueda junto al bloque de fecha en escritorio */
+@media(min-width:701px){
+
+.topbar{
+  display:flex!important;
+  align-items:center!important;
+}
+
+.search{
+  margin-left:auto!important;
+  margin-right:8px!important;
+  width:310px!important;
+  max-width:310px!important;
+  flex:0 0 310px!important;
+}
+
+.current-date{
+  flex:0 0 auto!important;
+  order:10!important;
+}
+
+}
 </style>
 
-<style id="v9-patient-list">
-/* La columna Pacientes conserva su fecha de referencia mientras se navega por estudios históricos. */
-</style>
 </head>
 <body>
 <header class="topbar">
@@ -1657,17 +1581,6 @@ style="display:none;">
 </div>
 <div class="panel-body" id="patientList"></div>
 </section>
-
-<section id="patientStudyHistory" class="patient-study-history" aria-hidden="true">
-  <div class="history-header">
-    <div>
-      <div class="history-kicker">HISTORIAL DE ESTUDIOS</div>
-      <h2 id="historyPatientName">Paciente</h2>
-      <div id="historyStudyCount" class="history-count"></div>
-    </div>
-  </div>
-  <div id="historyStudyList" class="history-study-list"></div>
-</section>
 <section class="viewer">
 <div class="viewer-header">
 <div class="viewer-header-left">
@@ -1722,6 +1635,12 @@ Seleccione un paciente para visualizar sus estudios.
 <button class="tool" title="Pantalla completa" onclick="openFullscreen()">⛶</button>
 </div>
 <div class="thumbnails" id="thumbnailList"></div>
+
+<section id="patientStudiesBelow" class="patient-studies-below" aria-label="Estudios del paciente">
+  <div class="patient-studies-title">ESTUDIOS DEL PACIENTE</div>
+  <div id="patientStudiesBelowList" class="patient-studies-below-list"></div>
+</section>
+
 </section>
 <section class="panel">
 <div class="panel-header">
@@ -2083,8 +2002,6 @@ const STORAGE_BUCKET =
 "IMAGENES";
 let studies=[];
 let selectedDate=getTodayString();
-/* Fecha independiente para la lista de Pacientes. */
-let patientListDate=selectedDate;
 let calendarDate=new Date(selectedDate+"T00:00:00");
 let currentPatient=null;
 let currentStudy=0;
@@ -2265,11 +2182,7 @@ item=>item.date===selectedDate
 }
 function getPatientsForDate(){
 const result=[];
-studies
-.filter(
-item=>item.date===patientListDate
-)
-.forEach(item=>{
+getStudiesForDate().forEach(item=>{
 if(
 item.patient&&
 !result.includes(item.patient)
@@ -2378,7 +2291,6 @@ container.appendChild(div);
 }
 function selectDate(date){
 selectedDate=date;
-patientListDate=date;
 currentPatient=null;
 currentStudy=0;
 currentImage=0;
@@ -2417,34 +2329,14 @@ const list=
 document.getElementById(
 "patientList"
 );
-
 list.innerHTML="";
-
-const listStudies=
-studies.filter(
-item=>item.date===patientListDate
-);
-
-const patients=[];
-
-listStudies.forEach(
-item=>{
-if(
-item.patient &&
-!patients.includes(item.patient)
-){
-patients.push(item.patient);
-}
-}
-);
-
+const patients=
+getPatientsForDate();
 document.getElementById(
 "patientCount"
 ).textContent=
 patients.length;
-
 if(!patients.length){
-
 list.innerHTML=`
 <div class="no-results">
 No hay pacientes<br>
@@ -2452,30 +2344,22 @@ registrados para<br>
 esta fecha.
 </div>
 `;
-
 return;
-
 }
-
-patients.forEach(
-name=>{
-
+patients.forEach(name=>{
 const patientStudies=
-listStudies.filter(
+getStudiesForDate()
+.filter(
 item=>item.patient===name
 );
-
 const element=
-document.createElement(
-"div"
-);
-
+document.createElement("div");
 element.className="patient";
-
 if(currentPatient===name){
-element.classList.add("active");
+element.classList.add(
+"active"
+);
 }
-
 element.innerHTML=`
 <div class="patient-name">
 ${escapeHtml(name)}
@@ -2490,27 +2374,19 @@ ${patientStudies.length}
 </span>
 </div>
 `;
-
 element.onclick=()=>{
 currentPatient=name;
 currentStudy=0;
 currentImage=0;
 resetView();
 renderPatients();
-showPatientStudyHistory(
-currentPatient
-);
+showFirstStudy();
 };
-
 element.dataset.patientName=
 name.toLowerCase();
-
 list.appendChild(element);
-
 });
-
 }
-
 function searchPatients(){
 const input=
 document.getElementById("search");
@@ -2579,6 +2455,8 @@ study.date
 results.appendChild(item);
 });
 results.style.display="block";
+
+renderPatientStudiesBelow();
 }
 function openPatientFromSearch(
 patientName,
@@ -2604,9 +2482,7 @@ resetView();
 setDateLabel(date);
 renderCalendar();
 renderPatients();
-showPatientStudyHistory(
-currentPatient
-);
+showFirstStudy();
 setTimeout(()=>{
 const patientElements=
 document.querySelectorAll(
@@ -2884,6 +2760,8 @@ return;
 }
 buttons.style.display=
 admin?"flex":"none";
+
+renderPatientStudiesBelow();
 }
 function clampPan(){
 const viewport=
@@ -5156,67 +5034,38 @@ loadStudies();
 
 
 <script>
-/* =========================================================
-   V8 — HISTORIAL DE ESTUDIOS
-   Seleccionar paciente -> lista de todos sus estudios.
-   Seleccionar estudio -> visor de ese estudio.
-   ========================================================= */
+/* V10 — estudios históricos debajo de las miniaturas.
+   No reemplaza el visor: el visor permanece visible. */
 
-let patientHistoryMode=false;
-let patientHistoryStudies=[];
+function renderPatientStudiesBelow(){
 
-function showPatientStudyHistory(patientName){
+  const list=
+    document.getElementById(
+      "patientStudiesBelowList"
+    );
 
-  const historyPanel=
-    document.getElementById("patientStudyHistory");
+  const section=
+    document.getElementById(
+      "patientStudiesBelow"
+    );
 
-  const viewer=
-    document.querySelector(".viewer");
-
-  const nameElement=
-    document.getElementById("historyPatientName");
-
-  const countElement=
-    document.getElementById("historyStudyCount");
-
-  const listElement=
-    document.getElementById("historyStudyList");
-
-  if(
-    !historyPanel||
-    !viewer||
-    !listElement
-  ){
+  if(!list||!section){
     return;
   }
 
-  patientHistoryMode=true;
+  list.innerHTML="";
 
-  historyPanel.classList.add("visible");
-  historyPanel.setAttribute(
-    "aria-hidden",
-    "false"
-  );
+  if(!currentPatient){
 
-  viewer.classList.add(
-    "history-viewer-hidden"
-  );
+    section.classList.remove("has-studies");
+    return;
 
-  nameElement.textContent=
-    patientName||
-    "Paciente";
+  }
 
-  /*
-     IMPORTANTE:
-     aquí NO usamos getPatientStudies(), porque esa función
-     está limitada a selectedDate. El historial debe mostrar
-     todos los estudios del paciente, sin importar la fecha.
-  */
-  patientHistoryStudies=
+  const patientStudies=
     studies
       .filter(
-        item=>
-          item.patient===patientName
+        item=>item.patient===currentPatient
       )
       .slice()
       .sort(
@@ -5225,153 +5074,127 @@ function showPatientStudyHistory(patientName){
           new Date(a.date||0)
       );
 
-  const total=
-    patientHistoryStudies.length;
+  /* Agrupar por fecha: una fila por fecha y cantidad total
+     de imágenes de esa fecha. No se muestra estructura. */
+  const byDate=new Map();
 
-  countElement.textContent=
-    total===1?
-    "1 estudio encontrado":
-    total+" estudios encontrados";
+  patientStudies.forEach(
+    study=>{
 
-  listElement.innerHTML="";
+      const date=
+        study.date||
+        "Sin fecha";
 
-  if(!total){
+      if(!byDate.has(date)){
+        byDate.set(date,[]);
+      }
 
-    listElement.innerHTML=
-      '<div class="history-empty">'+
-      'No hay estudios registrados para este paciente.'+
-      '</div>';
+      byDate.get(date).push(study);
 
+    }
+  );
+
+  if(!byDate.size){
+
+    section.classList.remove("has-studies");
     return;
+
   }
 
-  patientHistoryStudies.forEach(
-    (study,index)=>{
+  section.classList.add("has-studies");
 
-      const card=
-        document.createElement(
-          "button"
-        );
-
-      card.type="button";
-      card.className=
-        "history-study-card";
-
-      const dateText=
-        study.date?
-        formatDate(study.date):
-        "Fecha no disponible";
-
-      const studyName=
-        study.study||
-        "Estudio no especificado";
+  byDate.forEach(
+    (dateStudies,date)=>{
 
       const imageCount=
-        Array.isArray(study.images)?
-        study.images.length:
-        0;
+        dateStudies.reduce(
+          (total,study)=>
+            total+
+            (
+              Array.isArray(study.images)?
+              study.images.length:
+              0
+            ),
+          0
+        );
 
-      card.innerHTML=
-        '<span class="history-study-main">'+
-          '<strong>'+
-            escapeHtml(studyName)+
-          '</strong>'+
-          '<span>'+
-            escapeHtml(dateText)+
-          '</span>'+
+      const row=
+        document.createElement("button");
+
+      row.type="button";
+      row.className="patient-study-row";
+
+      row.innerHTML=
+        '<span class="patient-study-date">'+
+          escapeHtml(
+            date==="Sin fecha"?
+            date:
+            formatDate(date)
+          )+
         '</span>'+
-        '<span class="history-study-images">'+
+        '<span class="patient-study-images">'+
           imageCount+
           (
             imageCount===1?
-            " imagen":
-            " imágenes"
+            ' imagen':
+            ' imágenes'
           )+
         '</span>'+
-        '<span class="history-study-arrow">›</span>';
+        '<span class="patient-study-arrow">›</span>';
 
-      card.addEventListener(
+      row.addEventListener(
         "click",
         function(){
 
-          openStudyFromPatientHistory(
-            index
+          openPatientDateStudies(
+            currentPatient,
+            dateStudies
           );
 
         }
       );
 
-      listElement.appendChild(
-        card
-      );
+      list.appendChild(row);
 
     }
   );
 
 }
 
-function openStudyFromPatientHistory(
-  index
+function openPatientDateStudies(
+  patientName,
+  dateStudies
 ){
 
-  const study=
-    patientHistoryStudies[index];
-
-  if(!study){
+  if(
+    !patientName||
+    !dateStudies||
+    !dateStudies.length
+  ){
     return;
   }
 
-  patientHistoryMode=false;
-
-  const historyPanel=
-    document.getElementById(
-      "patientStudyHistory"
-    );
-
-  const viewer=
-    document.querySelector(
-      ".viewer"
-    );
-
-  if(historyPanel){
-
-    historyPanel.classList.remove(
-      "visible"
-    );
-
-    historyPanel.setAttribute(
-      "aria-hidden",
-      "true"
-    );
-
-  }
-
-  if(viewer){
-
-    viewer.classList.remove(
-      "history-viewer-hidden"
-    );
-
-  }
+  const firstStudy=
+    dateStudies[0];
 
   /*
-     Seleccionamos la fecha del estudio elegido para que
-     el resto de la interfaz (calendario/información) quede
-     sincronizada con ese estudio.
+     Seleccionar una fecha histórica cambia únicamente
+     el contenido del visor. La columna Pacientes no se
+     reemplaza ni desaparece.
   */
-  if(study.date){
+  if(firstStudy.date){
 
     selectedDate=
-      study.date;
+      firstStudy.date;
 
     calendarDate=
       new Date(
-        study.date+
+        firstStudy.date+
         "T00:00:00"
       );
 
     setDateLabel(
-      study.date
+      firstStudy.date
     );
 
     renderCalendar();
@@ -5379,38 +5202,38 @@ function openStudyFromPatientHistory(
   }
 
   currentPatient=
-    study.patient;
+    patientName;
 
-  /*
-     getPatientStudies() ahora corresponde al día elegido.
-     Buscamos el estudio exacto por id para evitar seleccionar
-     otro estudio del mismo paciente en esa fecha.
-  */
-  const studiesForDate=
-    getPatientStudies();
-
-  const studyIndex=
-    studiesForDate.findIndex(
+  const sameDateStudies=
+    studies.filter(
       item=>
-        item.id===study.id
+        item.patient===patientName &&
+        item.date===firstStudy.date
+    );
+
+  const index=
+    sameDateStudies.findIndex(
+      item=>item.id===firstStudy.id
     );
 
   currentStudy=
-    studyIndex>=0?
-    studyIndex:
+    index>=0?
+    index:
     0;
 
   currentImage=0;
 
   renderPatients();
-
   resetView();
 
   renderStudy(
-    study
+    firstStudy
   );
 
+  renderPatientStudiesBelow();
+
 }
+
 </script>
 
 </body>
