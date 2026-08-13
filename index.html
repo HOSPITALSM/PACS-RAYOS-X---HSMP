@@ -807,6 +807,83 @@ justify-self:center!important;
 }
 </style>
 
+
+<style>
+/* V3 — navegación móvil: el encabezado permanece accesible */
+@media(max-width:700px){
+
+html{
+height:auto!important;
+min-height:100%!important;
+overflow-y:auto!important;
+}
+
+body{
+height:auto!important;
+min-height:100vh!important;
+overflow-x:hidden!important;
+overflow-y:auto!important;
+-webkit-overflow-scrolling:touch!important;
+}
+
+.topbar{
+position:sticky!important;
+top:0!important;
+z-index:1000!important;
+}
+
+.app{
+height:auto!important;
+min-height:0!important;
+overflow:visible!important;
+}
+
+.viewer{
+height:auto!important;
+min-height:0!important;
+overflow:visible!important;
+}
+
+.viewport{
+height:calc(100svh - 250px)!important;
+min-height:390px!important;
+}
+
+.info-panel,
+.panel:nth-child(2),
+.panel:last-child{
+overflow:visible!important;
+}
+
+}
+</style>
+
+
+<style>
+@media(max-width:700px){
+#mobileBackTop{
+position:fixed!important;
+right:12px!important;
+bottom:12px!important;
+z-index:1200!important;
+width:42px!important;
+height:42px!important;
+border-radius:50%!important;
+border:1px solid #3b454b!important;
+background:#15191c!important;
+color:#d8dde0!important;
+font-size:20px!important;
+display:flex!important;
+align-items:center!important;
+justify-content:center!important;
+box-shadow:0 4px 16px rgba(0,0,0,.4)!important;
+}
+}
+@media(min-width:701px){
+#mobileBackTop{display:none!important}
+}
+</style>
+
 </head>
 <body>
 <header class="topbar">
@@ -836,6 +913,15 @@ CERRAR SESIÓN
 </button>
 </div>
 </header>
+
+<button
+id="mobileBackTop"
+type="button"
+aria-label="Volver arriba"
+onclick="window.scrollTo({top:0,behavior:'smooth'})">
+↑
+</button>
+
 <div class="app">
 <aside class="panel info-panel">
 <div class="panel-header">
@@ -2282,6 +2368,7 @@ resetView();
 showImage(imageObj.url);
 renderThumbnails(study);
 updateImageInformation(study);
+renderStudySelector();
 };
 const deleteButton=
 document.createElement("button");
