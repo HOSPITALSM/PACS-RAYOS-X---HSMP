@@ -1758,6 +1758,25 @@ body{letter-spacing:.01em}
 .login-hint{color:#697277;font-size:10px;text-align:right}
 @media(max-width:700px){.login-email-wrap .login-email-local{padding-right:78px!important}.login-remember-row{align-items:flex-start}}
 </style>
+
+<style id="v19-private-image-ui">
+/* V19 — protección visual para imágenes privadas */
+.thumbnail-locked{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  background:#12171a!important;
+  border:1px dashed #334047!important;
+  border-radius:8px!important;
+  position:relative!important;
+}
+.thumbnail-locked::after{
+  content:"🔒";
+  font-size:18px;
+  opacity:.7;
+}
+</style>
+
 </head>
 <body>
 <header class="topbar">
@@ -1780,7 +1799,7 @@ body{letter-spacing:.01em}
 <div class="auth-area">
 <span class="auth-user" id="authUser"></span>
 <button class="auth-button" id="loginButton" onclick="openLogin()">
-ADMINISTRADOR
+INICIAR SESIÓN
 </button>
 <button class="auth-button logout-button" id="logoutButton" onclick="logoutAdmin()">
 CERRAR SESIÓN
@@ -1960,7 +1979,7 @@ Seleccione un paciente para visualizar sus estudios.
 <div class="admin-overlay" id="loginOverlay">
 <div class="login-box">
 <div class="login-header">
-<div class="login-title">ACCESO ADMINISTRADOR</div>
+<div class="login-title">ACCESO AL SISTEMA</div>
 <div class="login-subtitle">
 Hospital San Martín de Pangoa - Rayos X
 </div>
@@ -2278,8 +2297,11 @@ SUPABASE_KEY
 );
 const ADMIN_UID =
 "622de888-2abd-4f4c-b1ba-488c7472b767";
+const VIEWER_UID =
+"070c65c4-b499-4a45-ba7f-f2d5525a1d48";
 const STORAGE_BUCKET =
 "IMAGENES";
+let currentAuthRole="anonymous";
 let studies=[];
 let selectedDate=getTodayString();
 /* La columna Pacientes mantiene la fecha seleccionada por calendario. */
@@ -2336,13 +2358,59 @@ if(
 file.startsWith("http://")||
 file.startsWith("https://")
 )return file;
-return SUPABASE_URL+
-"/storage/v1/object/public/"+
-STORAGE_BUCKET+
-"/"+
-file.split("/")
-.map(part=>encodeURIComponent(part))
-.join("/");
+return file;
+}
+
+async function getAuthorizedImageUrl(file){
+if(!file||typeof file!=="string")return"";
+file=file.trim();
+
+if(
+file.startsWith("http://")||
+file.startsWith("https://")
+)return file;
+
+const{
+data:{
+session
+}
+}=await supabaseClient.auth.getSession();
+
+if(
+!session||
+!session.user||
+(
+session.user.id!==ADMIN_UID &&
+session.user.id!==VIEWER_UID
+)
+){
+return "";
+}
+
+const storagePath=
+getStoragePath(file);
+
+const{
+data,
+error
+}=
+await supabaseClient
+.storage
+.from(STORAGE_BUCKET)
+.createSignedUrl(
+storagePath,
+3600
+);
+
+if(error||!data||!data.signedUrl){
+console.error(
+"ERROR AL CREAR URL SEGURA:",
+error
+);
+return "";
+}
+
+return data.signedUrl;
 }
 function getStoragePath(file){
 if(!file||typeof file!=="string")return"";
@@ -2922,7 +2990,7 @@ list[index]
 
 }
 
-function renderStudy(study){
+async function renderStudy(study){
 if(!study)return;
 renderStudySelector();
 document.getElementById(
@@ -2979,7 +3047,8 @@ study.images.length-1,
 );
 renderThumbnails(study);
 if(study.images.length){
-showImage(
+await showImage(
+study.images[currentImage].path||
 study.images[currentImage].url
 );
 }else{
@@ -3183,18 +3252,39 @@ isDragging=false;
 imageLoaded=true;
 applyTransform();
 }
-function showImage(src){
+async function showImage(src){
 if(!src)return;
+
+const secureUrl=
+await getAuthorizedImageUrl(src);
+
+const image=
+document.getElementById(
+"mainImage"
+);
+
+if(!secureUrl){
+imageLoaded=false;
+document.getElementById(
+"imageWrapper"
+).style.display="none";
+document.getElementById(
+"emptyMessage"
+).textContent=
+"🔒 Inicia sesión con una cuenta autorizada para visualizar imágenes.";
+document.getElementById(
+"emptyMessage"
+).style.display="block";
+return;
+}
+
 document.getElementById(
 "emptyMessage"
 ).style.display="none";
 document.getElementById(
 "imageWrapper"
 ).style.display="flex";
-const image=
-document.getElementById(
-"mainImage"
-);
+
 imageLoaded=false;
 image.onerror=()=>{
 imageLoaded=false;
@@ -3215,7 +3305,7 @@ panY=0;
 fitImageToViewport();
 applyTransform();
 };
-image.src=src;
+image.src=secureUrl;
 }
 function renderThumbnails(study){
 const container=
@@ -3223,6 +3313,7 @@ document.getElementById(
 "thumbnailList"
 );
 container.innerHTML="";
+
 study.images.forEach(
 (imageObj,index)=>{
 const item=
@@ -3230,10 +3321,11 @@ document.createElement(
 "div"
 );
 item.className="thumbnail-item";
+
 const img=
 document.createElement("img");
-img.src=imageObj.url;
 img.className="thumbnail";
+img.alt="Miniatura de imagen";
 if(imageObj.structure){
 img.title=imageObj.structure;
 }
@@ -3242,14 +3334,34 @@ img.classList.add(
 "active"
 );
 }
+
+(async()=>{
+const secureUrl=
+await getAuthorizedImageUrl(
+imageObj.path||imageObj.url
+);
+
+if(secureUrl){
+img.src=secureUrl;
+}else{
+item.classList.add(
+"thumbnail-locked"
+);
+}
+})();
+
 img.onclick=()=>{
 currentImage=index;
 resetView();
-showImage(imageObj.url);
+showImage(
+imageObj.path||
+imageObj.url
+);
 renderThumbnails(study);
 updateImageInformation(study);
 renderStudySelector();
 };
+
 const deleteButton=
 document.createElement("button");
 deleteButton.className=
@@ -3258,6 +3370,11 @@ deleteButton.type="button";
 deleteButton.title=
 "Eliminar imagen";
 deleteButton.textContent="×";
+
+if(currentAuthRole!=="admin"){
+deleteButton.style.display="none";
+}
+
 deleteButton.onclick=
 event=>{
 event.stopPropagation();
@@ -3266,6 +3383,7 @@ study,
 index
 );
 };
+
 item.appendChild(img);
 item.appendChild(deleteButton);
 container.appendChild(item);
@@ -4281,20 +4399,29 @@ if(error)
 throw error;
 if(
 !data.user||
-data.user.id!==ADMIN_UID
+(
+data.user.id!==ADMIN_UID &&
+data.user.id!==VIEWER_UID
+)
 ){
 await supabaseClient
 .auth
 .signOut();
 throw new Error(
-"Esta cuenta no tiene permisos de administrador."
+"Esta cuenta no tiene permisos de acceso."
 );
 }
+
+currentAuthRole=
+data.user.id===ADMIN_UID?
+"admin":
+"viewer";
+
 const remember=document.getElementById("rememberAdminAccount").checked;
 if(remember){
- localStorage.setItem("pacsRememberedAdminEmail",email);
+ localStorage.setItem("pacsRememberedAccountEmail",email);
 }else{
- localStorage.removeItem("pacsRememberedAdminEmail");
+ localStorage.removeItem("pacsRememberedAccountEmail");
 }
 closeLogin();
 updateAuthInterface(data.user);
@@ -4313,38 +4440,65 @@ data
 await supabaseClient
 .auth
 .getSession();
+
 if(
 data&&
 data.session&&
 data.session.user
 ){
-if(
-data.session.user.id===
-ADMIN_UID
-){
+const userId=
+data.session.user.id;
+
+if(userId===ADMIN_UID){
+currentAuthRole="admin";
+updateAuthInterface(
+data.session.user
+);
+}else if(userId===VIEWER_UID){
+currentAuthRole="viewer";
 updateAuthInterface(
 data.session.user
 );
 }else{
+currentAuthRole="anonymous";
 await supabaseClient
 .auth
 .signOut();
 }
+}else{
+currentAuthRole="anonymous";
 }
+
 supabaseClient
 .auth
 .onAuthStateChange(
 async(event,session)=>{
 if(
 session&&
-session.user&&
-session.user.id===
-ADMIN_UID
+session.user
 ){
+const userId=
+session.user.id;
+
+if(userId===ADMIN_UID){
+currentAuthRole="admin";
+updateAuthInterface(
+session.user
+);
+}else if(userId===VIEWER_UID){
+currentAuthRole="viewer";
 updateAuthInterface(
 session.user
 );
 }else{
+currentAuthRole="anonymous";
+await supabaseClient
+.auth
+.signOut();
+updateAuthInterface(null);
+}
+}else{
+currentAuthRole="anonymous";
 updateAuthInterface(
 null
 );
@@ -4377,11 +4531,19 @@ logoutButton.style.display=
 "inline-block";
 authUser.textContent=
 user.email||
-"Administrador";
+(
+currentAuthRole==="admin"?
+"Administrador":
+"Visualizador"
+);
+
 if(addStudyButton){
 addStudyButton.style.display=
-"block";
+currentAuthRole==="admin"?
+"block":
+"none";
 }
+
 updateViewerAdminButtons();
 }else{
 loginButton.style.display=
@@ -5569,13 +5731,13 @@ function openPatientDateStudies(
 
 <script id="v17-login-enhancements">
 (function(){
- const rememberedKey="pacsRememberedAdminEmail";
+ const rememberedKey="pacsRememberedAccountEmail";
  function prepareAdminLogin(){
   const email=document.getElementById("loginEmail");
   const password=document.getElementById("loginPassword");
   const remember=document.getElementById("rememberAdminAccount");
   if(!email||!password||!remember)return;
-  const saved=localStorage.getItem(rememberedKey);
+  const saved=localStorage.getItem(rememberedKey)||localStorage.getItem("pacsRememberedAdminEmail");
   if(saved){
    const local=saved.toLowerCase().endsWith("@gmail.com")?saved.slice(0,-10):saved;
    email.value=local; remember.checked=true;
