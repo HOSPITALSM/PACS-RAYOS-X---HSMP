@@ -1706,6 +1706,58 @@ button.delete:hover,
 }
 </style>
 
+
+<style id="v17-ui-modernization">
+:root{--ui-green-soft:rgba(89,215,174,.12);--ui-green-line:rgba(89,215,174,.32);--ui-panel-highlight:rgba(255,255,255,.025)}
+body{letter-spacing:.01em}
+.panel-title{font-size:12px!important;letter-spacing:.9px!important;font-weight:700!important}
+.info-heading{font-size:10px!important;letter-spacing:1.15px!important;font-weight:700!important}
+.info-label{font-size:10px!important;letter-spacing:.45px!important}
+.info-value{font-size:13px!important;font-weight:500!important}
+.viewer-title{font-size:15px!important;font-weight:600!important;letter-spacing:.01em!important}
+.viewer-subtitle{font-size:11px!important;letter-spacing:.02em!important}
+.panel:not(.info-panel) .panel-header{background:linear-gradient(180deg,rgba(255,255,255,.018),transparent)!important}
+.panel:not(.info-panel) .panel-count{min-width:25px!important;height:25px!important;padding:0 7px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;border:1px solid var(--ui-green-line)!important;border-radius:999px!important;background:var(--ui-green-soft)!important;color:var(--green)!important;font-size:10px!important}
+.panel:not(.info-panel) .panel-body{padding:8px!important}
+.panel:not(.info-panel) .patient-item{border-radius:7px!important;margin-bottom:5px!important;border:1px solid transparent!important;transition:background var(--ease),border-color var(--ease),transform var(--ease)!important}
+.panel:not(.info-panel) .patient-item:hover{background:var(--ui-panel-highlight)!important;border-color:#2a3438!important}
+.panel:not(.info-panel) .patient-item.active{background:var(--ui-green-soft)!important;border-color:var(--ui-green-line)!important;box-shadow:inset 3px 0 0 var(--green)!important}
+.info-panel .panel-header{background:linear-gradient(180deg,rgba(255,255,255,.018),transparent)!important}
+.info-panel .info-section{padding:15px 16px!important}
+.info-panel .info-heading{margin-bottom:11px!important}
+.info-panel .patient-card{background:#11171b!important;border:1px solid #293238!important;border-radius:8px!important;padding:12px!important}
+.info-panel .patient-card-name{font-size:14px!important;font-weight:600!important;color:#eef3f2!important}
+.info-panel .patient-card-meta{font-size:11px!important;margin-top:5px!important;color:#8f999e!important}
+.info-panel .info-row{padding:6px 0!important;margin-bottom:4px!important;border-bottom:1px solid rgba(255,255,255,.035)!important}
+.info-panel .info-row:last-child{border-bottom:0!important}
+.info-panel .study-selector{border-color:#303a3f!important;border-radius:7px!important;background:#11171b!important;min-height:38px!important}
+.viewer-header{background:linear-gradient(180deg,rgba(255,255,255,.018),transparent)!important}
+.viewer-statusbar{border-color:#252d31!important;background:#0d1113!important;color:#879297!important;letter-spacing:.02em!important}
+.viewer-statusbar .status-dot{width:7px!important;height:7px!important}
+.toolbar{background:#0f1315!important;border-top:1px solid #252d31!important;padding:7px 9px!important}
+.toolbar .tool{height:36px!important;min-width:36px!important;border-radius:6px!important;background:#151a1d!important;border-color:#2b353a!important;color:#d7dddf!important;font-size:12px!important}
+.toolbar .tool:hover{background:var(--ui-green-soft)!important;border-color:var(--ui-green-line)!important;color:var(--green)!important}
+.toolbar .separator{background:#2a3236!important}
+.patient-studies-below{background:#090d0f!important;border-top:1px solid #293238!important;padding-top:17px!important}
+.patient-studies-title{font-size:11px!important;letter-spacing:1.25px!important;color:var(--green)!important;margin-bottom:10px!important}
+.patient-studies-below-list{gap:7px!important}
+.patient-study-row{min-height:40px!important;padding:8px 11px!important;border-color:#293238!important;border-radius:8px!important;background:#10161a!important;transition:background var(--ease),border-color var(--ease),transform var(--ease)!important}
+.patient-study-row:hover{background:var(--ui-green-soft)!important;border-color:var(--ui-green-line)!important}
+.patient-study-date{font-size:12px!important;font-weight:600!important}
+.patient-study-images{font-size:11px!important;color:#a0aaae!important}
+.patient-study-arrow{color:var(--green)!important;font-size:18px!important}
+.add-study-button,.admin-primary{box-shadow:0 0 0 1px rgba(89,215,174,.08)!important}
+.add-study-button:hover,.admin-primary:hover{filter:brightness(1.05)!important}
+.search:focus-within{border-color:var(--green)!important;box-shadow:0 0 0 3px var(--ui-green-soft)!important}
+.login-email-wrap{position:relative;display:flex;align-items:center;width:100%}
+.login-email-wrap .login-email-local{padding-right:82px!important}
+.login-email-domain{position:absolute;right:13px;color:var(--green);font-size:13px;font-weight:600;pointer-events:none;white-space:nowrap}
+.login-remember-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:-3px 0 16px}
+.login-remember{display:flex;align-items:center;gap:8px;color:#c7ced1;font-size:12px;cursor:pointer}
+.login-remember input{width:15px;height:15px;accent-color:var(--green);cursor:pointer}
+.login-hint{color:#697277;font-size:10px;text-align:right}
+@media(max-width:700px){.login-email-wrap .login-email-local{padding-right:78px!important}.login-remember-row{align-items:flex-start}}
+</style>
 </head>
 <body>
 <header class="topbar">
@@ -1916,13 +1968,10 @@ Hospital San Martín de Pangoa - Rayos X
 <div class="login-body">
 <div class="form-group">
 <label class="form-label">Correo electrónico</label>
-<input
-class="form-input"
-id="loginEmail"
-type="email"
-autocomplete="username"
-placeholder="Correo">
-</div>
+<div class="login-email-wrap">
+<input class="form-input login-email-local" id="loginEmail" type="text" inputmode="email" autocomplete="username" placeholder="correo">
+<span class="login-email-domain">@gmail.com</span>
+</div></div>
 <div class="form-group">
 <label class="form-label">Contraseña</label>
 <input
@@ -1932,13 +1981,16 @@ type="password"
 autocomplete="current-password"
 placeholder="Contraseña">
 </div>
+<div class="login-remember-row">
+<label class="login-remember">
+<input id="rememberAdminAccount" type="checkbox">
+<span>Recordar cuenta</span>
+</label>
+<span class="login-hint">Solo se recuerda el correo</span>
+</div>
 <div class="admin-actions">
-<button class="admin-secondary" onclick="closeLogin()">
-CANCELAR
-</button>
-<button class="admin-primary" onclick="loginAdmin()">
-INGRESAR
-</button>
+<button class="admin-secondary" onclick="closeLogin()">CANCELAR</button>
+<button class="admin-primary" onclick="loginAdmin()">INGRESAR</button>
 </div>
 <div class="status-message" id="loginStatus"></div>
 </div>
@@ -4192,11 +4244,10 @@ error.message||
 }
 
 async function loginAdmin(){
-const email=
-document.getElementById(
-"loginEmail"
-).value.trim();
-const password=
+ const emailField=document.getElementById("loginEmail");
+ const rawEmail=emailField.value.trim();
+ const email=rawEmail.includes("@")?rawEmail:rawEmail+"@gmail.com";
+ const password=
 document.getElementById(
 "loginPassword"
 ).value;
@@ -4239,10 +4290,14 @@ throw new Error(
 "Esta cuenta no tiene permisos de administrador."
 );
 }
+const remember=document.getElementById("rememberAdminAccount").checked;
+if(remember){
+ localStorage.setItem("pacsRememberedAdminEmail",email);
+}else{
+ localStorage.removeItem("pacsRememberedAdminEmail");
+}
 closeLogin();
-updateAuthInterface(
-data.user
-);
+updateAuthInterface(data.user);
 }catch(error){
 status.className=
 "status-message status-error";
@@ -5511,5 +5566,30 @@ function openPatientDateStudies(
 
 </script>
 
+
+<script id="v17-login-enhancements">
+(function(){
+ const rememberedKey="pacsRememberedAdminEmail";
+ function prepareAdminLogin(){
+  const email=document.getElementById("loginEmail");
+  const password=document.getElementById("loginPassword");
+  const remember=document.getElementById("rememberAdminAccount");
+  if(!email||!password||!remember)return;
+  const saved=localStorage.getItem(rememberedKey);
+  if(saved){
+   const local=saved.toLowerCase().endsWith("@gmail.com")?saved.slice(0,-10):saved;
+   email.value=local; remember.checked=true;
+  }
+  email.addEventListener("keydown",function(event){
+   if(event.key==="Enter"){event.preventDefault();password.focus();}
+  });
+  password.addEventListener("keydown",function(event){
+   if(event.key==="Enter"){event.preventDefault();if(typeof loginAdmin==="function")loginAdmin();}
+  });
+ }
+ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",prepareAdminLogin,{once:true});
+ else prepareAdminLogin();
+})();
+</script>
 </body>
 </html>
