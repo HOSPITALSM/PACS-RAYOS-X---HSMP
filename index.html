@@ -714,6 +714,70 @@ body{font-size:16px}
   .tool{font-size:12px}
 }
 </style>
+<style>
+/* AJUSTES SOLICITADOS */
+body{font-size:15px}
+.panel-title{font-size:15px}
+.panel-body,.info-section,.info-row{font-size:14px}
+.viewer-title{font-size:16px}
+.viewer-subtitle{font-size:13px}
+button,input,select{font-size:14px}
+
+.logo img{
+width:auto!important;
+height:auto!important;
+max-width:100%!important;
+max-height:48px!important;
+object-fit:contain;
+}
+
+@media(max-width:700px){
+.topbar{
+height:auto!important;
+min-height:0!important;
+padding:8px 9px!important;
+display:grid!important;
+grid-template-columns:1fr auto!important;
+grid-template-areas:
+"logo auth"
+"brand brand"
+"search search"
+"date date"!important;
+gap:7px!important;
+align-items:center!important;
+}
+.logo{
+grid-area:logo!important;
+width:44px!important;
+height:44px!important;
+display:flex!important;
+align-items:center!important;
+justify-content:center!important;
+}
+.logo img{max-width:44px!important;max-height:44px!important}
+.brand{
+grid-area:brand!important;
+min-width:0!important;
+width:100%!important;
+text-align:center!important;
+}
+.brand-title{font-size:12px!important;line-height:1.2!important}
+.brand-subtitle{display:block!important;font-size:9px!important;line-height:1.2!important}
+.search{
+grid-area:search!important;
+width:100%!important;
+max-width:none!important;
+margin:0!important;
+}
+.search input{
+width:100%!important;
+height:36px!important;
+box-sizing:border-box!important;
+font-size:13px!important;
+}
+.current-date{grid-area:date!important;justify-self:center!important}
+}
+</style>
 </head>
 <body>
 <header class="topbar">
@@ -961,18 +1025,8 @@ EDITAR INFORMACIÓN DEL PACIENTE
 <label class="form-label">Fecha de nacimiento <span style="color:#686e74;text-transform:none;">(opcional)</span></label>
 <input class="form-input" id="editPatientBirth" type="date">
 </div>
-<div class="form-group">
-<label class="form-label">Sexo <span style="color:#686e74;text-transform:none;">(opcional)</span></label>
-<select class="study-selector" id="editPatientSex">
-<option value="">No especificar</option>
-<option value="Masculino">Masculino</option>
-<option value="Femenino">Femenino</option>
-</select>
-</div>
-<div class="form-group">
-<label class="form-label">Historia clínica <span style="color:#686e74;text-transform:none;">(opcional)</span></label>
-<input class="form-input" id="editPatientHistory" type="text" placeholder="Número de historia clínica">
-</div>
+
+
 <div class="status-message" id="editPatientStatus"></div>
 <div class="admin-actions">
 <button class="admin-secondary" onclick="closeEditPatient()">CANCELAR</button>
@@ -1777,55 +1831,162 @@ getPatientStudies();
 return list[currentStudy];
 }
 function renderStudySelector(){
+
 const selector=
 document.getElementById(
 "studySelector"
 );
+
 selector.innerHTML="";
+
 const list=
 getPatientStudies();
+
 if(!list.length){
+
 selector.innerHTML=
 '<option value="">Seleccione un estudio</option>';
+
 return;
+
 }
+
 list.forEach(
 (study,index)=>{
+
 const option=
 document.createElement(
 "option"
 );
-option.value=index;
-let studyName=
+
+option.value=
+"study:"+index;
+
+const studyName=
 study.study||
 "Estudio no especificado";
+
 option.textContent=
 studyName+
 " · "+
 formatDate(study.date);
-if(index===currentStudy){
+
+if(index===currentStudy)
 option.selected=true;
-}
-selector.appendChild(option);
-});
-}
-function changeSelectedStudy(
-value
+
+selector.appendChild(
+option
+);
+
+if(index===currentStudy){
+
+const structures=[];
+
+study.images.forEach(
+(image,imageIndex)=>{
+
+const structure=
+(image.structure||"").trim();
+
+if(
+structure &&
+!structures.some(
+item=>item.name===structure
+)
 ){
+
+structures.push({
+name:structure,
+imageIndex:imageIndex
+});
+
+}
+
+});
+
+structures.forEach(
+item=>{
+
+const structureOption=
+document.createElement(
+"option"
+);
+
+structureOption.value=
+"image:"+
+index+
+":"+
+item.imageIndex;
+
+structureOption.textContent=
+"↳ "+
+item.name;
+
+selector.appendChild(
+structureOption
+);
+
+});
+
+}
+
+});
+
+}
+
+function changeSelectedStudy(value){
+
 if(value==="")return;
-const index=
-parseInt(value,10);
+
+const parts=
+String(value).split(":");
+
+if(parts[0]==="study"){
+
+const index=parseInt(parts[1],10);
+
 if(isNaN(index))return;
-const list=
-getPatientStudies();
+
+const list=getPatientStudies();
+
 if(!list[index])return;
+
 currentStudy=index;
 currentImage=0;
+
 resetView();
-renderStudy(
-list[index]
-);
+renderStudy(list[index]);
+
+return;
+
 }
+
+if(parts[0]==="image"){
+
+const studyIndex=parseInt(parts[1],10);
+const imageIndex=parseInt(parts[2],10);
+
+if(
+isNaN(studyIndex)||
+isNaN(imageIndex)
+)return;
+
+const list=getPatientStudies();
+const study=list[studyIndex];
+
+if(!study||!study.images[imageIndex])
+return;
+
+currentStudy=studyIndex;
+currentImage=imageIndex;
+
+resetView();
+renderStudy(study);
+
+}
+
+}
+
 function renderStudy(study){
 if(!study)return;
 renderStudySelector();
@@ -2980,14 +3141,8 @@ document.getElementById(
 "editPatientBirth"
 ).value=
 reference.birth||"";
-document.getElementById(
-"editPatientSex"
-).value=
-reference.sex||"";
-document.getElementById(
-"editPatientHistory"
-).value=
-reference.history||"";
+
+
 document.getElementById(
 "editPatientStatus"
 ).textContent="";
@@ -3024,14 +3179,8 @@ const birth=
 document.getElementById(
 "editPatientBirth"
 ).value||null;
-const sex=
-document.getElementById(
-"editPatientSex"
-).value||null;
-const history=
-document.getElementById(
-"editPatientHistory"
-).value.trim()||null;
+
+
 const status=
 document.getElementById(
 "editPatientStatus"
@@ -3057,27 +3206,37 @@ status.className=
 "status-message";
 status.textContent=
 "Guardando cambios...";
-const previousPatient=
-currentPatient;
+const patientStudiesToUpdate=
+getPatientStudies().filter(
+study=>study.id
+);
+
+if(!patientStudiesToUpdate.length){
+throw new Error(
+"No se encontraron estudios del paciente para actualizar."
+);
+}
+
+for(const study of patientStudiesToUpdate){
+
 const{
-error
+error:updateError
 }=
 await supabaseClient
 .from("studies")
 .update({
 patient:newName,
-birth:birth,
-sex:sex,
-history:history
+birth:birth
 })
 .eq(
-"patient",
-previousPatient
-)
-.eq(
-"date",
-selectedDate
+"id",
+study.id
 );
+
+if(updateError)
+throw updateError;
+
+}
 if(error)
 throw error;
 currentPatient=
