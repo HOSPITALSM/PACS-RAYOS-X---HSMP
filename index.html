@@ -359,7 +359,7 @@ function mapStudiesRows(rows){
   });
 }
 
-async async function loadStudiesFromSupabase(){
+async function loadStudiesFromSupabase(){
   if(!supabaseClient) return;
   const {data,error}=await supabaseClient
     .from("studies")
