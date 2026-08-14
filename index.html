@@ -346,6 +346,23 @@
     z-index:200;
   }
 }
+
+@media(max-width:850px){
+  html,body{height:auto;min-height:100%;overflow-x:hidden;overflow-y:auto}
+  .layout{height:auto;min-height:0;padding:0 0 78px}
+  .viewer{height:auto;min-height:0}
+  .viewer .image{height:clamp(280px,58svh,540px);min-height:280px}
+  .history{display:block;padding:18px 12px 28px;max-width:none}
+  .history h2{font-size:16px;line-height:1.35}
+  .history .study{padding:11px;font-size:13px}
+  .mobile-nav{position:fixed;left:0;right:0;bottom:0}
+  .side{z-index:130}
+  .overlay.show{z-index:120}
+}
+.overlay.show{cursor:pointer}\n
+@media(max-width:850px){
+  .user .menu button{min-height:44px}
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -719,6 +736,11 @@ PACS.patients = {
     PACS.state.selectedImage=PACS.data.studyCount(PACS.data.currentStudy())>0?1:0;
     PACS.app.resetViewer();
     PACS.app.render();
+    if(window.matchMedia?.("(max-width: 850px)").matches){
+      this.closeSide();
+      document.querySelectorAll(".mobile-nav button").forEach(b=>b.classList.remove("active"));
+      document.querySelector('.mobile-nav button[data-mobile="viewer"]')?.classList.add("active");
+    }
   },
   async add({name,study,date,files=[]}){
     const {data,error}=await PACS.state.client.from("studies").insert({patient:name,date:PACS.data.dateISO(date),study,structure:study,modality:(["TC","RM","MAMOGRAFÍA","ECOGRAFÍA"].includes(study)?study:"RX"),images:[]}).select("*").single();
@@ -1100,6 +1122,29 @@ PACS.app = {
     this.applyViewerTransform();
   },
   endImageDrag(){PACS.state.isDraggingImage=false;},
+
+  mobileDrawerTouchStart(e){
+    if(!window.matchMedia?.("(max-width: 850px)").matches)return;
+    const side=document.getElementById("side");
+    if(!side?.classList.contains("open"))return;
+    if(!e.touches?.length)return;
+    const t=e.touches[0];
+    this._drawerTouchStartX=t.clientX;
+    this._drawerTouchStartY=t.clientY;
+  },
+  mobileDrawerTouchEnd(e){
+    if(!window.matchMedia?.("(max-width: 850px)").matches)return;
+    const side=document.getElementById("side");
+    if(!side?.classList.contains("open"))return;
+    if(this._drawerTouchStartX==null)return;
+    const t=e.changedTouches?.[0];
+    if(!t)return;
+    const dx=t.clientX-this._drawerTouchStartX;
+    const dy=t.clientY-this._drawerTouchStartY;
+    if(dx < -70 && Math.abs(dx)>Math.abs(dy)) this.closeSide();
+    this._drawerTouchStartX=null;
+    this._drawerTouchStartY=null;
+  },
   bindGlobalEvents(){
     if(this._eventsBound)return;
     this._eventsBound=true;
@@ -1122,6 +1167,8 @@ PACS.app = {
     document.addEventListener("pointermove",e=>this.moveImageDrag(e));
     document.addEventListener("pointerup",()=>this.endImageDrag());
     document.addEventListener("pointercancel",()=>this.endImageDrag());
+    document.addEventListener("touchstart",e=>this.mobileDrawerTouchStart(e),{passive:true});
+    document.addEventListener("touchend",e=>this.mobileDrawerTouchEnd(e),{passive:true});
 
   },
   async onClick(e){
@@ -1390,11 +1437,15 @@ const calDate=e.target.closest?.("[data-calendar-date]")?.dataset?.calendarDate;
   mobileNavigate(which){
     document.querySelectorAll(".mobile-nav button").forEach(b=>b.classList.remove("active"));
     document.querySelector(`.mobile-nav button[data-mobile="${which}"]`)?.classList.add("active");
+
     if(which==="patients"){
-      document.getElementById("side")?.classList.add("open");
-      document.getElementById("overlay")?.classList.add("show");
+      const side=document.getElementById("side");
+      const overlay=document.getElementById("overlay");
+      side?.classList.add("open");
+      overlay?.classList.add("show");
       return;
     }
+
     this.closeSide();
     if(which==="viewer"){
       document.getElementById("image")?.scrollIntoView({behavior:"smooth",block:"start"});
