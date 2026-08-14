@@ -79,7 +79,7 @@
 #confirmModal .modal{padding:18px}
 #confirmModal #confirmText{font-size:14px;margin:8px 0 4px}
 #confirmModal .btn,#confirmModal .secondary{padding:9px 14px}
-.email-field{display:flex;align-items:stretch}.email-field input{border-radius:9px 0 0 9px;flex:1;min-width:0}.email-suffix{display:flex;align-items:center;padding:0 12px;background:#0b1b22;border:1px solid var(--line);border-left:0;border-radius:0 9px 9px 0;color:var(--muted);font-weight:700}
+.email-field{display:flex;align-items:stretch}.email-field input{border-radius:9px;flex:1;min-width:0}
 
 .study-search-wrap{cursor:pointer}
 .study-search-wrap .study-search{cursor:pointer}
@@ -169,7 +169,7 @@
 <div id="toast" class="toast"></div>
 <div id="loginModal" class="modal-bg"><div class="modal">
 <div class="mh"><b>INICIAR SESIÓN</b><button class="close" onclick="closeModal('loginModal')" aria-label="Cerrar">×</button></div>
-<div class="field"><label>CORREO</label><div class="email-field"><input id="loginEmail" placeholder="USUARIO" autocomplete="username" aria-label="Usuario"><span class="email-suffix">@gmail.com</span></div></div>
+<div class="field"><label>CORREO</label><input id="loginEmail" placeholder="CORREO ELECTRÓNICO" autocomplete="username" aria-label="Correo electrónico"></div>
 <div class="field" style="margin-top:10px"><label>CONTRASEÑA</label><input id="loginPass" type="password" placeholder="CONTRASEÑA" autocomplete="current-password" aria-label="Contraseña"></div>
 <div style="display:flex;flex-direction:column;gap:7px;margin-top:11px">
 <label style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px"><input id="rememberUser" type="checkbox"> RECORDAR USUARIO</label>
@@ -243,12 +243,12 @@ function openModal(id){ document.getElementById(id)?.classList.add("show"); }
 function closeModal(id){ document.getElementById(id)?.classList.remove("show"); }
 
 async function doLogin(){
-  const local = (document.getElementById("loginEmail")?.value || "").trim().replace(/@gmail\.com$/i, "");
+  const email = (document.getElementById("loginEmail")?.value || "").trim();
   const pass = (document.getElementById("loginPass")?.value || "").trim();
   const status = document.getElementById("loginStatus");
   if (status) status.textContent = "";
 
-  if (!local) { if (status) status.textContent = "Escribe tu usuario."; return; }
+  if (!email) { if (status) status.textContent = "Escribe tu correo."; return; }
   if (!pass) { if (status) status.textContent = "Escribe tu contraseña."; return; }
   if (!supabaseClient) {
     if (status) status.textContent = "No se pudo inicializar la conexión con Supabase.";
@@ -260,7 +260,7 @@ async function doLogin(){
 
   try {
     const { data, error } = await supabaseClient.auth.signInWithPassword({
-      email: local + "@gmail.com",
+      email: email,
       password: pass
     });
 
@@ -282,7 +282,7 @@ async function doLogin(){
 
     try {
       if (document.getElementById("rememberUser")?.checked) {
-        localStorage.setItem("pacsRememberedUser", local);
+        localStorage.setItem("pacsRememberedUser", email);
       }
     } catch (_) {}
 
