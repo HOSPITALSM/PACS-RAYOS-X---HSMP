@@ -645,6 +645,17 @@
   .mobile-admin-actions{display:none!important}
 }
 
+
+.sex-symbol{display:inline-block;width:1.05em;margin-right:5px;font-weight:800;line-height:1;text-align:center}
+.sex-symbol.male{color:#4da3ff}
+.sex-symbol.female{color:#f58bb5}
+.sex-symbol.unknown{color:#7f9299;font-size:.72em}
+
+
+.sex-radio-group{display:flex;flex-direction:column;align-items:flex-start;gap:4px;margin-top:6px}
+.sex-radio-group label{display:flex;align-items:center;gap:6px;margin:0;cursor:pointer;white-space:nowrap}
+.sex-radio-group input[type="radio"]{width:15px;height:15px;margin:0;accent-color:#5ed2e5}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -659,7 +670,13 @@
 <div class="form-grid">
 <div class="field name-field"><label>NOMBRE COMPLETO</label><input id="pName" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()" placeholder="NOMBRE Y APELLIDOS" autocomplete="off"></div>
 <div class="field"><label>DNI <span class="optional">(OPCIONAL)</span></label><input id="pDni" inputmode="numeric" maxlength="8" placeholder="DNI"></div>
-<div class="field"><label>SEXO <span class="optional">(OPCIONAL)</span></label><select id="pSex"><option value="">NO ESPECIFICADO</option><option value="M">MASCULINO</option><option value="F">FEMENINO</option></select></div>
+<div class="field"><label>SEXO <span class="optional">(OPCIONAL)</span></label>
+<div class="sex-radio-group" role="radiogroup" aria-label="Sexo">
+<label><input type="radio" name="pSexChoice" value="M"> Masculino</label>
+<label><input type="radio" name="pSexChoice" value="F"> Femenino</label>
+</div>
+<input id="pSex" type="hidden" value="">
+</div>
 <div class="field"><label>FECHA DE NACIMIENTO <span class="optional">(OPCIONAL)</span></label><input id="pBirth" type="date"></div>
 <div class="field"><label>FECHA DEL ESTUDIO</label><div class="muted" id="pStudyDate">14 AGO 2026</div></div>
 <div class="field study-field"><label>ESTRUCTURA / ESTUDIO</label><div id="pStudyType"></div></div>
@@ -1174,7 +1191,11 @@ PACS.studies = {
 /* ===== view.js ===== */
 window.PACS = window.PACS || {};
 PACS.view = {
-  patientIcon(sex){ return sex==="M"?"👨":sex==="F"?"👩":"👤"; },
+  patientIcon(sex){
+    return sex==="M"?'<span class="sex-symbol male" aria-label="Masculino">♂</span>':
+           sex==="F"?'<span class="sex-symbol female" aria-label="Femenino">♀</span>':
+           '<span class="sex-symbol unknown" aria-label="Sexo no especificado">●</span>';
+  },
   patientList(){
     const list=PACS.data.patientsForDate();
     if(!list.length) return `<div class="patient-empty">No hay pacientes registrados en esta fecha.</div>`;
@@ -1291,11 +1312,15 @@ PACS.app = {
     const history=PACS.view.history();
     const list=PACS.view.patientList();
     const thumb=PACS.view.renderThumbs(study);
-    const mobileActions=st.role==="admin"?`<button class="action" data-action="edit-patient">✏️ Modificar paciente</button><button class="action" data-action="add-images">➕ Añadir imágenes</button><button class="action" data-action="delete-image">🗑️ Eliminar imagen</button><button class="action danger" data-action="delete-patient">🔴 ✕ Eliminar paciente</button>`:`<div class="muted">Modo visualización</div>`;
+    const mobileActions="";
     const mobileAdd=st.role==="admin"?`<button type="button" class="add" data-action="add-patient">＋ Agregar paciente</button>`:"";
 
     document.getElementById("root").innerHTML=`<header class="top">
       <div class="brand"><img src="DXLOGO.png" class="brand-logo" alt="Logo"><div class="brand-text"><b>HOSPITAL SAN MARTIN DE PANGOA</b><span>DIAGNÓSTICO POR IMAGEN</span></div></div>
+      <div class="tr">
+        <div class="search-wrap"><input id="topSearch" class="search" placeholder="🔎 Buscar paciente..."><div id="searchResults"></div></div>
+        <div class="date-wrap"><button class="date-field" data-action="calendar-toggle">📅 <span id="dateLabel">${st.selectedDate}</span><span class="date-chevron">▾</span></button><div id="calendarPopup" class="calendar-popup"></div></div>
+        <div class="user"><button id="userButton" data-action="menu-toggle">👤 ${roleLabel} ▾</button><div id="menu" class="menu"><b>${roleLabel}</b><button data-action="logout">🔐 Cerrar sesión</button></div></div>
         ${st.role==="admin"?`<div class="mobile-admin-actions">
           <button type="button" class="mobile-more-btn" data-action="mobile-more-toggle" aria-label="Más acciones" title="Más acciones">⋮</button>
           <div id="mobileMoreMenu" class="mobile-more-menu">
@@ -1306,10 +1331,6 @@ PACS.app = {
             <button class="danger" data-action="delete-patient">🔴 <span>Eliminar paciente</span></button>
           </div>
         </div>`:""}
-      <div class="tr">
-        <div class="search-wrap"><input id="topSearch" class="search" placeholder="🔎 Buscar paciente..."><div id="searchResults"></div></div>
-        <div class="date-wrap"><button class="date-field" data-action="calendar-toggle">📅 <span id="dateLabel">${st.selectedDate}</span><span class="date-chevron">▾</span></button><div id="calendarPopup" class="calendar-popup"></div></div>
-        <div class="user"><button id="userButton" data-action="menu-toggle">👤 ${roleLabel} ▾</button><div id="menu" class="menu"><b>${roleLabel}</b><button data-action="logout">🔐 Cerrar sesión</button></div></div>
       </div>
     </header>
     <main class="layout">
@@ -1353,7 +1374,7 @@ PACS.app = {
     <section class="history"><h2>HISTORIAL DEL PACIENTE · ${p?.name||"—"}</h2>${history}</section>
     <nav class="mobile-nav"><button data-mobile="home"><span>🏠</span>Inicio</button><button data-mobile="patients"><span>👥</span>Pacientes</button><button data-mobile="viewer" class="active"><span>🩻</span>Visor</button></nav>
     <div id="overlay" class="overlay" data-action="side-close"></div>
-    <aside id="side" class="side"><div style="display:flex;justify-content:space-between"><b>← PACIENTES</b><button class="close" data-action="side-close">×</button></div><input id="mobileSearch" placeholder="🔎 Buscar paciente...">${mobileAdd}<div id="mobilePatients" class="patients">${list}</div><div class="mobile-actions">${mobileActions}</div></aside>`;
+    <aside id="side" class="side"><div style="display:flex;justify-content:space-between"><b>← PACIENTES</b><button class="close" data-action="side-close">×</button></div><input id="mobileSearch" placeholder="🔎 Buscar paciente...">${mobileAdd}<div id="mobilePatients" class="patients">${list}</div></aside>`;
     this.renderThumbSync();
     this.applyViewerTransform();
     this.bindMobileControls();
@@ -1679,6 +1700,7 @@ const calDate=e.target.closest?.("[data-calendar-date]")?.dataset?.calendarDate;
     document.getElementById("pName").value="";
     document.getElementById("pDni").value="";
     document.getElementById("pSex").value="";
+    document.querySelectorAll('input[name="pSexChoice"]').forEach(r=>r.checked=false);
     document.getElementById("pBirth").value="";
     document.getElementById("pStudyDate").textContent=PACS.state.selectedDate;
     PACS.state.patientFiles=[];
@@ -1908,6 +1930,14 @@ const calDate=e.target.closest?.("[data-calendar-date]")?.dataset?.calendarDate;
 </script>
 <script>
 window.PACS.app.start();
+</script>
+<script>
+document.addEventListener("change",function(e){
+  if(e.target && e.target.name==="pSexChoice"){
+    const target=document.getElementById("pSex");
+    if(target) target.value=e.target.value;
+  }
+});
 </script>
 </body>
 </html>
