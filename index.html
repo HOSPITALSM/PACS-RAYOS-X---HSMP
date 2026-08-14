@@ -363,6 +363,30 @@
 @media(max-width:850px){
   .user .menu button{min-height:44px}
 }
+
+@media(min-width:851px){
+  html,body{overflow:hidden}
+  .layout{height:calc(100vh - 76px);min-height:0}
+  .left{height:calc(100vh - 76px);min-height:0;display:flex;flex-direction:column;overflow:hidden}
+  .left .patients{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;padding-right:4px;scrollbar-width:thin;scrollbar-color:#2b4854 transparent}
+  .left .patients::-webkit-scrollbar{width:8px}
+  .left .patients::-webkit-scrollbar-track{background:transparent}
+  .left .patients::-webkit-scrollbar-thumb{background:#2b4854;border-radius:8px}
+}
+
+@media(max-width:850px){
+  .mobile-nav{z-index:900!important}
+  #overlay{z-index:1000!important}
+  #side{display:block!important;visibility:visible!important;z-index:1100!important;transform:translate3d(-110%,0,0)!important}
+  #side.open{transform:translate3d(0,0,0)!important}
+  #side .patients{display:flex!important;flex-direction:column!important;gap:7px!important;overflow:visible!important;max-height:none!important}
+  #side .patient{display:block!important;width:100%!important;opacity:1!important}
+  #overlay.show{display:block!important;visibility:visible!important}
+}
+
+@media(max-width:850px){
+  body.drawer-open{overflow:hidden}
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -1027,6 +1051,40 @@ PACS.app = {
     <aside id="side" class="side"><div style="display:flex;justify-content:space-between"><b>← PACIENTES</b><button class="close" data-action="side-close">×</button></div><input id="mobileSearch" placeholder="🔎 Buscar paciente...">${mobileAdd}<div id="mobilePatients" class="patients">${list}</div><div class="mobile-actions">${mobileActions}</div></aside>`;
     this.renderThumbSync();
     this.applyViewerTransform();
+    this.bindMobileControls();
+  },
+  bindMobileControls(){
+    if(!window.matchMedia?.("(max-width: 850px)").matches)return;
+    document.querySelectorAll(".mobile-nav button").forEach(btn=>{
+      if(btn.dataset.mobileBound==="1")return;
+      btn.dataset.mobileBound="1";
+      btn.addEventListener("click",()=>{
+        this.mobileNavigate(btn.dataset.mobile);
+      });
+      btn.addEventListener("touchend",e=>{
+        e.preventDefault();
+        this.mobileNavigate(btn.dataset.mobile);
+      },{passive:false});
+    });
+
+    const side=document.getElementById("side");
+    const overlay=document.getElementById("overlay");
+    side?.querySelectorAll("[data-patient]").forEach(btn=>{
+      if(btn.dataset.mobilePatientBound==="1")return;
+      btn.dataset.mobilePatientBound="1";
+      const choose=ev=>{
+        ev.preventDefault();
+        PACS.patients.select(decodeURIComponent(btn.dataset.patient));
+      };
+      btn.addEventListener("click",choose);
+      btn.addEventListener("touchend",choose,{passive:false});
+    });
+    const close=document.querySelector('#side [data-action="side-close"]');
+    if(side && !side.dataset.mobileBound){
+      side.dataset.mobileBound="1";
+      close?.addEventListener("click",e=>{e.preventDefault();this.closeSide();});
+      overlay?.addEventListener("click",()=>this.closeSide());
+    }
   },
   renderThumbSync(){
     // No-op: thumbs are already part of the render() HTML.
@@ -1443,6 +1501,7 @@ const calDate=e.target.closest?.("[data-calendar-date]")?.dataset?.calendarDate;
       const overlay=document.getElementById("overlay");
       side?.classList.add("open");
       overlay?.classList.add("show");
+      document.body.classList.add("drawer-open");
       return;
     }
 
@@ -1453,7 +1512,11 @@ const calDate=e.target.closest?.("[data-calendar-date]")?.dataset?.calendarDate;
     }
     window.scrollTo({top:0,behavior:"smooth"});
   },
-  closeSide(){document.getElementById("side")?.classList.remove("open");document.getElementById("overlay")?.classList.remove("show");},
+  closeSide(){
+    document.getElementById("side")?.classList.remove("open");
+    document.getElementById("overlay")?.classList.remove("show");
+    document.body.classList.remove("drawer-open");
+  },
   async onKey(e){
     if(e.key==="Escape"){PACS.ui.closeAll();return;}
     if(e.key==="Enter" && document.getElementById("loginModal")?.classList.contains("show")){
