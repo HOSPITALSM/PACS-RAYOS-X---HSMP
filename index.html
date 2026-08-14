@@ -1115,7 +1115,10 @@ PACS.patients = {
     }
   },
   async add({name,study,date,files=[],sex=""}){
-    const basePayload={
+    // La tabla "studies" de tu Supabase NO tiene una columna "gender"
+    // (y tampoco "sex"). Por eso el sexo NO se envía al insert.
+    // Se conserva localmente para mostrar ♂/♀ sin romper la creación del paciente.
+    const payload={
       patient:name,
       date:PACS.data.dateISO(date),
       study,
@@ -1124,36 +1127,20 @@ PACS.patients = {
       images:[]
     };
 
-    // Compatibilidad con Supabase: soporta tanto "sex" como "gender".
-    let data=null, error=null;
-    const payloads=sex
-      ? [{...basePayload,sex},{...basePayload,gender:sex}]
-      : [basePayload];
-
-    for(const payload of payloads){
-      const result=await PACS.state.client
-        .from("studies")
-        .insert(payload)
-        .select("*")
-        .single();
-      if(!result.error){
-        data=result.data;
-        error=null;
-        break;
-      }
-      error=result.error;
-      const msg=String(result.error?.message||"").toLowerCase();
-      const missingColumn=msg.includes("column") && (msg.includes("sex") || msg.includes("gender"));
-      if(!missingColumn) break;
-    }
+    const {data,error}=await PACS.state.client
+      .from("studies")
+      .insert(payload)
+      .select("*")
+      .single();
 
     if(error) throw error;
 
+    const selectedSex=String(sex||"").trim().toUpperCase();
     const localPreview=files.map(PACS.images.localPreview);
     const pLocal={
       id:`patient-${encodeURIComponent(name)}`,
       name,
-      sex:String((sex||data?.sex||data?.gender||"")).trim().toUpperCase(),
+      sex:selectedSex,
       studies:[{
         id:data.id,
         date,
@@ -1164,12 +1151,12 @@ PACS.patients = {
       }]
     };
 
-    if(pLocal.sex) PACS.gender.write(name,pLocal.sex);
+    if(selectedSex) PACS.gender.write(name,selectedSex);
 
     const existing=PACS.state.patients.find(p=>p.id===pLocal.id);
     if(existing){
       existing.studies.push(pLocal.studies[0]);
-      if(!existing.sex) existing.sex=pLocal.sex;
+      if(!existing.sex) existing.sex=selectedSex;
     }else{
       PACS.state.patients.push(pLocal);
     }
