@@ -128,6 +128,10 @@
   .mobile-actions{display:flex;flex-direction:column;gap:7px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
   .mobile-actions .action{display:block}
 }
+
+.xray{display:grid;place-items:center;overflow:hidden}
+.xray img{width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;display:block;border-radius:14px;user-select:none;-webkit-user-drag:none}
+.thumb-loading{display:grid;place-items:center;width:100%;height:100%;color:var(--muted);font-size:12px}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
 document.addEventListener("keydown",e=>{
@@ -409,7 +413,35 @@ function mapStudiesRows(rows){
 }
 
 
-const STORAGE_BUCKET = "IMAGENES";
+const STORAGE_BUCKET_CANDIDATES = ["IMAGENES","imagenes","imágenes"];
+let ACTIVE_STORAGE_BUCKET = "IMAGENES";
+async function storageUpload(path,file){
+  let lastError=null;
+  for(const bucket of [ACTIVE_STORAGE_BUCKET,...STORAGE_BUCKET_CANDIDATES.filter(b=>b!==ACTIVE_STORAGE_BUCKET)]){
+    const res=await supabaseClient.storage.from(bucket).upload(path,file,{upsert:false});
+    if(!res.error){ACTIVE_STORAGE_BUCKET=bucket;return res;}
+    lastError=res.error;
+  }
+  return {error:lastError||new Error("No se encontró el bucket de imágenes.")};
+}
+async function storageSignedUrl(path){
+  for(const bucket of [ACTIVE_STORAGE_BUCKET,...STORAGE_BUCKET_CANDIDATES.filter(b=>b!==ACTIVE_STORAGE_BUCKET)]){
+    const res=await supabaseClient.storage.from(bucket).createSignedUrl(path,3600);
+    if(!res.error && res.data?.signedUrl){ACTIVE_STORAGE_BUCKET=bucket;return res.data.signedUrl;}
+  }
+  return "";
+}
+async function storageRemove(path){
+  const res=await supabaseClient.storage.from(ACTIVE_STORAGE_BUCKET).remove([path]);
+  if(!res.error)return res;
+  for(const bucket of STORAGE_BUCKET_CANDIDATES){
+    if(bucket===ACTIVE_STORAGE_BUCKET)continue;
+    const retry=await supabaseClient.storage.from(bucket).remove([path]);
+    if(!retry.error){ACTIVE_STORAGE_BUCKET=bucket;return retry;}
+  }
+  return res;
+}
+
 
 function studyRowToLocal(row){
   const date=normalizeStudyDate(row.date);
@@ -452,6 +484,39 @@ function storageObjectPath(studyImage){
   return studyImage?.path || studyImage?.storagePath || "";
 }
 
+
+async function hydrateImageUrls(){
+  if(!supabaseClient)return;
+  for(const patient of P){
+    for(const study of patient.s||[]){
+      const items=getStudyImageObjects(study);
+      if(!items.length)continue;
+      for(let i=0;i<items.length;i++){
+        const item=items[i];
+        const path=storageObjectPath(item);
+        if(!path)continue;
+        if(typeof item==="object" && item.url)continue;
+        try{
+          const url=await storageSignedUrl(path);
+          if(!url)continue;
+          if(typeof item==="string"){
+            items[i]={path,name:`Imagen ${i+1}`,url};
+          }else{
+            item.url=url;
+          }
+        }catch(err){console.error("Storage signed URL:",err);}
+      }
+    }
+  }
+}
+
+function currentImageUrl(){
+  const study=sel?.s?.[si];
+  const items=getStudyImageObjects(study);
+  const item=items[Math.max(0,img-1)];
+  return typeof item==="string" ? "" : (item?.url||item?.publicUrl||"");
+}
+
 function renderCurrentThumbs(){
   const strip=document.querySelector(".thumbs");
   if(!strip)return;
@@ -462,11 +527,10 @@ function renderCurrentThumbs(){
     return;
   }
   strip.innerHTML=items.map((it,i)=>{
-    const path=storageObjectPath(it);
     const url=it?.url||it?.publicUrl||"";
     const label=it?.name||`Imagen ${i+1}`;
     return `<button class="thumb ${img===i+1?"active":""}" type="button" title="${String(label).replace(/"/g,"&quot;")}" onclick="selectStudyImage(${i+1})">
-      ${url?`<img src="${url}" alt="${String(label).replace(/"/g,"&quot;")}">`:""}
+      ${url?`<img src="${url}" alt="${String(label).replace(/"/g,"&quot;")}" loading="lazy">`:`<span class="thumb-loading">⌛</span>`}
       <span>${i+1}</span>
     </button>`;
   }).join("");
@@ -511,6 +575,8 @@ async function loadStudiesFromSupabase(){
 
   sel=next||null;
   img=1;
+
+  await hydrateImageUrls();
 }
 
 async function restoreSession(){
@@ -622,7 +688,7 @@ function render(){
 
     <section class="viewer">
       <div class="vh"><b>${x[1]||"VISOR DE IMÁGENES"}</b><span>${x[2]?img+" / "+x[2]:""}</span></div>
-      <div class="image" id="image"><div class="xray" id="xray" style="transform:scale(${scale})"></div></div>
+      <div class="image" id="image"><div class="xray" id="xray" style="transform:scale(${scale})">${currentImageUrl()?`<img src="${currentImageUrl()}" alt="Imagen médica" draggable="false">`:`<div style="color:var(--muted);font-size:13px">SELECCIONA UNA IMAGEN</div>`}</div></div>
       <div class="tools">
         <button class="tool" onclick="tool(0)">−</button><button class="tool" onclick="tool(1)">＋</button>
         <button class="tool" onclick="tool(2)">✋</button><button class="tool" onclick="tool(3)">↻</button>
@@ -705,19 +771,13 @@ function selectPatient(id){
   sel=found;
   const idx=sel.s.findIndex(st=>st[0]===selectedDate);
   si=idx>=0?idx:0;
-  img=1;scale=1;
+  const count=Number(sel.s?.[si]?.[2]||0);
+  img=count>0?1:0;
+  scale=1;
   render();
 }
 function pick(id){selectPatient(id);}
-function study(i){ if (!sel) return; si = i; img = 1; scale = 1; render(); }
-function tool(i){
-  if(i===0){scale=Math.max(.5,scale-.15);}
-  if(i===1){scale=Math.min(2.5,scale+.15);}
-  if(i===6){scale=1;}
-  if(i===2){/* hand tool visual state reserved for real image pan */}
-  if(i===3){/* rotation reserved */}
-  render();
-}
+function study(i){if(!sel)return;si=i;img=Number(sel.s?.[i]?.[2]||0)>0?1:0;scale=1;render();}
 function fillStudySelect(id,selected=""){
   const wrap=document.getElementById(id);
   if(!wrap)return;
@@ -801,13 +861,12 @@ async function saveEditPatient(){
   try{
     const {error}=await supabaseClient.from("studies").update({patient:newName}).eq("patient",oldName);
     if(error)throw error;
+    sel.n=newName;
+    P.forEach(p=>{if(p.n===oldName)p.n=newName;});
     closeModal("editModal");
-    toast("Paciente modificado correctamente.");
-    sel=null;
-    await loadStudiesFromSupabase();
-    sel=P.find(p=>p.n===newName)||null;
-    if(sel){si=0;img=1;}
     render();
+    toast("Paciente modificado correctamente.");
+    loadStudiesFromSupabase().then(()=>render()).catch(err=>console.error(err));
   }catch(err){
     console.error(err);
     toast(err?.message||"No se pudo modificar el paciente.");
@@ -841,8 +900,8 @@ function openDeleteImage(){
       const path=storageObjectPath(target);
 
       if(path){
-        const {error:storageError}=await supabaseClient.storage.from(STORAGE_BUCKET).remove([path]);
-        if(storageError)throw storageError;
+        const storageResult=await storageRemove(path);
+        if(storageResult.error)throw storageResult.error;
       }
 
       items.splice(index,1);
@@ -902,11 +961,10 @@ async function saveImages(){
     for(const file of files){
       const safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,"_");
       const path=`studies/${studyId}/${Date.now()}_${Math.random().toString(36).slice(2,8)}_${safeName}`;
-      const {error}=await supabaseClient.storage.from(STORAGE_BUCKET).upload(path,file,{upsert:false});
-      if(error)throw error;
-
-      const {data:pub}=supabaseClient.storage.from(STORAGE_BUCKET).getPublicUrl(path);
-      uploaded.push({path,name:file.name,url:pub?.publicUrl||""});
+      const up=await storageUpload(path,file);
+      if(up.error)throw up.error;
+      const url=await storageSignedUrl(path);
+      uploaded.push({path,name:file.name,url});
     }
 
     const next=[...existing,...uploaded];
@@ -915,17 +973,17 @@ async function saveImages(){
 
     closeModal("imagesModal");
     addFiles=[];
-    toast(`${uploaded.length} imagen${uploaded.length>1?"es":""} añadida${uploaded.length>1?"s":""}.`);
-
-    // Update locally immediately.
     study[5]=next;
     study[2]=next.length;
     img=1;
     render();
-    loadStudiesFromSupabase().then(()=>render()).catch(err=>console.error(err));
+    toast(`${uploaded.length} imagen${uploaded.length>1?"es":""} añadida${uploaded.length>1?"s":""}.`);
+
+    await hydrateImageUrls();
+    render();
   }catch(err){
     console.error(err);
-    toast(err?.message||"No se pudieron guardar las imágenes. Revisa Storage.");
+    toast(err?.message||"No se pudieron guardar las imágenes. Revisa Storage y sus permisos.");
   }
 }
 function handleFiles(files,target){const arr=Array.from(files||[]);if(target==="patientFiles")patientFiles.push(...arr);else addFiles.push(...arr);renderFileList(target==="patientFiles"?patientFiles:addFiles,target);}
@@ -935,9 +993,6 @@ async function savePatient(){
   if(currentRole!=="admin"){toast("Solo el Administrador puede agregar pacientes.");return;}
   const name=document.getElementById("pName").value.trim().toUpperCase();
   const structure=getStudyValue("pStudyType");
-  const dni=document.getElementById("pDni").value.trim();
-  const sex=document.getElementById("pSex").value;
-  const birth=document.getElementById("pBirth").value;
   if(!name){toast("El nombre del paciente es obligatorio.");return;}
   if(!STUDIES.includes(structure)){toast("Selecciona una estructura / estudio.");return;}
   if(!supabaseClient){toast("No hay conexión con Supabase.");return;}
@@ -946,28 +1001,51 @@ async function savePatient(){
   const months={ENE:"01",FEB:"02",MAR:"03",ABR:"04",MAY:"05",JUN:"06",JUL:"07",AGO:"08",SEP:"09",OCT:"10",NOV:"11",DIC:"12"};
   const studyDateISO=`${y}-${months[mon]}-${String(d).padStart(2,"0")}`;
   const modality=({TC:"TC",RM:"RM",MAMOGRAFÍA:"MAMOGRAFÍA",ECOGRAFÍA:"ECOGRAFÍA"}[structure]||"RX");
-
+  const files=[...(patientFiles||[])];
   const buttons=[...document.querySelectorAll("#patientModal .modal-actions button")];
   buttons.forEach(b=>b.disabled=true);
+
   try{
+    // 1) Create the study row first to obtain its database ID.
     const {data,error}=await supabaseClient.from("studies").insert({
       patient:name,date:studyDateISO,study:structure,structure:structure,modality:modality,images:[]
     }).select("*").single();
     if(error)throw error;
 
+    // 2) Upload any images selected together with the patient.
+    const uploaded=[];
+    for(const file of files){
+      const safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,"_");
+      const path=`studies/${data.id}/${Date.now()}_${Math.random().toString(36).slice(2,8)}_${safeName}`;
+      const up=await storageUpload(path,file);
+      if(up.error)throw up.error;
+      const url=await storageSignedUrl(path);
+      uploaded.push({path,name:file.name,url});
+    }
+
+    if(uploaded.length){
+      const {error:updateError}=await supabaseClient.from("studies").update({images:uploaded}).eq("id",data.id);
+      if(updateError)throw updateError;
+      data.images=uploaded;
+    }
+
     upsertLocalStudy(data);
     sel=P.find(p=>p.n===name)||sel;
-    if(sel){si=sel.s.findIndex(st=>String(st[4])===String(data.id));if(si<0)si=0;}
+    if(sel){
+      si=sel.s.findIndex(st=>String(st[4])===String(data.id));
+      if(si<0)si=0;
+    }
     img=1;scale=1;
     closeModal("patientModal");
-    refreshUiInstant();
-
-    // Confirm with the server in the background. UI is not blocked waiting for F5.
-    loadStudiesFromSupabase().then(()=>refreshUiInstant()).catch(err=>console.error(err));
-    toast("Paciente agregado correctamente.");
+    patientFiles=[];
+    await hydrateImageUrls();
+    render();
+    toast(files.length?`Paciente e ${files.length} imagen${files.length>1?"es":""} agregados correctamente.`:"Paciente agregado correctamente.");
   }catch(err){
     console.error(err);
-    toast(err?.message||"No se pudo guardar el paciente en Supabase.");
+    toast(err?.message||"No se pudo guardar el paciente o sus imágenes.");
+    // Keep the UI usable even when storage fails; study row can remain and be fixed later.
+    try{await loadStudiesFromSupabase();render();}catch(_){}
   }finally{
     buttons.forEach(b=>b.disabled=false);
   }
