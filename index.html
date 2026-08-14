@@ -97,6 +97,7 @@
 
 .modal-bg .modal{outline:none}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <div id="root"></div>
@@ -167,8 +168,8 @@
 <div id="toast" class="toast"></div>
 <div id="loginModal" class="modal-bg"><div class="modal">
 <div class="mh"><b>INICIAR SESIÓN</b><button class="close" onclick="closeModal('loginModal')" aria-label="Cerrar">×</button></div>
-<div class="field"><label>CORREO</label><div class="email-field"><input id="loginEmail" placeholder="USUARIO" autocomplete="username" aria-label="Usuario"><span class="email-suffix">@gmail.com</span></div></div>
-<div class="field" style="margin-top:10px"><label>CONTRASEÑA</label><input id="loginPass" type="password" placeholder="CONTRASEÑA" autocomplete="current-password" aria-label="Contraseña"></div>
+<div class="field"><label>CORREO</label><div class="email-field"><input id="loginEmail" placeholder="USUARIO" autocomplete="username"><span class="email-suffix">@gmail.com</span></div></div>
+<div class="field" style="margin-top:10px"><label>CONTRASEÑA</label><input id="loginPass" type="password" placeholder="CONTRASEÑA" autocomplete="current-password"></div>
 <div style="display:flex;flex-direction:column;gap:7px;margin-top:11px">
 <label style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px"><input id="rememberUser" type="checkbox"> RECORDAR USUARIO</label>
 <label style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px"><input id="rememberPass" type="checkbox"> RECORDAR CONTRASEÑA</label>
@@ -181,20 +182,25 @@
 <label style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px"><input id="rememberUser" type="checkbox"> RECORDAR USUARIO</label>
 <label style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px"><input id="rememberPass" type="checkbox"> RECORDAR CONTRASEÑA</label>
 </div>
-<div class="modal-actions"><button class="secondary" onclick="closeModal('loginModal')">CANCELAR</button><button class="btn" onclick="doLogin()">INICIAR SESIÓN</button><div style="text-align:center;color:var(--muted);font-size:11px;margin-top:9px"></div></div>
+<div class="modal-actions"><button class="secondary" onclick="closeModal('loginModal')">CANCELAR</button><button class="btn" onclick="doLogin()">INICIAR SESIÓN</button><div style="text-align:center;color:var(--muted);font-size:11px;margin-top:9px">MODO DEMO · NO HAY CUENTAS CREADAS TODAVÍA</div></div>
 </div></div>
 <script>
 const SUPABASE_CONFIG = {
   url: "https://tapjgdzwmsfgthxncero.supabase.co",
-  anonKey: "sb_publishable_5L4-txz5pZzI6dU6UAw86w_5gXbHZr0"
+  anonKey: ""
 };
+const ROLE_UIDS = {
+  admin: "622de888-2abd-4f4c-b1ba-488c7472b767",
+  viewer: "070c65c4-b499-4a45-ba7f-f2d5525a1d48"
+};
+let supabaseClient = null;
 const P=[];
-let sel=null,si=0,img=1,scale=1,logged=false,selectedDate="14 AGO 2026",searchTerm="";
+let sel=null,si=0,img=1,scale=1,logged=false,selectedDate="14 AGO 2026",searchTerm="",currentRole="";
+
 function initSupabase(){
+  if(!window.supabase) return;
   if(!SUPABASE_CONFIG.url || !SUPABASE_CONFIG.anonKey) return;
-  if(window.supabase && !window.supabaseClient){
-    window.supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url,SUPABASE_CONFIG.anonKey);
-  }
+  supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url,SUPABASE_CONFIG.anonKey);
 }
 function loadRememberedUser(){
   try{
@@ -203,46 +209,72 @@ function loadRememberedUser(){
     if(saved && el) el.value=saved;
   }catch(_){}
 }
-function home(){root.innerHTML='<div class="screen"><div class="center"><div class="logo">🏥</div><h1>HOSPITAL SAN MARTIN DE PANGOA</h1><p>DIAGNÓSTICO POR IMAGEN</p><button class="btn" onclick="openLogin()">Iniciar sesión</button></div></div>'}
+function roleFromUser(user){
+  const uid=user?.id||"";
+  if(uid===ROLE_UIDS.admin) return "admin";
+  if(uid===ROLE_UIDS.viewer) return "viewer";
+  return "";
+}
+async function restoreSession(){
+  if(!supabaseClient) return;
+  const {data,error}=await supabaseClient.auth.getSession();
+  if(error || !data?.session) return;
+  currentRole=roleFromUser(data.session.user);
+  if(!currentRole){
+    await supabaseClient.auth.signOut();
+    return;
+  }
+  logged=true;
+  render();
+}
+async function doLogin(){
+  const local=(document.getElementById("loginEmail")?.value||"").trim().replace(/@gmail\.com$/i,"");
+  const pass=(document.getElementById("loginPass")?.value||"").trim();
+  const status=document.getElementById("loginStatus");
+  if(status)status.textContent="";
+  if(!local){if(status)status.textContent="Escribe tu usuario.";return}
+  if(!pass){if(status)status.textContent="Escribe tu contraseña.";return}
+  if(!supabaseClient){
+    if(status)status.textContent="Configura la conexión de Supabase en SUPABASE_CONFIG.";
+    return;
+  }
+  if(status)status.textContent="Verificando acceso…";
+  const {data,error}=await supabaseClient.auth.signInWithPassword({
+    email:local+"@gmail.com",password:pass
+  });
+  if(error || !data?.user){
+    if(status)status.textContent="Correo o contraseña incorrectos.";
+    return;
+  }
+  currentRole=roleFromUser(data.user);
+  if(!currentRole){
+    await supabaseClient.auth.signOut();
+    if(status)status.textContent="Este usuario no tiene un rol autorizado para el PACS.";
+    return;
+  }
+  try{
+    if(document.getElementById("rememberUser")?.checked){
+      localStorage.setItem("pacsRememberedUser",local);
+    }
+  }catch(_){}
+  logged=true;
+  closeModal("loginModal");
+  render();
+}
+async function logout(){
+  if(supabaseClient) await supabaseClient.auth.signOut();
+  logged=false; currentRole="";
+  render();
+}
 function openLogin(){
- const m=document.getElementById("loginModal");
- const status=document.getElementById("loginStatus");
- if(status)status.textContent="";
- loadRememberedUser();
- m?.classList.add("show");
+  const m=document.getElementById("loginModal");
+  const status=document.getElementById("loginStatus");
+  if(status)status.textContent="";
+  loadRememberedUser();
+  m?.classList.add("show");
 }
-function doLogin(){
- const local=(document.getElementById("loginEmail")?.value||"").trim().replace(/@gmail\.com$/i,"");
- const pass=(document.getElementById("loginPass")?.value||"").trim();
- const status=document.getElementById("loginStatus");
- if(!local){if(status)status.textContent="Escribe tu usuario.";return}
- if(!pass){if(status)status.textContent="Escribe tu contraseña.";return}
- if(!SUPABASE_CONFIG.url || !SUPABASE_CONFIG.anonKey){
-   if(status)status.textContent="La conexión con Supabase todavía no está configurada.";
-   return;
- }
- if(!window.supabaseClient){
-   if(status)status.textContent="Falta configurar la conexión con Supabase.";
-   return;
- }
- status && (status.textContent="Conectando…");
- window.supabaseClient.auth.signInWithPassword({
-   email: local+"@gmail.com",
-   password: pass
- }).then(({error})=>{
-   if(error){if(status)status.textContent="Correo o contraseña incorrectos.";return}
-   logged=true;
-   closeModal("loginModal");
-   render();
- }).catch(()=>{
-   if(status)status.textContent="No se pudo conectar con Supabase.";
- });
-}
-function logout(){logged=false;render()}
 
-function getPatientsForDate(date){
-  return P.filter(p=>p.s.some(s=>s[0]===date));
-}
+function home(){root.innerHTML='<div class="screen"><div class="center"><div class="logo">🏥</div><h1>HOSPITAL SAN MARTIN DE PANGOA</h1><p>DIAGNÓSTICO POR IMAGEN</p><button class="btn" onclick="openLogin()">Iniciar sesión</button></div></div>'}
 function filteredPatients(date=selectedDate,term=searchTerm){
   const q=term.trim().toLowerCase();
   return getPatientsForDate(date).filter(p=>!q || p.n.toLowerCase().includes(q));
@@ -261,8 +293,8 @@ function searchSuggestions(){
   return `<div class="suggestions">${items.map(p=>`<button onclick="pick(${p.id});clearSearch()"><strong>${p.g==='M'?'👨':'👩'} ${p.n}</strong><span>${p.s.length} estudios · Ver historial</span></button>`).join("") || `<div class="empty">No se encontraron pacientes.</div>`}</div>`;
 }
 
-function hist(){if(!sel||!sel.s||!sel.s.length)return `<div class="muted">No hay estudios registrados para este paciente.</div>`;let last="",o="";sel.s.forEach((x,i)=>{if(x[0]!=last){o+=`<div class="day">${x[0]}</div>`;last=x[0]}o+=`<button class="study" onclick="study(${i})"><div><b>🩻 ${x[1]}</b><br><span>${x[3]} · <span class="ok">Disponible</span></span></div><span>${x[2]} imágenes ›</span></button>`});return o}
-function render(){if(!logged)return 
+function hist(){let last="",o="";sel.s.forEach((x,i)=>{if(x[0]!=last){o+=`<div class="day">${x[0]}</div>`;last=x[0]}o+=`<button class="study" onclick="study(${i})"><div><b>🩻 ${x[1]}</b><br><span>${x[3]} · <span class="ok">Disponible</span></span></div><span>${x[2]} imágenes ›</span></button>`});return o}
+function render(){document.body.classList.toggle("viewer-only",currentRole==="viewer");if(!logged)return 
 document.addEventListener("keydown",e=>{
   if(e.key!=="Escape")return;
   // Close any open modal first.
@@ -281,7 +313,7 @@ document.addEventListener("keydown",e=>{
 home();let x=sel.s[si];root.innerHTML=`<header class="top"><div class="brand"><b>HOSPITAL SAN MARTIN DE PANGOA</b><span>DIAGNÓSTICO POR IMAGEN</span></div><div class="tr"><div class="search-wrap"><input id="topSearch" class="search" value="" oninput="searchTerm=this.value;renderSearch()" placeholder="🔎 Buscar paciente..."><div id="searchResults"></div></div><div class="date-wrap">
 <button class="date-field" id="dateField" onclick="toggleCalendar(event)">📅 <span id="dateLabel">14 AGO 2026</span><span class="date-chevron">▾</span></button>
 <div id="calendarPopup" class="calendar-popup" onclick="event.stopPropagation()"></div>
-</div><div class="user"><button onclick="menu.classList.toggle('show')">👤 Administrador ▾</button><div id="menu" class="menu"><b>Administrador</b><button>⚙️ Mi cuenta</button><button onclick="logout()">🔐 Cerrar sesión</button></div></div></div></header><main class="layout"><aside class="left"><div class="title">PACIENTES DEL DÍA</div><div class="subhead">${selectedDate}</div><div class="muted">${getPatientsForDate(selectedDate).length} pacientes con estudios</div><button class="add admin-action" onclick="openAddPatient()">＋ Agregar paciente</button><div class="patients">${pb()}</div></aside><section class="viewer"><div class="vh"><b>${x[1]}</b><span>${img} / ${x[2]}</span></div><div class="image" id="image"><img class="xray" id="xray" src="assets/demo_rx_${((img-1)%6)+1}.jpg" alt="Imagen médica" style="transform:scale(${scale})"></div><div class="tools"><button class="tool" onclick="tool(0)">−</button><button class="tool" onclick="tool(1)">＋</button><button class="tool">✋</button><button class="tool">↻</button><button class="tool">☀</button><button class="tool">◑</button><button class="tool" onclick="tool(6)">↩</button><button class="tool" onclick="document.getElementById('image').requestFullscreen?.()">⛶</button></div><div class="thumbs"></div></section><aside class="right"><div class="title">PACIENTE SELECCIONADO</div><div class="info"><h2>${sel.g==='M'?'👨':'👩'} ${sel.n}</h2><div class="kv">Estudio actual<br><b style="color:var(--text)">${x[1]}</b><br>📅 ${x[0]}<br>🕐 ${x[3]}<br>🖼️ ${x[2]} imágenes<br><span class="ok">● Disponible</span></div></div><div class="title subhead" style="margin-top:18px">ACCIONES</div><div class="actions"><button class="action admin-action" onclick="openEditPatient()">✏️ Modificar paciente</button>
+</div><div class="user"><button onclick="menu.classList.toggle('show')">👤 ${currentRole==='admin'?'Administrador':'Visualizador'} ▾</button><div id="menu" class="menu"><b>${currentRole==='admin'?'Administrador':'Visualizador'}</b><button>⚙️ Mi cuenta</button><button onclick="logout()">🔐 Cerrar sesión</button></div></div></div></header><main class="layout"><aside class="left"><div class="title">PACIENTES DEL DÍA</div><div class="subhead">${selectedDate}</div><div class="muted">${getPatientsForDate(selectedDate).length} pacientes con estudios</div><button class="add admin-action" onclick="openAddPatient()">＋ Agregar paciente</button><div class="patients">${pb()}</div></aside><section class="viewer"><div class="vh"><b>${x[1]}</b><span>${img} / ${x[2]}</span></div><div class="image" id="image"><div class="xray" id="xray" style="transform:scale(${scale})"></div></div><div class="tools"><button class="tool" onclick="tool(0)">−</button><button class="tool" onclick="tool(1)">＋</button><button class="tool">✋</button><button class="tool">↻</button><button class="tool">☀</button><button class="tool">◑</button><button class="tool" onclick="tool(6)">↩</button><button class="tool" onclick="document.getElementById('image').requestFullscreen?.()">⛶</button></div><div class="thumbs"></div></section><aside class="right"><div class="title">PACIENTE SELECCIONADO</div><div class="info"><h2>${sel.g==='M'?'👨':'👩'} ${sel.n}</h2><div class="kv">Estudio actual<br><b style="color:var(--text)">${x[1]}</b><br>📅 ${x[0]}<br>🕐 ${x[3]}<br>🖼️ ${x[2]} imágenes<br><span class="ok">● Disponible</span></div></div><div class="title subhead" style="margin-top:18px">ACCIONES</div><div class="actions"><button class="action admin-action" onclick="openEditPatient()">✏️ Modificar paciente</button>
 <button class="action admin-action" onclick="openAddImages()">➕ Añadir imágenes</button>
 <button class="action admin-action" onclick="openDeleteImage()">🗑️ Eliminar imagen</button>
 <button class="action danger admin-action" onclick="openDeletePatient()">🔴 ✕ Eliminar paciente</button></div></aside></main><section class="history"><h2>HISTORIAL DEL PACIENTE · ${sel.n}</h2>${hist()}</section><nav class="mobile-nav"><button class="active"><span>🏠</span>Inicio</button><button onclick="openSide()"><span>👥</span>Pacientes</button><button onclick="scrollTo({top:0,behavior:'smooth'})"><span>🩻</span>Visor</button></nav><div id="overlay" class="overlay" onclick="closeSide()"></div><aside id="side" class="side"><div style="display:flex;justify-content:space-between"><b>← PACIENTES</b><button class="close" onclick="closeSide()">×</button></div><input placeholder="🔎 Buscar paciente..."><button class="add admin-action" onclick="openAddPatient()">＋ Agregar paciente</button><div class="patients">${pb()}</div></aside>`;gesture();bindDrop("pDrop","patientFiles");bindDrop("aDrop","addFiles");const ts=document.getElementById("topSearch");if(ts){ts.value=searchTerm;renderSearch();}const dl=document.getElementById("dateLabel");if(dl)dl.textContent=selectedDate;}
@@ -356,7 +388,7 @@ function chooseCalendarDate(y,m,d){
   img=1;scale=1;
   render();
 }
-function pick(id){sel=P.find(p=>p.id==id)||null;const idx=sel.s.findIndex(s=>s[0]===selectedDate);si=idx>=0?idx:0;img=1;scale=1;closeSide();render()}function study(i){si=i;img=1;scale=1;render()}function tool(i){if(i==0)scale=Math.max(.5,scale-.15);if(i==1)scale=Math.min(2.5,scale+.15);if(i==6)scale=1;render()}function openSide(){side.classList.add("open");overlay.classList.add("show")}function closeSide(){document.getElementById("side")?.classList.remove("open");document.getElementById("overlay")?.classList.remove("show")}
+function pick(id){sel=P.find(p=>p.id==id);const idx=sel.s.findIndex(s=>s[0]===selectedDate);si=idx>=0?idx:0;img=1;scale=1;closeSide();render()}function study(i){si=i;img=1;scale=1;render()}function tool(i){if(i==0)scale=Math.max(.5,scale-.15);if(i==1)scale=Math.min(2.5,scale+.15);if(i==6)scale=1;render()}function openSide(){side.classList.add("open");overlay.classList.add("show")}function closeSide(){document.getElementById("side")?.classList.remove("open");document.getElementById("overlay")?.classList.remove("show")}
 const STUDIES=[
 "TÓRAX","COLUMNA CERVICAL","COLUMNA DORSAL","COLUMNA LUMBAR","COLUMNA COMPLETA",
 "PELVIS","CADERA","ABDOMEN","CRÁNEO","SENOS PARANASALES","HOMBRO","CODO","ANTEBRAZO",
@@ -427,12 +459,14 @@ function getStudyValue(id){return (document.getElementById(id+"Search")?.value||
 function openModal(id){document.getElementById(id)?.classList.add("show")}
 function closeModal(id){document.getElementById(id)?.classList.remove("show")}
 function openAddPatient(){
+ if(currentRole!=="admin"){toast("Solo el Administrador puede agregar pacientes.");return}
  document.getElementById("patientModalTitle").textContent="Agregar paciente";
  document.getElementById("pName").value="";document.getElementById("pDni").value="";document.getElementById("pSex").value="";document.getElementById("pBirth").value="";
  document.getElementById("pStudyDate").textContent=selectedDate;patientFiles=[];document.getElementById("patientFiles").innerHTML="";
  fillStudySelect("pStudyType");openModal("patientModal");
 }
 function openEditPatient(){
+ if(currentRole!=="admin"){toast("Solo el Administrador puede modificar pacientes.");return}
  if(!sel){toast("Selecciona un paciente primero.");return}
  document.getElementById("eName").value=sel.n;
  document.getElementById("eDni").value=sel.dni||"";
@@ -441,6 +475,7 @@ function openEditPatient(){
  openModal("editModal");
 }
 function openAddImages(){
+ if(currentRole!=="admin"){toast("Solo el Administrador puede añadir imágenes.");return}
  if(!sel){toast("SELECCIONA UN PACIENTE PRIMERO.");return}
  document.getElementById("aPatient").value=sel.n;
  document.getElementById("aStudyDate").value=selectedDate;
@@ -451,6 +486,7 @@ function openAddImages(){
  openModal("imagesModal");
 }
 function openDeleteImage(){
+ if(currentRole!=="admin"){toast("Solo el Administrador puede eliminar imágenes.");return}
  if(!sel){toast("Selecciona un paciente primero.");return}
  const study=sel.s[si]; if(!study){toast("No hay estudio seleccionado.");return}
  if((study[2]||0)<=0){toast("No hay imágenes para eliminar.");return}
@@ -460,6 +496,7 @@ function openDeleteImage(){
  openModal("confirmModal");
 }
 function openDeletePatient(){
+ if(currentRole!=="admin"){toast("Solo el Administrador puede eliminar pacientes.");return}
  if(!sel){toast("Selecciona un paciente primero.");return}
  document.getElementById("confirmTitle").textContent="Eliminar paciente";
  document.getElementById("confirmText").innerHTML=`¿ELIMINAR AL PACIENTE <b>${sel.n}</b>?<br><br>Se eliminarán sus datos, estudios e imágenes asociadas.`;
@@ -511,6 +548,7 @@ function saveImages(){
 }
 function toast(msg){const t=document.getElementById("toast");if(!t)return;t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2600)}
 function gesture(){let a=document.getElementById("image"),sx=0;a.onpointerdown=e=>{sx=e.clientX;a.setPointerCapture(e.pointerId)};a.onpointerup=e=>{let d=e.clientX-sx;if(Math.abs(d)>70){img=d<0?Math.min(sel.s[si][2],img+1):Math.max(1,img-1);render()}}}initSupabase();
+restoreSession();
 home();
 </script>
 </body></html>
