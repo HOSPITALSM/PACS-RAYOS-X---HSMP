@@ -437,6 +437,27 @@
   .viewer .image{height:clamp(250px,48svh,470px);min-height:250px}
   .history{margin-top:0!important;padding-top:10px!important}
 }
+
+/* V56: compact mobile viewer/history */
+@media(max-width:850px){
+  html,body{overflow-x:hidden;overflow-y:auto;height:auto;min-height:100%}
+  .layout{height:auto;min-height:0;padding-bottom:78px}
+  .viewer{height:auto!important;min-height:0!important}
+  .viewer .image{height:clamp(250px,48svh,470px)!important;min-height:250px!important}
+  .tools{height:44px!important;min-height:44px!important}
+  .thumbs{height:68px!important;min-height:68px!important;padding:8px 10px!important}
+  .history{
+    display:block!important;
+    visibility:visible!important;
+    height:auto!important;
+    max-height:none!important;
+    overflow:visible!important;
+    margin:0!important;
+    padding:10px 12px 88px!important;
+    border-top:1px solid var(--line);
+  }
+  .history h2{margin:0 0 10px!important}
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -566,6 +587,9 @@ PACS.state = {
   dragStartY: 0,
   panStartX: 0,
   panStartY: 0,
+  pinchActive: false,
+  pinchStartDistance: 0,
+  pinchStartScale: 1,
   storageBucket: "IMAGENES"
 };
 
@@ -1214,7 +1238,7 @@ PACS.app = {
   },
   startImageDrag(e){
     const img=e.target.closest?.("#image .xray img");
-    if(!img||!PACS.state.panMode)return;
+    if(!img||!PACS.state.panMode||PACS.state.pinchActive)return;
     e.preventDefault();
     PACS.state.isDraggingImage=true;
     PACS.state.dragStartX=e.clientX; PACS.state.dragStartY=e.clientY;
@@ -1232,6 +1256,52 @@ PACS.app = {
 
   mobileDrawerTouchStart(e){},
   mobileDrawerTouchEnd(e){},
+
+  touchDistance(touches){
+    const a=touches[0], b=touches[1];
+    return Math.hypot(a.clientX-b.clientX, a.clientY-b.clientY);
+  },
+  startPinch(e){
+    if(e.touches?.length!==2)return;
+    const image=e.target.closest?.("#image");
+    if(!image)return;
+    e.preventDefault();
+    PACS.state.pinchActive=true;
+    PACS.state.isDraggingImage=false;
+    PACS.state.pinchStartDistance=this.touchDistance(e.touches);
+    PACS.state.pinchStartScale=PACS.state.scale;
+  },
+  movePinch(e){
+    if(!PACS.state.pinchActive || e.touches?.length!==2)return;
+    e.preventDefault();
+
+    const start=PACS.state.pinchStartDistance||1;
+    const factor=this.touchDistance(e.touches)/start;
+    const old=PACS.state.scale;
+    const next=Math.max(0.25,Math.min(6,PACS.state.pinchStartScale*factor));
+    if(Math.abs(next-old)<0.002)return;
+
+    const centerX=(e.touches[0].clientX+e.touches[1].clientX)/2;
+    const centerY=(e.touches[0].clientY+e.touches[1].clientY)/2;
+    const frame=document.getElementById("image");
+    const rect=frame?.getBoundingClientRect();
+
+    if(rect){
+      const cx=centerX-(rect.left+rect.width/2);
+      const cy=centerY-(rect.top+rect.height/2);
+      const ratio=(next/old)-1;
+      PACS.state.panX-=cx*ratio;
+      PACS.state.panY-=cy*ratio;
+    }
+
+    PACS.state.scale=next;
+    this.applyViewerTransform();
+  },
+  endPinch(e){
+    if(!e.touches || e.touches.length<2){
+      PACS.state.pinchActive=false;
+    }
+  },
   bindGlobalEvents(){
     if(this._eventsBound)return;
     this._eventsBound=true;
@@ -1254,6 +1324,10 @@ PACS.app = {
     document.addEventListener("pointermove",e=>this.moveImageDrag(e));
     document.addEventListener("pointerup",()=>this.endImageDrag());
     document.addEventListener("pointercancel",()=>this.endImageDrag());
+    document.addEventListener("touchstart",e=>this.startPinch(e),{passive:false});
+    document.addEventListener("touchmove",e=>this.movePinch(e),{passive:false});
+    document.addEventListener("touchend",e=>this.endPinch(e),{passive:false});
+    document.addEventListener("touchcancel",e=>this.endPinch(e),{passive:false});
     document.addEventListener("touchstart",e=>this.mobileDrawerTouchStart(e),{passive:true});
     document.addEventListener("touchend",e=>this.mobileDrawerTouchEnd(e),{passive:true});
 
