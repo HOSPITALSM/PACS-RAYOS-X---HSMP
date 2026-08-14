@@ -1183,6 +1183,7 @@ PACS.patients = {
       PACS.ui.toast(files.length
         ?`Paciente e ${files.length} imagen(es) guardados.`
         :"Paciente agregado correctamente.");
+      return pLocal;
     }catch(err){
       const studyRow=PACS.data.currentStudy();
       if(studyRow) studyRow.images=[];
@@ -1986,7 +1987,36 @@ const calDate=e.target.closest?.("[data-calendar-date]")?.dataset?.calendarDate;
     if(btn) btn.disabled=true;
 
     try{
-      await PACS.patients.add({name,study,date:PACS.state.selectedDate,files,sex});
+      const created=await PACS.patients.add({
+        name,
+        study,
+        date:PACS.state.selectedDate,
+        files,
+        sex
+      });
+
+      // Refresco inmediato: el paciente ya existe en Supabase, por lo que
+      // reconstruimos la lista sin exigir F5. Si la lectura remota falla,
+      // conservamos el paciente optimista que ya mostramos.
+      try{
+        const beforeId=created?.id;
+        await PACS.data.loadStudies();
+        const refreshed=PACS.data.findPatient(beforeId)
+          ||PACS.data.patientsForDate(PACS.state.selectedDate)
+              .find(p=>p.name===name);
+
+        if(refreshed){
+          PACS.state.selectedPatient=refreshed;
+          const idx=refreshed.studies.findIndex(s=>s.date===PACS.state.selectedDate);
+          PACS.state.selectedStudyIndex=idx>=0?idx:0;
+          PACS.state.selectedImage=PACS.data.studyCount(PACS.data.currentStudy())>0?1:0;
+        }
+      }catch(refreshErr){
+        console.warn("PACS: refresco después de agregar no disponible; se conserva la actualización local.",refreshErr);
+        PACS.state.selectedPatient=created||PACS.state.selectedPatient;
+      }
+
+      PACS.app.render();
       PACS.ui.closeModal("patientModal");
     }catch(err){
       console.error("PACS: error al agregar paciente:",err);
