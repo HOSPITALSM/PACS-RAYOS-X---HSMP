@@ -458,6 +458,76 @@
   }
   .history h2{margin:0 0 10px!important}
 }
+
+/* V57 — mobile: no intermediate gap between thumbnails and patient history */
+@media(max-width:850px){
+  html,body{
+    height:auto !important;
+    min-height:100% !important;
+    overflow-x:hidden !important;
+    overflow-y:auto !important;
+  }
+
+  .layout{
+    display:block !important;
+    height:auto !important;
+    min-height:0 !important;
+    padding:0 0 78px !important;
+  }
+
+  .viewer{
+    display:block !important;
+    height:auto !important;
+    min-height:0 !important;
+    overflow:visible !important;
+  }
+
+  .viewer .vh{
+    height:44px !important;
+    min-height:44px !important;
+  }
+
+  .viewer .image{
+    display:grid !important;
+    height:clamp(250px,48svh,470px) !important;
+    min-height:250px !important;
+    flex:none !important;
+  }
+
+  .viewer .tools{
+    display:flex !important;
+    height:44px !important;
+    min-height:44px !important;
+    flex:none !important;
+  }
+
+  .viewer .thumbs{
+    display:flex !important;
+    height:68px !important;
+    min-height:68px !important;
+    flex:none !important;
+    margin:0 !important;
+    border-bottom:0 !important;
+  }
+
+  .history{
+    display:block !important;
+    visibility:visible !important;
+    position:relative !important;
+    height:auto !important;
+    min-height:0 !important;
+    max-height:none !important;
+    overflow:visible !important;
+    margin:0 !important;
+    padding:0 12px 88px !important;
+    border-top:1px solid var(--line) !important;
+  }
+
+  .history h2{
+    margin:0 !important;
+    padding:10px 0 !important;
+  }
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
