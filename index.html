@@ -1399,11 +1399,27 @@ PACS.app = {
       }
       // Signed URLs are temporary. Refresh only the study currently being viewed.
       if(!PACS.state._imageRefreshTimer){
-        PACS.state._imageRefreshTimer=setInterval(()=>{
+        const refreshCurrentImages=()=>{
           if(!PACS.state.logged)return;
           const study=PACS.data.currentStudy();
-          PACS.data.hydrateImages(study).then(()=>PACS.app.render()).catch(err=>console.error("Automatic image refresh:",err));
-        },45*60*1000);
+          if(!study?.images?.length)return;
+          PACS.data.hydrateImages(study)
+            .then(()=>PACS.app.render())
+            .catch(err=>console.error("Automatic image refresh:",err));
+        };
+
+        // Renueva las URLs antes de que caduquen (1 hora) mientras la página
+        // permanece abierta.
+        PACS.state._imageRefreshTimer=setInterval(refreshCurrentImages,45*60*1000);
+
+        // Si el navegador suspende la pestaña/móvil y vuelve después de horas o días,
+        // renovar inmediatamente al regresar, sin F5.
+        if(!PACS.state._imageVisibilityHandler){
+          PACS.state._imageVisibilityHandler=()=>{
+            if(document.visibilityState==="visible") refreshCurrentImages();
+          };
+          document.addEventListener("visibilitychange",PACS.state._imageVisibilityHandler);
+        }
       }
     }catch(err){
       console.error("PACS startup:",err);
