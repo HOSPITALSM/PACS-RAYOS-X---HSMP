@@ -400,6 +400,31 @@
     overflow:visible !important;
   }
 }
+
+@media(max-width:850px){
+  html,body{overflow-x:hidden;overflow-y:auto;height:auto;min-height:100%}
+  .layout{height:auto;min-height:0;padding-bottom:78px}
+  .viewer{height:auto;min-height:0}
+  .viewer .image{height:clamp(280px,54svh,520px);min-height:280px}
+  .tools{height:44px;min-height:44px}
+  .thumbs{height:70px;min-height:70px;padding:9px 10px;overflow-x:auto;overflow-y:hidden}
+  .history{
+    display:block !important;
+    visibility:visible !important;
+    height:auto !important;
+    max-height:none !important;
+    overflow:visible !important;
+    margin:0 !important;
+    padding:14px 12px 88px !important;
+    border-top:1px solid var(--line);
+    background:var(--bg);
+  }
+  .history h2{margin:0 0 12px;font-size:15px;line-height:1.35}
+  .history .day{margin:12px 0 7px}
+  .history .study{margin-bottom:7px;padding:11px;min-height:58px}
+  #side{touch-action:pan-y;overflow-y:auto !important;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  #side .patient{touch-action:pan-y}
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -1090,7 +1115,6 @@ PACS.app = {
         PACS.patients.select(decodeURIComponent(btn.dataset.patient));
       };
       btn.addEventListener("click",choose);
-      btn.addEventListener("touchend",choose,{passive:false});
     });
     const close=document.querySelector('#side [data-action="side-close"]');
     if(side && !side.dataset.mobileBound){
