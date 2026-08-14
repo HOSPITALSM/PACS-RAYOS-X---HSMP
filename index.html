@@ -686,6 +686,10 @@
     height:40px;
   }
 }
+@media(max-width:850px){
+  #patientModal{z-index:2000!important}
+  #patientModal.show{z-index:2000!important}
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -1784,7 +1788,14 @@ const calDate=e.target.closest?.("[data-calendar-date]")?.dataset?.calendarDate;
       document.getElementById("mobileMoreMenu")?.classList.remove("show");
     }
     if(action==="fullscreen"){document.getElementById("image")?.requestFullscreen?.();return;}
-    if(action==="add-patient")return this.openAddPatient();
+    if(action==="add-patient"){
+      // En móvil, cerrar primero el panel lateral de Pacientes para que
+      // la ventana "Agregar paciente" quede completamente visible.
+      if(window.matchMedia?.("(max-width: 850px)").matches){
+        this.closeSide();
+      }
+      return this.openAddPatient();
+    }
     if(action==="edit-patient"){document.getElementById("mobileMoreMenu")?.classList.remove("show");return this.openEditPatient();}
     if(action==="add-images"){document.getElementById("mobileMoreMenu")?.classList.remove("show");return this.openAddImages();}
     if(action==="delete-image"){document.getElementById("mobileMoreMenu")?.classList.remove("show");return this.openDeleteImage();}
