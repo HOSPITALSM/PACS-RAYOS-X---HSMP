@@ -586,6 +586,28 @@ async function chooseCalendarDate(y,m,d){
   sel=available[0]||null;
   si=0;img=1;scale=1;render();
 }
+function fillStudySelect(id,selected=""){
+  const wrap=document.getElementById(id);
+  if(!wrap)return;
+  const value=(selected||"").toUpperCase();
+  wrap.innerHTML=`<div class="study-search-wrap" title="Seleccionar estructura / estudio">
+    <button type="button" class="study-search study-picker-btn" id="${id}Picker">
+      <span id="${id}Label">${value||"SELECCIONA ESTRUCTURA / ESTUDIO"}</span>
+      <span class="study-picker-arrow">▾</span>
+    </button>
+    <div class="study-options" id="${id}Options"></div>
+  </div>
+  <div class="study-selected" id="${id}Selected">${value?"ESTRUCTURA SELECCIONADA: "+value:"SELECCIONAR ESTRUCTURA / ESTUDIO"}</div>`;
+  const picker=document.getElementById(id+"Picker");
+  picker?.addEventListener("click",e=>{
+    e.preventDefault();
+    e.stopPropagation();
+    const opts=document.getElementById(id+"Options");
+    renderStudyOptions(id,"");
+    opts?.classList.toggle("show");
+  });
+  renderStudyOptions(id,"");
+}
 function renderStudyOptions(id,term=""){
   const opts=document.getElementById(id+"Options"); if(!opts)return;
   const q=(term||"").toUpperCase().trim();
@@ -617,9 +639,8 @@ function openAddPatient(){
   document.getElementById("pStudyDate").textContent=selectedDate;
   patientFiles=[];
   const fl=document.getElementById("patientFiles"); if(fl)fl.innerHTML="";
-  fillStudySelect("pStudyType");
-  showStudies("pStudyType");
   openModal("patientModal");
+  try{fillStudySelect("pStudyType");showStudies("pStudyType");}catch(err){console.error(err);toast("No se pudo cargar la lista de estructuras.");}
 }
 function openEditPatient(){
   if(currentRole!=="admin"){toast("Solo el Administrador puede modificar pacientes.");return;}
@@ -636,11 +657,10 @@ function openAddImages(){
   document.getElementById("aPatient").value=sel.n||"";
   document.getElementById("aStudyDate").value=selectedDate;
   const currentStudy=sel?.s?.[si]?.[1]||"";
-  fillStudySelect("aStudyType",currentStudy);
-  showStudies("aStudyType");
   addFiles=[];
   const fl=document.getElementById("addFiles"); if(fl)fl.innerHTML="";
   openModal("imagesModal");
+  try{fillStudySelect("aStudyType",currentStudy);showStudies("aStudyType");}catch(err){console.error(err);toast("No se pudo cargar la lista de estructuras.");}
 }
 function openDeleteImage(){
   if(currentRole!=="admin"){toast("Solo el Administrador puede eliminar imágenes.");return;}
