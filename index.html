@@ -690,6 +690,9 @@
   #patientModal{z-index:2000!important}
   #patientModal.show{z-index:2000!important}
 }
+@media(max-width:850px){
+  .side{touch-action:pan-y}
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -1657,8 +1660,37 @@ PACS.app = {
   },
   endImageDrag(){PACS.state.isDraggingImage=false;},
 
-  mobileDrawerTouchStart(e){},
-  mobileDrawerTouchEnd(e){},
+  mobileDrawerTouchStart(e){
+    if(!window.matchMedia?.("(max-width: 850px)").matches)return;
+    const side=document.getElementById("side");
+    if(!side?.classList.contains("open"))return;
+    const t=e.touches?.[0];
+    if(!t || !side.contains(e.target))return;
+
+    PACS.state._drawerSwipe={
+      startX:t.clientX,
+      startY:t.clientY,
+      active:true
+    };
+  },
+  mobileDrawerTouchEnd(e){
+    const swipe=PACS.state._drawerSwipe;
+    PACS.state._drawerSwipe=null;
+    if(!swipe?.active)return;
+    if(!window.matchMedia?.("(max-width: 850px)").matches)return;
+
+    const t=e.changedTouches?.[0];
+    if(!t)return;
+
+    const dx=t.clientX-swipe.startX;
+    const dy=t.clientY-swipe.startY;
+
+    // Solo cerrar con un gesto claramente horizontal hacia la izquierda.
+    // Un movimiento vertical normal dentro de la lista no cierra el panel.
+    if(dx < -60 && Math.abs(dx) > Math.abs(dy)*1.2){
+      this.closeSide();
+    }
+  },
 
   touchDistance(touches){
     const a=touches[0], b=touches[1];
