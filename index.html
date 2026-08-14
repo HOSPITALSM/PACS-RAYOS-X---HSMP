@@ -269,52 +269,82 @@
 .calendar-popup .cal-day,.calendar-popup .cal-nav{pointer-events:auto;cursor:pointer}
 .calendar-popup .cal-day:not(.muted-day){appearance:none;-webkit-appearance:none}
 
-/* V49 Mobile Optimizada — only mobile behavior is changed */
+/* V50-MOBILE-DATE — mobile-only layout */
 @media(max-width:850px){
-  html,body{width:100%;height:100%;min-height:100%;overflow:hidden}
-  body{font-size:15px;overscroll-behavior:none}
-  .app-loading{display:none !important;pointer-events:none !important}
-
-  /* Fixed app shell */
-  .top{height:58px;min-height:58px;position:fixed;top:0;left:0;right:0;z-index:55;padding:0 12px;box-shadow:0 6px 18px #0006}
-  .brand{min-width:0;max-width:74%;overflow:hidden}
-  .brand b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .brand span{font-size:10px;white-space:nowrap}
-  .layout{display:block;height:calc(100svh - 58px);min-height:0;padding:58px 0 64px}
-  .viewer{height:calc(100svh - 58px);min-height:0}
-  .viewer .vh{height:46px;min-height:46px;padding:0 12px}
-  .viewer .vh b{font-size:13px;max-width:72%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .viewer .image{height:calc(100svh - 58px - 46px - 44px - 64px);min-height:0}
-  .tools{height:44px;min-height:44px;padding:4px 7px;justify-content:flex-start;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
-  .tools::-webkit-scrollbar{display:none}
-  .thumbs{height:64px;min-height:64px;padding:8px 10px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
-  .thumbs::-webkit-scrollbar{display:none}
-  .thumb{min-width:62px;max-width:78px;height:46px}
-
-  /* Bottom app navigation */
-  .mobile-nav{display:grid;position:fixed;left:0;right:0;bottom:0;height:64px;z-index:90;grid-template-columns:repeat(3,1fr);background:#09151a;border-top:1px solid var(--line);box-shadow:0 -8px 24px #0007;padding-bottom:env(safe-area-inset-bottom)}
-  .mobile-nav button{background:none;border:0;color:var(--muted);font-size:11px;font-weight:700;padding:6px 0 4px}
-  .mobile-nav button.active{color:var(--cyan)}
-  .mobile-nav span{display:block;font-size:19px;line-height:20px;margin-bottom:3px}
-
-  /* Patient drawer */
-  .side{display:block;position:fixed;z-index:120;left:0;top:0;bottom:0;width:min(92vw,380px);padding:14px 14px 84px;background:var(--panel);border-right:1px solid var(--line);transform:translateX(-105%);transition:transform .22s ease;overflow-y:auto;box-shadow:18px 0 50px #0008}
-  .side.open{transform:translateX(0)}
-  .side input{width:100%;height:44px;padding:10px 11px;margin:10px 0}
-  .side .patients{display:flex;flex-direction:column;gap:7px;overflow:visible}
-  .side .patient{padding:12px 10px}
-  .mobile-actions{display:flex;flex-direction:column;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
-  .mobile-actions .action,.mobile-actions .add{width:100%}
-  .overlay.show{display:block;position:fixed;inset:0;background:#0008;z-index:110}
-
-  /* Full-screen date popup on small phones */
-  .calendar-popup{position:fixed;top:66px;left:50%;right:auto;width:min(315px,92vw);transform:translateX(-50%);z-index:200}
-
-  /* Modals as mobile sheets */
-  .modal-bg{place-items:end center;padding:0}
-  .modal{width:100%;max-width:none;max-height:92svh;overflow:auto;border-radius:18px 18px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom))}
-  .form-grid{grid-template-columns:1fr}
-  .modal .btn{min-height:46px}
+  html,body{width:100%;height:auto;min-height:100%;overflow-x:hidden;overflow-y:auto}
+  .top{
+    position:relative !important;
+    top:auto;left:auto;right:auto;
+    height:auto;min-height:0;
+    padding:10px 12px 8px;
+    display:block;
+    box-shadow:none;
+    z-index:10;
+  }
+  .brand{min-width:0;max-width:100%;display:block;text-align:center}
+  .brand b{font-size:14px;line-height:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .brand span{font-size:10px;line-height:14px}
+  .tr{
+    display:flex;
+    width:100%;
+    margin:8px 0 0;
+    justify-content:center;
+    align-items:center;
+    gap:8px;
+  }
+  .tr .search-wrap{display:none}
+  .tr .date-wrap{display:block}
+  .tr .date-field{
+    min-width:0;
+    width:auto;
+    padding:9px 14px;
+    border-radius:10px;
+    font-size:14px;
+    justify-content:center;
+  }
+  .tr .user{margin-left:auto}
+  .tr .user>button{
+    padding:9px 10px;
+    font-size:0;
+  }
+  .tr .user>button::before{content:"👤";font-size:19px}
+  .layout{
+    display:block;
+    min-height:auto;
+    height:auto;
+    padding:0 0 76px;
+  }
+  .viewer{
+    min-height:0;
+    height:auto;
+  }
+  .viewer .vh{
+    height:44px;min-height:44px;
+    padding:0 12px;
+  }
+  .viewer .image{
+    height:calc(100svh - 44px - 44px - 64px - 140px);
+    min-height:280px;
+  }
+  .mobile-nav{
+    position:fixed;
+    left:0;right:0;bottom:0;
+    height:64px;
+    z-index:90;
+  }
+  .side{
+    width:82vw;
+    max-width:340px;
+  }
+  .calendar-popup{
+    position:fixed;
+    top:105px;
+    left:50%;
+    right:auto;
+    transform:translateX(-50%);
+    width:min(320px,92vw);
+    z-index:200;
+  }
 }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -323,7 +353,7 @@
 
 <div id="appLoading" class="app-loading">Cargando PACS…</div>
 
-<div id="root"><div class="screen"><div class="center"><div class="logo">🏥</div><h1>HOSPITAL SAN MARTIN DE PANGOA</h1><p>DIAGNÓSTICO POR IMAGEN</p><button class="btn" data-action="login-open">Iniciar sesión</button></div></div></div>
+<div id="root"></div>
 
 <div id="patientModal" class="modal-bg"><div class="modal">
 <div class="mh"><b id="patientModalTitle">AGREGAR PACIENTE</b><button class="close" data-action="close-patient-modal">×</button></div>
@@ -445,9 +475,6 @@ PACS.state = {
   dragStartY: 0,
   panStartX: 0,
   panStartY: 0,
-  pinchActive: false,
-  pinchStartDistance: 0,
-  pinchStartScale: 1,
   storageBucket: "IMAGENES"
 };
 
@@ -692,11 +719,6 @@ PACS.patients = {
     PACS.state.selectedImage=PACS.data.studyCount(PACS.data.currentStudy())>0?1:0;
     PACS.app.resetViewer();
     PACS.app.render();
-    if(window.matchMedia?.("(max-width: 850px)").matches){
-      this.closeSide();
-      document.querySelectorAll(".mobile-nav button").forEach(b=>b.classList.remove("active"));
-      document.querySelector('.mobile-nav button[data-mobile="viewer"]')?.classList.add("active");
-    }
   },
   async add({name,study,date,files=[]}){
     const {data,error}=await PACS.state.client.from("studies").insert({patient:name,date:PACS.data.dateISO(date),study,structure:study,modality:(["TC","RM","MAMOGRAFÍA","ECOGRAFÍA"].includes(study)?study:"RX"),images:[]}).select("*").single();
@@ -786,6 +808,7 @@ PACS.studies = {
     if(!label)return;
     PACS.state.selectedDate=label;
     document.getElementById("calendarPopup")?.classList.remove("show");
+    PACS.ui.toast(`Fecha seleccionada: ${label}`);
 
     const available=PACS.data.patientsForDate(label);
     const currentId=PACS.state.selectedPatient?.id;
@@ -1062,7 +1085,7 @@ PACS.app = {
   },
   startImageDrag(e){
     const img=e.target.closest?.("#image .xray img");
-    if(!img||!PACS.state.panMode||PACS.state.pinchActive)return;
+    if(!img||!PACS.state.panMode)return;
     e.preventDefault();
     PACS.state.isDraggingImage=true;
     PACS.state.dragStartX=e.clientX; PACS.state.dragStartY=e.clientY;
@@ -1077,32 +1100,6 @@ PACS.app = {
     this.applyViewerTransform();
   },
   endImageDrag(){PACS.state.isDraggingImage=false;},
-
-  touchDistance(touches){
-    const a=touches[0],b=touches[1];
-    return Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);
-  },
-  startPinch(e){
-    if(e.touches?.length!==2)return;
-    e.preventDefault();
-    PACS.state.pinchActive=true;
-    PACS.state.isDraggingImage=false;
-    PACS.state.pinchStartDistance=this.touchDistance(e.touches);
-    PACS.state.pinchStartScale=PACS.state.scale;
-  },
-  movePinch(e){
-    if(!PACS.state.pinchActive || e.touches?.length<2)return;
-    e.preventDefault();
-    const dist=this.touchDistance(e.touches);
-    const base=PACS.state.pinchStartDistance||dist;
-    const factor=dist/base;
-    const centerX=(e.touches[0].clientX+e.touches[1].clientX)/2;
-    const centerY=(e.touches[0].clientY+e.touches[1].clientY)/2;
-    this.viewerZoom(PACS.state.pinchStartScale?factor:1,centerX,centerY);
-  },
-  endPinch(e){
-    if(e.touches?.length<2)PACS.state.pinchActive=false;
-  },
   bindGlobalEvents(){
     if(this._eventsBound)return;
     this._eventsBound=true;
@@ -1125,12 +1122,6 @@ PACS.app = {
     document.addEventListener("pointermove",e=>this.moveImageDrag(e));
     document.addEventListener("pointerup",()=>this.endImageDrag());
     document.addEventListener("pointercancel",()=>this.endImageDrag());
-
-    // Mobile pinch-to-zoom. One-finger pointer drag remains unchanged.
-    document.addEventListener("touchstart",e=>this.startPinch(e),{passive:false});
-    document.addEventListener("touchmove",e=>this.movePinch(e),{passive:false});
-    document.addEventListener("touchend",e=>this.endPinch(e),{passive:false});
-    document.addEventListener("touchcancel",e=>this.endPinch(e),{passive:false});
 
   },
   async onClick(e){
@@ -1399,19 +1390,16 @@ const calDate=e.target.closest?.("[data-calendar-date]")?.dataset?.calendarDate;
   mobileNavigate(which){
     document.querySelectorAll(".mobile-nav button").forEach(b=>b.classList.remove("active"));
     document.querySelector(`.mobile-nav button[data-mobile="${which}"]`)?.classList.add("active");
-
     if(which==="patients"){
       document.getElementById("side")?.classList.add("open");
       document.getElementById("overlay")?.classList.add("show");
       return;
     }
-
     this.closeSide();
     if(which==="viewer"){
       document.getElementById("image")?.scrollIntoView({behavior:"smooth",block:"start"});
       return;
     }
-
     window.scrollTo({top:0,behavior:"smooth"});
   },
   closeSide(){document.getElementById("side")?.classList.remove("open");document.getElementById("overlay")?.classList.remove("show");},
