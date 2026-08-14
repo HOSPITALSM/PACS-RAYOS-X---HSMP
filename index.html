@@ -118,6 +118,16 @@
 .study-options{max-height:260px;overflow-y:auto;z-index:1000}
 #patientModal .study-search-wrap,#imagesModal .study-search-wrap{z-index:1001}
 #patientModal .study-options,#imagesModal .study-options{z-index:1100}
+
+.mobile-actions{display:flex;flex-direction:column;gap:7px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+@media(max-width:850px){
+  .mobile-actions .admin-action{display:block}
+}
+
+@media(max-width:850px){
+  .mobile-actions{display:flex;flex-direction:column;gap:7px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+  .mobile-actions .action{display:block}
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
 document.addEventListener("keydown",e=>{
@@ -398,8 +408,84 @@ function mapStudiesRows(rows){
   });
 }
 
+
+const STORAGE_BUCKET = "IMAGENES";
+
+function studyRowToLocal(row){
+  const date=normalizeStudyDate(row.date);
+  const structure=String(row.structure||row.study||row.modality||"ESTUDIO").trim().toUpperCase();
+  const count=parseStudyImagesCount(row.images);
+  return [date,structure,count,row.created_at?new Date(row.created_at).toLocaleTimeString("es-PE",{hour:"2-digit",minute:"2-digit"}):"",row.id,row.images||[]];
+}
+
+function upsertLocalStudy(row){
+  const patient=String(row.patient||"").trim().toUpperCase();
+  if(!patient)return;
+  const id=`patient-${encodeURIComponent(patient)}`;
+  let p=P.find(x=>x.id===id);
+  if(!p){
+    p={id,n:patient,g:row.sex||row.gender||"U",s:[]};
+    P.push(p);
+  }
+  const local=studyRowToLocal(row);
+  const idx=p.s.findIndex(s=>String(s[4])===String(row.id));
+  if(idx>=0)p.s[idx]=local;else p.s.push(local);
+  p.s.sort((a,b)=>String(b[0]).localeCompare(String(a[0]))||String(b[3]).localeCompare(String(a[3])));
+  return p;
+}
+
+function removeLocalPatient(patientName){
+  const name=String(patientName||"").trim().toUpperCase();
+  P=P.filter(p=>p.n!==name);
+  if(sel?.n===name)sel=null;
+}
+
+function getStudyImageObjects(study){
+  const raw=study?.[5];
+  if(Array.isArray(raw)) return raw;
+  if(raw && typeof raw==="object" && Array.isArray(raw.images)) return raw.images;
+  return [];
+}
+
+function storageObjectPath(studyImage){
+  if(typeof studyImage==="string") return studyImage;
+  return studyImage?.path || studyImage?.storagePath || "";
+}
+
+function renderCurrentThumbs(){
+  const strip=document.querySelector(".thumbs");
+  if(!strip)return;
+  const study=sel?.s?.[si];
+  const items=getStudyImageObjects(study);
+  if(!items.length){
+    strip.innerHTML="";
+    return;
+  }
+  strip.innerHTML=items.map((it,i)=>{
+    const path=storageObjectPath(it);
+    const url=it?.url||it?.publicUrl||"";
+    const label=it?.name||`Imagen ${i+1}`;
+    return `<button class="thumb ${img===i+1?"active":""}" type="button" title="${String(label).replace(/"/g,"&quot;")}" onclick="selectStudyImage(${i+1})">
+      ${url?`<img src="${url}" alt="${String(label).replace(/"/g,"&quot;")}">`:""}
+      <span>${i+1}</span>
+    </button>`;
+  }).join("");
+}
+
+function selectStudyImage(n){
+  img=Math.max(1,Number(n)||1);
+  render();
+}
+
+function refreshUiInstant(){
+  render();
+}
+
 async function loadStudiesFromSupabase(){
   if(!supabaseClient) return;
+  const previousName=sel?.n||null;
+  const previousStudyId=sel?.s?.[si]?.[4]||null;
+
   const {data,error}=await supabaseClient
     .from("studies")
     .select("*")
@@ -411,19 +497,20 @@ async function loadStudiesFromSupabase(){
     throw error;
   }
 
-  P = mapStudiesRows(data || []);
+  P=mapStudiesRows(data||[]);
 
-  if(P.length){
-    const available=getPatientsForDate(selectedDate);
-    sel = available[0] || P[0];
-    const idx=sel?.s?.findIndex(s=>s[0]===selectedDate) ?? -1;
-    si=idx>=0?idx:0;
-    img=1;
+  let next=previousName?P.find(p=>p.n===previousName):null;
+  if(next&&previousStudyId){
+    const wanted=next.s.findIndex(s=>String(s[4])===String(previousStudyId));
+    if(wanted>=0) si=wanted; else si=0;
   }else{
-    sel=null;
-    si=0;
-    img=1;
+    const available=getPatientsForDate(selectedDate);
+    next=available[0]||P[0]||null;
+    si=next?Math.max(0,next.s.findIndex(s=>s[0]===selectedDate)):0;
   }
+
+  sel=next||null;
+  img=1;
 }
 
 async function restoreSession(){
@@ -506,19 +593,19 @@ function hist(){
 }
 
 function render(){
-  if (!logged) { home(); return; }
+  if(!logged){home();return;}
   setViewerClass();
 
-  const x = sel?.s?.[si] || ["", "", 0, ""];
-  const patientName = sel?.n || "SIN PACIENTE SELECCIONADO";
-  const roleLabel = currentRole === "admin" ? "Administrador" : "Visualizador";
+  const x=sel?.s?.[si]||["","","0","",null,[]];
+  const patientName=sel?.n||"SIN PACIENTE SELECCIONADO";
+  const roleLabel=currentRole==="admin"?"Administrador":"Visualizador";
 
-  root.innerHTML = `<header class="top">
+  root.innerHTML=`<header class="top">
     <div class="brand"><b>HOSPITAL SAN MARTIN DE PANGOA</b><span>DIAGNÓSTICO POR IMAGEN</span></div>
     <div class="tr">
       <div class="search-wrap"><input id="topSearch" class="search" value="" oninput="searchTerm=this.value;renderSearch()" placeholder="🔎 Buscar paciente..."><div id="searchResults"></div></div>
       <div class="date-wrap"><button class="date-field" id="dateField" onclick="toggleCalendar(event)">📅 <span id="dateLabel">${selectedDate}</span><span class="date-chevron">▾</span></button><div id="calendarPopup" class="calendar-popup" onclick="event.stopPropagation()"></div></div>
-      <div class="user"><button id="userButton" onclick="menu.classList.toggle('show')">👤 ${roleLabel} ▾</button>
+      <div class="user"><button id="userButton" onclick="document.getElementById('menu')?.classList.toggle('show')">👤 ${roleLabel} ▾</button>
         <div id="menu" class="menu"><b>${roleLabel}</b><button onclick="logout()">🔐 Cerrar sesión</button></div>
       </div>
     </div>
@@ -526,23 +613,29 @@ function render(){
 
   <main class="layout">
     <aside class="left">
-      <div class="title">PACIENTES DEL DÍA</div><div class="subhead">${selectedDate}</div>
+      <div class="title">PACIENTES DEL DÍA</div>
+      <div class="subhead">${selectedDate}</div>
       <div class="muted">${getPatientsForDate(selectedDate).length} pacientes con estudios</div>
       <button type="button" class="add admin-action" data-action="add-patient">＋ Agregar paciente</button>
       <div class="patients">${pb()}</div>
     </aside>
 
     <section class="viewer">
-      <div class="vh"><b>${x[1] || "VISOR DE IMÁGENES"}</b><span>${x[2] ? img + " / " + x[2] : ""}</span></div>
+      <div class="vh"><b>${x[1]||"VISOR DE IMÁGENES"}</b><span>${x[2]?img+" / "+x[2]:""}</span></div>
       <div class="image" id="image"><div class="xray" id="xray" style="transform:scale(${scale})"></div></div>
-      <div class="tools"><button class="tool" onclick="tool(0)">−</button><button class="tool" onclick="tool(1)">＋</button><button class="tool">✋</button><button class="tool">↻</button><button class="tool">☀</button><button class="tool">◑</button><button class="tool" onclick="tool(6)">↩</button><button class="tool" onclick="document.getElementById('image').requestFullscreen?.()">⛶</button></div>
+      <div class="tools">
+        <button class="tool" onclick="tool(0)">−</button><button class="tool" onclick="tool(1)">＋</button>
+        <button class="tool" onclick="tool(2)">✋</button><button class="tool" onclick="tool(3)">↻</button>
+        <button class="tool" onclick="tool(4)">☀</button><button class="tool" onclick="tool(5)">◑</button>
+        <button class="tool" onclick="tool(6)">↩</button><button class="tool" onclick="document.getElementById('image').requestFullscreen?.()">⛶</button>
+      </div>
       <div class="thumbs"></div>
     </section>
 
     <aside class="right">
       <div class="title">PACIENTE SELECCIONADO</div>
-      <div class="info"><h2>${sel ? (sel.g === 'M' ? '👨' : sel.g === 'F' ? '👩' : '👤') + ' ' + sel.n : patientName}</h2>
-      <div class="kv">Estudio actual<br><b style="color:var(--text)">${x[1] || "—"}</b><br>📅 ${x[0] || "—"}<br>🕐 ${x[3] || "—"}<br>🖼️ ${x[2] || 0} imágenes<br><span class="ok">● Disponible</span></div></div>
+      <div class="info"><h2>${sel?(sel.g==="M"?"👨":sel.g==="F"?"👩":"👤")+" "+sel.n:patientName}</h2>
+      <div class="kv">Estudio actual<br><b style="color:var(--text)">${x[1]||"—"}</b><br>📅 ${x[0]||"—"}<br>🕐 ${x[3]||"—"}<br>🖼️ ${x[2]||0} imágenes<br><span class="ok">● Disponible</span></div></div>
       <div class="title subhead" style="margin-top:18px">ACCIONES</div>
       <div class="actions">
         <button class="action admin-action" data-action="edit-patient">✏️ Modificar paciente</button>
@@ -554,15 +647,44 @@ function render(){
   </main>
 
   <section class="history"><h2>HISTORIAL DEL PACIENTE · ${patientName}</h2>${hist()}</section>
-  <nav class="mobile-nav"><button class="active"><span>🏠</span>Inicio</button><button onclick="openSide()"><span>👥</span>Pacientes</button><button onclick="scrollTo({top:0,behavior:'smooth'})"><span>🩻</span>Visor</button></nav>
+
+  <nav class="mobile-nav">
+    <button type="button" data-mobile="home" class="active"><span>🏠</span>Inicio</button>
+    <button type="button" data-mobile="patients"><span>👥</span>Pacientes</button>
+    <button type="button" data-mobile="viewer"><span>🩻</span>Visor</button>
+  </nav>
+
   <div id="overlay" class="overlay" onclick="closeSide()"></div>
-  <aside id="side" class="side"><div style="display:flex;justify-content:space-between"><b>← PACIENTES</b><button class="close" onclick="closeSide()">×</button></div>
-    <input placeholder="🔎 Buscar paciente..."><button type="button" class="add admin-action" data-action="add-patient">＋ Agregar paciente</button><div class="patients">${pb()}</div>
+  <aside id="side" class="side">
+    <div style="display:flex;justify-content:space-between"><b>← PACIENTES</b><button class="close" onclick="closeSide()">×</button></div>
+    <input id="mobileSearch" placeholder="🔎 Buscar paciente..." oninput="searchTerm=this.value;renderSearchMobile()">
+    <button type="button" class="add admin-action" data-action="add-patient">＋ Agregar paciente</button>
+    <div id="mobilePatients" class="patients">${pb()}</div>
+    <div class="mobile-actions">
+      <button type="button" class="action admin-action" data-action="edit-patient">✏️ Modificar paciente</button>
+      <button type="button" class="action admin-action" data-action="add-images">➕ Añadir imágenes</button>
+      <button type="button" class="action admin-action" data-action="delete-image">🗑️ Eliminar imagen</button>
+      <button type="button" class="action danger admin-action" data-action="delete-patient">🔴 ✕ Eliminar paciente</button>
+    </div>
   </aside>`;
 
+  renderCurrentThumbs();
+
+  const ts=document.getElementById("topSearch"); if(ts){ts.value=searchTerm;renderSearch();}
+  const ms=document.getElementById("mobileSearch"); if(ms)ms.value=searchTerm;
   gesture();
-  const ts = document.getElementById("topSearch");
-  if (ts) { ts.value = searchTerm; renderSearch(); }
+}
+
+
+function renderSearchMobile(){
+  const box=document.getElementById("mobilePatients");
+  if(box)box.innerHTML=pb(filteredPatients(selectedDate,searchTerm));
+}
+function mobileNavigate(which){
+  if(which==="patients"){openSide();return;}
+  closeSide();
+  if(which==="viewer"){document.getElementById("image")?.scrollIntoView({behavior:"smooth",block:"start"});return;}
+  window.scrollTo({top:0,behavior:"smooth"});
 }
 
 function renderSearch(){
@@ -583,30 +705,18 @@ function selectPatient(id){
   sel=found;
   const idx=sel.s.findIndex(st=>st[0]===selectedDate);
   si=idx>=0?idx:0;
-  img=1;scale=1;render();
+  img=1;scale=1;
+  render();
 }
 function pick(id){selectPatient(id);}
 function study(i){ if (!sel) return; si = i; img = 1; scale = 1; render(); }
-function tool(i){ if (i===0) scale=Math.max(.5,scale-.15); if(i===1) scale=Math.min(2.5,scale+.15); if(i===6) scale=1; render(); }
-function openSide(){ side.classList.add("open"); overlay.classList.add("show"); }
-function closeSide(){ document.getElementById("side")?.classList.remove("open"); document.getElementById("overlay")?.classList.remove("show"); }
-
-const MONTHS=["ENERO","FEBRERO","MARZO","ABRIL","MAYO","JUNIO","JULIO","AGOSTO","SEPTIEMBRE","OCTUBRE","NOVIEMBRE","DICIEMBRE"];
-const WD=["L","M","M","J","V","S","D"];
-let calYear=2026,calMonth=7;
-function dateToLabel(y,m,d){ return `${String(d).padStart(2,"0")} ${MONTHS[m].slice(0,3)} ${y}`; }
-function dateKey(y,m,d){ return dateToLabel(y,m,d); }
-function dateHasStudies(y,m,d){ return P.some(p => p.s?.some(s => s[0] === dateKey(y,m,d))); }
-function parseSelectedDate(){ const [d,mon,y]=selectedDate.split(" "); const m=MONTHS.findIndex(x=>x.startsWith(mon)); return {y:Number(y),m,d:Number(d)}; }
-function toggleCalendar(e){ e?.stopPropagation(); const p=document.getElementById("calendarPopup"); if(!p)return; if(p.classList.contains("show")){p.classList.remove("show");return} const cur=parseSelectedDate(); calYear=cur.y;calMonth=cur.m;drawCalendar();p.classList.add("show"); }
-function drawCalendar(){ const p=document.getElementById("calendarPopup");if(!p)return;const first=new Date(calYear,calMonth,1);let start=(first.getDay()+6)%7;const days=new Date(calYear,calMonth+1,0).getDate();const prevDays=new Date(calYear,calMonth,0).getDate();let cells="";WD.forEach(w=>cells+=`<div class="cal-week">${w}</div>`);for(let i=0;i<42;i++){let d=i-start+1,y=calYear,m=calMonth,muted=false;if(d<1){d=prevDays+d;m=calMonth-1;muted=true;if(m<0){m=11;y--}}else if(d>days){d=d-days;m=calMonth+1;muted=true;if(m>11){m=0;y++}}const key=dateKey(y,m,d),selected=key===selectedDate,has=dateHasStudies(y,m,d);cells+=`<button class="cal-day ${muted?'muted-day':''} ${selected?'selected':''} ${has?'has-study':''}" onclick="chooseCalendarDate(${y},${m},${d})">${d}</button>`;}p.innerHTML=`<div class="cal-head"><button class="cal-nav" onclick="moveCalendar(-1)">‹</button><div class="cal-title">${MONTHS[calMonth]} ${calYear}</div><button class="cal-nav" onclick="moveCalendar(1)">›</button></div><div class="cal-grid">${cells}</div><div class="cal-note"><b>●</b> Hay estudios registrados en esa fecha</div>`; }
-function moveCalendar(delta){calMonth+=delta;if(calMonth<0){calMonth=11;calYear--}if(calMonth>11){calMonth=0;calYear++}drawCalendar();}
-async function chooseCalendarDate(y,m,d){
-  selectedDate=dateKey(y,m,d);
-  try{ await loadStudiesFromSupabase(); }catch(e){ console.error(e); }
-  const available=getPatientsForDate(selectedDate);
-  sel=available[0]||null;
-  si=0;img=1;scale=1;render();
+function tool(i){
+  if(i===0){scale=Math.max(.5,scale-.15);}
+  if(i===1){scale=Math.min(2.5,scale+.15);}
+  if(i===6){scale=1;}
+  if(i===2){/* hand tool visual state reserved for real image pan */}
+  if(i===3){/* rotation reserved */}
+  render();
 }
 function fillStudySelect(id,selected=""){
   const wrap=document.getElementById(id);
@@ -681,6 +791,28 @@ function openEditPatient(){
   document.getElementById("eBirth").value=sel.birth||"";
   openModal("editModal");
 }
+
+async function saveEditPatient(){
+  if(currentRole!=="admin"){toast("Solo el Administrador puede modificar pacientes.");return;}
+  if(!sel){toast("Selecciona un paciente primero para realizar esta acción.");return;}
+  const newName=document.getElementById("eName").value.trim().toUpperCase();
+  if(!newName){toast("El nombre del paciente es obligatorio.");return;}
+  const oldName=sel.n;
+  try{
+    const {error}=await supabaseClient.from("studies").update({patient:newName}).eq("patient",oldName);
+    if(error)throw error;
+    closeModal("editModal");
+    toast("Paciente modificado correctamente.");
+    sel=null;
+    await loadStudiesFromSupabase();
+    sel=P.find(p=>p.n===newName)||null;
+    if(sel){si=0;img=1;}
+    render();
+  }catch(err){
+    console.error(err);
+    toast(err?.message||"No se pudo modificar el paciente.");
+  }
+}
 function openAddImages(){
   if(currentRole!=="admin"){toast("Solo el Administrador puede añadir imágenes.");return;}
   if(!sel){toast("Selecciona un paciente primero para realizar esta acción.");return;}
@@ -697,11 +829,38 @@ function openDeleteImage(){
   if(!sel){toast("Selecciona un paciente primero para realizar esta acción.");return;}
   const study=sel?.s?.[si];
   if(!study){toast("No hay estudio seleccionado.");return;}
-  const count=Number(study[2]||0);
-  if(count<=0){toast("El estudio seleccionado no tiene imágenes.");return;}
+  const items=Array.isArray(study[5])?study[5].slice():[];
+  if(!items.length){toast("El estudio seleccionado no tiene imágenes.");return;}
+
   document.getElementById("confirmTitle").textContent="ELIMINAR IMAGEN";
   document.getElementById("confirmText").innerHTML=`¿Deseas eliminar la imagen <b>${img}</b> del estudio <b>${study[1]}</b>?`;
-  document.getElementById("confirmBtn").onclick=()=>closeModal("confirmModal");
+  document.getElementById("confirmBtn").onclick=async()=>{
+    try{
+      const index=Math.max(0,Math.min(items.length-1,img-1));
+      const target=items[index];
+      const path=storageObjectPath(target);
+
+      if(path){
+        const {error:storageError}=await supabaseClient.storage.from(STORAGE_BUCKET).remove([path]);
+        if(storageError)throw storageError;
+      }
+
+      items.splice(index,1);
+      const {error}=await supabaseClient.from("studies").update({images:items}).eq("id",study[4]);
+      if(error)throw error;
+
+      closeModal("confirmModal");
+      study[5]=items;
+      study[2]=items.length;
+      img=Math.max(1,Math.min(img,items.length||1));
+      render();
+      loadStudiesFromSupabase().then(()=>render()).catch(err=>console.error(err));
+      toast("Imagen eliminada correctamente.");
+    }catch(err){
+      console.error(err);
+      toast(err?.message||"No se pudo eliminar la imagen.");
+    }
+  };
   openModal("confirmModal");
 }
 function openDeletePatient(){
@@ -725,6 +884,50 @@ function openDeletePatient(){
   };
   openModal("confirmModal");
 }
+
+async function saveImages(){
+  if(currentRole!=="admin"){toast("Solo el Administrador puede añadir imágenes.");return;}
+  if(!sel){toast("Selecciona un paciente primero para realizar esta acción.");return;}
+  const study=sel?.s?.[si];
+  if(!study){toast("Selecciona un estudio primero.");return;}
+  const files=[...(addFiles||[])];
+  if(!files.length){toast("Selecciona al menos una imagen.");return;}
+
+  const studyId=study[4];
+  if(!studyId){toast("No se pudo identificar el estudio.");return;}
+
+  const existing=Array.isArray(study[5])?study[5].slice():[];
+  const uploaded=[];
+  try{
+    for(const file of files){
+      const safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,"_");
+      const path=`studies/${studyId}/${Date.now()}_${Math.random().toString(36).slice(2,8)}_${safeName}`;
+      const {error}=await supabaseClient.storage.from(STORAGE_BUCKET).upload(path,file,{upsert:false});
+      if(error)throw error;
+
+      const {data:pub}=supabaseClient.storage.from(STORAGE_BUCKET).getPublicUrl(path);
+      uploaded.push({path,name:file.name,url:pub?.publicUrl||""});
+    }
+
+    const next=[...existing,...uploaded];
+    const {error}=await supabaseClient.from("studies").update({images:next}).eq("id",studyId);
+    if(error)throw error;
+
+    closeModal("imagesModal");
+    addFiles=[];
+    toast(`${uploaded.length} imagen${uploaded.length>1?"es":""} añadida${uploaded.length>1?"s":""}.`);
+
+    // Update locally immediately.
+    study[5]=next;
+    study[2]=next.length;
+    img=1;
+    render();
+    loadStudiesFromSupabase().then(()=>render()).catch(err=>console.error(err));
+  }catch(err){
+    console.error(err);
+    toast(err?.message||"No se pudieron guardar las imágenes. Revisa Storage.");
+  }
+}
 function handleFiles(files,target){const arr=Array.from(files||[]);if(target==="patientFiles")patientFiles.push(...arr);else addFiles.push(...arr);renderFileList(target==="patientFiles"?patientFiles:addFiles,target);}
 function renderFileList(arr,target){const el=document.getElementById(target);if(!el)return;el.innerHTML=arr.map(f=>`<div class="file-row"><span>🖼️ ${f.name}</span><span>${Math.round(f.size/1024)} KB</span></div>`).join("");}
 function bindDrop(id,target){const d=document.getElementById(id);if(!d)return;["dragenter","dragover"].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.add("drag")}));["dragleave","drop"].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.remove("drag")}));d.addEventListener("drop",e=>handleFiles(e.dataTransfer.files,target));}
@@ -732,45 +935,42 @@ async function savePatient(){
   if(currentRole!=="admin"){toast("Solo el Administrador puede agregar pacientes.");return;}
   const name=document.getElementById("pName").value.trim().toUpperCase();
   const structure=getStudyValue("pStudyType");
-  const birth=document.getElementById("pBirth").value;
-  const sex=document.getElementById("pSex").value;
   const dni=document.getElementById("pDni").value.trim();
+  const sex=document.getElementById("pSex").value;
+  const birth=document.getElementById("pBirth").value;
   if(!name){toast("El nombre del paciente es obligatorio.");return;}
-  if(!structure){toast("Selecciona una estructura / estudio.");return;}
+  if(!STUDIES.includes(structure)){toast("Selecciona una estructura / estudio.");return;}
   if(!supabaseClient){toast("No hay conexión con Supabase.");return;}
 
-  const studyDateISO = (()=>{
-    const [d,mon,y]=selectedDate.split(" ");
-    const months={ENE:"01",FEB:"02",MAR:"03",ABR:"04",MAY:"05",JUN:"06",JUL:"07",AGO:"08",SEP:"09",OCT:"10",NOV:"11",DIC:"12"};
-    return `${y}-${months[mon]}-${String(d).padStart(2,"0")}`;
-  })();
-  const modality = ({TC:"TC",RM:"RM",MAMOGRAFÍA:"MAMOGRAFÍA",ECOGRAFÍA:"ECOGRAFÍA"}[structure] || "RX");
+  const [d,mon,y]=selectedDate.split(" ");
+  const months={ENE:"01",FEB:"02",MAR:"03",ABR:"04",MAY:"05",JUN:"06",JUL:"07",AGO:"08",SEP:"09",OCT:"10",NOV:"11",DIC:"12"};
+  const studyDateISO=`${y}-${months[mon]}-${String(d).padStart(2,"0")}`;
+  const modality=({TC:"TC",RM:"RM",MAMOGRAFÍA:"MAMOGRAFÍA",ECOGRAFÍA:"ECOGRAFÍA"}[structure]||"RX");
 
-  const btns=[...document.querySelectorAll("#patientModal .modal-actions button")];
-  btns.forEach(b=>b.disabled=true);
+  const buttons=[...document.querySelectorAll("#patientModal .modal-actions button")];
+  buttons.forEach(b=>b.disabled=true);
   try{
-    const {error}=await supabaseClient.from("studies").insert({
-      patient:name,
-      date:studyDateISO,
-      study:structure,
-      structure:structure,
-      modality:modality,
-      images:[]
-    });
-    if(error){
-      console.error(error);
-      toast("No se pudo guardar el paciente en Supabase.");
-      return;
-    }
+    const {data,error}=await supabaseClient.from("studies").insert({
+      patient:name,date:studyDateISO,study:structure,structure:structure,modality:modality,images:[]
+    }).select("*").single();
+    if(error)throw error;
+
+    upsertLocalStudy(data);
+    sel=P.find(p=>p.n===name)||sel;
+    if(sel){si=sel.s.findIndex(st=>String(st[4])===String(data.id));if(si<0)si=0;}
+    img=1;scale=1;
     closeModal("patientModal");
-    patientFiles=[];
-    await loadStudiesFromSupabase();
+    refreshUiInstant();
+
+    // Confirm with the server in the background. UI is not blocked waiting for F5.
+    loadStudiesFromSupabase().then(()=>refreshUiInstant()).catch(err=>console.error(err));
     toast("Paciente agregado correctamente.");
-    render();
   }catch(err){
     console.error(err);
-    toast("Ocurrió un error al guardar el paciente.");
-  }finally{btns.forEach(b=>b.disabled=false);}
+    toast(err?.message||"No se pudo guardar el paciente en Supabase.");
+  }finally{
+    buttons.forEach(b=>b.disabled=false);
+  }
 }
 
 document.addEventListener("click",e=>{
@@ -811,6 +1011,16 @@ document.addEventListener("keydown",e=>{
   }
 });
 
+
+
+document.addEventListener("click",e=>{
+  const btn=e.target.closest?.("[data-mobile]"); 
+  if(!btn)return;
+  e.preventDefault();
+  document.querySelectorAll("[data-mobile]").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+  mobileNavigate(btn.dataset.mobile);
+});
 
 document.addEventListener("click",e=>{
   const action=e.target.closest?.("[data-action]")?.dataset?.action;
