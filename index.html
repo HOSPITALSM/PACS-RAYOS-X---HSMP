@@ -697,7 +697,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style id="auth-boot-fix">
 body.auth-booting #loginModal,
-body.auth-booting .app{visibility:hidden}
+body.auth-booting #root{visibility:hidden}
 body.auth-booting{background:#061014}
 </style></head>
 <body class="auth-booting">
@@ -1785,11 +1785,21 @@ PACS.app = {
     const tool=e.target.closest?.("[data-tool]")?.dataset?.tool;
     const mobile=e.target.closest?.("[data-mobile]")?.dataset?.mobile;
 
-    // En móvil, cerrar el menú de Administrador/⋮ al tocar fuera del propio menú.
+    // En móvil, cerrar los menús de Administrador y ⋮ al tocar fuera.
     if(window.matchMedia?.("(max-width: 850px)").matches){
-      const adminMenu=document.querySelector(".user .menu.open, .mobile-admin-menu.open, [data-admin-menu].open");
-      if(adminMenu && !e.target.closest?.(".user .menu") && !e.target.closest?.("[data-admin-menu]")){
-        adminMenu.classList.remove("open");
+      const userMenu=document.getElementById("menu");
+      const moreMenu=document.getElementById("mobileMoreMenu");
+
+      if(userMenu?.classList.contains("show") &&
+         !e.target.closest?.("#menu") &&
+         !e.target.closest?.("#userButton")){
+        userMenu.classList.remove("show");
+      }
+
+      if(moreMenu?.classList.contains("show") &&
+         !e.target.closest?.("#mobileMoreMenu") &&
+         !e.target.closest?.(".mobile-more-btn")){
+        moreMenu.classList.remove("show");
       }
     }
 
@@ -1838,8 +1848,12 @@ const calDate=e.target.closest?.("[data-calendar-date]")?.dataset?.calendarDate;
 
     e.preventDefault();
     if(action==="login-open")return this.openLogin();
-    if(action==="menu-toggle")return document.getElementById("menu")?.classList.toggle("show");
+    if(action==="menu-toggle"){
+      document.getElementById("mobileMoreMenu")?.classList.remove("show");
+      return document.getElementById("menu")?.classList.toggle("show");
+    }
     if(action==="mobile-more-toggle"){
+      document.getElementById("menu")?.classList.remove("show");
       document.getElementById("mobileMoreMenu")?.classList.toggle("show");
       return;
     }
