@@ -709,14 +709,28 @@ PACS.supabase = {
     return "";
   },
   async remove(path){
-    const res = await PACS.state.client.storage.from(PACS.state.storageBucket).remove([path]);
-    if(!res.error) return res;
-    for(const bucket of PACS.config.storageBuckets){
-      if(bucket===PACS.state.storageBucket) continue;
-      const retry = await PACS.state.client.storage.from(bucket).remove([path]);
-      if(!retry.error){ PACS.state.storageBucket=bucket; return retry; }
+    if(!path) return {data:null,error:null};
+    const candidates = [PACS.state.storageBucket, ...PACS.config.storageBuckets.filter(x=>x!==PACS.state.storageBucket)];
+    let lastError=null;
+    for(const bucket of candidates){
+      const res = await PACS.state.client.storage.from(bucket).remove([path]);
+      if(!res.error){
+        PACS.state.storageBucket=bucket;
+        return res;
+      }
+      lastError=res.error;
     }
-    return res;
+    return {data:null,error:lastError||new Error("No se pudo eliminar el archivo del Storage.")};
+  },
+  async removeItems(items){
+    const failures=[];
+    for(const item of (items||[])){
+      const path=PACS.data.imagePath(item);
+      if(!path) continue;
+      const res=await this.remove(path);
+      if(res.error) failures.push({item,path,error:res.error});
+    }
+    return failures;
   }
 };
 
@@ -970,9 +984,16 @@ PACS.patients = {
     PACS.state.selectedStudyIndex=0; PACS.state.selectedImage=0;
     PACS.app.render();
     try{
+      const imageItems=p.studies.flatMap(s=>PACS.data.imageItems(s));
       const {error}=await PACS.state.client.from("studies").delete().eq("patient",p.name);
       if(error) throw error;
-      PACS.ui.toast("Paciente eliminado correctamente.");
+      const failures=await PACS.images.removeItems(imageItems);
+      if(failures.length){
+        console.warn("Archivos que no pudieron eliminarse de Storage:",failures);
+        PACS.ui.toast(`Paciente eliminado. ${failures.length} archivo(s) quedaron pendientes de limpieza en Storage.`);
+      }else{
+        PACS.ui.toast(imageItems.length?"Paciente y todas sus imágenes eliminados correctamente.":"Paciente eliminado correctamente.");
+      }
     }catch(err){
       PACS.state.patients=backup;
       PACS.state.selectedPatient=p;
@@ -1482,14 +1503,29 @@ const calDate=e.target.closest?.("[data-calendar-date]")?.dataset?.calendarDate;
     if(!email){if(status)status.textContent="Escribe tu correo.";return;}
     if(!pass){if(status)status.textContent="Escribe tu contraseña.";return;}
     const btn=document.getElementById("loginSubmit"); if(btn)btn.disabled=true;
-    try{await PACS.auth.login(email,pass);PACS.ui.closeModal("loginModal");await this.sync();this.render();}
-    catch(err){if(status)status.textContent=err.message||"No se pudo iniciar sesión.";}
+    try{
+      await PACS.auth.login(email,pass);
+      const rememberUser=document.getElementById("rememberUser")?.checked;
+      if(rememberUser) localStorage.setItem("pacsRememberEmail",email);
+      else localStorage.removeItem("pacsRememberEmail");
+      // Por seguridad, no guardamos la contraseña en localStorage.
+      const rememberPass=document.getElementById("rememberPass");
+      if(rememberPass) rememberPass.checked=false;
+      PACS.ui.closeModal("loginModal");
+      await this.sync();
+      this.render();
+    }catch(err){if(status)status.textContent=err.message||"No se pudo iniciar sesión.";}
     finally{if(btn)btn.disabled=false;}
   },
   openLogin(){
     PACS.ui.openModal("loginModal");
     document.getElementById("loginStatus").textContent="";
-    document.getElementById("loginEmail")?.focus();
+    const savedEmail=localStorage.getItem("pacsRememberEmail")||"";
+    const email=document.getElementById("loginEmail");
+    const remember=document.getElementById("rememberUser");
+    if(email && savedEmail) email.value=savedEmail;
+    if(remember) remember.checked=!!savedEmail;
+    document.getElementById("loginPass")?.focus();
   },
   openAddPatient(){
     if(PACS.state.role!=="admin"){return PACS.ui.toast("Solo el Administrador puede agregar pacientes.");}
@@ -1542,9 +1578,18 @@ const calDate=e.target.closest?.("[data-calendar-date]")?.dataset?.calendarDate;
       PACS.state.selectedImage=study.images.length?Math.min(index+1,study.images.length):0;
       this.render();
       try{
-        await PACS.images.removeItem(deleted);
+        // Primero actualizamos la BD para que nunca quede una referencia a un archivo ya borrado.
         const {error}=await PACS.state.client.from("studies").update({images:study.images}).eq("id",study.id);
         if(error)throw error;
+        try{
+          await PACS.images.removeItem(deleted);
+        }catch(storageErr){
+          // La referencia ya fue quitada de la BD; el archivo puede quedar como residuo en Storage.
+          PACS.images.revoke([deleted]);
+          PACS.ui.toast("Imagen quitada del estudio, pero no se pudo limpiar el archivo de Storage.");
+          console.error("Storage cleanup:",storageErr);
+          return;
+        }
         PACS.images.revoke([deleted]);
         PACS.ui.toast("Imagen eliminada correctamente.");
       }catch(err){
@@ -1567,9 +1612,23 @@ const calDate=e.target.closest?.("[data-calendar-date]")?.dataset?.calendarDate;
       PACS.state.selectedPatient=null;
       this.render();
       try{
+        // Guardamos todos los archivos antes de eliminar los registros de la BD.
+        const imageItems=p.studies.flatMap(s=>PACS.data.imageItems(s));
+        const paths=imageItems.map(PACS.data.imagePath).filter(Boolean);
+
+        // Primero eliminamos los estudios de la BD.
         const {error}=await PACS.state.client.from("studies").delete().eq("patient",p.name);
         if(error)throw error;
-        PACS.ui.toast("Paciente eliminado correctamente.");
+
+        // Después limpiamos los archivos físicos del Storage. Si alguno falla,
+        // el paciente sigue eliminado de la BD y mostramos una advertencia clara.
+        const failures=await PACS.images.removeItems(imageItems);
+        if(failures.length){
+          console.warn("Archivos que no pudieron eliminarse de Storage:",failures);
+          PACS.ui.toast(`Paciente eliminado. ${failures.length} archivo(s) quedaron pendientes de limpieza en Storage.`);
+        }else{
+          PACS.ui.toast(paths.length?"Paciente y todas sus imágenes eliminados correctamente.":"Paciente eliminado correctamente.");
+        }
       }catch(err){
         PACS.state.patients=backup; PACS.state.selectedPatient=p; this.render();
         PACS.ui.toast(err.message||"No se pudo eliminar el paciente.");
