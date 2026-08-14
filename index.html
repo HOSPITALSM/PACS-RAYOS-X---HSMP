@@ -160,6 +160,7 @@
   .mobile-actions .action,.mobile-actions .add{display:block;width:100%}
 }
 
+ .modal-bg{display:none !important}.modal-bg.show{display:grid !important}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -215,7 +216,7 @@
 </div>
 </div></div>
 
-<div id="imagesModal"<div id="imagesModal" class="modal-bg"><div class="modal">
+<div id="imagesModal" class="modal-bg"><div class="modal">
 <div class="mh"><b>Añadir imágenes</b><button class="close" data-action="close-images-modal">×</button></div>
 <div class="field"><label>Paciente</label><input id="aPatient" readonly></div>
 <div class="field full"><label>ESTRUCTURA / ESTUDIO</label><div id="aStudyType" title="Haz clic para ver todas las estructuras"></div></div>
@@ -448,6 +449,7 @@ PACS.ui = {
 window.PACS = window.PACS || {};
 PACS.auth = {
   async login(email,password){
+    if(!PACS.state.client) await PACS.supabase.init();
     const {data,error}=await PACS.state.client.auth.signInWithPassword({email,password});
     if(error || !data?.user) throw new Error("Correo o contraseña incorrectos.");
     const uid=data.user.id;
@@ -658,27 +660,41 @@ PACS.view = {
 };
 
 
+
+window.handleFiles=function(files,target){
+  const arr=Array.from(files||[]);
+  if(target==="patientFiles") PACS.state.patientFiles.push(...arr);
+  if(target==="addFiles") PACS.state.addFiles.push(...arr);
+  PACS.app.renderFileList(target==="patientFiles"?PACS.state.patientFiles:PACS.state.addFiles,target);
+};
+PACS.app.renderFileList=function(files,target){
+  const el=document.getElementById(target);
+  if(!el)return;
+  el.innerHTML=(files||[]).map(f=>`<div class="file-row"><span>🖼️ ${String(f.name).replace(/</g,"&lt;")}</span><span>${Math.max(1,Math.round((f.size||0)/1024))} KB</span></div>`).join("");
+};
+
+
 /* ===== app.js ===== */
 window.PACS = window.PACS || {};
 PACS.app = {
   async start(){
-    PACS.ui.loading(true);
+    this.bindGlobalEvents();
+    this.home();
+    PACS.ui.loading(false);
+
+    // Supabase is initialized in the background. The login screen must not
+    // depend on successful data initialization.
     try{
       await PACS.supabase.init();
       const restored=await PACS.auth.restore();
       if(restored){
-        await PACS.sync();
+        await this.sync();
         this.render();
-      }else{
-        this.home();
       }
-      this.bindGlobalEvents();
     }catch(err){
-      console.error(err);
-      this.home();
-      PACS.ui.toast(err?.message||"No se pudo inicializar el PACS.");
-    }finally{
-      PACS.ui.loading(false);
+      console.error("PACS startup:",err);
+      const status=document.getElementById("loginStatus");
+      if(status)status.textContent="Conexión pendiente con Supabase. Puedes intentar iniciar sesión.";
     }
   },
   home(){
@@ -686,16 +702,16 @@ PACS.app = {
   },
   async sync(){
     await PACS.data.loadStudies();
-    await PACS.data.hydrateImages();
     const p=PACS.state.selectedPatient;
     const same=p&&PACS.data.findPatient(p.id);
-    if(same) PACS.state.selectedPatient=same;
-    else {
+    if(same)PACS.state.selectedPatient=same;
+    else{
       const today=PACS.data.patientsForDate();
       PACS.state.selectedPatient=today[0]||PACS.state.patients[0]||null;
       PACS.state.selectedStudyIndex=0;
-      PACS.state.selectedImage=PACS.data.studyCount(PACS.data.currentStudy())>0?1:0;
     }
+    PACS.state.selectedImage=PACS.data.studyCount(PACS.data.currentStudy())>0?1:0;
+    PACS.data.hydrateImages().then(()=>this.render()).catch(err=>console.error("Image hydration:",err));
   },
   renderSearchResults(mobile=false){
     const q=PACS.state.searchTerm;
@@ -759,10 +775,12 @@ PACS.app = {
     // No-op: thumbs are already part of the render() HTML.
   },
   bindGlobalEvents(){
-    document.addEventListener("click", e=>this.onClick(e));
-    document.addEventListener("keydown", e=>this.onKey(e));
-    document.addEventListener("input", e=>{
-      if(e.target?.id==="topSearch" || e.target?.id==="mobileSearch"){
+    if(this._eventsBound)return;
+    this._eventsBound=true;
+    document.addEventListener("click",e=>this.onClick(e));
+    document.addEventListener("keydown",e=>this.onKey(e));
+    document.addEventListener("input",e=>{
+      if(e.target?.id==="topSearch"||e.target?.id==="mobileSearch"){
         PACS.state.searchTerm=e.target.value.trim().toLowerCase();
         this.renderSearchResults(e.target.id==="mobileSearch");
       }
@@ -1026,7 +1044,11 @@ PACS.app = {
 
 </script>
 <script>
-window.PACS.app.start();
+window.PACS.app.start().catch(err=>{
+  console.error(err);
+  window.PACS.ui.loading(false);
+  window.PACS.app.home();
+});
 </script>
 </body>
 </html>
