@@ -675,6 +675,17 @@
 .patient strong .sex-symbol.male{color:#4da3ff !important}
 .patient strong .sex-symbol.female{color:#f58bb5 !important}
 .patient strong .sex-symbol.unknown{color:#7f9299 !important;font-size:.82em}
+@media(max-width:850px){
+  .tr .user{margin-left:auto;margin-right:0}
+  .tr .mobile-admin-actions{
+    margin-left:-4px !important;
+    margin-right:0 !important;
+  }
+  .tr .mobile-more-btn{
+    width:40px;
+    height:40px;
+  }
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -1694,6 +1705,12 @@ PACS.app = {
 
   },
   async onClick(e){
+    const calendar=document.getElementById("calendarPopup");
+    const clickedInsideDate=e.target.closest?.(".date-wrap");
+    if(calendar?.classList.contains("show") && !clickedInsideDate){
+      calendar.classList.remove("show");
+    }
+
     const action=e.target.closest?.("[data-action]")?.dataset?.action;
     const patientBtn=e.target.closest?.("[data-patient]")?.dataset?.patient;
     const studyBtn=e.target.closest?.("[data-study-index]");
