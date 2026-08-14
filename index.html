@@ -98,6 +98,12 @@
 .modal-bg .modal{outline:none}
 .btn:disabled{opacity:.65;cursor:wait}
 .data-loading{padding:16px;color:var(--muted);text-align:center;font-size:13px}
+
+.study-picker-btn{width:100%;padding:12px 14px;border-radius:9px;border:1px solid var(--line);background:#071116;color:var(--text);display:flex;align-items:center;justify-content:space-between;text-align:left;cursor:pointer;transition:.18s ease}
+.study-picker-btn:hover,.study-picker-btn:focus{border-color:var(--cyan);box-shadow:0 0 0 2px #5ed2e51a,0 8px 22px #0005;outline:none}
+.study-picker-arrow{color:var(--muted);font-size:15px}
+.study-option{width:100%;text-align:left;border:0;background:none;color:var(--text);padding:10px 12px;cursor:pointer}
+.study-option:hover,.study-option:focus{background:#17313b;color:var(--cyan);outline:none}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -552,12 +558,48 @@ function chooseCalendarDate(y,m,d){selectedDate=dateKey(y,m,d);const available=g
 
 const STUDIES=["TÓRAX","COLUMNA CERVICAL","COLUMNA DORSAL","COLUMNA LUMBAR","COLUMNA COMPLETA","PELVIS","CADERA","ABDOMEN","CRÁNEO","SENOS PARANASALES","HOMBRO","CODO","ANTEBRAZO","MUÑECA","MANO","RODILLA","PIERNA","TOBILLO","PIE","CUELLO","CLAVÍCULA","ESTERNÓN","COSTILLAS","SACROCOCCÍGEA","SACROILÍACA","TEMPOROMANDIBULAR","DENTAL","TC","RM","MAMOGRAFÍA","ECOGRAFÍA","OTRO"];
 let patientFiles=[],addFiles=[];
-function fillStudySelect(id,selected=""){const wrap=document.getElementById(id);if(!wrap)return;const value=(selected||"").toUpperCase();wrap.innerHTML=`<div class="study-search-wrap" title="Seleccionar estructura / estudio"><input class="study-search" id="${id}Search" value="${value}" placeholder="SELECCIONA O ESCRIBE LA ESTRUCTURA" autocomplete="off" readonly><div class="study-options" id="${id}Options"></div></div><div class="study-selected" id="${id}Selected">${value?"ESTRUCTURA SELECCIONADA: "+value:"SELECCIONAR ESTRUCTURA / ESTUDIO"}</div>`;const wrapEl=document.querySelector(`#${id} .study-search-wrap`);wrapEl?.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();renderStudyOptions(id,"");document.getElementById(id+"Options")?.classList.toggle("show");});renderStudyOptions(id,"");}
-function renderStudyOptions(id,term=""){const opts=document.getElementById(id+"Options");if(!opts)return;const q=(term||"").toUpperCase().trim();const matches=STUDIES.filter(s=>!q||s.includes(q));opts.innerHTML=matches.map(s=>`<button type="button" onclick="chooseStudy('${id}',${JSON.stringify(s)});event.stopPropagation()">${s}</button>`).join("")||`<div style="padding:12px;color:var(--muted)">NO SE ENCONTRARON ESTRUCTURAS</div>`;}
-function showStudies(id){const opts=document.getElementById(id+"Options");if(!opts)return;renderStudyOptions(id,"");opts.classList.add("show");}
-function filterStudies(id,value){value=value.toUpperCase();const s=document.getElementById(id+"Search");if(s)s.value=value;renderStudyOptions(id,value);document.getElementById(id+"Options")?.classList.add("show");}
-function chooseStudy(id,value){const s=document.getElementById(id+"Search");if(s)s.value=value;const selected=document.getElementById(id+"Selected");if(selected)selected.textContent="ESTRUCTURA SELECCIONADA: "+value;document.getElementById(id+"Options")?.classList.remove("show");}
-function getStudyValue(id){return (document.getElementById(id+"Search")?.value||"").trim().toUpperCase();}
+
+function fillStudySelect(id,selected=""){
+  const wrap=document.getElementById(id); if(!wrap)return;
+  const value=(selected||"").toUpperCase();
+  wrap.innerHTML=`<div class="study-search-wrap" title="Seleccionar estructura / estudio">
+    <button type="button" class="study-search study-picker-btn" id="${id}Picker">
+      <span id="${id}Label">${value || "SELECCIONA ESTRUCTURA / ESTUDIO"}</span>
+      <span class="study-picker-arrow">▾</span>
+    </button>
+    <div class="study-options" id="${id}Options"></div>
+  </div>
+  <div class="study-selected" id="${id}Selected">${value ? "ESTRUCTURA SELECCIONADA: "+value : "SELECCIONAR ESTRUCTURA / ESTUDIO"}</div>`;
+  const picker=document.getElementById(id+"Picker");
+  picker?.addEventListener("click",e=>{
+    e.preventDefault();
+    e.stopPropagation();
+    const opts=document.getElementById(id+"Options");
+    renderStudyOptions(id,"");
+    opts?.classList.toggle("show");
+  });
+  renderStudyOptions(id,"");
+}
+function renderStudyOptions(id,term=""){
+  const opts=document.getElementById(id+"Options"); if(!opts)return;
+  const q=(term||"").toUpperCase().trim();
+  const matches=STUDIES.filter(s=>!q||s.includes(q));
+  opts.innerHTML=matches.map(s=>`<button type="button" class="study-option" onclick='chooseStudy(${JSON.stringify(id)},${JSON.stringify(s)})'>${s}</button>`).join("")
+    || `<div style="padding:12px;color:var(--muted)">NO SE ENCONTRARON ESTRUCTURAS</div>`;
+}
+function showStudies(id){
+  const opts=document.getElementById(id+"Options"); if(!opts)return;
+  renderStudyOptions(id,"");
+  opts.classList.add("show");
+}
+function chooseStudy(id,value){
+  const label=document.getElementById(id+"Label");
+  if(label)label.textContent=value;
+  const selected=document.getElementById(id+"Selected");
+  if(selected)selected.textContent="ESTRUCTURA SELECCIONADA: "+value;
+  document.getElementById(id+"Options")?.classList.remove("show");
+}
+function getStudyValue(id){return (document.getElementById(id+"Label")?.textContent||"").trim().toUpperCase();}
 
 function openAddPatient(){if(currentRole!=="admin"){toast("Solo el Administrador puede agregar pacientes.");return;}document.getElementById("patientModalTitle").textContent="Agregar paciente";document.getElementById("pName").value="";document.getElementById("pDni").value="";document.getElementById("pSex").value="";document.getElementById("pBirth").value="";document.getElementById("pStudyDate").textContent=selectedDate;patientFiles=[];document.getElementById("patientFiles").innerHTML="";fillStudySelect("pStudyType");showStudies("pStudyType");openModal("patientModal");}
 function openEditPatient(){if(currentRole!=="admin"){toast("Solo el Administrador puede modificar pacientes.");return;}if(!sel){toast("Selecciona un paciente primero.");return;}document.getElementById("eName").value=sel.n;document.getElementById("eDni").value=sel.dni||"";document.getElementById("eSex").value="";document.getElementById("eBirth").value=sel.birth||"";openModal("editModal");}
