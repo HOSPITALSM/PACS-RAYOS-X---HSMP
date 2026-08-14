@@ -969,9 +969,32 @@ PACS.data = {
     return [...groups.values()];
   },
   async loadStudies(){
-    const {data,error}=await PACS.state.client.from("studies").select("*").order("date",{ascending:false}).order("created_at",{ascending:false});
+    const previous=new Map(
+      (PACS.state.patients||[]).map(p=>[
+        String(p.name||"").trim().toUpperCase(),
+        String(p.sex||"").trim().toUpperCase()
+      ])
+    );
+
+    const {data,error}=await PACS.state.client
+      .from("studies")
+      .select("*")
+      .order("date",{ascending:false})
+      .order("created_at",{ascending:false});
+
     if(error) throw error;
-    PACS.state.patients=this.mapRows(data||[]);
+
+    const fresh=this.mapRows(data||[]);
+
+    // Supabase actualmente no tiene sex/gender en "studies".
+    // Conservamos el sexo que ya conocemos al reconstruir la lista.
+    fresh.forEach(p=>{
+      const previousSex=previous.get(String(p.name||"").trim().toUpperCase());
+      const storedSex=PACS.gender.get(p.name);
+      p.sex=String(p.sex||previousSex||storedSex||"").trim().toUpperCase();
+    });
+
+    PACS.state.patients=fresh;
     return PACS.state.patients;
   },
   async hydrateImages(study=PACS.data.currentStudy()){
@@ -1407,7 +1430,7 @@ PACS.app = {
   renderSearchResults(mobile=false){
     const q=PACS.state.searchTerm;
     const list=PACS.data.patientsForDate().filter(p=>!q||p.name.toLowerCase().includes(q));
-    const html=list.map(p=>`<button type="button" class="patient ${PACS.state.selectedPatient?.id===p.id?"active":""}" data-patient="${encodeURIComponent(p.id)}"><strong>${PACS.view.patientIcon(p.sex)} ${p.name}</strong><span>Ver historial</span></button>`).join("") || `<div class="patient-empty">No se encontraron pacientes.</div>`;
+    const html=list.map(p=>`<button type="button" class="patient ${PACS.state.selectedPatient?.id===p.id?"active":""}" data-patient="${encodeURIComponent(p.id)}"><strong class="patient-name">${PACS.view.patientIcon(p.sex)}${p.name}</strong><span>Ver historial</span></button>`).join("") || `<div class="patient-empty">No se encontraron pacientes.</div>`;
     const box=document.getElementById(mobile?"mobilePatients":"searchResults");
     if(box)box.innerHTML=mobile?html:`<div class="suggestions">${html}</div>`;
   },
