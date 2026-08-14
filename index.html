@@ -114,8 +114,30 @@
   border-radius:9px;
   margin-top:8px;
 }
+
+.study-options{max-height:260px;overflow-y:auto;z-index:1000}
+#patientModal .study-search-wrap,#imagesModal .study-search-wrap{z-index:1001}
+#patientModal .study-options,#imagesModal .study-options{z-index:1100}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+document.addEventListener("keydown",e=>{
+  const active=document.activeElement;
+  const isPicker=active?.classList?.contains("study-picker-btn");
+  if(!isPicker)return;
+  if(e.key==="Enter" || e.key===" "){
+    e.preventDefault();
+    const id=(active.id||"").replace("Picker","");
+    const opts=document.getElementById(id+"Options");
+    renderStudyOptions(id,"");
+    opts?.classList.toggle("show");
+  }
+  if(e.key==="Escape"){
+    const id=(active.id||"").replace("Picker","");
+    document.getElementById(id+"Options")?.classList.remove("show");
+  }
+});
+
+</script>
 </head>
 <body>
 <div id="root"></div>
@@ -608,6 +630,14 @@ function fillStudySelect(id,selected=""){
   });
   renderStudyOptions(id,"");
 }
+const STUDIES=[
+  "TÓRAX","COLUMNA CERVICAL","COLUMNA DORSAL","COLUMNA LUMBAR","COLUMNA COMPLETA",
+  "PELVIS","CADERA","ABDOMEN","CRÁNEO","SENOS PARANASALES","HOMBRO","CODO","ANTEBRAZO",
+  "MUÑECA","MANO","RODILLA","PIERNA","TOBILLO","PIE","CUELLO","CLAVÍCULA","ESTERNÓN",
+  "COSTILLAS","SACROCOCCÍGEA","SACROILÍACA","TEMPOROMANDIBULAR","DENTAL",
+  "TC","RM","MAMOGRAFÍA","ECOGRAFÍA","OTRO"
+];
+
 function renderStudyOptions(id,term=""){
   const opts=document.getElementById(id+"Options"); if(!opts)return;
   const q=(term||"").toUpperCase().trim();
