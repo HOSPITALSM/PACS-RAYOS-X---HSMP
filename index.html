@@ -1105,7 +1105,7 @@ PACS.app = {
     }
   },
   home(){
-    document.getElementById("root").innerHTML=`<div class="screen"><div class="center"><div class="logo"><img src="LOGODX.png" alt="Logo Hospital San Martín de Pangoa"></div><h1>HOSPITAL SAN MARTIN DE PANGOA</h1><p>DIAGNÓSTICO POR IMAGEN</p><button class="btn" data-action="login-open">Iniciar sesión</button></div></div>`;
+    document.getElementById("root").innerHTML=`<div class="screen"><div class="center"><div class="logo">🏥</div><h1>HOSPITAL SAN MARTIN DE PANGOA</h1><p>DIAGNÓSTICO POR IMAGEN</p><button class="btn" data-action="login-open">Iniciar sesión</button></div></div>`;
   },
   async sync(){
     await PACS.data.loadStudies();
