@@ -425,6 +425,18 @@
   #side{touch-action:pan-y;overflow-y:auto !important;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
   #side .patient{touch-action:pan-y}
 }
+
+@media(min-width:851px){
+  html,body{overflow-y:auto;overflow-x:hidden}
+  .layout{height:auto;min-height:calc(100vh - 76px)}
+  .left{height:calc(100vh - 76px);min-height:0}
+  .viewer{min-height:calc(100vh - 76px)}
+}
+
+@media(max-width:850px){
+  .viewer .image{height:clamp(250px,48svh,470px);min-height:250px}
+  .history{margin-top:0!important;padding-top:10px!important}
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
