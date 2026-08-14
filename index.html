@@ -97,6 +97,7 @@
 
 .modal-bg .modal{outline:none}
 .btn:disabled{opacity:.65;cursor:wait}
+.data-loading{padding:16px;color:var(--muted);text-align:center;font-size:13px}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -191,7 +192,7 @@ const ROLE_UIDS = {
 };
 
 let supabaseClient = null;
-const P = [];
+let P = [];
 let sel = null, si = 0, img = 1, scale = 1, logged = false;
 let selectedDate = "14 AGO 2026", searchTerm = "", currentRole = "";
 
@@ -296,6 +297,85 @@ async function doLogin(){
   }
 }
 
+
+function parseStudyImagesCount(value){
+  if (Array.isArray(value)) return value.length;
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string"){
+    const v=value.trim();
+    if(!v) return 0;
+    if(/^\d+$/.test(v)) return Number(v);
+    try{
+      const parsed=JSON.parse(v);
+      if(Array.isArray(parsed)) return parsed.length;
+      if(parsed && typeof parsed==="object"){
+        if(Array.isArray(parsed.images)) return parsed.images.length;
+        if(Number.isFinite(Number(parsed.count))) return Number(parsed.count);
+      }
+    }catch(_){}
+  }
+  if(value && typeof value==="object"){
+    if(Array.isArray(value.images)) return value.images.length;
+    if(Number.isFinite(Number(value.count))) return Number(value.count);
+  }
+  return 0;
+}
+
+function normalizeStudyDate(v){
+  if(!v) return "";
+  const d = new Date(v);
+  if(Number.isNaN(d.getTime())) return String(v).toUpperCase();
+  const months=["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"];
+  return `${String(d.getDate()).padStart(2,"0")} ${months[d.getMonth()]} ${d.getFullYear()}`.toUpperCase();
+}
+
+function mapStudiesRows(rows){
+  const groups = new Map();
+  (rows||[]).forEach((r,idx)=>{
+    const patient = String(r.patient||"").trim().toUpperCase();
+    if(!patient) return;
+    const date = normalizeStudyDate(r.date);
+    const structure = String(r.structure||r.study||"").trim().toUpperCase();
+    const studyName = String(r.study||structure||r.modality||"ESTUDIO").trim().toUpperCase();
+    const imagesCount = parseStudyImagesCount(r.images);
+    const key = patient;
+    if(!groups.has(key)){
+      groups.set(key,{id:r.patient_id||`p-${idx}-${patient}`,n:patient,g:r.sex||r.gender||"U",s:[]});
+    }
+    groups.get(key).s.push([date,structure||studyName,imagesCount,r.created_at?new Date(r.created_at).toLocaleTimeString("es-PE",{hour:"2-digit",minute:"2-digit"}):""]);
+  });
+  return Array.from(groups.values()).map(p=>{
+    p.s.sort((a,b)=>{
+      const da=a[0],db=b[0];
+      return db.localeCompare(da);
+    });
+    return p;
+  });
+}
+
+async function loadStudiesFromSupabase(){
+  if(!supabaseClient) return;
+  const {data,error}=await supabaseClient
+    .from("studies")
+    .select("*")
+    .order("date",{ascending:false})
+    .order("created_at",{ascending:false});
+  if(error){
+    console.error("Supabase studies:",error);
+    throw error;
+  }
+  P = mapStudiesRows(data||[]);
+  if(P.length){
+    const available=getPatientsForDate(selectedDate);
+    sel = available[0] || P[0];
+    const idx=sel?.s?.findIndex(s=>s[0]===selectedDate) ?? -1;
+    si=idx>=0?idx:0;
+    img=1;
+  }else{
+    sel=null; si=0; img=1;
+  }
+}
+
 async function restoreSession(){
   if (!supabaseClient) return;
   try {
@@ -347,7 +427,7 @@ function patientMatchesSearch(term){
 function pb(list = filteredPatients()){
   if (!list.length) return `<div class="muted" style="padding:12px 4px">No hay pacientes registrados en esta fecha.</div>`;
   return list.map(p => `<button class="patient ${p.id == sel?.id ? 'active' : ''}" onclick="pick(${p.id})">
-    <strong>${p.g === 'M' ? '👨' : '👩'} ${p.n}</strong>
+    <strong>${p.g === 'M' ? '👨' : p.g === 'F' ? '👩' : '👤'} ${p.n}</strong>
     <span>${p.s.find(s => s[0] === selectedDate)?.[1] || 'Ver historial'} · ${p.s.filter(s => s[0] === selectedDate).reduce((a,s) => a + (Number(s[2]) || 0), 0)} imágenes</span>
   </button>`).join("");
 }
@@ -356,7 +436,7 @@ function searchSuggestions(){
   const items = patientMatchesSearch(searchTerm);
   if (!searchTerm.trim()) return "";
   return `<div class="suggestions">${items.map(p => `<button onclick="pick(${p.id});clearSearch()">
-    <strong>${p.g === 'M' ? '👨' : '👩'} ${p.n}</strong>
+    <strong>${p.g === 'M' ? '👨' : p.g === 'F' ? '👩' : '👤'} ${p.n}</strong>
     <span>${p.s.length} estudios · Ver historial</span></button>`).join("") || `<div class="empty">No se encontraron pacientes.</div>`}</div>`;
 }
 
@@ -408,7 +488,7 @@ function render(){
 
     <aside class="right">
       <div class="title">PACIENTE SELECCIONADO</div>
-      <div class="info"><h2>${sel ? (sel.g === 'M' ? '👨' : '👩') + ' ' + sel.n : patientName}</h2>
+      <div class="info"><h2>${sel ? (sel.g === 'M' ? '👨' : sel.g === 'F' ? '👩' : '👤') + ' ' + sel.n : patientName}</h2>
       <div class="kv">Estudio actual<br><b style="color:var(--text)">${x[1] || "—"}</b><br>📅 ${x[0] || "—"}<br>🕐 ${x[3] || "—"}<br>🖼️ ${x[2] || 0} imágenes<br><span class="ok">● Disponible</span></div></div>
       <div class="title subhead" style="margin-top:18px">ACCIONES</div>
       <div class="actions">
@@ -468,7 +548,7 @@ function parseSelectedDate(){ const [d,mon,y]=selectedDate.split(" "); const m=M
 function toggleCalendar(e){ e?.stopPropagation(); const p=document.getElementById("calendarPopup"); if(!p)return; if(p.classList.contains("show")){p.classList.remove("show");return} const cur=parseSelectedDate(); calYear=cur.y;calMonth=cur.m;drawCalendar();p.classList.add("show"); }
 function drawCalendar(){ const p=document.getElementById("calendarPopup");if(!p)return;const first=new Date(calYear,calMonth,1);let start=(first.getDay()+6)%7;const days=new Date(calYear,calMonth+1,0).getDate();const prevDays=new Date(calYear,calMonth,0).getDate();let cells="";WD.forEach(w=>cells+=`<div class="cal-week">${w}</div>`);for(let i=0;i<42;i++){let d=i-start+1,y=calYear,m=calMonth,muted=false;if(d<1){d=prevDays+d;m=calMonth-1;muted=true;if(m<0){m=11;y--}}else if(d>days){d=d-days;m=calMonth+1;muted=true;if(m>11){m=0;y++}}const key=dateKey(y,m,d),selected=key===selectedDate,has=dateHasStudies(y,m,d);cells+=`<button class="cal-day ${muted?'muted-day':''} ${selected?'selected':''} ${has?'has-study':''}" onclick="chooseCalendarDate(${y},${m},${d})">${d}</button>`;}p.innerHTML=`<div class="cal-head"><button class="cal-nav" onclick="moveCalendar(-1)">‹</button><div class="cal-title">${MONTHS[calMonth]} ${calYear}</div><button class="cal-nav" onclick="moveCalendar(1)">›</button></div><div class="cal-grid">${cells}</div><div class="cal-note"><b>●</b> Hay estudios registrados en esa fecha</div>`; }
 function moveCalendar(delta){calMonth+=delta;if(calMonth<0){calMonth=11;calYear--}if(calMonth>11){calMonth=0;calYear++}drawCalendar();}
-function chooseCalendarDate(y,m,d){selectedDate=dateKey(y,m,d);const available=getPatientsForDate(selectedDate);if(!available.some(p=>p.id===sel?.id))sel=available[0]||null;si=sel?Math.max(0,sel.s.findIndex(s=>s[0]===selectedDate)):0;img=1;scale=1;render();}
+function chooseCalendarDate(y,m,d){selectedDate=dateKey(y,m,d);const available=getPatientsForDate(selectedDate);sel=available[0]||null;si=0;img=1;scale=1;render();}
 
 const STUDIES=["TÓRAX","COLUMNA CERVICAL","COLUMNA DORSAL","COLUMNA LUMBAR","COLUMNA COMPLETA","PELVIS","CADERA","ABDOMEN","CRÁNEO","SENOS PARANASALES","HOMBRO","CODO","ANTEBRAZO","MUÑECA","MANO","RODILLA","PIERNA","TOBILLO","PIE","CUELLO","CLAVÍCULA","ESTERNÓN","COSTILLAS","SACROCOCCÍGEA","SACROILÍACA","TEMPOROMANDIBULAR","DENTAL","TC","RM","MAMOGRAFÍA","ECOGRAFÍA","OTRO"];
 let patientFiles=[],addFiles=[];
