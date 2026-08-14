@@ -660,7 +660,8 @@ PACS.state = {
   pinchActive: false,
   pinchStartDistance: 0,
   pinchStartScale: 1,
-  storageBucket: "IMAGENES"
+  storageBucket: "IMAGENES",
+  _imageRefreshTimer: null
 };
 
 
@@ -787,19 +788,21 @@ PACS.data = {
     PACS.state.patients=this.mapRows(data||[]);
     return PACS.state.patients;
   },
-  async hydrateImages(){
-    for(const p of PACS.state.patients){
-      for(const study of p.studies){
-        for(const item of study.images){
-          if(typeof item==="string" && PACS.data.imagePath(item)){
-            const url=await PACS.supabase.signedUrl(PACS.data.imagePath(item));
-            const i=study.images.indexOf(item);
-            if(i>=0) study.images[i]={path:item,name:`Imagen ${i+1}`,url};
-          } else if(item && typeof item==="object" && item.path && !item.url){
-            const url=await PACS.supabase.signedUrl(item.path);
-            if(url) item.url=url;
-          }
-        }
+  async hydrateImages(study=PACS.data.currentStudy()){
+    if(!study?.images?.length) return;
+    const items=study.images.slice();
+    for(let i=0;i<items.length;i++){
+      const item=items[i];
+      const path=PACS.data.imagePath(item);
+      if(!path) continue;
+      const url=await PACS.supabase.signedUrl(path);
+      if(!url) continue;
+      if(typeof item==="string"){
+        study.images[i]={path,name:`Imagen ${i+1}`,url};
+      }else if(item && typeof item==="object"){
+        item.url=url;
+        item.publicUrl="";
+        item.localUrl=item.pending?item.localUrl:"";
       }
     }
   },
@@ -892,7 +895,7 @@ PACS.images = {
       const up=await PACS.supabase.storageUpload(path,file);
       if(up.error) throw up.error;
       const url=await PACS.supabase.signedUrl(path);
-      uploaded.push({path,name:file.name,url});
+      uploaded.push({path,name:file.name});
     }
     return uploaded;
   },
@@ -918,6 +921,7 @@ PACS.patients = {
     PACS.state.selectedImage=PACS.data.studyCount(PACS.data.currentStudy())>0?1:0;
     PACS.app.resetViewer();
     PACS.app.render();
+    PACS.data.hydrateImages(PACS.data.currentStudy()).then(()=>PACS.app.render()).catch(err=>console.error("Image refresh:",err));
     if(window.matchMedia?.("(max-width: 850px)").matches){
       this.closeSide();
       document.querySelectorAll(".mobile-nav button").forEach(b=>b.classList.remove("active"));
@@ -1014,6 +1018,7 @@ PACS.studies = {
     PACS.state.selectedImage=PACS.data.studyCount(p.studies[index])>0?1:0;
     PACS.app.resetViewer();
     PACS.app.render();
+    PACS.data.hydrateImages(PACS.data.currentStudy()).then(()=>PACS.app.render()).catch(err=>console.error("Image refresh:",err));
   },
   async chooseDate(label){
     if(!label)return;
@@ -1040,7 +1045,7 @@ PACS.studies = {
       PACS.state.selectedImage=PACS.data.studyCount(PACS.data.currentStudy())>0?1:0;
       PACS.app.resetViewer();
       PACS.app.render();
-      PACS.data.hydrateImages().then(()=>PACS.app.render()).catch(err=>console.error("Image hydration:",err));
+      PACS.data.hydrateImages(PACS.data.currentStudy()).then(()=>PACS.app.render()).catch(err=>console.error("Image hydration:",err));
     }catch(err){
       console.error("Calendar refresh:",err);
       PACS.ui.toast("Se cambió la fecha, pero no se pudo actualizar el contenido remoto.");
@@ -1119,6 +1124,14 @@ PACS.app = {
         await this.sync();
         this.render();
       }
+      // Signed URLs are temporary. Refresh only the study currently being viewed.
+      if(!PACS.state._imageRefreshTimer){
+        PACS.state._imageRefreshTimer=setInterval(()=>{
+          if(!PACS.state.logged)return;
+          const study=PACS.data.currentStudy();
+          PACS.data.hydrateImages(study).then(()=>PACS.app.render()).catch(err=>console.error("Automatic image refresh:",err));
+        },45*60*1000);
+      }
     }catch(err){
       console.error("PACS startup:",err);
       const status=document.getElementById("loginStatus");
@@ -1143,7 +1156,7 @@ PACS.app = {
     }
     const study=PACS.data.currentStudy();
     PACS.state.selectedImage=PACS.data.studyCount(study)>0?1:0;
-    PACS.data.hydrateImages().then(()=>this.render()).catch(err=>console.error("Image hydration:",err));
+    PACS.data.hydrateImages(study).then(()=>this.render()).catch(err=>console.error("Image hydration:",err));
   },
   renderSearchResults(mobile=false){
     const q=PACS.state.searchTerm;
