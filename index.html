@@ -695,8 +695,12 @@
 }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
-<body>
+<style id="auth-boot-fix">
+body.auth-booting #loginModal,
+body.auth-booting .app{visibility:hidden}
+body.auth-booting{background:#061014}
+</style></head>
+<body class="auth-booting">
 
 <div id="appLoading" class="app-loading">Cargando PACS…</div>
 
@@ -1781,6 +1785,14 @@ PACS.app = {
     const tool=e.target.closest?.("[data-tool]")?.dataset?.tool;
     const mobile=e.target.closest?.("[data-mobile]")?.dataset?.mobile;
 
+    // En móvil, cerrar el menú de Administrador/⋮ al tocar fuera del propio menú.
+    if(window.matchMedia?.("(max-width: 850px)").matches){
+      const adminMenu=document.querySelector(".user .menu.open, .mobile-admin-menu.open, [data-admin-menu].open");
+      if(adminMenu && !e.target.closest?.(".user .menu") && !e.target.closest?.("[data-admin-menu]")){
+        adminMenu.classList.remove("open");
+      }
+    }
+
     if(patientBtn){ e.preventDefault(); return PACS.patients.select(decodeURIComponent(patientBtn)); }
     if(studyBtn){ e.preventDefault(); return PACS.studies.select(Number(studyBtn.dataset.studyIndex)); }
     if(imageBtn){ e.preventDefault(); PACS.state.selectedImage=Number(imageBtn.dataset.imageIndex); return this.render(); }
@@ -2217,7 +2229,9 @@ const calDate=e.target.closest?.("[data-calendar-date]")?.dataset?.calendarDate;
 
 </script>
 <script>
-window.PACS.app.start();
+Promise.resolve(window.PACS.app.start()).finally(()=>{
+  document.body.classList.remove("auth-booting");
+});
 </script>
 <script>
 document.addEventListener("change",function(e){
