@@ -506,7 +506,7 @@ function render(){
     <aside class="left">
       <div class="title">PACIENTES DEL DÍA</div><div class="subhead">${selectedDate}</div>
       <div class="muted">${getPatientsForDate(selectedDate).length} pacientes con estudios</div>
-      <button class="add admin-action" onclick="openAddPatient()">＋ Agregar paciente</button>
+      <button type="button" class="add admin-action" data-action="add-patient">＋ Agregar paciente</button>
       <div class="patients">${pb()}</div>
     </aside>
 
@@ -523,10 +523,10 @@ function render(){
       <div class="kv">Estudio actual<br><b style="color:var(--text)">${x[1] || "—"}</b><br>📅 ${x[0] || "—"}<br>🕐 ${x[3] || "—"}<br>🖼️ ${x[2] || 0} imágenes<br><span class="ok">● Disponible</span></div></div>
       <div class="title subhead" style="margin-top:18px">ACCIONES</div>
       <div class="actions">
-        <button class="action admin-action" onclick="openEditPatient()">✏️ Modificar paciente</button>
-        <button class="action admin-action" onclick="openAddImages()">➕ Añadir imágenes</button>
-        <button class="action admin-action" onclick="openDeleteImage()">🗑️ Eliminar imagen</button>
-        <button class="action danger admin-action" onclick="openDeletePatient()">🔴 ✕ Eliminar paciente</button>
+        <button class="action admin-action" data-action="edit-patient">✏️ Modificar paciente</button>
+        <button class="action admin-action" data-action="add-images">➕ Añadir imágenes</button>
+        <button class="action admin-action" data-action="delete-image">🗑️ Eliminar imagen</button>
+        <button class="action danger admin-action" data-action="delete-patient">🔴 ✕ Eliminar paciente</button>
       </div>
     </aside>
   </main>
@@ -535,7 +535,7 @@ function render(){
   <nav class="mobile-nav"><button class="active"><span>🏠</span>Inicio</button><button onclick="openSide()"><span>👥</span>Pacientes</button><button onclick="scrollTo({top:0,behavior:'smooth'})"><span>🩻</span>Visor</button></nav>
   <div id="overlay" class="overlay" onclick="closeSide()"></div>
   <aside id="side" class="side"><div style="display:flex;justify-content:space-between"><b>← PACIENTES</b><button class="close" onclick="closeSide()">×</button></div>
-    <input placeholder="🔎 Buscar paciente..."><button class="add admin-action" onclick="openAddPatient()">＋ Agregar paciente</button><div class="patients">${pb()}</div>
+    <input placeholder="🔎 Buscar paciente..."><button type="button" class="add admin-action" data-action="add-patient">＋ Agregar paciente</button><div class="patients">${pb()}</div>
   </aside>`;
 
   gesture();
@@ -607,33 +607,66 @@ function chooseStudy(id,value){
 }
 function getStudyValue(id){return (document.getElementById(id+"Label")?.textContent||"").trim().toUpperCase();}
 
-function openAddPatient(){if(currentRole!=="admin"){toast("Solo el Administrador puede agregar pacientes.");return;}document.getElementById("patientModalTitle").textContent="Agregar paciente";document.getElementById("pName").value="";document.getElementById("pDni").value="";document.getElementById("pSex").value="";document.getElementById("pBirth").value="";document.getElementById("pStudyDate").textContent=selectedDate;patientFiles=[];document.getElementById("patientFiles").innerHTML="";fillStudySelect("pStudyType");showStudies("pStudyType");openModal("patientModal");}
-function openEditPatient(){if(currentRole!=="admin"){toast("Solo el Administrador puede modificar pacientes.");return;}if(!sel){toast("Selecciona un paciente primero para realizar esta acción.");return;}document.getElementById("eName").value=sel.n;document.getElementById("eDni").value=sel.dni||"";document.getElementById("eSex").value="";document.getElementById("eBirth").value=sel.birth||"";openModal("editModal");}
-function openAddImages(){if(currentRole!=="admin"){toast("Solo el Administrador puede añadir imágenes.");return;}if(!sel){toast("Selecciona un paciente primero para realizar esta acción.");return;}document.getElementById("aPatient").value=sel.n;document.getElementById("aStudyDate").value=selectedDate;const currentStudy=sel.s?.[si]?.[1]||"";fillStudySelect("aStudyType",currentStudy);showStudies("aStudyType");addFiles=[];document.getElementById("addFiles").innerHTML="";openModal("imagesModal");}
+function openAddPatient(){
+  if(currentRole!=="admin"){toast("Solo el Administrador puede agregar pacientes.");return;}
+  document.getElementById("patientModalTitle").textContent="AGREGAR PACIENTE";
+  document.getElementById("pName").value="";
+  document.getElementById("pDni").value="";
+  document.getElementById("pSex").value="";
+  document.getElementById("pBirth").value="";
+  document.getElementById("pStudyDate").textContent=selectedDate;
+  patientFiles=[];
+  const fl=document.getElementById("patientFiles"); if(fl)fl.innerHTML="";
+  fillStudySelect("pStudyType");
+  showStudies("pStudyType");
+  openModal("patientModal");
+}
+function openEditPatient(){
+  if(currentRole!=="admin"){toast("Solo el Administrador puede modificar pacientes.");return;}
+  if(!sel){toast("Selecciona un paciente primero para realizar esta acción.");return;}
+  document.getElementById("eName").value=sel.n||"";
+  document.getElementById("eDni").value=sel.dni||"";
+  document.getElementById("eSex").value="";
+  document.getElementById("eBirth").value=sel.birth||"";
+  openModal("editModal");
+}
+function openAddImages(){
+  if(currentRole!=="admin"){toast("Solo el Administrador puede añadir imágenes.");return;}
+  if(!sel){toast("Selecciona un paciente primero para realizar esta acción.");return;}
+  document.getElementById("aPatient").value=sel.n||"";
+  document.getElementById("aStudyDate").value=selectedDate;
+  const currentStudy=sel?.s?.[si]?.[1]||"";
+  fillStudySelect("aStudyType",currentStudy);
+  showStudies("aStudyType");
+  addFiles=[];
+  const fl=document.getElementById("addFiles"); if(fl)fl.innerHTML="";
+  openModal("imagesModal");
+}
 function openDeleteImage(){
   if(currentRole!=="admin"){toast("Solo el Administrador puede eliminar imágenes.");return;}
   if(!sel){toast("Selecciona un paciente primero para realizar esta acción.");return;}
   const study=sel?.s?.[si];
   if(!study){toast("No hay estudio seleccionado.");return;}
-  if(Number(study[2]||0)<=0){toast("No hay imágenes para eliminar.");return;}
-  document.getElementById("confirmTitle").textContent="Eliminar imagen";
-  document.getElementById("confirmText").innerHTML=`Las imágenes todavía se gestionarán desde Storage en el siguiente paso.`;
-  document.getElementById("confirmBtn").onclick=()=>{closeModal("confirmModal");};
+  const count=Number(study[2]||0);
+  if(count<=0){toast("El estudio seleccionado no tiene imágenes.");return;}
+  document.getElementById("confirmTitle").textContent="ELIMINAR IMAGEN";
+  document.getElementById("confirmText").innerHTML=`¿Deseas eliminar la imagen <b>${img}</b> del estudio <b>${study[1]}</b>?`;
+  document.getElementById("confirmBtn").onclick=()=>closeModal("confirmModal");
   openModal("confirmModal");
 }
 function openDeletePatient(){
   if(currentRole!=="admin"){toast("Solo el Administrador puede eliminar pacientes.");return;}
   if(!sel){toast("Selecciona un paciente primero para realizar esta acción.");return;}
-  document.getElementById("confirmTitle").textContent="Eliminar paciente";
-  document.getElementById("confirmText").innerHTML=`¿ELIMINAR AL PACIENTE <b>${sel.n}</b>?<br><br>Se eliminarán sus estudios asociados.`;
+  document.getElementById("confirmTitle").textContent="ELIMINAR PACIENTE";
+  document.getElementById("confirmText").innerHTML=`¿Deseas eliminar al paciente <b>${sel.n}</b>?`;
   document.getElementById("confirmBtn").onclick=async()=>{
     try{
       const {error}=await supabaseClient.from("studies").delete().eq("patient",sel.n);
       if(error)throw error;
       closeModal("confirmModal");
-      toast("Paciente eliminado.");
       sel=null;si=0;img=1;
       await loadStudiesFromSupabase();
+      toast("Paciente eliminado correctamente.");
       render();
     }catch(err){
       console.error(err);
@@ -642,7 +675,6 @@ function openDeletePatient(){
   };
   openModal("confirmModal");
 }
-
 function handleFiles(files,target){const arr=Array.from(files||[]);if(target==="patientFiles")patientFiles.push(...arr);else addFiles.push(...arr);renderFileList(target==="patientFiles"?patientFiles:addFiles,target);}
 function renderFileList(arr,target){const el=document.getElementById(target);if(!el)return;el.innerHTML=arr.map(f=>`<div class="file-row"><span>🖼️ ${f.name}</span><span>${Math.round(f.size/1024)} KB</span></div>`).join("");}
 function bindDrop(id,target){const d=document.getElementById(id);if(!d)return;["dragenter","dragover"].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.add("drag")}));["dragleave","drop"].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.remove("drag")}));d.addEventListener("drop",e=>handleFiles(e.dataTransfer.files,target));}
@@ -727,6 +759,18 @@ document.addEventListener("keydown",e=>{
       filterStudies(active.id.replace("Search",""),active.value.slice(0,-1));
     }
   }
+});
+
+
+document.addEventListener("click",e=>{
+  const action=e.target.closest?.("[data-action]")?.dataset?.action;
+  if(!action)return;
+  e.preventDefault();
+  if(action==="add-patient") return openAddPatient();
+  if(action==="edit-patient") return openEditPatient();
+  if(action==="add-images") return openAddImages();
+  if(action==="delete-image") return openDeleteImage();
+  if(action==="delete-patient") return openDeletePatient();
 });
 
 initSupabase();
