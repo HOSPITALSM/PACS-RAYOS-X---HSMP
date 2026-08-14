@@ -568,24 +568,49 @@ function openDeletePatient(){if(currentRole!=="admin"){toast("Solo el Administra
 function handleFiles(files,target){const arr=Array.from(files||[]);if(target==="patientFiles")patientFiles.push(...arr);else addFiles.push(...arr);renderFileList(target==="patientFiles"?patientFiles:addFiles,target);}
 function renderFileList(arr,target){const el=document.getElementById(target);if(!el)return;el.innerHTML=arr.map(f=>`<div class="file-row"><span>🖼️ ${f.name}</span><span>${Math.round(f.size/1024)} KB</span></div>`).join("");}
 function bindDrop(id,target){const d=document.getElementById(id);if(!d)return;["dragenter","dragover"].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.add("drag")}));["dragleave","drop"].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.remove("drag")}));d.addEventListener("drop",e=>handleFiles(e.dataTransfer.files,target));}
-function savePatient(){toast("La base de datos todavía no está conectada para guardar pacientes.");}
-function saveEditPatient(){toast("La base de datos todavía no está conectada para modificar pacientes.");}
-function saveImages(){toast("La base de datos todavía no está conectada para guardar imágenes.");}
+async function savePatient(){
+  if(currentRole!=="admin"){toast("Solo el Administrador puede agregar pacientes.");return;}
+  const name=document.getElementById("pName").value.trim().toUpperCase();
+  const structure=getStudyValue("pStudyType");
+  const birth=document.getElementById("pBirth").value;
+  const sex=document.getElementById("pSex").value;
+  const dni=document.getElementById("pDni").value.trim();
+  if(!name){toast("El nombre del paciente es obligatorio.");return;}
+  if(!structure){toast("Selecciona una estructura / estudio.");return;}
+  if(!supabaseClient){toast("No hay conexión con Supabase.");return;}
 
-function toast(msg){const t=document.getElementById("toast");if(!t)return;t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2600);}
+  const studyDateISO = (()=>{
+    const [d,mon,y]=selectedDate.split(" ");
+    const months={ENE:"01",FEB:"02",MAR:"03",ABR:"04",MAY:"05",JUN:"06",JUL:"07",AGO:"08",SEP:"09",OCT:"10",NOV:"11",DIC:"12"};
+    return `${y}-${months[mon]}-${String(d).padStart(2,"0")}`;
+  })();
+  const modality = ({TC:"TC",RM:"RM",MAMOGRAFÍA:"MAMOGRAFÍA",ECOGRAFÍA:"ECOGRAFÍA"}[structure] || "RX");
 
-function gesture(){
-  const a=document.getElementById("image"); if(!a)return;
-  let sx=0;
-  a.onpointerdown=e=>{sx=e.clientX;a.setPointerCapture(e.pointerId)};
-  a.onpointerup=e=>{
-    if(!sel?.s?.[si])return;
-    const d=e.clientX-sx;
-    if(Math.abs(d)>70){
-      img=d<0?Math.min(sel.s[si][2],img+1):Math.max(1,img-1);
-      render();
+  const btns=[...document.querySelectorAll("#patientModal .modal-actions button")];
+  btns.forEach(b=>b.disabled=true);
+  try{
+    const {error}=await supabaseClient.from("studies").insert({
+      patient:name,
+      date:studyDateISO,
+      study:structure,
+      structure:structure,
+      modality:modality,
+      images:[]
+    });
+    if(error){
+      console.error(error);
+      toast("No se pudo guardar el paciente en Supabase.");
+      return;
     }
-  };
+    closeModal("patientModal");
+    patientFiles=[];
+    await loadStudiesFromSupabase();
+    toast("Paciente agregado correctamente.");
+    render();
+  }catch(err){
+    console.error(err);
+    toast("Ocurrió un error al guardar el paciente.");
+  }finally{btns.forEach(b=>b.disabled=false);}
 }
 
 document.addEventListener("click",e=>{
