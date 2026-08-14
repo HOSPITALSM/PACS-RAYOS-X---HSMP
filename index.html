@@ -359,18 +359,21 @@ function mapStudiesRows(rows){
   });
 }
 
-async function loadStudiesFromSupabase(){
+async async function loadStudiesFromSupabase(){
   if(!supabaseClient) return;
   const {data,error}=await supabaseClient
     .from("studies")
     .select("*")
     .order("date",{ascending:false})
     .order("created_at",{ascending:false});
+
   if(error){
     console.error("Supabase studies:",error);
     throw error;
   }
-  P = mapStudiesRows(data||[]);
+
+  P = mapStudiesRows(data || []);
+
   if(P.length){
     const available=getPatientsForDate(selectedDate);
     sel = available[0] || P[0];
@@ -378,7 +381,9 @@ async function loadStudiesFromSupabase(){
     si=idx>=0?idx:0;
     img=1;
   }else{
-    sel=null; si=0; img=1;
+    sel=null;
+    si=0;
+    img=1;
   }
 }
 
