@@ -387,6 +387,19 @@
 @media(max-width:850px){
   body.drawer-open{overflow:hidden}
 }
+
+@media(max-width:850px){
+  #side{
+    touch-action:pan-y;
+    overflow-y:auto !important;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior:contain;
+  }
+  #side .patients{
+    touch-action:pan-y;
+    overflow:visible !important;
+  }
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -1181,28 +1194,8 @@ PACS.app = {
   },
   endImageDrag(){PACS.state.isDraggingImage=false;},
 
-  mobileDrawerTouchStart(e){
-    if(!window.matchMedia?.("(max-width: 850px)").matches)return;
-    const side=document.getElementById("side");
-    if(!side?.classList.contains("open"))return;
-    if(!e.touches?.length)return;
-    const t=e.touches[0];
-    this._drawerTouchStartX=t.clientX;
-    this._drawerTouchStartY=t.clientY;
-  },
-  mobileDrawerTouchEnd(e){
-    if(!window.matchMedia?.("(max-width: 850px)").matches)return;
-    const side=document.getElementById("side");
-    if(!side?.classList.contains("open"))return;
-    if(this._drawerTouchStartX==null)return;
-    const t=e.changedTouches?.[0];
-    if(!t)return;
-    const dx=t.clientX-this._drawerTouchStartX;
-    const dy=t.clientY-this._drawerTouchStartY;
-    if(dx < -70 && Math.abs(dx)>Math.abs(dy)) this.closeSide();
-    this._drawerTouchStartX=null;
-    this._drawerTouchStartY=null;
-  },
+  mobileDrawerTouchStart(e){},
+  mobileDrawerTouchEnd(e){},
   bindGlobalEvents(){
     if(this._eventsBound)return;
     this._eventsBound=true;
