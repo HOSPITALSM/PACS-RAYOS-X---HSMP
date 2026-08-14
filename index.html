@@ -858,21 +858,6 @@ overflow:visible!important;
 }
 </style>
 <style>
-/* V4 — logo ligeramente más grande */
-@media(min-width:701px){
-.logo{
-width:60px!important;
-height:60px!important;
-}
-.logo img{
-width:60px!important;
-height:60px!important;
-}
-}
-</style>
-
-
-<style>
 /* V4 — móvil: desplazamiento vertical normal con un dedo */
 @media(max-width:700px){
 
@@ -1456,30 +1441,7 @@ button.delete:hover,
 
 }
 
-/* V10 — búsqueda junto al bloque de fecha en escritorio */
-@media(min-width:701px){
-
-.topbar{
-  display:flex!important;
-  align-items:center!important;
-}
-
-.search{
-  margin-left:auto!important;
-  margin-right:8px!important;
-  width:310px!important;
-  max-width:310px!important;
-  flex:0 0 310px!important;
-}
-
-.current-date{
-  flex:0 0 auto!important;
-  order:10!important;
-}
-
-}
 </style>
-
 
 <style id="v13-final-layout">
 /* =========================================================
@@ -1777,6 +1739,11 @@ body{letter-spacing:.01em}
 }
 </style>
 
+
+<style id="v21-anonymous-interface-state">
+/* V21 — sin datos visibles cuando no hay sesión. Solo la interfaz. */
+.anonymous-no-data{}
+</style>
 </head>
 <body>
 <header class="topbar">
@@ -2640,6 +2607,7 @@ container.appendChild(div);
 }
 }
 function selectDate(date){
+if(currentAuthRole!=="admin" && currentAuthRole!=="viewer")return;
 selectedDate=date;
 patientListDate=date;
 currentPatient=null;
@@ -2739,6 +2707,7 @@ list.appendChild(element);
 });
 }
 function searchPatients(){
+if(currentAuthRole!=="admin" && currentAuthRole!=="viewer")return;
 const input=
 document.getElementById("search");
 const results=
@@ -4454,11 +4423,13 @@ currentAuthRole="admin";
 updateAuthInterface(
 data.session.user
 );
+await loadAuthorizedData();
 }else if(userId===VIEWER_UID){
 currentAuthRole="viewer";
 updateAuthInterface(
 data.session.user
 );
+await loadAuthorizedData();
 }else{
 currentAuthRole="anonymous";
 await supabaseClient
@@ -4467,6 +4438,7 @@ await supabaseClient
 }
 }else{
 currentAuthRole="anonymous";
+resetAnonymousState();
 }
 
 supabaseClient
@@ -4485,11 +4457,13 @@ currentAuthRole="admin";
 updateAuthInterface(
 session.user
 );
+await loadAuthorizedData();
 }else if(userId===VIEWER_UID){
 currentAuthRole="viewer";
 updateAuthInterface(
 session.user
 );
+await loadAuthorizedData();
 }else{
 currentAuthRole="anonymous";
 await supabaseClient
@@ -4502,9 +4476,95 @@ currentAuthRole="anonymous";
 updateAuthInterface(
 null
 );
+resetAnonymousState();
 }
 });
 }
+function resetAnonymousState(){
+currentAuthRole="anonymous";
+studies=[];
+/* Se conservan los valores de fecha ya vigentes.
+   Al no haber datos, el calendario se repinta sin indicadores de estudios,
+   pero la fecha seleccionada y su funcionamiento no se modifican. */
+currentPatient=null;
+currentStudy=0;
+currentImage=0;
+resetView();
+
+const patientList=document.getElementById("patientList");
+if(patientList)patientList.innerHTML="";
+const patientCount=document.getElementById("patientCount");
+if(patientCount)patientCount.textContent="";
+
+const search=document.getElementById("search");
+if(search)search.value="";
+const searchResults=document.getElementById("searchResults");
+if(searchResults)searchResults.style.display="none";
+
+/* Mantener la fecha tal como estaba; quitar únicamente sus indicadores de estudios. */
+renderCalendar();
+setDateLabel(selectedDate);
+
+const empty=document.getElementById("emptyMessage");
+if(empty){
+  empty.textContent="";
+  empty.style.display="none";
+}
+
+const viewerTitle=document.getElementById("viewerTitle");
+if(viewerTitle)viewerTitle.textContent="";
+const viewerSubtitle=document.getElementById("viewerSubtitle");
+if(viewerSubtitle)viewerSubtitle.textContent="";
+const imageCounter=document.getElementById("imageCounter");
+if(imageCounter)imageCounter.textContent="";
+const overlayRight=document.getElementById("overlayRight");
+if(overlayRight)overlayRight.innerHTML="";
+const imageWrapper=document.getElementById("imageWrapper");
+if(imageWrapper)imageWrapper.style.display="none";
+const thumbnailList=document.getElementById("thumbnailList");
+if(thumbnailList)thumbnailList.innerHTML="";
+
+const infoPatientName=document.getElementById("infoPatientName");
+if(infoPatientName)infoPatientName.textContent="";
+const infoPatientMeta=document.getElementById("infoPatientMeta");
+if(infoPatientMeta)infoPatientMeta.textContent="";
+const infoDate=document.getElementById("infoDate");
+if(infoDate)infoDate.textContent="";
+const infoImages=document.getElementById("infoImages");
+if(infoImages)infoImages.textContent="";
+const infoStudy=document.getElementById("infoStudy");
+if(infoStudy)infoStudy.textContent="";
+const infoCurrentImage=document.getElementById("infoCurrentImage");
+if(infoCurrentImage)infoCurrentImage.textContent="";
+const infoImageStructure=document.getElementById("infoImageStructure");
+if(infoImageStructure)infoImageStructure.textContent="";
+
+const studySelector=document.getElementById("studySelector");
+if(studySelector)studySelector.innerHTML="";
+
+const viewerAdminActions=document.getElementById("viewerAdminActions");
+if(viewerAdminActions)viewerAdminActions.style.display="none";
+const editPatientButton=document.getElementById("editPatientButton");
+if(editPatientButton)editPatientButton.style.display="none";
+const addStudyButton=document.getElementById("addStudyButton");
+if(addStudyButton)addStudyButton.style.display="none";
+
+const calendarPanel=document.querySelector(".panel:last-child");
+if(calendarPanel)calendarPanel.classList.remove("calendar-open");
+closeMobilePanels();
+}
+
+async function loadAuthorizedData(){
+if(currentAuthRole!=="admin" && currentAuthRole!=="viewer")return;
+if(!selectedDate){
+  selectedDate=getTodayString();
+  patientListDate=selectedDate;
+  calendarDate=new Date(selectedDate+"T00:00:00");
+}
+await loadStudies();
+setDateLabel(selectedDate);
+}
+
 function updateAuthInterface(
 user
 ){
@@ -4558,17 +4618,7 @@ addStudyButton.style.display=
 closeAddImages();
 closeAddStudy();
 closeEditPatient();
-document.getElementById(
-"viewerAdminActions"
-).style.display="none";
-const editPatientButton=
-document.getElementById(
-"editPatientButton"
-);
-if(editPatientButton){
-editPatientButton.style.display=
-"none";
-}
+resetAnonymousState();
 }
 }
 async function logoutAdmin(){
@@ -5294,6 +5344,7 @@ fitImageToViewport();
 }
 });
 function toggleDatePopover(event){
+  if(currentAuthRole!=="admin" && currentAuthRole!=="viewer")return;
   if(event){ event.preventDefault(); event.stopPropagation(); }
   const calendarPanel=document.querySelector('.panel:last-child');
   if(!calendarPanel)return;
@@ -5339,11 +5390,8 @@ window.addEventListener('resize',function(){
     requestAnimationFrame(()=>{ if(typeof fitImageToViewport==='function')fitImageToViewport(); });
   }
 });
-renderCalendar();
-clearViewer();
-setDateLabel(selectedDate);
+resetAnonymousState();
 checkAuth();
-loadStudies();
 </script>
 
 <script>
@@ -5594,64 +5642,6 @@ function renderPatientStudiesBelow(){
     }
   );
 }
-
-function openPatientDateStudies(
-  patientName,
-  dateStudies
-){
-
-  if(
-    !patientName||
-    !dateStudies||
-    !dateStudies.length
-  ){
-    return;
-  }
-
-  const firstStudy=dateStudies[0];
-
-  /* Esta fecha solo controla el estudio del visor.
-     NO modifica patientListDate ni la lista de Pacientes. */
-  selectedDate=firstStudy.date;
-
-  if(firstStudy.date){
-    calendarDate=
-      new Date(
-        firstStudy.date+
-        "T00:00:00"
-      );
-
-    setDateLabel(firstStudy.date);
-    renderCalendar();
-  }
-
-  currentPatient=patientName;
-
-  const sameDateStudies=
-    studies.filter(
-      item=>
-        item.patient===patientName &&
-        item.date===firstStudy.date
-    );
-
-  const index=
-    sameDateStudies.findIndex(
-      item=>item.id===firstStudy.id
-    );
-
-  currentStudy=index>=0?index:0;
-  currentImage=0;
-
-  resetView();
-
-  renderStudy(firstStudy);
-
-  /* La lista Pacientes se vuelve a pintar con patientListDate,
-     no con selectedDate. */
-  renderPatients();
-  renderPatientStudiesBelow();
-}
-
 
 function openPatientDateStudies(
   patientName,
