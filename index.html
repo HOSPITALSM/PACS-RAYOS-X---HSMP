@@ -104,6 +104,16 @@
 .study-picker-arrow{color:var(--muted);font-size:15px}
 .study-option{width:100%;text-align:left;border:0;background:none;color:var(--text);padding:10px 12px;cursor:pointer}
 .study-option:hover,.study-option:focus{background:#17313b;color:var(--cyan);outline:none}
+
+.patient-empty{
+  padding:14px 8px;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.5;
+  border:1px dashed var(--line);
+  border-radius:9px;
+  margin-top:8px;
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -286,6 +296,7 @@ async function doLogin(){
     currentRole = role;
     logged = true;
     setViewerClass();
+    await loadStudiesFromSupabase();
 
     try {
       if (document.getElementById("rememberUser")?.checked) {
@@ -329,8 +340,15 @@ function parseStudyImagesCount(value){
 
 function normalizeStudyDate(v){
   if(!v) return "";
-  const d = new Date(v);
-  if(Number.isNaN(d.getTime())) return String(v).toUpperCase();
+  const raw=String(v).trim();
+  const isoDateOnly=/^(\d{4})-(\d{2})-(\d{2})$/;
+  const m=raw.match(isoDateOnly);
+  if(m){
+    const months=["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"];
+    return `${m[3]} ${months[Number(m[2])-1]} ${m[1]}`.toUpperCase();
+  }
+  const d=new Date(raw);
+  if(Number.isNaN(d.getTime())) return raw.toUpperCase();
   const months=["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"];
   return `${String(d.getDate()).padStart(2,"0")} ${months[d.getMonth()]} ${d.getFullYear()}`.toUpperCase();
 }
@@ -388,23 +406,23 @@ async function loadStudiesFromSupabase(){
 }
 
 async function restoreSession(){
-  if (!supabaseClient) return;
-  try {
-    const { data, error } = await supabaseClient.auth.getSession();
-    if (error || !data?.session?.user) return;
-
-    const role = roleFromUser(data.session.user);
-    if (!role) {
+  if(!supabaseClient) return;
+  try{
+    const {data,error}=await supabaseClient.auth.getSession();
+    if(error || !data?.session?.user) return;
+    const role=roleFromUser(data.session.user);
+    if(!role){
       await supabaseClient.auth.signOut();
       return;
     }
-
-    currentRole = role;
-    logged = true;
+    currentRole=role;
+    logged=true;
     setViewerClass();
+    await loadStudiesFromSupabase();
     render();
-  } catch (e) {
+  }catch(e){
     console.error(e);
+    toast("No se pudieron cargar los estudios.");
   }
 }
 
@@ -436,7 +454,7 @@ function patientMatchesSearch(term){
 }
 
 function pb(list = filteredPatients()){
-  if (!list.length) return `<div class="muted" style="padding:12px 4px">No hay pacientes registrados en esta fecha.</div>`;
+  if (!list.length) return `<div class="patient-empty">No hay pacientes registrados en esta fecha.</div>`;
   return list.map(p => `<button class="patient ${p.id == sel?.id ? 'active' : ''}" onclick="pick(${p.id})">
     <strong>${p.g === 'M' ? '👨' : p.g === 'F' ? '👩' : '👤'} ${p.n}</strong>
     <span>${p.s.find(s => s[0] === selectedDate)?.[1] || 'Ver historial'} · ${p.s.filter(s => s[0] === selectedDate).reduce((a,s) => a + (Number(s[2]) || 0), 0)} imágenes</span>
@@ -559,31 +577,12 @@ function parseSelectedDate(){ const [d,mon,y]=selectedDate.split(" "); const m=M
 function toggleCalendar(e){ e?.stopPropagation(); const p=document.getElementById("calendarPopup"); if(!p)return; if(p.classList.contains("show")){p.classList.remove("show");return} const cur=parseSelectedDate(); calYear=cur.y;calMonth=cur.m;drawCalendar();p.classList.add("show"); }
 function drawCalendar(){ const p=document.getElementById("calendarPopup");if(!p)return;const first=new Date(calYear,calMonth,1);let start=(first.getDay()+6)%7;const days=new Date(calYear,calMonth+1,0).getDate();const prevDays=new Date(calYear,calMonth,0).getDate();let cells="";WD.forEach(w=>cells+=`<div class="cal-week">${w}</div>`);for(let i=0;i<42;i++){let d=i-start+1,y=calYear,m=calMonth,muted=false;if(d<1){d=prevDays+d;m=calMonth-1;muted=true;if(m<0){m=11;y--}}else if(d>days){d=d-days;m=calMonth+1;muted=true;if(m>11){m=0;y++}}const key=dateKey(y,m,d),selected=key===selectedDate,has=dateHasStudies(y,m,d);cells+=`<button class="cal-day ${muted?'muted-day':''} ${selected?'selected':''} ${has?'has-study':''}" onclick="chooseCalendarDate(${y},${m},${d})">${d}</button>`;}p.innerHTML=`<div class="cal-head"><button class="cal-nav" onclick="moveCalendar(-1)">‹</button><div class="cal-title">${MONTHS[calMonth]} ${calYear}</div><button class="cal-nav" onclick="moveCalendar(1)">›</button></div><div class="cal-grid">${cells}</div><div class="cal-note"><b>●</b> Hay estudios registrados en esa fecha</div>`; }
 function moveCalendar(delta){calMonth+=delta;if(calMonth<0){calMonth=11;calYear--}if(calMonth>11){calMonth=0;calYear++}drawCalendar();}
-function chooseCalendarDate(y,m,d){selectedDate=dateKey(y,m,d);const available=getPatientsForDate(selectedDate);sel=available[0]||null;si=0;img=1;scale=1;render();}
-
-const STUDIES=["TÓRAX","COLUMNA CERVICAL","COLUMNA DORSAL","COLUMNA LUMBAR","COLUMNA COMPLETA","PELVIS","CADERA","ABDOMEN","CRÁNEO","SENOS PARANASALES","HOMBRO","CODO","ANTEBRAZO","MUÑECA","MANO","RODILLA","PIERNA","TOBILLO","PIE","CUELLO","CLAVÍCULA","ESTERNÓN","COSTILLAS","SACROCOCCÍGEA","SACROILÍACA","TEMPOROMANDIBULAR","DENTAL","TC","RM","MAMOGRAFÍA","ECOGRAFÍA","OTRO"];
-let patientFiles=[],addFiles=[];
-
-function fillStudySelect(id,selected=""){
-  const wrap=document.getElementById(id); if(!wrap)return;
-  const value=(selected||"").toUpperCase();
-  wrap.innerHTML=`<div class="study-search-wrap" title="Seleccionar estructura / estudio">
-    <button type="button" class="study-search study-picker-btn" id="${id}Picker">
-      <span id="${id}Label">${value || "SELECCIONA ESTRUCTURA / ESTUDIO"}</span>
-      <span class="study-picker-arrow">▾</span>
-    </button>
-    <div class="study-options" id="${id}Options"></div>
-  </div>
-  <div class="study-selected" id="${id}Selected">${value ? "ESTRUCTURA SELECCIONADA: "+value : "SELECCIONAR ESTRUCTURA / ESTUDIO"}</div>`;
-  const picker=document.getElementById(id+"Picker");
-  picker?.addEventListener("click",e=>{
-    e.preventDefault();
-    e.stopPropagation();
-    const opts=document.getElementById(id+"Options");
-    renderStudyOptions(id,"");
-    opts?.classList.toggle("show");
-  });
-  renderStudyOptions(id,"");
+async function chooseCalendarDate(y,m,d){
+  selectedDate=dateKey(y,m,d);
+  try{ await loadStudiesFromSupabase(); }catch(e){ console.error(e); }
+  const available=getPatientsForDate(selectedDate);
+  sel=available[0]||null;
+  si=0;img=1;scale=1;render();
 }
 function renderStudyOptions(id,term=""){
   const opts=document.getElementById(id+"Options"); if(!opts)return;
@@ -607,10 +606,10 @@ function chooseStudy(id,value){
 function getStudyValue(id){return (document.getElementById(id+"Label")?.textContent||"").trim().toUpperCase();}
 
 function openAddPatient(){if(currentRole!=="admin"){toast("Solo el Administrador puede agregar pacientes.");return;}document.getElementById("patientModalTitle").textContent="Agregar paciente";document.getElementById("pName").value="";document.getElementById("pDni").value="";document.getElementById("pSex").value="";document.getElementById("pBirth").value="";document.getElementById("pStudyDate").textContent=selectedDate;patientFiles=[];document.getElementById("patientFiles").innerHTML="";fillStudySelect("pStudyType");showStudies("pStudyType");openModal("patientModal");}
-function openEditPatient(){if(currentRole!=="admin"){toast("Solo el Administrador puede modificar pacientes.");return;}if(!sel){toast("Selecciona un paciente primero.");return;}document.getElementById("eName").value=sel.n;document.getElementById("eDni").value=sel.dni||"";document.getElementById("eSex").value="";document.getElementById("eBirth").value=sel.birth||"";openModal("editModal");}
-function openAddImages(){if(currentRole!=="admin"){toast("Solo el Administrador puede añadir imágenes.");return;}if(!sel){toast("Selecciona un paciente primero.");return;}document.getElementById("aPatient").value=sel.n;document.getElementById("aStudyDate").value=selectedDate;const currentStudy=sel.s?.[si]?.[1]||"";fillStudySelect("aStudyType",currentStudy);showStudies("aStudyType");addFiles=[];document.getElementById("addFiles").innerHTML="";openModal("imagesModal");}
-function openDeleteImage(){if(currentRole!=="admin"){toast("Solo el Administrador puede eliminar imágenes.");return;}if(!sel){toast("Selecciona un paciente primero.");return;}const study=sel.s?.[si];if(!study){toast("No hay estudio seleccionado.");return;}if((study[2]||0)<=0){toast("No hay imágenes para eliminar.");return;}document.getElementById("confirmTitle").textContent="Eliminar imagen";document.getElementById("confirmText").innerHTML=`¿ELIMINAR LA IMAGEN <b>${img}</b> del estudio <b>${study[1]}</b>?<br><br>Esta acción <b>no eliminará al paciente</b> ni las demás imágenes.`;document.getElementById("confirmBtn").onclick=()=>{study[2]=Math.max(0,study[2]-1);img=Math.min(img,Math.max(1,study[2]));closeModal("confirmModal");toast("Imagen eliminada.");render();};openModal("confirmModal");}
-function openDeletePatient(){if(currentRole!=="admin"){toast("Solo el Administrador puede eliminar pacientes.");return;}if(!sel){toast("Selecciona un paciente primero.");return;}document.getElementById("confirmTitle").textContent="Eliminar paciente";document.getElementById("confirmText").innerHTML=`¿ELIMINAR AL PACIENTE <b>${sel.n}</b>?<br><br>Se eliminarán sus datos, estudios e imágenes asociadas.`;document.getElementById("confirmBtn").onclick=()=>{const id=sel.id;const idx=P.findIndex(p=>p.id===id);if(idx>=0)P.splice(idx,1);sel=P[0]||null;si=0;img=1;closeModal("confirmModal");toast("Paciente eliminado.");render();};openModal("confirmModal");}
+function openEditPatient(){if(currentRole!=="admin"){toast("Solo el Administrador puede modificar pacientes.");return;}if(!sel){toast("Selecciona un paciente primero para realizar esta acción.");return;}document.getElementById("eName").value=sel.n;document.getElementById("eDni").value=sel.dni||"";document.getElementById("eSex").value="";document.getElementById("eBirth").value=sel.birth||"";openModal("editModal");}
+function openAddImages(){if(currentRole!=="admin"){toast("Solo el Administrador puede añadir imágenes.");return;}if(!sel){toast("Selecciona un paciente primero para realizar esta acción.");return;}document.getElementById("aPatient").value=sel.n;document.getElementById("aStudyDate").value=selectedDate;const currentStudy=sel.s?.[si]?.[1]||"";fillStudySelect("aStudyType",currentStudy);showStudies("aStudyType");addFiles=[];document.getElementById("addFiles").innerHTML="";openModal("imagesModal");}
+function openDeleteImage(){if(currentRole!=="admin"){toast("Solo el Administrador puede eliminar imágenes.");return;}if(!sel){toast("Selecciona un paciente primero para realizar esta acción.");return;}const study=sel.s?.[si];if(!study){toast("No hay estudio seleccionado.");return;}if((study[2]||0)<=0){toast("No hay imágenes para eliminar.");return;}document.getElementById("confirmTitle").textContent="Eliminar imagen";document.getElementById("confirmText").innerHTML=`¿ELIMINAR LA IMAGEN <b>${img}</b> del estudio <b>${study[1]}</b>?<br><br>Esta acción <b>no eliminará al paciente</b> ni las demás imágenes.`;document.getElementById("confirmBtn").onclick=()=>{study[2]=Math.max(0,study[2]-1);img=Math.min(img,Math.max(1,study[2]));closeModal("confirmModal");toast("Imagen eliminada.");render();};openModal("confirmModal");}
+function openDeletePatient(){if(currentRole!=="admin"){toast("Solo el Administrador puede eliminar pacientes.");return;}if(!sel){toast("Selecciona un paciente primero para realizar esta acción.");return;}document.getElementById("confirmTitle").textContent="Eliminar paciente";document.getElementById("confirmText").innerHTML=`¿ELIMINAR AL PACIENTE <b>${sel.n}</b>?<br><br>Se eliminarán sus datos, estudios e imágenes asociadas.`;document.getElementById("confirmBtn").onclick=()=>{const id=sel.id;const idx=P.findIndex(p=>p.id===id);if(idx>=0)P.splice(idx,1);sel=P[0]||null;si=0;img=1;closeModal("confirmModal");toast("Paciente eliminado.");render();};openModal("confirmModal");}
 
 function handleFiles(files,target){const arr=Array.from(files||[]);if(target==="patientFiles")patientFiles.push(...arr);else addFiles.push(...arr);renderFileList(target==="patientFiles"?patientFiles:addFiles,target);}
 function renderFileList(arr,target){const el=document.getElementById(target);if(!el)return;el.innerHTML=arr.map(f=>`<div class="file-row"><span>🖼️ ${f.name}</span><span>${Math.round(f.size/1024)} KB</span></div>`).join("");}
