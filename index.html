@@ -550,5 +550,18 @@ function toast(msg){const t=document.getElementById("toast");if(!t)return;t.text
 function gesture(){let a=document.getElementById("image"),sx=0;a.onpointerdown=e=>{sx=e.clientX;a.setPointerCapture(e.pointerId)};a.onpointerup=e=>{let d=e.clientX-sx;if(Math.abs(d)>70){img=d<0?Math.min(sel.s[si][2],img+1):Math.max(1,img-1);render()}}}initSupabase();
 restoreSession();
 home();
+
+document.addEventListener("keydown",e=>{
+  if(e.key!=="Enter") return;
+  const loginOpen=document.getElementById("loginModal")?.classList.contains("show");
+  if(!loginOpen) return;
+  const tag=(e.target?.tagName||"").toLowerCase();
+  if(tag==="input" || tag==="button"){
+    e.preventDefault();
+    const btn=document.getElementById("loginSubmit");
+    if(btn) btn.click(); else doLogin();
+  }
+});
+
 </script>
 </body></html>
