@@ -375,6 +375,54 @@
 }
 
 @media(max-width:850px){
+  .mobile-nav{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    height:68px;
+    background:#071116;
+    border-top:1px solid var(--line);
+    box-shadow:0 -8px 24px #0005;
+    padding:4px 8px max(4px,env(safe-area-inset-bottom));
+    box-sizing:border-box;
+    gap:6px;
+  }
+  .mobile-nav button{
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:1px;
+    min-height:58px;
+    border:1px solid transparent;
+    border-radius:11px;
+    background:transparent;
+    color:var(--muted);
+    font-size:12px;
+    font-weight:600;
+    transition:.18s ease;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .mobile-nav button span{
+    display:block;
+    font-size:21px;
+    line-height:24px;
+    margin:0;
+    filter:grayscale(.15);
+  }
+  .mobile-nav button.active{
+    color:var(--cyan);
+    background:#102932;
+    border-color:#5ed2e533;
+    box-shadow:inset 0 2px 0 #5ed2e5,0 4px 14px #0003;
+  }
+  .mobile-nav button.active span{
+    filter:none;
+    transform:translateY(-1px);
+  }
+  .mobile-nav button:active{transform:scale(.97)}
+}
+@media(max-width:850px){
   .mobile-nav{z-index:900!important}
   #overlay{z-index:1000!important}
   #side{display:block!important;visibility:visible!important;z-index:1100!important;transform:translate3d(-110%,0,0)!important}
@@ -528,6 +576,75 @@
     padding:10px 0 !important;
   }
 }
+
+@media(max-width:850px){
+  .mobile-admin-actions{
+    position:relative;
+    flex:0 0 auto;
+    margin-left:auto;
+    align-self:flex-start;
+  }
+  .mobile-more-btn{
+    width:42px;
+    height:42px;
+    border:1px solid var(--line);
+    border-radius:10px;
+    background:#0e1d24;
+    color:var(--text);
+    font-size:27px;
+    line-height:1;
+    display:grid;
+    place-items:center;
+    cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .mobile-more-btn:active{
+    transform:scale(.96);
+    border-color:var(--cyan);
+  }
+  .mobile-more-menu{
+    display:none;
+    position:absolute;
+    top:48px;
+    right:0;
+    width:min(250px,78vw);
+    padding:8px;
+    background:#102027;
+    border:1px solid var(--line);
+    border-radius:12px;
+    box-shadow:0 18px 45px #0009;
+    z-index:1200;
+  }
+  .mobile-more-menu.show{display:block}
+  .mobile-more-menu b{
+    display:block;
+    padding:8px 10px 7px;
+    color:var(--cyan);
+    font-size:11px;
+    letter-spacing:.6px;
+  }
+  .mobile-more-menu button{
+    width:100%;
+    min-height:46px;
+    display:flex;
+    align-items:center;
+    gap:9px;
+    border:0;
+    border-radius:8px;
+    background:transparent;
+    color:var(--text);
+    padding:10px;
+    text-align:left;
+    font-size:14px;
+  }
+  .mobile-more-menu button:hover,
+  .mobile-more-menu button:active{background:#17313b}
+  .mobile-more-menu button.danger{color:#ff9d9d}
+}
+@media(min-width:851px){
+  .mobile-admin-actions{display:none!important}
+}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -1179,6 +1296,16 @@ PACS.app = {
 
     document.getElementById("root").innerHTML=`<header class="top">
       <div class="brand"><img src="DXLOGO.png" class="brand-logo" alt="Logo"><div class="brand-text"><b>HOSPITAL SAN MARTIN DE PANGOA</b><span>DIAGNÓSTICO POR IMAGEN</span></div></div>
+        ${st.role==="admin"?`<div class="mobile-admin-actions">
+          <button type="button" class="mobile-more-btn" data-action="mobile-more-toggle" aria-label="Más acciones" title="Más acciones">⋮</button>
+          <div id="mobileMoreMenu" class="mobile-more-menu">
+            <b>ACCIONES</b>
+            <button data-action="edit-patient">✏️ <span>Modificar paciente</span></button>
+            <button data-action="add-images">➕ <span>Añadir imágenes</span></button>
+            <button data-action="delete-image">🗑️ <span>Eliminar imagen</span></button>
+            <button class="danger" data-action="delete-patient">🔴 <span>Eliminar paciente</span></button>
+          </div>
+        </div>`:""}
       <div class="tr">
         <div class="search-wrap"><input id="topSearch" class="search" placeholder="🔎 Buscar paciente..."><div id="searchResults"></div></div>
         <div class="date-wrap"><button class="date-field" data-action="calendar-toggle">📅 <span id="dateLabel">${st.selectedDate}</span><span class="date-chevron">▾</span></button><div id="calendarPopup" class="calendar-popup"></div></div>
@@ -1490,13 +1617,20 @@ const calDate=e.target.closest?.("[data-calendar-date]")?.dataset?.calendarDate;
     e.preventDefault();
     if(action==="login-open")return this.openLogin();
     if(action==="menu-toggle")return document.getElementById("menu")?.classList.toggle("show");
+    if(action==="mobile-more-toggle"){
+      document.getElementById("mobileMoreMenu")?.classList.toggle("show");
+      return;
+    }
     if(action==="logout"){await PACS.auth.logout();return this.home();}
+    if(!e.target.closest?.(".mobile-admin-actions")){
+      document.getElementById("mobileMoreMenu")?.classList.remove("show");
+    }
     if(action==="fullscreen"){document.getElementById("image")?.requestFullscreen?.();return;}
     if(action==="add-patient")return this.openAddPatient();
-    if(action==="edit-patient")return this.openEditPatient();
-    if(action==="add-images")return this.openAddImages();
-    if(action==="delete-image")return this.openDeleteImage();
-    if(action==="delete-patient")return this.openDeletePatient();
+    if(action==="edit-patient"){document.getElementById("mobileMoreMenu")?.classList.remove("show");return this.openEditPatient();}
+    if(action==="add-images"){document.getElementById("mobileMoreMenu")?.classList.remove("show");return this.openAddImages();}
+    if(action==="delete-image"){document.getElementById("mobileMoreMenu")?.classList.remove("show");return this.openDeleteImage();}
+    if(action==="delete-patient"){document.getElementById("mobileMoreMenu")?.classList.remove("show");return this.openDeletePatient();}
     if(action==="calendar-toggle")return this.toggleCalendar(e);
     if(action==="side-close")return this.closeSide();
     if(action==="close-patient-modal"){return PACS.ui.closeModal("patientModal");}
