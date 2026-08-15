@@ -813,7 +813,11 @@ PACS.state = {
   selectedPatient: null,
   selectedStudyIndex: 0,
   selectedImage: 0,
-  selectedDate: "14 AGO 2026",
+  selectedDate: (() => {
+    const d = new Date();
+    const months = ["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"];
+    return `${String(d.getDate()).padStart(2,"0")} ${months[d.getMonth()]} ${d.getFullYear()}`;
+  })(),
   searchTerm: "",
   patients: [],
   patientFiles: [],
