@@ -2737,6 +2737,65 @@ const calDate=e.target.closest?.("[data-calendar-date]")?.dataset?.calendarDate;
     document.body.classList.remove("drawer-open");
   },
   async onKey(e){
+    // Navegación rápida por teclado en los dos selectores de ESTRUCTURA / ESTUDIO.
+    // Funciona tanto en AGREGAR PACIENTE (pStudyType) como en AÑADIR IMÁGENES (aStudyType).
+    const openOpts=[...document.querySelectorAll(".study-options.show")].find(x=>x.offsetParent!==null);
+    const focusedPicker=e.target?.closest?.("[data-study-picker]");
+    const focusedOption=e.target?.closest?.("[data-study-choice]");
+    const pickerId=openOpts?.id?.replace(/Options$/,"") || focusedPicker?.dataset?.studyPicker || focusedOption?.dataset?.studyChoice || "";
+
+    if(pickerId && (openOpts || focusedPicker || focusedOption)){
+      let opts=document.getElementById(pickerId+"Options");
+
+      // Si el selector tiene el foco pero aún está cerrado, una letra, Flecha abajo/arriba
+      // o Enter lo abre para permitir búsqueda inmediata.
+      const shouldOpen=!opts?.classList.contains("show") &&
+        ((e.key?.length===1 && /[a-záéíóúüñ]/i.test(e.key)) || e.key==="ArrowDown" || e.key==="ArrowUp");
+      if(shouldOpen){
+        e.preventDefault();
+        if(opts){
+          opts.innerHTML=PACS.constants.studies.map(s=>`<button type="button" class="study-option" data-study-choice="${pickerId}" data-value="${s.replace(/"/g,"&quot;")}">${s}</button>`).join("");
+          document.querySelectorAll(".study-options.show").forEach(x=>{if(x!==opts)x.classList.remove("show");});
+          opts.classList.add("show");
+        }
+      }
+
+      opts=document.getElementById(pickerId+"Options");
+      if(opts?.classList.contains("show")){
+        const buttons=[...opts.querySelectorAll("[data-study-choice]")];
+        const current=Math.max(-1,buttons.indexOf(document.activeElement));
+
+        if(e.key==="ArrowDown" || e.key==="ArrowUp"){
+          e.preventDefault();
+          const delta=e.key==="ArrowDown"?1:-1;
+          const next=current<0?(delta>0?0:buttons.length-1):(current+delta+buttons.length)%buttons.length;
+          buttons[next]?.focus();
+          buttons[next]?.scrollIntoView({block:"nearest"});
+          return;
+        }
+
+        if(e.key==="Enter" && focusedOption){
+          e.preventDefault();
+          return this.renderStudyChoice(focusedOption.dataset.studyChoice,focusedOption.dataset.value);
+        }
+
+        if(e.key?.length===1 && /[a-záéíóúüñ]/i.test(e.key)){
+          e.preventDefault();
+          const normalize=v=>String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toUpperCase();
+          const letter=normalize(e.key);
+          const matches=buttons.filter(b=>normalize(b.dataset.value).startsWith(letter));
+          if(matches.length){
+            // Repetir la misma letra avanza al siguiente resultado de esa inicial.
+            const activeIndex=matches.indexOf(document.activeElement);
+            const next=matches[(activeIndex+1+matches.length)%matches.length];
+            next.focus();
+            next.scrollIntoView({block:"nearest"});
+          }
+          return;
+        }
+      }
+    }
+
     if(e.key==="Escape"){PACS.ui.closeAll();return;}
     if(e.key==="Enter" && document.getElementById("loginModal")?.classList.contains("show")){
       if(e.target?.tagName?.toLowerCase()==="input"){e.preventDefault();await this.doLogin();}
