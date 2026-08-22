@@ -1924,8 +1924,14 @@ PACS.app = {
       e.preventDefault();
       const opts=document.getElementById(picker+"Options");
       if(opts){
-        opts.innerHTML=PACS.constants.studies.map(s=>`<button type="button" class="study-option" data-study-choice="${picker}" data-value="${s.replace(/"/g,"&quot;")}">${s}</button>`).join("");
-        opts.classList.add("show");
+        const wasOpen=opts.classList.contains("show");
+        document.querySelectorAll(".study-options.show").forEach(x=>{ if(x!==opts) x.classList.remove("show"); });
+        if(wasOpen){
+          opts.classList.remove("show");
+        }else{
+          opts.innerHTML=PACS.constants.studies.map(s=>`<button type="button" class="study-option" data-study-choice="${picker}" data-value="${s.replace(/"/g,"&quot;")}">${s}</button>`).join("");
+          opts.classList.add("show");
+        }
       }
       return;
     }
