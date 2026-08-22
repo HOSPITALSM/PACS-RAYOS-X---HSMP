@@ -713,35 +713,27 @@
   .side{touch-action:pan-y}
 }
 
-/* V62 — grupos de estructuras + visor móvil ampliado */
+/* V62 — grupos de estructuras */
 .group-builder{grid-column:1/-1;border:1px solid var(--line);border-radius:12px;padding:12px;background:#09171d}
 .group-builder-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
 .group-builder-head b{font-size:13px;color:var(--cyan)}
-.group-add-btn{width:100%;margin-top:10px;padding:10px 12px;border-radius:9px;border:1px dashed #3d6674;background:#0b1b22;color:var(--text);font-weight:700}
-.group-add-btn:hover{border-color:var(--cyan);background:#102932}
 .group-summary{grid-column:1/-1;margin-top:4px}
 .group-summary-title{font-size:12px;color:var(--muted);font-weight:800;margin-bottom:6px}
 .group-card{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 10px;margin-top:6px;border:1px solid var(--line);border-radius:9px;background:#0d1b21}
 .group-card-main{min-width:0}.group-card-main b{display:block;color:var(--text);font-size:13px}.group-card-main span{display:block;color:var(--muted);font-size:11px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .group-remove{flex:0 0 auto;width:34px;height:34px;border:1px solid #5a3034;border-radius:8px;background:#231317;color:#ff9d9d;font-weight:800}
 .group-empty{padding:9px 10px;border:1px dashed var(--line);border-radius:9px;color:var(--muted);font-size:12px}
-.viewer-focus-hint{display:none}
+
+/* V63 — flujo automático de estructuras + visor móvil compacto */
 @media(max-width:850px){
-  .viewer .image{height:clamp(360px,62svh,720px)!important;min-height:360px!important}
-  .viewer .xray,.viewer .xray img{width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important}
-  .viewer .xray img{object-fit:contain!important;object-position:center center!important}
-  .mobile-patient-context{padding:7px 10px!important}
-  .viewer .vh{height:38px!important;min-height:38px!important}
-  .viewer .tools{height:42px!important;min-height:42px!important}
-  .viewer .thumbs{height:60px!important;min-height:60px!important;padding:6px 8px!important}
-  .viewer-focus-hint{display:block;position:absolute;right:8px;bottom:8px;z-index:5;padding:5px 8px;border-radius:999px;background:#061015bb;border:1px solid #31515d;color:#b9dce4;font-size:10px;pointer-events:none}
-  body.viewer-focus{overflow:hidden!important}
-  body.viewer-focus .top,body.viewer-focus .mobile-patient-context,body.viewer-focus .viewer .vh,body.viewer-focus .viewer .tools,body.viewer-focus .viewer .thumbs,body.viewer-focus .history,body.viewer-focus .mobile-nav{display:none!important}
-  body.viewer-focus .layout{height:100svh!important;min-height:100svh!important;padding:0!important}
-  body.viewer-focus .viewer{height:100svh!important;min-height:100svh!important;overflow:hidden!important}
-  body.viewer-focus .viewer .image{height:100svh!important;min-height:100svh!important;max-height:100svh!important}
-  body.viewer-focus .viewer-focus-hint{font-size:11px;bottom:12px;right:12px}
+  .viewer .image{
+    height:clamp(220px,36svh,350px)!important;
+    min-height:220px!important;
+  }
+  .viewer .xray{width:100%!important;height:100%!important}
+  .viewer .xray img{width:100%!important;height:100%!important;object-fit:contain!important}
 }
+
 
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -774,7 +766,7 @@ body.auth-booting{background:#061014}
 <div class="field full"><label>IMÁGENES</label>
 <div class="dropzone" id="pDrop" onclick="document.getElementById('pFiles').click()"><b>📎 SELECCIONAR IMÁGENES</b><span>O ARRASTRA UNA O VARIAS IMÁGENES AQUÍ</span></div>
 <input id="pFiles" type="file" accept="image/*,.dcm" multiple hidden onchange="handleFiles(this.files,'patientFiles')"><div class="file-list" id="patientFiles"></div>
-<button type="button" class="group-add-btn" data-action="patient-group-add">＋ AÑADIR OTRA ESTRUCTURA</button></div>
+</div>
 <div class="group-summary"><div class="group-summary-title">ESTRUCTURAS PREPARADAS</div><div id="patientGroups"></div></div>
 </div>
 <div class="modal-actions"><button class="secondary" data-action="close-patient-modal">CANCELAR</button><button class="btn" data-action="add-patient-save">AGREGAR PACIENTE</button></div>
@@ -818,7 +810,7 @@ body.auth-booting{background:#061014}
 <div class="field"><label>Imágenes <span class="optional">(puedes seleccionar varias)</span></label>
 <div class="dropzone" id="aDrop" onclick="document.getElementById('aFiles').click()"><b>📎 Seleccionar imágenes</b>o arrastra una o varias imágenes aquí</div>
 <input id="aFiles" type="file" accept="image/*,.dcm" multiple hidden onchange="handleFiles(this.files,'addFiles')"><div class="file-list" id="addFiles"></div>
-<button type="button" class="group-add-btn" data-action="images-group-add">＋ AÑADIR OTRA ESTRUCTURA</button></div>
+</div>
 <div class="group-summary"><div class="group-summary-title">ESTRUCTURAS PREPARADAS</div><div id="addGroups"></div></div>
 <div class="modal-actions"><button class="secondary" data-action="close-images-modal">Cancelar</button><button class="btn" data-action="images-save">GUARDAR IMÁGENES</button></div>
 </div></div>
@@ -845,6 +837,7 @@ body.auth-booting{background:#061014}
 
 
 <script>
+/* BUILD HSMP 2026-08-22 AUTO-GRUPOS V64 */
 /* ===== config.js ===== */
 window.PACS = window.PACS || {};
 PACS.config = {
@@ -1528,16 +1521,30 @@ PACS.view = {
 window.handleFiles=function(files,target){
   const arr=Array.from(files||[]);
   const state=window.PACS?.state;
-  if(!state)return;
-  if(target==="patientFiles")state.patientFiles.push(...arr);
-  if(target==="addFiles")state.addFiles.push(...arr);
-  const list=target==="patientFiles"?state.patientFiles:state.addFiles;
-  const el=document.getElementById(target);
-  if(el){
-    el.innerHTML=list.map(f=>`<div class="file-row"><span>🖼️ ${String(f.name).replace(/</g,"&lt;")}</span><span>${Math.max(1,Math.round((f.size||0)/1024))} KB</span></div>`).join("");
+  if(!state || !arr.length)return;
+
+  const scope=target==="patientFiles"?"patient":"add";
+  const pickerId=scope==="patient"?"pStudyType":"aStudyType";
+  const study=(document.getElementById(pickerId+"Label")?.textContent||"").trim().toUpperCase();
+
+  // Primero debe elegirse la estructura. No dejamos imágenes sin clasificar.
+  if(!PACS.constants.studies.includes(study)){
+    const input=document.getElementById(scope==="patient"?"pFiles":"aFiles");
+    if(input)input.value="";
+    PACS.ui.toast("Selecciona primero una estructura / estudio.");
+    return;
   }
-  const input=document.getElementById(target==="patientFiles"?"pFiles":"aFiles");
-  if(input)input.value="";
+
+  if(scope==="patient")state.patientFiles.push(...arr);
+  else state.addFiles.push(...arr);
+
+  // Al pulsar “Abrir” en el explorador, estructura + archivos se convierten
+  // inmediatamente en un grupo preparado. No existe un segundo botón intermedio.
+  const ok=PACS.app.commitGroup(scope,true);
+  if(ok){
+    PACS.app.renderGroups(scope);
+    PACS.ui.toast(`${study} · ${arr.length} imagen(es) preparada(s).`);
+  }
 };
 
 /* ===== app.js ===== */
@@ -1667,7 +1674,7 @@ PACS.app = {
       <section class="viewer">
         <div class="mobile-patient-context"><div class="mp-main"><div class="mp-name">${p?icon+" "+p.name:"Ningún paciente"}</div><div class="mp-sub">${study?`${study.study} · ${study.date}`:"Selecciona un paciente"}</div></div><div class="mp-count">${PACS.data.studyCount(study)?`${st.selectedImage}/${PACS.data.studyCount(study)}`:""}</div></div>
         <div class="vh"><b>${study?.study||"VISOR DE IMÁGENES"}</b><span>${PACS.data.studyCount(study)?`${st.selectedImage} / ${PACS.data.studyCount(study)}`:""}</span></div>
-        <div class="image" id="image"><div class="viewer-focus-hint">TOCA LA IMAGEN PARA AMPLIAR</div><div class="xray">${currentUrl?`<img src="${currentUrl}" alt="Imagen médica" draggable="false" style="width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;object-position:center center;transform:translate(${st.panX}px,${st.panY}px) scale(${st.scale}) rotate(${st.rotation}deg);filter: brightness(${st.brightness/100}) contrast(${st.contrast/100});cursor:${st.panMode?"grab":"default"}">`:(study&&PACS.data.studyCount(study)?`<div class="viewer-empty"><div class="viewer-spinner"></div><strong>Cargando imagen</strong><span>La radiografía se solicita solo cuando la visualizas.</span></div>`:`<div class="viewer-empty"><strong>${p?"Selecciona un estudio":"Selecciona un paciente"}</strong><span>${p?"Elige un estudio del historial para visualizar sus imágenes.":"Busca o selecciona un paciente para comenzar."}</span></div>`)}</div></div>
+        <div class="image" id="image"><div class="xray">${currentUrl?`<img src="${currentUrl}" alt="Imagen médica" draggable="false" style="width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;object-position:center center;transform:translate(${st.panX}px,${st.panY}px) scale(${st.scale}) rotate(${st.rotation}deg);filter: brightness(${st.brightness/100}) contrast(${st.contrast/100});cursor:${st.panMode?"grab":"default"}">`:(study&&PACS.data.studyCount(study)?`<div class="viewer-empty"><div class="viewer-spinner"></div><strong>Cargando imagen</strong><span>La radiografía se solicita solo cuando la visualizas.</span></div>`:`<div class="viewer-empty"><strong>${p?"Selecciona un estudio":"Selecciona un paciente"}</strong><span>${p?"Elige un estudio del historial para visualizar sus imágenes.":"Busca o selecciona un paciente para comenzar."}</span></div>`)}</div></div>
         <div class="tools" aria-label="Herramientas del visor">
           <button type="button" class="tool" data-tool="zoom-out" title="Alejar">−</button>
           <button type="button" class="tool" data-tool="zoom-in" title="Acercar">＋</button>
@@ -1963,14 +1970,6 @@ PACS.app = {
     if(searchResults?.innerHTML && !e.target.closest?.(".search-wrap")) searchResults.innerHTML="";
     if(!e.target.closest?.(".study-search-wrap")) document.querySelectorAll(".study-options.show").forEach(x=>x.classList.remove("show"));
 
-    // En móvil, tocar la radiografía alterna el modo de visualización casi a pantalla completa.
-    if(window.matchMedia?.("(max-width: 850px)").matches && e.target.closest?.("#image") && !e.target.closest?.("button")){
-      document.body.classList.toggle("viewer-focus");
-      const hint=document.querySelector(".viewer-focus-hint");
-      if(hint) hint.textContent=document.body.classList.contains("viewer-focus")?"TOCA PARA VOLVER":"TOCA LA IMAGEN PARA AMPLIAR";
-      return;
-    }
-
     if(patientBtn){ e.preventDefault(); return PACS.patients.select(decodeURIComponent(patientBtn)); }
     if(studyBtn){ e.preventDefault(); return PACS.studies.select(Number(studyBtn.dataset.studyIndex)); }
     if(imageBtn){
@@ -2065,8 +2064,6 @@ const calDate=e.target.closest?.("[data-calendar-date]")?.dataset?.calendarDate;
     if(action==="close-confirm-modal"){return PACS.ui.closeModal("confirmModal");}
     if(action==="close-login-modal"){return PACS.ui.closeModal("loginModal");}
     if(action==="login-submit")return this.doLogin();
-    if(action==="patient-group-add")return this.commitGroup("patient",true);
-    if(action==="images-group-add")return this.commitGroup("add",true);
     if(action==="group-remove"){
       const scope=e.target.closest?.("[data-group-scope]")?.dataset?.groupScope;
       const index=Number(e.target.closest?.("[data-group-index]")?.dataset?.groupIndex);
