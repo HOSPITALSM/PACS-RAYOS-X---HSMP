@@ -712,6 +712,37 @@
 @media(max-width:850px){
   .side{touch-action:pan-y}
 }
+
+/* V62 — grupos de estructuras + visor móvil ampliado */
+.group-builder{grid-column:1/-1;border:1px solid var(--line);border-radius:12px;padding:12px;background:#09171d}
+.group-builder-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.group-builder-head b{font-size:13px;color:var(--cyan)}
+.group-add-btn{width:100%;margin-top:10px;padding:10px 12px;border-radius:9px;border:1px dashed #3d6674;background:#0b1b22;color:var(--text);font-weight:700}
+.group-add-btn:hover{border-color:var(--cyan);background:#102932}
+.group-summary{grid-column:1/-1;margin-top:4px}
+.group-summary-title{font-size:12px;color:var(--muted);font-weight:800;margin-bottom:6px}
+.group-card{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 10px;margin-top:6px;border:1px solid var(--line);border-radius:9px;background:#0d1b21}
+.group-card-main{min-width:0}.group-card-main b{display:block;color:var(--text);font-size:13px}.group-card-main span{display:block;color:var(--muted);font-size:11px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.group-remove{flex:0 0 auto;width:34px;height:34px;border:1px solid #5a3034;border-radius:8px;background:#231317;color:#ff9d9d;font-weight:800}
+.group-empty{padding:9px 10px;border:1px dashed var(--line);border-radius:9px;color:var(--muted);font-size:12px}
+.viewer-focus-hint{display:none}
+@media(max-width:850px){
+  .viewer .image{height:clamp(360px,62svh,720px)!important;min-height:360px!important}
+  .viewer .xray,.viewer .xray img{width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important}
+  .viewer .xray img{object-fit:contain!important;object-position:center center!important}
+  .mobile-patient-context{padding:7px 10px!important}
+  .viewer .vh{height:38px!important;min-height:38px!important}
+  .viewer .tools{height:42px!important;min-height:42px!important}
+  .viewer .thumbs{height:60px!important;min-height:60px!important;padding:6px 8px!important}
+  .viewer-focus-hint{display:block;position:absolute;right:8px;bottom:8px;z-index:5;padding:5px 8px;border-radius:999px;background:#061015bb;border:1px solid #31515d;color:#b9dce4;font-size:10px;pointer-events:none}
+  body.viewer-focus{overflow:hidden!important}
+  body.viewer-focus .top,body.viewer-focus .mobile-patient-context,body.viewer-focus .viewer .vh,body.viewer-focus .viewer .tools,body.viewer-focus .viewer .thumbs,body.viewer-focus .history,body.viewer-focus .mobile-nav{display:none!important}
+  body.viewer-focus .layout{height:100svh!important;min-height:100svh!important;padding:0!important}
+  body.viewer-focus .viewer{height:100svh!important;min-height:100svh!important;overflow:hidden!important}
+  body.viewer-focus .viewer .image{height:100svh!important;min-height:100svh!important;max-height:100svh!important}
+  body.viewer-focus .viewer-focus-hint{font-size:11px;bottom:12px;right:12px}
+}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style id="auth-boot-fix">
@@ -742,7 +773,9 @@ body.auth-booting{background:#061014}
 <div class="field study-field"><label>ESTRUCTURA / ESTUDIO</label><div id="pStudyType"></div></div>
 <div class="field full"><label>IMÁGENES</label>
 <div class="dropzone" id="pDrop" onclick="document.getElementById('pFiles').click()"><b>📎 SELECCIONAR IMÁGENES</b><span>O ARRASTRA UNA O VARIAS IMÁGENES AQUÍ</span></div>
-<input id="pFiles" type="file" accept="image/*,.dcm" multiple hidden onchange="handleFiles(this.files,'patientFiles')"><div class="file-list" id="patientFiles"></div></div>
+<input id="pFiles" type="file" accept="image/*,.dcm" multiple hidden onchange="handleFiles(this.files,'patientFiles')"><div class="file-list" id="patientFiles"></div>
+<button type="button" class="group-add-btn" data-action="patient-group-add">＋ AÑADIR OTRA ESTRUCTURA</button></div>
+<div class="group-summary"><div class="group-summary-title">ESTRUCTURAS PREPARADAS</div><div id="patientGroups"></div></div>
 </div>
 <div class="modal-actions"><button class="secondary" data-action="close-patient-modal">CANCELAR</button><button class="btn" data-action="add-patient-save">AGREGAR PACIENTE</button></div>
 </div></div>
@@ -784,8 +817,10 @@ body.auth-booting{background:#061014}
 <div class="field"><label>Fecha del estudio</label><input id="aStudyDate" readonly></div>
 <div class="field"><label>Imágenes <span class="optional">(puedes seleccionar varias)</span></label>
 <div class="dropzone" id="aDrop" onclick="document.getElementById('aFiles').click()"><b>📎 Seleccionar imágenes</b>o arrastra una o varias imágenes aquí</div>
-<input id="aFiles" type="file" accept="image/*,.dcm" multiple hidden onchange="handleFiles(this.files,'addFiles')"><div class="file-list" id="addFiles"></div></div>
-<div class="modal-actions"><button class="secondary" data-action="close-images-modal">Cancelar</button><button class="btn" data-action="images-save">Añadir imágenes</button></div>
+<input id="aFiles" type="file" accept="image/*,.dcm" multiple hidden onchange="handleFiles(this.files,'addFiles')"><div class="file-list" id="addFiles"></div>
+<button type="button" class="group-add-btn" data-action="images-group-add">＋ AÑADIR OTRA ESTRUCTURA</button></div>
+<div class="group-summary"><div class="group-summary-title">ESTRUCTURAS PREPARADAS</div><div id="addGroups"></div></div>
+<div class="modal-actions"><button class="secondary" data-action="close-images-modal">Cancelar</button><button class="btn" data-action="images-save">GUARDAR IMÁGENES</button></div>
 </div></div>
 
 <div id="confirmModal" class="modal-bg"><div class="modal">
@@ -841,6 +876,8 @@ PACS.state = {
   patients: [],
   patientFiles: [],
   addFiles: [],
+  patientGroups: [],
+  addGroups: [],
   scale: 1,
   panX: 0,
   panY: 0,
@@ -1499,6 +1536,8 @@ window.handleFiles=function(files,target){
   if(el){
     el.innerHTML=list.map(f=>`<div class="file-row"><span>🖼️ ${String(f.name).replace(/</g,"&lt;")}</span><span>${Math.max(1,Math.round((f.size||0)/1024))} KB</span></div>`).join("");
   }
+  const input=document.getElementById(target==="patientFiles"?"pFiles":"aFiles");
+  if(input)input.value="";
 };
 
 /* ===== app.js ===== */
@@ -1628,7 +1667,7 @@ PACS.app = {
       <section class="viewer">
         <div class="mobile-patient-context"><div class="mp-main"><div class="mp-name">${p?icon+" "+p.name:"Ningún paciente"}</div><div class="mp-sub">${study?`${study.study} · ${study.date}`:"Selecciona un paciente"}</div></div><div class="mp-count">${PACS.data.studyCount(study)?`${st.selectedImage}/${PACS.data.studyCount(study)}`:""}</div></div>
         <div class="vh"><b>${study?.study||"VISOR DE IMÁGENES"}</b><span>${PACS.data.studyCount(study)?`${st.selectedImage} / ${PACS.data.studyCount(study)}`:""}</span></div>
-        <div class="image" id="image"><div class="xray">${currentUrl?`<img src="${currentUrl}" alt="Imagen médica" draggable="false" style="width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;object-position:center center;transform:translate(${st.panX}px,${st.panY}px) scale(${st.scale}) rotate(${st.rotation}deg);filter: brightness(${st.brightness/100}) contrast(${st.contrast/100});cursor:${st.panMode?"grab":"default"}">`:(study&&PACS.data.studyCount(study)?`<div class="viewer-empty"><div class="viewer-spinner"></div><strong>Cargando imagen</strong><span>La radiografía se solicita solo cuando la visualizas.</span></div>`:`<div class="viewer-empty"><strong>${p?"Selecciona un estudio":"Selecciona un paciente"}</strong><span>${p?"Elige un estudio del historial para visualizar sus imágenes.":"Busca o selecciona un paciente para comenzar."}</span></div>`)}</div></div>
+        <div class="image" id="image"><div class="viewer-focus-hint">TOCA LA IMAGEN PARA AMPLIAR</div><div class="xray">${currentUrl?`<img src="${currentUrl}" alt="Imagen médica" draggable="false" style="width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;object-position:center center;transform:translate(${st.panX}px,${st.panY}px) scale(${st.scale}) rotate(${st.rotation}deg);filter: brightness(${st.brightness/100}) contrast(${st.contrast/100});cursor:${st.panMode?"grab":"default"}">`:(study&&PACS.data.studyCount(study)?`<div class="viewer-empty"><div class="viewer-spinner"></div><strong>Cargando imagen</strong><span>La radiografía se solicita solo cuando la visualizas.</span></div>`:`<div class="viewer-empty"><strong>${p?"Selecciona un estudio":"Selecciona un paciente"}</strong><span>${p?"Elige un estudio del historial para visualizar sus imágenes.":"Busca o selecciona un paciente para comenzar."}</span></div>`)}</div></div>
         <div class="tools" aria-label="Herramientas del visor">
           <button type="button" class="tool" data-tool="zoom-out" title="Alejar">−</button>
           <button type="button" class="tool" data-tool="zoom-in" title="Acercar">＋</button>
@@ -1877,6 +1916,8 @@ PACS.app = {
     document.addEventListener("input", e=>{
       if(e.target?.id==="topSearch" || e.target?.id==="mobileSearch"){
         PACS.state.searchTerm=e.target.value.trim().toLowerCase();
+        document.getElementById("menu")?.classList.remove("show");
+        document.getElementById("mobileMoreMenu")?.classList.remove("show");
         this.renderSearchResults(e.target.id==="mobileSearch");
       }
     });
@@ -1913,22 +1954,21 @@ PACS.app = {
     const tool=e.target.closest?.("[data-tool]")?.dataset?.tool;
     const mobile=e.target.closest?.("[data-mobile]")?.dataset?.mobile;
 
-    // En móvil, cerrar los menús de Administrador y ⋮ al tocar fuera.
-    if(window.matchMedia?.("(max-width: 850px)").matches){
-      const userMenu=document.getElementById("menu");
-      const moreMenu=document.getElementById("mobileMoreMenu");
+    // Cerrar desplegables al hacer clic fuera, tanto en PC como en móvil.
+    const userMenu=document.getElementById("menu");
+    const moreMenu=document.getElementById("mobileMoreMenu");
+    const searchResults=document.getElementById("searchResults");
+    if(userMenu?.classList.contains("show") && !e.target.closest?.("#menu") && !e.target.closest?.("#userButton")) userMenu.classList.remove("show");
+    if(moreMenu?.classList.contains("show") && !e.target.closest?.("#mobileMoreMenu") && !e.target.closest?.(".mobile-more-btn")) moreMenu.classList.remove("show");
+    if(searchResults?.innerHTML && !e.target.closest?.(".search-wrap")) searchResults.innerHTML="";
+    if(!e.target.closest?.(".study-search-wrap")) document.querySelectorAll(".study-options.show").forEach(x=>x.classList.remove("show"));
 
-      if(userMenu?.classList.contains("show") &&
-         !e.target.closest?.("#menu") &&
-         !e.target.closest?.("#userButton")){
-        userMenu.classList.remove("show");
-      }
-
-      if(moreMenu?.classList.contains("show") &&
-         !e.target.closest?.("#mobileMoreMenu") &&
-         !e.target.closest?.(".mobile-more-btn")){
-        moreMenu.classList.remove("show");
-      }
+    // En móvil, tocar la radiografía alterna el modo de visualización casi a pantalla completa.
+    if(window.matchMedia?.("(max-width: 850px)").matches && e.target.closest?.("#image") && !e.target.closest?.("button")){
+      document.body.classList.toggle("viewer-focus");
+      const hint=document.querySelector(".viewer-focus-hint");
+      if(hint) hint.textContent=document.body.classList.contains("viewer-focus")?"TOCA PARA VOLVER":"TOCA LA IMAGEN PARA AMPLIAR";
+      return;
     }
 
     if(patientBtn){ e.preventDefault(); return PACS.patients.select(decodeURIComponent(patientBtn)); }
@@ -1992,6 +2032,7 @@ const calDate=e.target.closest?.("[data-calendar-date]")?.dataset?.calendarDate;
     if(action==="login-open")return this.openLogin();
     if(action==="menu-toggle"){
       document.getElementById("mobileMoreMenu")?.classList.remove("show");
+      const sr=document.getElementById("searchResults"); if(sr) sr.innerHTML="";
       return document.getElementById("menu")?.classList.toggle("show");
     }
     if(action==="mobile-more-toggle"){
@@ -2024,6 +2065,13 @@ const calDate=e.target.closest?.("[data-calendar-date]")?.dataset?.calendarDate;
     if(action==="close-confirm-modal"){return PACS.ui.closeModal("confirmModal");}
     if(action==="close-login-modal"){return PACS.ui.closeModal("loginModal");}
     if(action==="login-submit")return this.doLogin();
+    if(action==="patient-group-add")return this.commitGroup("patient",true);
+    if(action==="images-group-add")return this.commitGroup("add",true);
+    if(action==="group-remove"){
+      const scope=e.target.closest?.("[data-group-scope]")?.dataset?.groupScope;
+      const index=Number(e.target.closest?.("[data-group-index]")?.dataset?.groupIndex);
+      return this.removeGroup(scope,index);
+    }
     if(action==="add-patient-save")return this.savePatient();
     if(action==="edit-save")return this.saveEdit();
     if(action==="images-save")return this.saveImages();
@@ -2068,8 +2116,10 @@ const calDate=e.target.closest?.("[data-calendar-date]")?.dataset?.calendarDate;
     document.getElementById("pBirth").value="";
     document.getElementById("pStudyDate").textContent=PACS.state.selectedDate;
     PACS.state.patientFiles=[];
+    PACS.state.patientGroups=[];
     document.getElementById("patientFiles").innerHTML="";
     this.openStudyPicker("pStudyType");
+    this.renderGroups("patient");
     PACS.ui.openModal("patientModal");
   },
   openEditPatient(){
@@ -2091,8 +2141,10 @@ const calDate=e.target.closest?.("[data-calendar-date]")?.dataset?.calendarDate;
     document.getElementById("aPatient").value=p.name;
     document.getElementById("aStudyDate").value=study.date;
     PACS.state.addFiles=[];
+    PACS.state.addGroups=[];
     document.getElementById("addFiles").innerHTML="";
     this.openStudyPicker("aStudyType",study.study);
+    this.renderGroups("add");
     PACS.ui.openModal("imagesModal");
   },
   openDeleteImage(){
@@ -2225,55 +2277,98 @@ const calDate=e.target.closest?.("[data-calendar-date]")?.dataset?.calendarDate;
     const value=selected||"";
     wrap.innerHTML=`<div class="study-search-wrap"><button type="button" class="study-picker-btn" data-study-picker="${id}"><span id="${id}Label">${value||"SELECCIONA ESTRUCTURA / ESTUDIO"}</span><span class="study-picker-arrow">▾</span></button><div class="study-options" id="${id}Options"></div></div><div class="study-selected" id="${id}Selected">${value?"ESTRUCTURA SELECCIONADA: "+value:"SELECCIONAR ESTRUCTURA / ESTUDIO"}</div>`;
   },
+  groupConfig(scope){
+    return scope==="patient"
+      ?{groups:"patientGroups",files:"patientFiles",picker:"pStudyType",list:"patientGroups",input:"pFiles"}
+      :{groups:"addGroups",files:"addFiles",picker:"aStudyType",list:"addGroups",input:"aFiles"};
+  },
+  renderPendingFiles(scope){
+    const c=this.groupConfig(scope), list=PACS.state[c.files]||[], el=document.getElementById(c.files);
+    if(el) el.innerHTML=list.map(f=>`<div class="file-row"><span>🖼️ ${String(f.name).replace(/</g,"&lt;")}</span><span>${Math.max(1,Math.round((f.size||0)/1024))} KB</span></div>`).join("");
+  },
+  renderGroups(scope){
+    const c=this.groupConfig(scope), groups=PACS.state[c.groups]||[], el=document.getElementById(c.list);
+    if(!el)return;
+    if(!groups.length){el.innerHTML='<div class="group-empty">Aún no hay estructuras preparadas.</div>';return;}
+    el.innerHTML=groups.map((g,i)=>`<div class="group-card" data-group-scope="${scope}" data-group-index="${i}"><div class="group-card-main"><b>${g.study}</b><span>${g.files.length} imagen(es) · ${g.files.map(f=>String(f.name)).join(", ")}</span></div><button type="button" class="group-remove" data-action="group-remove" title="Quitar grupo">×</button></div>`).join("");
+  },
+  commitGroup(scope,resetPicker=true){
+    const c=this.groupConfig(scope);
+    const study=(document.getElementById(c.picker+"Label")?.textContent||"").trim().toUpperCase();
+    const files=(PACS.state[c.files]||[]).slice();
+    if(!PACS.constants.studies.includes(study)){PACS.ui.toast("Selecciona una estructura / estudio.");return false;}
+    if(!files.length){PACS.ui.toast("Selecciona al menos una imagen para esta estructura.");return false;}
+    const groups=PACS.state[c.groups];
+    const existing=groups.find(g=>g.study===study);
+    if(existing)existing.files.push(...files); else groups.push({study,files});
+    PACS.state[c.files]=[];
+    const input=document.getElementById(c.input); if(input)input.value="";
+    this.renderPendingFiles(scope);
+    this.renderGroups(scope);
+    if(resetPicker)this.openStudyPicker(c.picker);
+    return true;
+  },
+  removeGroup(scope,index){
+    const c=this.groupConfig(scope);
+    if(!Number.isInteger(index)||index<0)return;
+    PACS.state[c.groups].splice(index,1);
+    this.renderGroups(scope);
+  },
+  commitPendingIfAny(scope){
+    const c=this.groupConfig(scope);
+    const files=PACS.state[c.files]||[];
+    if(!files.length)return true;
+    return this.commitGroup(scope,false);
+  },
+  async appendFilesToStudy(study,files){
+    const backup=study.images.slice();
+    const previews=files.map(PACS.images.localPreview);
+    study.images.push(...previews);
+    try{
+      const uploaded=await PACS.images.uploadForStudy(study.id,files);
+      const next=[...backup,...uploaded];
+      const {error}=await PACS.state.client.from("studies").update({images:next}).eq("id",study.id);
+      if(error)throw error;
+      PACS.images.revoke(previews);
+      study.images=next;
+    }catch(err){
+      PACS.images.revoke(previews);
+      study.images=backup;
+      throw err;
+    }
+  },
   async savePatient(){
     const name=document.getElementById("pName")?.value.trim().toUpperCase();
-    const study=(document.getElementById("pStudyTypeLabel")?.textContent||"").trim().toUpperCase();
     if(!name)return PACS.ui.toast("El nombre del paciente es obligatorio.");
-    if(!PACS.constants.studies.includes(study))return PACS.ui.toast("Selecciona una estructura / estudio.");
-
-    const files=PACS.state.patientFiles.slice();
+    if(!this.commitPendingIfAny("patient"))return;
+    const groups=PACS.state.patientGroups.slice();
+    if(!groups.length)return PACS.ui.toast("Agrega al menos una estructura con imágenes.");
     const sex=document.getElementById("pSex")?.value||"";
     const btn=document.querySelector('[data-action="add-patient-save"]');
-    if(btn) btn.disabled=true;
-
+    if(btn)btn.disabled=true;
     try{
-      const created=await PACS.patients.add({
-        name,
-        study,
-        date:PACS.state.selectedDate,
-        files,
-        sex
-      });
-
-      // Refresco inmediato: el paciente ya existe en Supabase, por lo que
-      // reconstruimos la lista sin exigir F5. Si la lectura remota falla,
-      // conservamos el paciente optimista que ya mostramos.
-      try{
-        const beforeId=created?.id;
-        await PACS.data.loadStudies();
-        const refreshed=PACS.data.findPatient(beforeId)
-          ||PACS.data.patientsForDate(PACS.state.selectedDate)
-              .find(p=>p.name===name);
-
-        if(refreshed){
-          PACS.state.selectedPatient=refreshed;
-          const idx=refreshed.studies.findIndex(s=>s.date===PACS.state.selectedDate);
-          PACS.state.selectedStudyIndex=idx>=0?idx:0;
-          PACS.state.selectedImage=PACS.data.studyCount(PACS.data.currentStudy())>0?1:0;
-        }
-      }catch(refreshErr){
-        console.warn("PACS: refresco después de agregar no disponible; se conserva la actualización local.",refreshErr);
-        PACS.state.selectedPatient=created||PACS.state.selectedPatient;
+      let created=null;
+      for(const g of groups){
+        created=await PACS.patients.add({name,study:g.study,date:PACS.state.selectedDate,files:g.files,sex});
       }
-
-      PACS.app.render();
+      await PACS.data.loadStudies();
+      const refreshed=PACS.state.patients.find(p=>p.name===name)||created||null;
+      PACS.state.selectedPatient=refreshed;
+      if(refreshed){
+        const lastStudy=groups[groups.length-1].study;
+        const idx=refreshed.studies.findIndex(s=>s.date===PACS.state.selectedDate&&s.study===lastStudy);
+        PACS.state.selectedStudyIndex=idx>=0?idx:0;
+        PACS.state.selectedImage=PACS.data.studyCount(PACS.data.currentStudy())>0?1:0;
+        await PACS.data.hydrateImages(PACS.data.currentStudy());
+      }
+      PACS.state.patientGroups=[]; PACS.state.patientFiles=[];
+      this.render();
       PACS.ui.closeModal("patientModal");
+      PACS.ui.toast(`${groups.length} estructura(s) guardadas correctamente.`);
     }catch(err){
-      console.error("PACS: error al agregar paciente:",err);
-      PACS.ui.toast(err?.message||"No se pudo agregar el paciente.");
-    }finally{
-      if(btn) btn.disabled=false;
-    }
+      console.error("PACS: error al agregar paciente por estructuras:",err);
+      PACS.ui.toast(err?.message||"No se pudo completar el registro del paciente.");
+    }finally{if(btn)btn.disabled=false;}
   },
   async saveEdit(){
     const newName=document.getElementById("eName").value.trim().toUpperCase();
@@ -2286,30 +2381,52 @@ const calDate=e.target.closest?.("[data-calendar-date]")?.dataset?.calendarDate;
     }
   },
   async saveImages(){
-    const study=PACS.data.currentStudy();
-    const files=PACS.state.addFiles.slice();
-    if(!study)return PACS.ui.toast("Selecciona un estudio primero.");
-    if(!files.length)return PACS.ui.toast("Selecciona al menos una imagen.");
-    const previews=files.map(PACS.images.localPreview);
-    const backup=study.images.slice();
-    study.images.push(...previews);
-    PACS.state.selectedImage=backup.length?1:1;
-    PACS.ui.closeModal("imagesModal"); this.render(); PACS.ui.toast("Mostrando imágenes mientras se guardan…");
+    const p=PACS.state.selectedPatient;
+    const current=PACS.data.currentStudy();
+    if(!p||!current)return PACS.ui.toast("Selecciona un paciente y estudio primero.");
+    if(!this.commitPendingIfAny("add"))return;
+    const groups=PACS.state.addGroups.slice();
+    if(!groups.length)return PACS.ui.toast("Agrega al menos una estructura con imágenes.");
+    const date=document.getElementById("aStudyDate")?.value||current.date;
+    const btn=document.querySelector('[data-action="images-save"]');
+    if(btn)btn.disabled=true;
     try{
-      const uploaded=await PACS.images.uploadForStudy(study.id,files);
-      const {error}=await PACS.state.client.from("studies").update({images:[...backup,...uploaded]}).eq("id",study.id);
-      if(error)throw error;
-      PACS.images.revoke(previews);
-      study.images=[...backup,...uploaded];
-      await PACS.data.hydrateImages();
+      for(const g of groups){
+        let target=p.studies.find(s=>s.date===date&&String(s.study).toUpperCase()===g.study);
+        if(target){
+          await this.appendFilesToStudy(target,g.files);
+        }else{
+          await PACS.patients.add({name:p.name,study:g.study,date,files:g.files,sex:p.sex||""});
+          target=PACS.data.currentStudy();
+        }
+      }
+      const patientName=p.name;
+      await PACS.data.loadStudies();
+      const refreshed=PACS.state.patients.find(x=>x.name===patientName)||null;
+      PACS.state.selectedPatient=refreshed;
+      if(refreshed){
+        const last=groups[groups.length-1].study;
+        const idx=refreshed.studies.findIndex(s=>s.date===date&&String(s.study).toUpperCase()===last);
+        PACS.state.selectedStudyIndex=idx>=0?idx:0;
+        PACS.state.selectedImage=PACS.data.studyCount(PACS.data.currentStudy())>0?1:0;
+        await PACS.data.hydrateImages(PACS.data.currentStudy());
+      }
+      PACS.state.addGroups=[]; PACS.state.addFiles=[];
       this.render();
-      PACS.ui.toast("Imágenes guardadas correctamente.");
+      PACS.ui.closeModal("imagesModal");
+      PACS.ui.toast(`${groups.length} estructura(s) actualizadas correctamente.`);
     }catch(err){
-      study.images=backup; PACS.images.revoke(previews); this.render();
-      PACS.ui.toast(err.message||"No se pudieron guardar las imágenes.");
-    }
+      console.error("PACS: error al guardar imágenes por estructuras:",err);
+      PACS.ui.toast(err?.message||"No se pudieron guardar todas las imágenes.");
+    }finally{if(btn)btn.disabled=false;}
   },
   renderStudyChoice(id,value){
+    const scope=id==="pStudyType"?"patient":(id==="aStudyType"?"add":"");
+    const c=scope?this.groupConfig(scope):null;
+    const oldValue=(document.getElementById(id+"Label")?.textContent||"").trim().toUpperCase();
+    if(scope && PACS.state[c.files]?.length && PACS.constants.studies.includes(oldValue) && oldValue!==String(value).toUpperCase()){
+      this.commitGroup(scope,false);
+    }
     const label=document.getElementById(id+"Label");
     if(label)label.textContent=value;
     const s=document.getElementById(id+"Selected");
