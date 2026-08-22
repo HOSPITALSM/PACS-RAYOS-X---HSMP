@@ -690,6 +690,25 @@
   #patientModal{z-index:2000!important}
   #patientModal.show{z-index:2000!important}
 }
+
+/* V61 — resumen operativo + estados claros */
+.stats-row{display:flex;gap:6px;flex-wrap:wrap;margin:9px 0 4px}
+.stat-pill{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border:1px solid var(--line);border-radius:999px;background:#0b1b22;color:var(--muted);font-size:11px;line-height:1.2}
+.stat-pill b{color:var(--text);font-size:12px}
+.viewer-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;text-align:center;color:var(--muted);padding:24px;line-height:1.45}
+.viewer-empty strong{color:var(--text);font-size:14px}
+.viewer-spinner{width:24px;height:24px;border:2px solid #29444f;border-top-color:var(--cyan);border-radius:50%;animation:pacs-spin .8s linear infinite}
+@keyframes pacs-spin{to{transform:rotate(360deg)}}
+.mobile-patient-context{display:none}
+@media(max-width:850px){
+  .mobile-patient-context{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;background:#09181f;border-bottom:1px solid var(--line);min-width:0}
+  .mobile-patient-context .mp-main{min-width:0}
+  .mobile-patient-context .mp-name{display:flex;align-items:center;min-width:0;font-size:13px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mobile-patient-context .mp-sub{font-size:11px;color:var(--muted);margin-top:2px}
+  .mobile-patient-context .mp-count{flex:0 0 auto;color:var(--cyan);font-size:12px;font-weight:700}
+  .side .stats-row{margin:8px 0 10px}
+}
+@media(prefers-reduced-motion:reduce){.viewer-spinner{animation:none}}
 @media(max-width:850px){
   .side{touch-action:pan-y}
 }
@@ -1432,8 +1451,12 @@ PACS.view = {
     if(!list.length) return `<div class="patient-empty">No hay pacientes registrados en esta fecha.</div>`;
     return list.map(p=>{
       const active=PACS.state.selectedPatient?.id===p.id;
-      const s=p.studies.find(x=>x.date===PACS.state.selectedDate)||p.studies[0];
-      return `<button type="button" class="patient ${active?"active":""}" data-patient="${encodeURIComponent(p.id)}"><strong class="patient-name">${this.patientIcon(p.sex)}${p.name}</strong><span>${s?.study||"Ver historial"} · ${PACS.data.studyCount(s)} imágenes</span></button>`;
+      const dayStudies=p.studies.filter(x=>x.date===PACS.state.selectedDate);
+      const studies=dayStudies.length?dayStudies:p.studies.slice(0,1);
+      const imageCount=studies.reduce((n,x)=>n+PACS.data.studyCount(x),0);
+      const first=studies[0];
+      const studyLabel=studies.length>1?`${studies.length} estudios`:first?.study||"Ver historial";
+      return `<button type="button" class="patient ${active?"active":""}" data-patient="${encodeURIComponent(p.id)}"><strong class="patient-name">${this.patientIcon(p.sex)}${p.name}</strong><span>${studyLabel} · ${imageCount} imágenes</span></button>`;
     }).join("");
   },
   history(){
@@ -1545,8 +1568,18 @@ PACS.app = {
   },
   renderSearchResults(mobile=false){
     const q=PACS.state.searchTerm;
-    const list=PACS.data.patientsForDate().filter(p=>!q||p.name.toLowerCase().includes(q));
-    const html=list.map(p=>`<button type="button" class="patient ${PACS.state.selectedPatient?.id===p.id?"active":""}" data-patient="${encodeURIComponent(p.id)}"><strong class="patient-name">${PACS.view.patientIcon(p.sex)}${p.name}</strong><span>Ver historial</span></button>`).join("") || `<div class="patient-empty">No se encontraron pacientes.</div>`;
+    const base=q?PACS.state.patients:PACS.data.patientsForDate();
+    const list=base.filter(p=>{
+      if(!q) return true;
+      const haystack=[p.name,...p.studies.flatMap(st=>[st.study,st.date,st.modality])].join(" ").toLowerCase();
+      return haystack.includes(q);
+    });
+    const html=list.map(p=>{
+      const matching=q?p.studies.filter(st=>[st.study,st.date,st.modality].join(" ").toLowerCase().includes(q)):p.studies.filter(st=>st.date===PACS.state.selectedDate);
+      const shown=matching[0]||p.studies[0];
+      const meta=shown?`${shown.study} · ${shown.date}`:"Ver historial";
+      return `<button type="button" class="patient ${PACS.state.selectedPatient?.id===p.id?"active":""}" data-patient="${encodeURIComponent(p.id)}"><strong class="patient-name">${PACS.view.patientIcon(p.sex)}${p.name}</strong><span>${meta}</span></button>`;
+    }).join("") || `<div class="patient-empty">No se encontraron pacientes.</div>`;
     const box=document.getElementById(mobile?"mobilePatients":"searchResults");
     if(box)box.innerHTML=mobile?html:`<div class="suggestions">${html}</div>`;
   },
@@ -1554,7 +1587,12 @@ PACS.app = {
     if(!PACS.state.logged){this.home();return;}
     const st=PACS.state, p=st.selectedPatient, study=PACS.data.currentStudy();
     const icon=PACS.view.patientIcon(p?.sex);
-    const currentUrl=PACS.data.imageUrl(PACS.data.imageItems(study)[Math.max(0,(st.selectedImage||1)-1)]);
+    const currentItem=PACS.data.imageItems(study)[Math.max(0,(st.selectedImage||1)-1)];
+    const currentUrl=PACS.data.imageUrl(currentItem);
+    const dayPatients=PACS.data.patientsForDate();
+    const dayStudies=dayPatients.reduce((n,px)=>n+px.studies.filter(sx=>sx.date===st.selectedDate).length,0);
+    const totalPatients=st.patients.length;
+    const totalStudies=st.patients.reduce((n,px)=>n+px.studies.length,0);
     const roleLabel=st.role==="admin"?"Administrador":"Visualizador";
     const history=PACS.view.history();
     const list=PACS.view.patientList();
@@ -1565,7 +1603,7 @@ PACS.app = {
     document.getElementById("root").innerHTML=`<header class="top">
       <div class="brand"><img src="DXLOGO.png" class="brand-logo" alt="Logo"><div class="brand-text"><b>HOSPITAL SAN MARTIN DE PANGOA</b><span>DIAGNÓSTICO POR IMAGEN</span></div></div>
       <div class="tr">
-        <div class="search-wrap"><input id="topSearch" class="search" placeholder="🔎 Buscar paciente..."><div id="searchResults"></div></div>
+        <div class="search-wrap"><input id="topSearch" class="search" placeholder="🔎 Nombre, estudio o fecha..."><div id="searchResults"></div></div>
         <div class="date-wrap"><button class="date-field" data-action="calendar-toggle">📅 <span id="dateLabel">${st.selectedDate}</span><span class="date-chevron">▾</span></button><div id="calendarPopup" class="calendar-popup"></div></div>
         <div class="user"><button id="userButton" data-action="menu-toggle">👤 ${roleLabel} ▾</button><div id="menu" class="menu"><b>${roleLabel}</b><button data-action="logout">🔐 Cerrar sesión</button></div></div>
         ${st.role==="admin"?`<div class="mobile-admin-actions">
@@ -1583,13 +1621,14 @@ PACS.app = {
     <main class="layout">
       <aside class="left">
         <div class="title">PACIENTES DEL DÍA</div><div class="subhead">${st.selectedDate}</div>
-        <div class="muted">${PACS.data.patientsForDate().length} pacientes con estudios</div>
+        <div class="stats-row"><span class="stat-pill"><b>${dayPatients.length}</b> pacientes</span><span class="stat-pill"><b>${dayStudies}</b> estudios</span><span class="stat-pill"><b>${totalPatients}</b> total</span></div>
         ${st.role==="admin"?`<button type="button" class="add" data-action="add-patient">＋ Agregar paciente</button>`:""}
         <div class="patients">${list}</div>
       </aside>
       <section class="viewer">
+        <div class="mobile-patient-context"><div class="mp-main"><div class="mp-name">${p?icon+" "+p.name:"Ningún paciente"}</div><div class="mp-sub">${study?`${study.study} · ${study.date}`:"Selecciona un paciente"}</div></div><div class="mp-count">${PACS.data.studyCount(study)?`${st.selectedImage}/${PACS.data.studyCount(study)}`:""}</div></div>
         <div class="vh"><b>${study?.study||"VISOR DE IMÁGENES"}</b><span>${PACS.data.studyCount(study)?`${st.selectedImage} / ${PACS.data.studyCount(study)}`:""}</span></div>
-        <div class="image" id="image"><div class="xray">${currentUrl?`<img src="${currentUrl}" alt="Imagen médica" draggable="false" style="width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;object-position:center center;transform:translate(${st.panX}px,${st.panY}px) scale(${st.scale}) rotate(${st.rotation}deg);filter: brightness(${st.brightness/100}) contrast(${st.contrast/100});cursor:${st.panMode?"grab":"default"}">`:`<div style="color:var(--muted);font-size:13px">${study?"SELECCIONA UNA IMAGEN":"SIN ESTUDIO SELECCIONADO"}</div>`}</div></div>
+        <div class="image" id="image"><div class="xray">${currentUrl?`<img src="${currentUrl}" alt="Imagen médica" draggable="false" style="width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;object-position:center center;transform:translate(${st.panX}px,${st.panY}px) scale(${st.scale}) rotate(${st.rotation}deg);filter: brightness(${st.brightness/100}) contrast(${st.contrast/100});cursor:${st.panMode?"grab":"default"}">`:(study&&PACS.data.studyCount(study)?`<div class="viewer-empty"><div class="viewer-spinner"></div><strong>Cargando imagen</strong><span>La radiografía se solicita solo cuando la visualizas.</span></div>`:`<div class="viewer-empty"><strong>${p?"Selecciona un estudio":"Selecciona un paciente"}</strong><span>${p?"Elige un estudio del historial para visualizar sus imágenes.":"Busca o selecciona un paciente para comenzar."}</span></div>`)}</div></div>
         <div class="tools" aria-label="Herramientas del visor">
           <button type="button" class="tool" data-tool="zoom-out" title="Alejar">−</button>
           <button type="button" class="tool" data-tool="zoom-in" title="Acercar">＋</button>
@@ -1621,7 +1660,7 @@ PACS.app = {
     <section class="history"><h2>HISTORIAL DEL PACIENTE · ${p?.name||"—"}</h2>${history}</section>
     <nav class="mobile-nav"><button data-mobile="home"><span>🏠</span>Inicio</button><button data-mobile="patients"><span>👥</span>Pacientes</button><button data-mobile="viewer" class="active"><span>🩻</span>Visor</button></nav>
     <div id="overlay" class="overlay" data-action="side-close"></div>
-    <aside id="side" class="side"><div style="display:flex;justify-content:space-between"><b>← PACIENTES</b><button class="close" data-action="side-close">×</button></div><input id="mobileSearch" placeholder="🔎 Buscar paciente...">${mobileAdd}<div id="mobilePatients" class="patients">${list}</div></aside>`;
+    <aside id="side" class="side"><div style="display:flex;justify-content:space-between"><b>← PACIENTES</b><button class="close" data-action="side-close">×</button></div><div class="stats-row"><span class="stat-pill"><b>${dayPatients.length}</b> hoy</span><span class="stat-pill"><b>${dayStudies}</b> estudios</span><span class="stat-pill"><b>${totalPatients}</b> total</span></div><input id="mobileSearch" placeholder="🔎 Nombre, estudio o fecha...">${mobileAdd}<div id="mobilePatients" class="patients">${list}</div></aside>`;
     this.renderThumbSync();
     this.applyViewerTransform();
     this.bindMobileControls();
