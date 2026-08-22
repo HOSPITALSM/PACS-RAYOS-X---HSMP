@@ -883,7 +883,9 @@ n
   .history{padding-bottom:74px !important}
 }
 
-/* V71 — móvil: llenar la altura del visor; se permite recorte lateral */
+/* V77 — móvil: ajustar por ALTURA sin recortar la imagen.
+   El ancho conserva su proporción natural y puede exceder el visor;
+   los laterales se consultan mediante el pan/arrastre existente. */
 @media(max-width:850px){
   .viewer .xray{
     position:absolute !important;
@@ -901,12 +903,13 @@ n
   }
   .viewer .xray img{
     display:block !important;
-    width:100% !important;
+    width:auto !important;
     height:100% !important;
     max-width:none !important;
     max-height:none !important;
-    object-fit:cover !important;
+    object-fit:fill !important;
     object-position:center center !important;
+    flex:0 0 auto !important;
     margin:0 !important;
     padding:0 !important;
   }
