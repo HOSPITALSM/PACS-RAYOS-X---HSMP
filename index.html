@@ -1692,16 +1692,17 @@ PACS.view = {
     }).join("");
   },
   history(){
-    const p=PACS.state.selectedPatient;
+    const selected=PACS.state.selectedPatient;
+    const p=(selected && PACS.data.findPatient?.(selected.id)) || selected;
     if(!p?.studies?.length) return `<div class="muted">No hay estudios registrados para este paciente.</div>`;
-    const previous=p.studies
-      .map((s,i)=>({s,i}))
-      .filter(x=>x.s.date!==PACS.state.selectedDate);
-    if(!previous.length) return `<div class="muted">No hay estudios de otras fechas para este paciente.</div>`;
+
+    // Historial completo: incluye SIEMPRE la fecha actual y todas las fechas anteriores.
+    // Conservamos el índice real de cada estudio para que al pulsarlo siga abriendo el estudio correcto.
+    const rows=p.studies.map((study,index)=>({study,index}));
     let last="",out="";
-    previous.forEach(({s,i})=>{
+    rows.forEach(({study:s,index:i})=>{
       if(s.date!==last){ out+=`<div class="day">${s.date}</div>`; last=s.date; }
-      out+=`<button type="button" class="study" data-study-index="${i}">
+      out+=`<button type="button" class="study ${i===PACS.state.selectedStudyIndex?"active-study":""}" data-study-index="${i}">
         <div><b>🩻 ${s.study}</b><br><span>${s.createdAt?new Date(s.createdAt).toLocaleTimeString("es-PE",{hour:"2-digit",minute:"2-digit"}):""} · <span class="ok">Disponible</span></span></div>
         <span>${PACS.data.studyCount(s)} imágenes ›</span>
       </button>`;
