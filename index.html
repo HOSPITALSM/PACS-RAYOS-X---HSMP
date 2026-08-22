@@ -882,6 +882,35 @@ n
   .layout{padding-bottom:0 !important}
   .history{padding-bottom:74px !important}
 }
+
+/* V70 — móvil: ajuste máximo de la radiografía sin recorte ni deformación */
+@media(max-width:850px){
+  .viewer .xray{
+    position:absolute !important;
+    inset:0 !important;
+    width:100% !important;
+    height:100% !important;
+    max-width:none !important;
+    max-height:none !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    padding:0 !important;
+    margin:0 !important;
+    overflow:hidden !important;
+  }
+  .viewer .xray img{
+    display:block !important;
+    width:100% !important;
+    height:100% !important;
+    max-width:100% !important;
+    max-height:100% !important;
+    object-fit:contain !important;
+    object-position:center center !important;
+    margin:0 !important;
+    padding:0 !important;
+  }
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style id="auth-boot-fix">
@@ -1873,7 +1902,7 @@ PACS.app = {
     <section class="history"><h2>HISTORIAL DEL PACIENTE · ${p?.name||"—"}</h2>${history}</section>
     <nav class="mobile-nav"><button data-mobile="home"><span>🏠</span>Inicio</button><button data-mobile="patients"><span>👥</span>Pacientes</button><button data-mobile="viewer" class="active"><span>🩻</span>Visor</button></nav>
     <div id="overlay" class="overlay" data-action="side-close"></div>
-    <aside id="side" class="side"><div style="display:flex;justify-content:space-between"><b>← PACIENTES</b><button class="close" data-action="side-close">×</button></div><div class="stats-row"><span class="stat-pill"><b>${dayPatients.length}</b> hoy</span><span class="stat-pill"><b>${dayStudies}</b> estudios</span><span class="stat-pill"><b>${totalPatients}</b> total</span></div><input id="mobileSearch" placeholder="🔎 Nombre, estudio o fecha...">${mobileAdd}<div id="mobilePatients" class="patients">${list}</div></aside>`;
+    <aside id="side" class="side"><div style="display:flex;justify-content:space-between"><b>← PACIENTES</b><button class="close" data-action="side-close">×</button></div><div class="stats-row"><span class="stat-pill"><b>${dayPatients.length}</b> pacientes</span><span class="stat-pill"><b>${dayStudies}</b> estudios</span><span class="stat-pill"><b>${totalPatients}</b> total</span></div><input id="mobileSearch" placeholder="🔎 Nombre, estudio o fecha...">${mobileAdd}<div id="mobilePatients" class="patients">${list}</div></aside>`;
     this.renderThumbSync();
     this.applyViewerTransform();
     this.bindMobileControls();
