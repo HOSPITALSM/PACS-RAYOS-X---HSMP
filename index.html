@@ -1715,7 +1715,7 @@ PACS.view = {
       const active=currentDate===group.date;
       out+=`<div class="day">${group.date}</div>`;
       out+=`<button type="button" class="study ${active?"active-study":""}" data-study-index="${group.firstIndex}">
-        <div><b>🩻 IMÁGENES DEL DÍA</b><br><span>${summary} · <span class="ok">Disponible</span></span></div>
+        <div><b>🩻 </b><br><span>${summary} · <span class="ok">Disponible</span></span></div>
         <span>${group.images} ${group.images===1?"imagen":"imágenes"} ›</span>
       </button>`;
     }
