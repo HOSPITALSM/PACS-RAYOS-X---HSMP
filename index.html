@@ -735,6 +735,114 @@
 }
 
 
+
+
+/* V65 — móvil: compactar interfaz y ceder altura al visor */
+@media(max-width:850px){
+  /* Cabecera superior más compacta */
+  .top{
+    padding:6px 10px 5px !important;
+  }
+  .brand{
+    gap:8px !important;
+    justify-content:center !important;
+  }
+  .brand-logo{
+    width:60px !important;
+    height:60px !important;
+    flex:0 0 60px !important;
+  }
+  .brand b{
+    font-size:13px !important;
+    line-height:16px !important;
+  }
+  .brand span{
+    font-size:10px !important;
+    line-height:12px !important;
+    margin-top:1px !important;
+  }
+
+  /* Fecha + administrador + menú, más arriba y con menos aire */
+  .tr{
+    margin:3px 0 0 !important;
+    gap:7px !important;
+    min-height:38px !important;
+  }
+  .tr .date-field{
+    padding:7px 11px !important;
+    min-height:38px !important;
+    font-size:13px !important;
+    border-radius:9px !important;
+  }
+  .tr .user>button,
+  .tr .mobile-more-btn{
+    width:38px !important;
+    height:38px !important;
+    min-height:38px !important;
+    padding:6px !important;
+    border-radius:9px !important;
+  }
+  .tr .user>button::before{font-size:18px !important}
+  .tr .mobile-more-btn{font-size:24px !important}
+
+  /* Contexto del paciente más compacto */
+  .mobile-patient-context{
+    padding:6px 10px !important;
+    min-height:48px !important;
+  }
+  .mobile-patient-context .mp-name{
+    font-size:12px !important;
+    line-height:15px !important;
+  }
+  .mobile-patient-context .mp-sub{
+    font-size:10px !important;
+    margin-top:1px !important;
+  }
+  .mobile-patient-context .mp-count{font-size:11px !important}
+
+  /* Encabezado del estudio actual */
+  .viewer .vh{
+    height:38px !important;
+    min-height:38px !important;
+    padding:0 10px !important;
+  }
+  .viewer .vh b{font-size:14px !important}
+  .viewer .vh span{font-size:12px !important}
+
+  /* El espacio recuperado va al visor, sin hacerlo excesivamente alto */
+  .viewer .image{
+    height:clamp(245px,40svh,405px) !important;
+    min-height:245px !important;
+  }
+
+  /* Miniaturas algo más compactas */
+  .viewer .thumbs{
+    height:62px !important;
+    min-height:62px !important;
+    padding:7px 9px !important;
+  }
+
+  /* Barra inferior más baja */
+  .mobile-nav{
+    height:58px !important;
+    padding:3px 7px max(3px,env(safe-area-inset-bottom)) !important;
+    gap:5px !important;
+  }
+  .mobile-nav button{
+    min-height:50px !important;
+    border-radius:10px !important;
+    font-size:11px !important;
+  }
+  .mobile-nav button span{
+    font-size:19px !important;
+    line-height:20px !important;
+  }
+
+  /* Ajustar reservas inferiores al nuevo alto de navegación */
+  .layout{padding-bottom:66px !important}
+  .history{padding-bottom:74px !important}
+}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style id="auth-boot-fix">
