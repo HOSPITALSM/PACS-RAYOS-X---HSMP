@@ -1696,17 +1696,29 @@ PACS.view = {
     const p=(selected && PACS.data.findPatient?.(selected.id)) || selected;
     if(!p?.studies?.length) return `<div class="muted">No hay estudios registrados para este paciente.</div>`;
 
-    // Historial completo: incluye SIEMPRE la fecha actual y todas las fechas anteriores.
-    // Conservamos el índice real de cada estudio para que al pulsarlo siga abriendo el estudio correcto.
-    const rows=p.studies.map((study,index)=>({study,index}));
-    let last="",out="";
-    rows.forEach(({study:s,index:i})=>{
-      if(s.date!==last){ out+=`<div class="day">${s.date}</div>`; last=s.date; }
-      out+=`<button type="button" class="study ${i===PACS.state.selectedStudyIndex?"active-study":""}" data-study-index="${i}">
-        <div><b>🩻 ${s.study}</b><br><span>${s.createdAt?new Date(s.createdAt).toLocaleTimeString("es-PE",{hour:"2-digit",minute:"2-digit"}):""} · <span class="ok">Disponible</span></span></div>
-        <span>${PACS.data.studyCount(s)} imágenes ›</span>
-      </button>`;
+    // Historial agrupado por FECHA: una sola entrada representa todas las
+    // estructuras e imágenes realizadas al paciente ese día.
+    const byDate=new Map();
+    p.studies.forEach((study,index)=>{
+      const date=study.date||"SIN FECHA";
+      if(!byDate.has(date)) byDate.set(date,{date,firstIndex:index,studies:[],images:0});
+      const group=byDate.get(date);
+      group.studies.push(study);
+      group.images+=PACS.data.studyCount(study);
     });
+
+    const currentDate=PACS.data.currentStudy()?.date||"";
+    let out="";
+    for(const group of byDate.values()){
+      const structures=[...new Set(group.studies.map(s=>s.study).filter(Boolean))];
+      const summary=structures.length?structures.join(" · "):"ESTUDIOS DEL DÍA";
+      const active=currentDate===group.date;
+      out+=`<div class="day">${group.date}</div>`;
+      out+=`<button type="button" class="study ${active?"active-study":""}" data-study-index="${group.firstIndex}">
+        <div><b>🩻 IMÁGENES DEL DÍA</b><br><span>${summary} · <span class="ok">Disponible</span></span></div>
+        <span>${group.images} ${group.images===1?"imagen":"imágenes"} ›</span>
+      </button>`;
+    }
     return out;
   },
   renderThumbs(study){
