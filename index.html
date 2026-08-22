@@ -883,7 +883,7 @@ n
   .history{padding-bottom:74px !important}
 }
 
-/* V70 — móvil: ajuste máximo de la radiografía sin recorte ni deformación */
+/* V71 — móvil: llenar la altura del visor; se permite recorte lateral */
 @media(max-width:850px){
   .viewer .xray{
     position:absolute !important;
@@ -903,9 +903,9 @@ n
     display:block !important;
     width:100% !important;
     height:100% !important;
-    max-width:100% !important;
-    max-height:100% !important;
-    object-fit:contain !important;
+    max-width:none !important;
+    max-height:none !important;
+    object-fit:cover !important;
     object-position:center center !important;
     margin:0 !important;
     padding:0 !important;
