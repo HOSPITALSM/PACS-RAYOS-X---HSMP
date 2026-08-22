@@ -1227,16 +1227,16 @@ PACS.patients = {
     }
   },
   async add({name,study,date,files=[],sex=""}){
-    // La tabla "studies" de tu Supabase NO tiene una columna "gender"
-    // (y tampoco "sex"). Por eso el sexo NO se envía al insert.
-    // Se conserva localmente para mostrar ♂/♀ sin romper la creación del paciente.
+    // El sexo se guarda en Supabase para que ♂/♀ sea consistente en cualquier dispositivo.
+    const selectedSex=String(sex||"").trim().toUpperCase();
     const payload={
       patient:name,
       date:PACS.data.dateISO(date),
       study,
       structure:study,
       modality:(["TC","RM","MAMOGRAFÍA","ECOGRAFÍA"].includes(study)?study:"RX"),
-      images:[]
+      images:[],
+      sex:selectedSex||null
     };
 
     const {data,error}=await PACS.state.client
@@ -1247,7 +1247,6 @@ PACS.patients = {
 
     if(error) throw error;
 
-    const selectedSex=String(sex||"").trim().toUpperCase();
     const localPreview=files.map(PACS.images.localPreview);
     const pLocal={
       id:`patient-${encodeURIComponent(name)}`,
@@ -1304,20 +1303,32 @@ PACS.patients = {
       PACS.ui.toast(err?.message||"Paciente creado, pero no se pudieron guardar las imágenes.");
     }
   },
-  async updateName(newName){
+  async updateName(newName,newSex=""){
     const p=PACS.state.selectedPatient;
     if(!p) throw new Error("Selecciona un paciente primero.");
     const oldName=p.name;
-    if(oldName===newName){PACS.ui.closeModal("editModal");return;}
-    // optimistic
+    const oldSex=String(p.sex||"").trim().toUpperCase();
+    const selectedSex=String(newSex||"").trim().toUpperCase();
+    const nameChanged=oldName!==newName;
+    const sexChanged=!!selectedSex && selectedSex!==oldSex;
+    if(!nameChanged && !sexChanged) return;
+
+    const updates={};
+    if(nameChanged) updates.patient=newName;
+    if(selectedSex) updates.sex=selectedSex;
+
+    // Actualización optimista de la interfaz.
     p.name=newName;
+    if(selectedSex) p.sex=selectedSex;
     PACS.app.render();
     try{
-      const {error}=await PACS.state.client.from("studies").update({patient:newName}).eq("patient",oldName);
+      const {error}=await PACS.state.client.from("studies").update(updates).eq("patient",oldName);
       if(error) throw error;
+      if(selectedSex) PACS.gender.write(newName,selectedSex);
       PACS.ui.toast("Paciente modificado correctamente.");
     }catch(err){
       p.name=oldName;
+      p.sex=oldSex;
       PACS.app.render();
       throw err;
     }
@@ -2022,7 +2033,7 @@ const calDate=e.target.closest?.("[data-calendar-date]")?.dataset?.calendarDate;
     if(!p)return PACS.ui.toast("Selecciona un paciente primero para realizar esta acción.");
     document.getElementById("eName").value=p.name;
     document.getElementById("eDni").value="";
-    document.getElementById("eSex").value="";
+    document.getElementById("eSex").value=String(p.sex||"").trim().toUpperCase();
     document.getElementById("eBirth").value="";
     PACS.ui.openModal("editModal");
   },
@@ -2220,8 +2231,14 @@ const calDate=e.target.closest?.("[data-calendar-date]")?.dataset?.calendarDate;
     }
   },
   async saveEdit(){
-    try{await PACS.patients.updateName(document.getElementById("eName").value.trim().toUpperCase());PACS.ui.closeModal("editModal");}
-    catch(err){PACS.ui.toast(err.message||"No se pudo modificar el paciente.");}
+    const newName=document.getElementById("eName").value.trim().toUpperCase();
+    const newSex=document.getElementById("eSex").value.trim().toUpperCase();
+    try{
+      await PACS.patients.updateName(newName,newSex);
+      PACS.ui.closeModal("editModal");
+    }catch(err){
+      PACS.ui.toast(err.message||"No se pudo modificar el paciente.");
+    }
   },
   async saveImages(){
     const study=PACS.data.currentStudy();
