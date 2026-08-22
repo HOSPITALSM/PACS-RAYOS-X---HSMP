@@ -1312,6 +1312,12 @@ PACS.data = {
   },
   patientsForDate(date=PACS.state.selectedDate){
     return PACS.state.patients.filter(p=>p.studies.some(s=>s.date===date));
+  },
+  async hydratePatientDateStudies(patient=PACS.state.selectedPatient,date=PACS.state.selectedDate){
+    const studies=(patient?.studies||[]).filter(s=>s.date===date);
+    for(const study of studies){
+      await this.hydrateImages(study);
+    }
   }
 };
 
@@ -1464,7 +1470,7 @@ PACS.patients = {
     PACS.state.selectedImage=PACS.data.studyCount(PACS.data.currentStudy())>0?1:0;
     PACS.app.resetViewer();
     PACS.app.render();
-    PACS.data.hydrateImages(PACS.data.currentStudy()).then(()=>PACS.app.render()).catch(err=>console.error("Image refresh:",err));
+    PACS.data.hydratePatientDateStudies(p,PACS.state.selectedDate).then(()=>PACS.app.render()).catch(err=>console.error("Image refresh:",err));
     if(window.matchMedia?.("(max-width: 850px)").matches){
       this.closeSide();
       document.querySelectorAll(".mobile-nav button").forEach(b=>b.classList.remove("active"));
@@ -1625,7 +1631,7 @@ PACS.studies = {
     PACS.state.selectedImage=PACS.data.studyCount(p.studies[index])>0?1:0;
     PACS.app.resetViewer();
     PACS.app.render();
-    PACS.data.hydrateImages(PACS.data.currentStudy()).then(()=>PACS.app.render()).catch(err=>console.error("Image refresh:",err));
+    PACS.data.hydratePatientDateStudies(p,p.studies[index].date).then(()=>PACS.app.render()).catch(err=>console.error("Image refresh:",err));
   },
   async chooseDate(label){
     if(!label)return;
@@ -1688,10 +1694,14 @@ PACS.view = {
   history(){
     const p=PACS.state.selectedPatient;
     if(!p?.studies?.length) return `<div class="muted">No hay estudios registrados para este paciente.</div>`;
+    const previous=p.studies
+      .map((s,i)=>({s,i}))
+      .filter(x=>x.s.date!==PACS.state.selectedDate);
+    if(!previous.length) return `<div class="muted">No hay estudios de otras fechas para este paciente.</div>`;
     let last="",out="";
-    p.studies.forEach((s,i)=>{
+    previous.forEach(({s,i})=>{
       if(s.date!==last){ out+=`<div class="day">${s.date}</div>`; last=s.date; }
-      out+=`<button type="button" class="study ${i===PACS.state.selectedStudyIndex?"active-study":""}" data-study-index="${i}">
+      out+=`<button type="button" class="study" data-study-index="${i}">
         <div><b>🩻 ${s.study}</b><br><span>${s.createdAt?new Date(s.createdAt).toLocaleTimeString("es-PE",{hour:"2-digit",minute:"2-digit"}):""} · <span class="ok">Disponible</span></span></div>
         <span>${PACS.data.studyCount(s)} imágenes ›</span>
       </button>`;
@@ -1699,13 +1709,27 @@ PACS.view = {
     return out;
   },
   renderThumbs(study){
-    const items=PACS.data.imageItems(study);
-    if(!items.length) return "";
-    return items.map((item,i)=>{
+    const p=PACS.state.selectedPatient;
+    const entries=[];
+    const displayDate=study?.date||PACS.state.selectedDate;
+    if(p?.studies?.length){
+      p.studies.forEach((s,studyIndex)=>{
+        if(s.date!==displayDate)return;
+        PACS.data.imageItems(s).forEach((item,imageIndex)=>entries.push({item,studyIndex,imageIndex,study:s}));
+      });
+    }
+    if(!entries.length && study){
+      const studyIndex=Math.max(0,PACS.state.selectedStudyIndex||0);
+      PACS.data.imageItems(study).forEach((item,imageIndex)=>entries.push({item,studyIndex,imageIndex,study}));
+    }
+    if(!entries.length)return "";
+    return entries.map((entry,globalIndex)=>{
+      const {item,studyIndex,imageIndex}=entry;
       const thumbUrl=(typeof item==="object" && item)?(item.thumbUrl||item.localUrl||""):"";
-      const label=(typeof item==="object" && item?.name)?item.name:`Imagen ${i+1}`;
-      return `<button type="button" class="thumb ${PACS.state.selectedImage===i+1?"active":""}" data-image-index="${i+1}">
-        ${thumbUrl?`<img src="${thumbUrl}" alt="${label}" loading="lazy" decoding="async">`:`<span class="thumb-loading">IMG ${i+1}</span>`}<span>${i+1}</span>
+      const label=(typeof item==="object" && item?.name)?item.name:`Imagen ${globalIndex+1}`;
+      const active=PACS.state.selectedStudyIndex===studyIndex && PACS.state.selectedImage===imageIndex+1;
+      return `<button type="button" class="thumb ${active?"active":""}" data-image-index="${imageIndex+1}" data-thumb-study-index="${studyIndex}" title="${entry.study?.study||""}">
+        ${thumbUrl?`<img src="${thumbUrl}" alt="${label}" loading="lazy" decoding="async">`:`<span class="thumb-loading">IMG ${globalIndex+1}</span>`}<span>${globalIndex+1}</span>
       </button>`;
     }).join("");
   }
@@ -1806,7 +1830,7 @@ PACS.app = {
     }
     const study=PACS.data.currentStudy();
     PACS.state.selectedImage=PACS.data.studyCount(study)>0?1:0;
-    PACS.data.hydrateImages(study).then(()=>this.render()).catch(err=>console.error("Image hydration:",err));
+    PACS.data.hydratePatientDateStudies(PACS.state.selectedPatient,PACS.state.selectedDate).then(()=>this.render()).catch(err=>console.error("Image hydration:",err));
   },
   renderSearchResults(mobile=false){
     const q=PACS.state.searchTerm;
@@ -2170,7 +2194,13 @@ PACS.app = {
     if(studyBtn){ e.preventDefault(); return PACS.studies.select(Number(studyBtn.dataset.studyIndex)); }
     if(imageBtn){
       e.preventDefault();
+      const thumbStudy=Number(imageBtn.dataset.thumbStudyIndex);
+      const oldStudy=PACS.state.selectedStudyIndex;
+      if(Number.isInteger(thumbStudy) && thumbStudy>=0)PACS.state.selectedStudyIndex=thumbStudy;
       PACS.state.selectedImage=Number(imageBtn.dataset.imageIndex);
+      if(oldStudy!==PACS.state.selectedStudyIndex){
+        Object.assign(PACS.state,{scale:1,panX:0,panY:0,rotation:0,brightness:100,contrast:100,invert:false,windowLevel:0,panMode:true,isDraggingImage:false});
+      }
       this.render();
       PACS.data.hydrateImages(PACS.data.currentStudy())
         .then(()=>this.render())
@@ -2552,7 +2582,7 @@ const calDate=e.target.closest?.("[data-calendar-date]")?.dataset?.calendarDate;
         const idx=refreshed.studies.findIndex(s=>s.date===PACS.state.selectedDate&&s.study===lastStudy);
         PACS.state.selectedStudyIndex=idx>=0?idx:0;
         PACS.state.selectedImage=PACS.data.studyCount(PACS.data.currentStudy())>0?1:0;
-        await PACS.data.hydrateImages(PACS.data.currentStudy());
+        await PACS.data.hydratePatientDateStudies(refreshed,PACS.state.selectedDate);
       }
       PACS.state.patientGroups=[]; PACS.state.patientFiles=[];
       this.render();
@@ -2602,7 +2632,7 @@ const calDate=e.target.closest?.("[data-calendar-date]")?.dataset?.calendarDate;
         const idx=refreshed.studies.findIndex(s=>s.date===date&&String(s.study).toUpperCase()===last);
         PACS.state.selectedStudyIndex=idx>=0?idx:0;
         PACS.state.selectedImage=PACS.data.studyCount(PACS.data.currentStudy())>0?1:0;
-        await PACS.data.hydrateImages(PACS.data.currentStudy());
+        await PACS.data.hydratePatientDateStudies(refreshed,date);
       }
       PACS.state.addGroups=[]; PACS.state.addFiles=[];
       this.render();
