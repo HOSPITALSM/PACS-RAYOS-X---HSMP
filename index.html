@@ -963,7 +963,7 @@ body.auth-booting{background:#061014}
 .comment-item:last-child{border-bottom:0}
 .comment-meta{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;color:var(--muted);font-size:11px;margin-bottom:6px}
 .comment-scope{font-weight:800;color:var(--cyan)}
-.comment-text{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55;color:var(--text);font-size:14px}
+.comment-text{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55;color:var(--text);font-size:14px;font-weight:800}
 .comment-admin-actions{display:flex;justify-content:flex-end;gap:7px;margin-top:9px}
 .comment-admin-actions button{padding:7px 9px;font-size:11px}
 .comment-empty{padding:26px 8px;text-align:center;color:var(--muted)}
@@ -980,7 +980,8 @@ body.auth-booting{background:#061014}
 .comment-scope-options{display:grid;gap:8px;margin:12px 0}
 .comment-scope-options label{display:flex;align-items:center;gap:8px;color:var(--text);font-size:13px}
 .comment-error{color:#ff7676;font-size:12px;margin-top:8px}
-.mobile-comment-icon{position:relative;display:inline-block!important}
+.mobile-comment-icon{position:relative;display:inline-flex!important;align-items:center;justify-content:center;color:var(--muted)}
+.mobile-comment-icon svg{width:20px;height:20px;display:block;fill:currentColor}
 .mobile-comment-badge{position:absolute;top:-7px;right:-10px;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:#d9363e;color:#fff;font-size:10px;line-height:16px;font-weight:900;text-align:center}
 .mobile-nav button.has-comments .mobile-comment-icon{color:#ff4d4f!important}
 @media(max-width:850px){
@@ -988,6 +989,8 @@ body.auth-booting{background:#061014}
   .mobile-nav button{min-width:0;padding:4px 2px!important;font-size:10px!important}
   .mobile-nav button span{font-size:19px!important}
   .comment-modal{width:calc(100vw - 20px)!important;margin:10px!important}
+  #commentsTitle{font-size:16px!important;letter-spacing:.02em}
+  .comment-text{font-size:15px!important;font-weight:800!important;line-height:1.6}
   .comments-scroll{max-height:52vh}
   .comment-footer{position:sticky;bottom:0}
   .comment-compose textarea{min-height:88px;max-height:150px}
@@ -1078,7 +1081,7 @@ body.auth-booting{background:#061014}
 
 <div id="noticeModal" class="modal-bg"><div class="modal notice-modal" role="dialog" aria-modal="true" aria-labelledby="noticeTitle">
 <div class="mh" style="justify-content:center"><b id="noticeTitle" class="notice-title">⚠️ IMPORTANTE</b></div>
-<p class="notice-text">EN CASO DE OBSERVACIONES, SUGERENCIAS O QUEJAS CON RESPECTO A LOS ESTUDIOS, ACERCARSE AL ÁREA DE RAYOS X.</p>
+<p class="notice-text">EN CASO DE OBSERVACIONES O SUGERENCIAS CON RESPECTO A LOS ESTUDIOS O LA PLATAFORMA, ACERCARSE AL ÁREA DE RAYOS X.</p>
 <p class="notice-thanks">GRACIAS</p>
 <div class="modal-actions notice-actions"><button class="btn" data-action="notice-close">ENTENDIDO</button></div>
 </div></div>
@@ -1112,7 +1115,7 @@ body.auth-booting{background:#061014}
 </div></div>
 
 <script>
-/* BUILD HSMP 2026-08-31 V79 · COMENTARIOS POR PACIENTE + IMPORTANTE */
+/* BUILD HSMP 2026-08-31 V80 · COMENTARIOS MÓVIL + TOTAL POR CICLO + IMPORTANTE */
 /* ===== config.js ===== */
 window.PACS = window.PACS || {};
 PACS.config = {
@@ -1395,6 +1398,38 @@ PACS.data = {
   },
   patientsForDate(date=PACS.state.selectedDate){
     return PACS.state.patients.filter(p=>p.studies.some(s=>s.date===date));
+  },
+  cycleStudyTotal(date=PACS.state.selectedDate){
+    const iso=this.dateISO(date);
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return 0;
+    const year=Number(iso.slice(0,4));
+    // Ciclos operativos indicados para 2026. Las fechas son inclusivas.
+    const configured=year===2026?[
+      ["2026-08-23","2026-09-23"],
+      ["2026-09-24","2026-10-23"],
+      ["2026-10-24","2026-11-22"],
+      ["2026-11-23","2026-12-22"]
+    ]:[];
+    let range=configured.find(([start,end])=>iso>=start&&iso<=end);
+    // Fuera de los ciclos configurados, se usa el ciclo mensual 23→22 para no mezclar meses completos.
+    if(!range){
+      const d=new Date(`${iso}T12:00:00`);
+      let start,end;
+      if(d.getDate()>=23){
+        start=new Date(d.getFullYear(),d.getMonth(),23,12);
+        end=new Date(d.getFullYear(),d.getMonth()+1,22,12);
+      }else{
+        start=new Date(d.getFullYear(),d.getMonth()-1,23,12);
+        end=new Date(d.getFullYear(),d.getMonth(),22,12);
+      }
+      const f=x=>`${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,"0")}-${String(x.getDate()).padStart(2,"0")}`;
+      range=[f(start),f(end)];
+    }
+    const [start,end]=range;
+    return PACS.state.patients.reduce((total,p)=>total+(p.studies||[]).filter(st=>{
+      const stIso=this.dateISO(st.date);
+      return stIso>=start&&stIso<=end;
+    }).length,0);
   },
   async hydratePatientDateStudies(patient=PACS.state.selectedPatient,date=PACS.state.selectedDate){
     const studies=(patient?.studies||[]).filter(s=>s.date===date);
@@ -1939,16 +1974,19 @@ PACS.comments = {
   mobileButtonHtml(){
     const count=this.relevant().length;
     const badge=count?`<small class="mobile-comment-badge">${count>99?"99+":count}</small>`:"";
-    return `<button data-mobile="comments" class="${count?"has-comments":""}"><span class="mobile-comment-icon">💬${badge}</span>Comentario</button>`;
+    const bubble=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3C6.49 3 2 6.81 2 11.5c0 2.63 1.42 5.02 3.85 6.61L5 22l4.18-2.08c.92.22 1.87.33 2.82.33 5.51 0 10-3.81 10-8.5S17.51 3 12 3z"/></svg>`;
+    return `<button data-mobile="comments" class="${count?"has-comments":""}"><span class="mobile-comment-icon">${bubble}${badge}</span>Comentario</button>`;
   },
-  async open(){
+  async open(options={}){
     if(!PACS.state.selectedPatient) return PACS.ui.toast("Selecciona un paciente primero.");
     await this.loadForCurrentPatient({rerender:false});
-    this.renderModal();
+    const mobile=window.matchMedia?.("(max-width: 850px)").matches;
+    const manage=options.manage===true || (!mobile && PACS.state.role==="admin");
+    this.renderModal({manage});
     PACS.ui.openModal("commentsModal");
-    if(PACS.state.role==="admin") setTimeout(()=>document.getElementById("commentInlineText")?.focus(),0);
+    if(manage && PACS.state.role==="admin") setTimeout(()=>document.getElementById("commentInlineText")?.focus(),0);
   },
-  renderModal(){
+  renderModal({manage=false}={}){
     const p=PACS.state.selectedPatient, rows=this.relevant();
     const title=document.getElementById("commentsTitle");
     const ctx=document.getElementById("commentsContext");
@@ -1957,10 +1995,10 @@ PACS.comments = {
     if(title) title.textContent=`💬 COMENTARIOS (${rows.length})`;
     if(ctx) ctx.textContent=p?`PACIENTE: ${p.name}`:"";
     if(list){
-      list.innerHTML=rows.length?rows.slice().reverse().map(c=>`<article class="comment-item"><div class="comment-meta"><span>${this.formatDateTime(c.created_at)}</span></div><div class="comment-text">${this.escapeHtml(c.comment_text)}</div>${PACS.state.role==="admin"?`<div class="comment-admin-actions"><button class="secondary" data-action="comment-edit" data-comment-id="${this.escapeHtml(c.id)}">EDITAR</button><button class="secondary" data-action="comment-delete" data-comment-id="${this.escapeHtml(c.id)}">ELIMINAR</button></div>`:""}</article>`).join(""):`<div class="comment-empty">Este paciente no tiene comentarios registrados.</div>`;
+      list.innerHTML=rows.length?rows.slice().reverse().map(c=>`<article class="comment-item"><div class="comment-meta"><span>${this.formatDateTime(c.created_at)}</span></div><div class="comment-text">${this.escapeHtml(c.comment_text)}</div>${PACS.state.role==="admin"&&manage?`<div class="comment-admin-actions"><button class="secondary" data-action="comment-edit" data-comment-id="${this.escapeHtml(c.id)}">EDITAR</button><button class="secondary" data-action="comment-delete" data-comment-id="${this.escapeHtml(c.id)}">ELIMINAR</button></div>`:""}</article>`).join(""):`<div class="comment-empty">Este paciente no tiene comentarios registrados.</div>`;
     }
     if(footer){
-      footer.innerHTML=PACS.state.role==="admin"?`<div class="comment-compose"><div class="comment-compose-label">AGREGAR COMENTARIO</div><textarea id="commentInlineText" placeholder="Escribir comentario..."></textarea><div id="commentInlineStatus" class="comment-inline-status"></div><div class="comment-compose-actions"><button class="secondary" data-action="close-comments-modal">CERRAR</button><button class="btn" data-action="comment-add-inline">AGREGAR</button></div></div>`:`<button class="secondary" data-action="close-comments-modal">CERRAR</button>`;
+      footer.innerHTML=PACS.state.role==="admin"&&manage?`<div class="comment-compose"><div class="comment-compose-label">AGREGAR COMENTARIO</div><textarea id="commentInlineText" placeholder="Escribir comentario..."></textarea><div id="commentInlineStatus" class="comment-inline-status"></div><div class="comment-compose-actions"><button class="secondary" data-action="close-comments-modal">CERRAR</button><button class="btn" data-action="comment-add-inline">AGREGAR</button></div></div>`:`<button class="secondary" data-action="close-comments-modal">CERRAR</button>`;
     }
   },
   async addInline(){
@@ -1979,7 +2017,7 @@ PACS.comments = {
       if(error) throw error;
       await this.loadForCurrentPatient({rerender:false});
       PACS.app.render();
-      this.renderModal();
+      this.renderModal({manage:true});
       PACS.ui.openModal("commentsModal");
       const fresh=document.getElementById("commentInlineText");
       if(fresh){fresh.value="";fresh.focus();}
@@ -2136,8 +2174,7 @@ PACS.app = {
     const currentUrl=PACS.data.imageUrl(currentItem);
     const dayPatients=PACS.data.patientsForDate();
     const dayStudies=dayPatients.reduce((n,px)=>n+px.studies.filter(sx=>sx.date===st.selectedDate).length,0);
-    const totalPatients=st.patients.length;
-    const totalStudies=st.patients.reduce((n,px)=>n+px.studies.length,0);
+    const cycleTotal=PACS.data.cycleStudyTotal(st.selectedDate);
     const roleLabel=st.role==="admin"?"Administrador":"Visualizador";
     const history=PACS.view.history();
     const list=PACS.view.patientList();
@@ -2161,6 +2198,7 @@ PACS.app = {
             <button data-action="edit-patient">✏️ <span>Modificar paciente</span></button>
             <button data-action="add-images">➕ <span>Añadir imágenes</span></button>
             <button data-action="delete-image">🗑️ <span>Eliminar imagen</span></button>
+            <button data-action="comments-manage">💬 <span>Agregar comentario</span></button>
             <button class="danger" data-action="delete-patient">🔴 <span>Eliminar paciente</span></button>
           </div>
         </div>`:""}
@@ -2169,7 +2207,7 @@ PACS.app = {
     <main class="layout">
       <aside class="left">
         <div class="title">PACIENTES DEL DÍA</div><div class="subhead">${st.selectedDate}</div>
-        <div class="stats-row"><span class="stat-pill"><b>${dayPatients.length}</b> pacientes</span><span class="stat-pill"><b>${dayStudies}</b> estudios</span><span class="stat-pill"><b>${totalPatients}</b> total</span></div>
+        <div class="stats-row"><span class="stat-pill"><b>${dayPatients.length}</b> pacientes</span><span class="stat-pill"><b>${dayStudies}</b> estudios</span><span class="stat-pill"><b>${cycleTotal}</b> total</span></div>
         ${st.role==="admin"?`<button type="button" class="add" data-action="add-patient">＋ Agregar paciente</button>`:""}
         <div class="patients">${list}</div>
       </aside>
@@ -2210,7 +2248,7 @@ PACS.app = {
     <section class="history"><h2>HISTORIAL DEL PACIENTE · ${p?.name||"—"}</h2>${history}</section>
     <nav class="mobile-nav"><button data-mobile="home"><span>🏠</span>Inicio</button><button data-mobile="patients"><span>👥</span>Pacientes</button>${mobileComments}<button data-mobile="viewer" class="active"><span>🩻</span>Visor</button></nav>
     <div id="overlay" class="overlay" data-action="side-close"></div>
-    <aside id="side" class="side"><div style="display:flex;justify-content:space-between"><b>← PACIENTES</b><button class="close" data-action="side-close">×</button></div><div class="stats-row"><span class="stat-pill"><b>${dayPatients.length}</b> pacientes</span><span class="stat-pill"><b>${dayStudies}</b> estudios</span><span class="stat-pill"><b>${totalPatients}</b> total</span></div><input id="mobileSearch" placeholder="🔎 Nombre, estudio o fecha...">${mobileAdd}<div id="mobilePatients" class="patients">${list}</div></aside>`;
+    <aside id="side" class="side"><div style="display:flex;justify-content:space-between"><b>← PACIENTES</b><button class="close" data-action="side-close">×</button></div><div class="stats-row"><span class="stat-pill"><b>${dayPatients.length}</b> pacientes</span><span class="stat-pill"><b>${dayStudies}</b> estudios</span><span class="stat-pill"><b>${cycleTotal}</b> total</span></div><input id="mobileSearch" placeholder="🔎 Nombre, estudio o fecha...">${mobileAdd}<div id="mobilePatients" class="patients">${list}</div></aside>`;
     this.renderThumbSync();
     this.applyViewerTransform();
     this.bindMobileControls();
@@ -2570,6 +2608,7 @@ const calDate=e.target.closest?.("[data-calendar-date]")?.dataset?.calendarDate;
     if(action==="side-close")return this.closeSide();
     if(action==="notice-close")return PACS.ui.closeModal("noticeModal");
     if(action==="comments-open")return PACS.comments.open();
+    if(action==="comments-manage")return PACS.comments.open({manage:true});
     if(action==="close-comments-modal")return PACS.ui.closeModal("commentsModal");
     if(action==="comment-add-inline")return PACS.comments.addInline();
     if(action==="comment-edit")return PACS.comments.openEdit(e.target.closest?.("[data-comment-id]")?.dataset?.commentId);
