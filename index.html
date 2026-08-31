@@ -943,10 +943,11 @@ body.auth-booting{background:#061014}
 }
 </style>
 <style id="v78-comments-notice">
-/* V78 · Comentarios + aviso de acceso */
+/* V79 · Comentarios generales por paciente + IMPORTANTE */
 .notice-modal{width:min(540px,calc(100vw - 32px))!important;text-align:center}
 .notice-title{display:block;width:100%;text-align:center;color:#ff4d4f;font-size:22px;letter-spacing:.08em;font-weight:900}
 .notice-text{margin:20px 0 4px;color:var(--text);font-weight:700;line-height:1.7;text-align:center}
+.notice-thanks{margin:18px 0 4px;text-align:center;color:var(--text);font-weight:900;letter-spacing:.06em}
 .notice-actions{justify-content:center!important}
 .comments-summary{margin-top:14px;padding:13px;border:1px solid var(--line);border-radius:10px;background:#081319}
 .comments-summary-title{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;font-weight:800}
@@ -967,6 +968,14 @@ body.auth-booting{background:#061014}
 .comment-admin-actions button{padding:7px 9px;font-size:11px}
 .comment-empty{padding:26px 8px;text-align:center;color:var(--muted)}
 .comment-footer{display:flex;justify-content:flex-end;gap:9px;padding-top:12px;border-top:1px solid var(--line);background:var(--panel)}
+.comment-compose{width:100%;display:grid;gap:9px}
+.comment-compose-label{font-size:12px;font-weight:900;color:var(--text);letter-spacing:.04em}
+.comment-compose textarea{width:100%;min-height:96px;max-height:180px;resize:vertical;background:#071116;border:1px solid var(--line);color:var(--text);border-radius:9px;padding:11px 12px;font:inherit;line-height:1.5}
+.comment-compose-actions{display:flex;justify-content:flex-end;gap:9px;flex-wrap:wrap}
+.comment-inline-status{min-height:16px;color:#ff7676;font-size:12px}
+.desktop-comment-icon{display:inline-block}
+.action.has-comments .desktop-comment-icon,.action.has-comments .comment-count{color:#ff4d4f!important}
+.comment-count{font-weight:900}
 .comment-form textarea{width:100%;min-height:130px;resize:vertical;background:#071116;border:1px solid var(--line);color:var(--text);border-radius:9px;padding:12px;font:inherit;line-height:1.5}
 .comment-scope-options{display:grid;gap:8px;margin:12px 0}
 .comment-scope-options label{display:flex;align-items:center;gap:8px;color:var(--text);font-size:13px}
@@ -981,6 +990,7 @@ body.auth-booting{background:#061014}
   .comment-modal{width:calc(100vw - 20px)!important;margin:10px!important}
   .comments-scroll{max-height:52vh}
   .comment-footer{position:sticky;bottom:0}
+  .comment-compose textarea{min-height:88px;max-height:150px}
   .notice-modal{width:calc(100vw - 28px)!important}
   .notice-title{font-size:20px}
   .notice-text{font-size:14px}
@@ -1067,8 +1077,9 @@ body.auth-booting{background:#061014}
 </div></div>
 
 <div id="noticeModal" class="modal-bg"><div class="modal notice-modal" role="dialog" aria-modal="true" aria-labelledby="noticeTitle">
-<div class="mh" style="justify-content:center"><b id="noticeTitle" class="notice-title">AVISO</b></div>
+<div class="mh" style="justify-content:center"><b id="noticeTitle" class="notice-title">⚠️ IMPORTANTE</b></div>
 <p class="notice-text">EN CASO DE OBSERVACIONES, SUGERENCIAS O QUEJAS CON RESPECTO A LOS ESTUDIOS, ACERCARSE AL ÁREA DE RAYOS X.</p>
+<p class="notice-thanks">GRACIAS</p>
 <div class="modal-actions notice-actions"><button class="btn" data-action="notice-close">ENTENDIDO</button></div>
 </div></div>
 
@@ -1101,7 +1112,7 @@ body.auth-booting{background:#061014}
 </div></div>
 
 <script>
-/* BUILD HSMP 2026-08-31 V78 · COMENTARIOS + AVISO */
+/* BUILD HSMP 2026-08-31 V79 · COMENTARIOS POR PACIENTE + IMPORTANTE */
 /* ===== config.js ===== */
 window.PACS = window.PACS || {};
 PACS.config = {
@@ -1873,22 +1884,14 @@ PACS.comments = {
     PACS.state.commentsLoading=false;
     PACS.state.editingCommentId=null;
   },
-  currentImageKey(){
-    const study=PACS.data.currentStudy();
-    const item=PACS.data.imageItems(study)[Math.max(0,(PACS.state.selectedImage||1)-1)];
-    return PACS.data.imagePath(item) || (study?.id ? `${study.id}#${PACS.state.selectedImage||0}` : "");
-  },
   relevant(){
-    const p=PACS.state.selectedPatient, study=PACS.data.currentStudy();
+    const p=PACS.state.selectedPatient;
     if(!p) return [];
-    const studyId=study?.id!=null?String(study.id):"";
-    const imageKey=this.currentImageKey();
-    return (PACS.state.comments||[]).filter(c=>{
-      if(String(c.patient_name||"").trim().toUpperCase()!==String(p.name||"").trim().toUpperCase()) return false;
-      if(c.scope==="patient") return true;
-      if(c.scope==="image") return String(c.study_id||"")===studyId && String(c.image_key||"")===imageKey;
-      return false;
-    }).sort((a,b)=>new Date(a.created_at||0)-new Date(b.created_at||0));
+    // V79: todos los comentarios pertenecen al paciente. Incluso comentarios
+    // antiguos que fueron guardados como "image" se muestran en todo su historial.
+    return (PACS.state.comments||[]).filter(c=>
+      String(c.patient_name||"").trim().toUpperCase()===String(p.name||"").trim().toUpperCase()
+    ).sort((a,b)=>new Date(a.created_at||0)-new Date(b.created_at||0));
   },
   formatDateTime(value){
     if(!value) return "";
@@ -1907,7 +1910,6 @@ PACS.comments = {
     try{
       const {data,error}=await PACS.state.client.from("comments").select("*").eq("patient_name",p.name).order("created_at",{ascending:true});
       if(error) throw error;
-      // Evitar que una respuesta tardía de un paciente anterior contamine el actual.
       if(PACS.state.selectedPatient?.name===p.name){
         PACS.state.comments=Array.isArray(data)?data:[];
         PACS.state.commentsPatientName=p.name;
@@ -1932,7 +1934,7 @@ PACS.comments = {
   },
   actionButtonHtml(){
     const count=this.relevant().length;
-    return `<button class="action" data-action="comments-open">💬 COMENTARIOS${count?` (${count})`:""}</button>`;
+    return `<button class="action ${count?"has-comments":""}" data-action="comments-open"><span class="desktop-comment-icon">💬</span> COMENTARIOS${count?` <span class="comment-count">(${count})</span>`:""}</button>`;
   },
   mobileButtonHtml(){
     const count=this.relevant().length;
@@ -1944,32 +1946,48 @@ PACS.comments = {
     await this.loadForCurrentPatient({rerender:false});
     this.renderModal();
     PACS.ui.openModal("commentsModal");
+    if(PACS.state.role==="admin") setTimeout(()=>document.getElementById("commentInlineText")?.focus(),0);
   },
   renderModal(){
-    const p=PACS.state.selectedPatient, study=PACS.data.currentStudy(), rows=this.relevant();
+    const p=PACS.state.selectedPatient, rows=this.relevant();
     const title=document.getElementById("commentsTitle");
     const ctx=document.getElementById("commentsContext");
     const list=document.getElementById("commentsList");
     const footer=document.getElementById("commentsFooter");
     if(title) title.textContent=`💬 COMENTARIOS (${rows.length})`;
-    if(ctx) ctx.textContent=p?`${p.name}${study?` · ${study.study} · ${study.date}`:""}`:"";
+    if(ctx) ctx.textContent=p?`PACIENTE: ${p.name}`:"";
     if(list){
-      list.innerHTML=rows.length?rows.map(c=>`<article class="comment-item"><div class="comment-meta"><span><span class="comment-scope">${c.scope==="image"?"IMAGEN ACTUAL":"PACIENTE"}</span> · ${this.formatDateTime(c.created_at)}</span></div><div class="comment-text">${this.escapeHtml(c.comment_text)}</div>${PACS.state.role==="admin"?`<div class="comment-admin-actions"><button class="secondary" data-action="comment-edit" data-comment-id="${this.escapeHtml(c.id)}">EDITAR</button><button class="secondary" data-action="comment-delete" data-comment-id="${this.escapeHtml(c.id)}">ELIMINAR</button></div>`:""}</article>`).join(""):`<div class="comment-empty">Este estudio no tiene comentarios registrados.</div>`;
+      list.innerHTML=rows.length?rows.slice().reverse().map(c=>`<article class="comment-item"><div class="comment-meta"><span>${this.formatDateTime(c.created_at)}</span></div><div class="comment-text">${this.escapeHtml(c.comment_text)}</div>${PACS.state.role==="admin"?`<div class="comment-admin-actions"><button class="secondary" data-action="comment-edit" data-comment-id="${this.escapeHtml(c.id)}">EDITAR</button><button class="secondary" data-action="comment-delete" data-comment-id="${this.escapeHtml(c.id)}">ELIMINAR</button></div>`:""}</article>`).join(""):`<div class="comment-empty">Este paciente no tiene comentarios registrados.</div>`;
     }
-    if(footer) footer.innerHTML=PACS.state.role==="admin"?`<button class="btn" data-action="comment-new">＋ NUEVO COMENTARIO</button><button class="secondary" data-action="close-comments-modal">CERRAR</button>`:`<button class="secondary" data-action="close-comments-modal">CERRAR</button>`;
+    if(footer){
+      footer.innerHTML=PACS.state.role==="admin"?`<div class="comment-compose"><div class="comment-compose-label">AGREGAR COMENTARIO</div><textarea id="commentInlineText" placeholder="Escribir comentario..."></textarea><div id="commentInlineStatus" class="comment-inline-status"></div><div class="comment-compose-actions"><button class="secondary" data-action="close-comments-modal">CERRAR</button><button class="btn" data-action="comment-add-inline">AGREGAR</button></div></div>`:`<button class="secondary" data-action="close-comments-modal">CERRAR</button>`;
+    }
   },
-  openNew(){
+  async addInline(){
     if(PACS.state.role!=="admin") return PACS.ui.toast("Solo el Administrador puede agregar comentarios.");
-    const p=PACS.state.selectedPatient, study=PACS.data.currentStudy();
+    const p=PACS.state.selectedPatient;
     if(!p) return PACS.ui.toast("Selecciona un paciente primero.");
-    PACS.state.editingCommentId=null;
-    const hasImage=!!(study && PACS.data.studyCount(study) && this.currentImageKey());
-    document.getElementById("commentFormTitle").textContent="NUEVO COMENTARIO";
-    document.getElementById("commentScopeOptions").innerHTML=`<label><input type="radio" name="commentScope" value="image" ${hasImage?"checked":"disabled"}> IMAGEN ACTUAL${hasImage?"":" (NO DISPONIBLE)"}</label><label><input type="radio" name="commentScope" value="patient" ${hasImage?"":"checked"}> PACIENTE</label>`;
-    document.getElementById("commentText").value="";
-    document.getElementById("commentFormStatus").textContent="";
-    PACS.ui.openModal("commentFormModal");
-    setTimeout(()=>document.getElementById("commentText")?.focus(),0);
+    const textarea=document.getElementById("commentInlineText");
+    const status=document.getElementById("commentInlineStatus");
+    const text=(textarea?.value||"").trim();
+    if(!text){if(status)status.textContent="Escribe un comentario antes de agregar.";return;}
+    if(status)status.textContent="";
+    try{
+      // Desde V79, los nuevos comentarios siempre son generales del paciente.
+      const payload={patient_name:p.name,scope:"patient",study_id:null,image_key:null,comment_text:text};
+      const {error}=await PACS.state.client.from("comments").insert(payload);
+      if(error) throw error;
+      await this.loadForCurrentPatient({rerender:false});
+      PACS.app.render();
+      this.renderModal();
+      PACS.ui.openModal("commentsModal");
+      const fresh=document.getElementById("commentInlineText");
+      if(fresh){fresh.value="";fresh.focus();}
+      PACS.ui.toast("Comentario agregado correctamente.");
+    }catch(err){
+      const currentStatus=document.getElementById("commentInlineStatus");
+      if(currentStatus)currentStatus.textContent=err?.message||"No se pudo agregar el comentario.";
+    }
   },
   openEdit(id){
     if(PACS.state.role!=="admin") return PACS.ui.toast("Solo el Administrador puede editar comentarios.");
@@ -1977,7 +1995,7 @@ PACS.comments = {
     if(!c) return PACS.ui.toast("No se encontró el comentario.");
     PACS.state.editingCommentId=c.id;
     document.getElementById("commentFormTitle").textContent="EDITAR COMENTARIO";
-    document.getElementById("commentScopeOptions").innerHTML=`<div class="muted">ASOCIADO A: ${c.scope==="image"?"IMAGEN ACTUAL":"PACIENTE"}</div>`;
+    document.getElementById("commentScopeOptions").innerHTML="";
     document.getElementById("commentText").value=c.comment_text||"";
     document.getElementById("commentFormStatus").textContent="";
     PACS.ui.openModal("commentFormModal");
@@ -1985,24 +2003,13 @@ PACS.comments = {
   },
   async save(){
     if(PACS.state.role!=="admin") return PACS.ui.toast("Solo el Administrador puede modificar comentarios.");
-    const p=PACS.state.selectedPatient, study=PACS.data.currentStudy();
     const text=(document.getElementById("commentText")?.value||"").trim();
     const status=document.getElementById("commentFormStatus");
     if(!text){if(status)status.textContent="Escribe un comentario antes de guardar.";return;}
+    if(!PACS.state.editingCommentId){if(status)status.textContent="No se encontró el comentario a editar.";return;}
     try{
-      if(PACS.state.editingCommentId){
-        const {error}=await PACS.state.client.from("comments").update({comment_text:text,updated_at:new Date().toISOString()}).eq("id",PACS.state.editingCommentId);
-        if(error) throw error;
-      }else{
-        const scope=document.querySelector('input[name="commentScope"]:checked')?.value||"patient";
-        const payload={patient_name:p.name,scope,comment_text:text};
-        if(scope==="image"){
-          payload.study_id=study?.id!=null?String(study.id):null;
-          payload.image_key=this.currentImageKey()||null;
-        }
-        const {error}=await PACS.state.client.from("comments").insert(payload);
-        if(error) throw error;
-      }
+      const {error}=await PACS.state.client.from("comments").update({comment_text:text,scope:"patient",study_id:null,image_key:null,updated_at:new Date().toISOString()}).eq("id",PACS.state.editingCommentId);
+      if(error) throw error;
       PACS.ui.closeModal("commentFormModal");
       PACS.state.editingCommentId=null;
       await this.loadForCurrentPatient({rerender:false});
@@ -2194,8 +2201,8 @@ PACS.app = {
           <button class="action" data-action="edit-patient">✏️ Modificar paciente</button>
           <button class="action" data-action="add-images">➕ Añadir imágenes</button>
           <button class="action" data-action="delete-image">🗑️ Eliminar imagen</button>
-          <button class="action danger" data-action="delete-patient">🔴 ✕ Eliminar paciente</button>
           ${commentsAction}
+          <button class="action danger" data-action="delete-patient">🔴 ✕ Eliminar paciente</button>
         </div>`:`<div class="actions"><div class="muted">Modo visualización</div>${commentsAction}</div>`}
         ${commentsSummary}
       </aside>
@@ -2564,7 +2571,7 @@ const calDate=e.target.closest?.("[data-calendar-date]")?.dataset?.calendarDate;
     if(action==="notice-close")return PACS.ui.closeModal("noticeModal");
     if(action==="comments-open")return PACS.comments.open();
     if(action==="close-comments-modal")return PACS.ui.closeModal("commentsModal");
-    if(action==="comment-new")return PACS.comments.openNew();
+    if(action==="comment-add-inline")return PACS.comments.addInline();
     if(action==="comment-edit")return PACS.comments.openEdit(e.target.closest?.("[data-comment-id]")?.dataset?.commentId);
     if(action==="comment-delete")return PACS.comments.askDelete(e.target.closest?.("[data-comment-id]")?.dataset?.commentId);
     if(action==="close-comment-form"){PACS.state.editingCommentId=null;return PACS.ui.closeModal("commentFormModal");}
