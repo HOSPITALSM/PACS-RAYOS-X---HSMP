@@ -942,6 +942,50 @@ body.auth-booting{background:#061014}
   }
 }
 </style>
+<style id="v78-comments-notice">
+/* V78 · Comentarios + aviso de acceso */
+.notice-modal{width:min(540px,calc(100vw - 32px))!important;text-align:center}
+.notice-title{display:block;width:100%;text-align:center;color:#ff4d4f;font-size:22px;letter-spacing:.08em;font-weight:900}
+.notice-text{margin:20px 0 4px;color:var(--text);font-weight:700;line-height:1.7;text-align:center}
+.notice-actions{justify-content:center!important}
+.comments-summary{margin-top:14px;padding:13px;border:1px solid var(--line);border-radius:10px;background:#081319}
+.comments-summary-title{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;font-weight:800}
+.comments-summary-latest{margin-top:9px;color:var(--muted);font-size:12px;line-height:1.5}
+.comments-summary-latest strong{display:block;color:var(--text);font-size:12px;margin-bottom:3px}
+.comments-summary .comment-preview{color:var(--text);white-space:pre-wrap;overflow-wrap:anywhere}
+.comment-action{margin-top:10px;width:100%}
+.comment-modal{width:min(620px,calc(100vw - 26px))!important;max-width:620px!important}
+.comment-modal .mh{position:sticky;top:0;z-index:2;background:var(--panel)}
+.comment-context{padding:0 0 10px;color:var(--muted);font-size:12px;border-bottom:1px solid var(--line)}
+.comments-scroll{max-height:min(56vh,520px);overflow-y:auto;overscroll-behavior:contain;padding:10px 2px 4px;scrollbar-width:thin}
+.comment-item{padding:11px 3px 13px;border-bottom:1px solid var(--line)}
+.comment-item:last-child{border-bottom:0}
+.comment-meta{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;color:var(--muted);font-size:11px;margin-bottom:6px}
+.comment-scope{font-weight:800;color:var(--cyan)}
+.comment-text{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55;color:var(--text);font-size:14px}
+.comment-admin-actions{display:flex;justify-content:flex-end;gap:7px;margin-top:9px}
+.comment-admin-actions button{padding:7px 9px;font-size:11px}
+.comment-empty{padding:26px 8px;text-align:center;color:var(--muted)}
+.comment-footer{display:flex;justify-content:flex-end;gap:9px;padding-top:12px;border-top:1px solid var(--line);background:var(--panel)}
+.comment-form textarea{width:100%;min-height:130px;resize:vertical;background:#071116;border:1px solid var(--line);color:var(--text);border-radius:9px;padding:12px;font:inherit;line-height:1.5}
+.comment-scope-options{display:grid;gap:8px;margin:12px 0}
+.comment-scope-options label{display:flex;align-items:center;gap:8px;color:var(--text);font-size:13px}
+.comment-error{color:#ff7676;font-size:12px;margin-top:8px}
+.mobile-comment-icon{position:relative;display:inline-block!important}
+.mobile-comment-badge{position:absolute;top:-7px;right:-10px;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:#d9363e;color:#fff;font-size:10px;line-height:16px;font-weight:900;text-align:center}
+.mobile-nav button.has-comments .mobile-comment-icon{color:#ff4d4f!important}
+@media(max-width:850px){
+  .mobile-nav{grid-template-columns:repeat(4,1fr)!important}
+  .mobile-nav button{min-width:0;padding:4px 2px!important;font-size:10px!important}
+  .mobile-nav button span{font-size:19px!important}
+  .comment-modal{width:calc(100vw - 20px)!important;margin:10px!important}
+  .comments-scroll{max-height:52vh}
+  .comment-footer{position:sticky;bottom:0}
+  .notice-modal{width:calc(100vw - 28px)!important}
+  .notice-title{font-size:20px}
+  .notice-text{font-size:14px}
+}
+</style>
 </head>
 <body class="auth-booting">
 
@@ -1022,6 +1066,27 @@ body.auth-booting{background:#061014}
 <div class="modal-actions"><button class="secondary" data-action="close-confirm-modal">Cancelar</button><button class="btn" id="confirmBtn">Confirmar</button></div>
 </div></div>
 
+<div id="noticeModal" class="modal-bg"><div class="modal notice-modal" role="dialog" aria-modal="true" aria-labelledby="noticeTitle">
+<div class="mh" style="justify-content:center"><b id="noticeTitle" class="notice-title">AVISO</b></div>
+<p class="notice-text">EN CASO DE OBSERVACIONES, SUGERENCIAS O QUEJAS CON RESPECTO A LOS ESTUDIOS, ACERCARSE AL ÁREA DE RAYOS X.</p>
+<div class="modal-actions notice-actions"><button class="btn" data-action="notice-close">ENTENDIDO</button></div>
+</div></div>
+
+<div id="commentsModal" class="modal-bg"><div class="modal comment-modal" role="dialog" aria-modal="true" aria-labelledby="commentsTitle">
+<div class="mh"><b id="commentsTitle">💬 COMENTARIOS</b><button class="close" data-action="close-comments-modal" aria-label="Cerrar">×</button></div>
+<div id="commentsContext" class="comment-context"></div>
+<div id="commentsList" class="comments-scroll"></div>
+<div id="commentsFooter" class="comment-footer"></div>
+</div></div>
+
+<div id="commentFormModal" class="modal-bg"><div class="modal comment-modal comment-form" role="dialog" aria-modal="true" aria-labelledby="commentFormTitle">
+<div class="mh"><b id="commentFormTitle">NUEVO COMENTARIO</b><button class="close" data-action="close-comment-form" aria-label="Cerrar">×</button></div>
+<div id="commentScopeOptions" class="comment-scope-options"></div>
+<textarea id="commentText" maxlength="2000" placeholder="Escribe el comentario..."></textarea>
+<div id="commentFormStatus" class="comment-error" aria-live="polite"></div>
+<div class="modal-actions"><button class="secondary" data-action="close-comment-form">CANCELAR</button><button class="btn" data-action="comment-save">GUARDAR</button></div>
+</div></div>
+
 <div id="toast" class="toast"></div>
 <div id="loginModal" class="modal-bg"><div class="modal">
 <div class="mh"><b>INICIAR SESIÓN</b><button class="close" data-action="close-login-modal" aria-label="Cerrar">×</button></div>
@@ -1036,7 +1101,7 @@ body.auth-booting{background:#061014}
 </div></div>
 
 <script>
-/* BUILD HSMP 2026-08-22 AUTO-GRUPOS V64 */
+/* BUILD HSMP 2026-08-31 V78 · COMENTARIOS + AVISO */
 /* ===== config.js ===== */
 window.PACS = window.PACS || {};
 PACS.config = {
@@ -1088,7 +1153,11 @@ PACS.state = {
   pinchStartDistance: 0,
   pinchStartScale: 1,
   storageBucket: "IMAGENES",
-  _imageRefreshTimer: null
+  _imageRefreshTimer: null,
+  comments: [],
+  commentsPatientName: "",
+  commentsLoading: false,
+  editingCommentId: null
 };
 
 
@@ -1472,7 +1541,9 @@ PACS.patients = {
     PACS.state.selectedStudyIndex=idx>=0?idx:0;
     PACS.state.selectedImage=PACS.data.studyCount(PACS.data.currentStudy())>0?1:0;
     PACS.app.resetViewer();
+    PACS.comments.clear();
     PACS.app.render();
+    PACS.comments.loadForCurrentPatient({rerender:true}).catch(err=>console.error("Comments refresh:",err));
     PACS.data.hydratePatientDateStudies(p,PACS.state.selectedDate).then(()=>PACS.app.render()).catch(err=>console.error("Image refresh:",err));
     if(window.matchMedia?.("(max-width: 850px)").matches){
       this.closeSide();
@@ -1578,6 +1649,12 @@ PACS.patients = {
     try{
       const {error}=await PACS.state.client.from("studies").update(updates).eq("patient",oldName);
       if(error) throw error;
+      if(nameChanged){
+        const {error:commentRenameError}=await PACS.state.client.from("comments").update({patient_name:newName,updated_at:new Date().toISOString()}).eq("patient_name",oldName);
+        if(commentRenameError) console.warn("No se pudieron renombrar los comentarios:",commentRenameError.message);
+        PACS.state.comments=(PACS.state.comments||[]).map(c=>({...c,patient_name:newName}));
+        PACS.state.commentsPatientName=newName;
+      }
       if(selectedSex) PACS.gender.write(newName,selectedSex);
       PACS.ui.toast("Paciente modificado correctamente.");
     }catch(err){
@@ -1649,7 +1726,9 @@ PACS.studies = {
     PACS.state.selectedStudyIndex=idx>=0?idx:0;
     PACS.state.selectedImage=PACS.data.studyCount(PACS.data.currentStudy())>0?1:0;
     PACS.app.resetViewer();
+    PACS.comments.clear();
     PACS.app.render();
+    PACS.comments.loadForCurrentPatient({rerender:true}).catch(err=>console.error("Comments refresh:",err));
 
     try{
       await PACS.data.loadStudies();
@@ -1660,7 +1739,9 @@ PACS.studies = {
       PACS.state.selectedStudyIndex=idx2>=0?idx2:0;
       PACS.state.selectedImage=PACS.data.studyCount(PACS.data.currentStudy())>0?1:0;
       PACS.app.resetViewer();
+      PACS.comments.clear();
       PACS.app.render();
+      PACS.comments.loadForCurrentPatient({rerender:true}).catch(err=>console.error("Comments refresh:",err));
       PACS.data.hydrateImages(PACS.data.currentStudy()).then(()=>PACS.app.render()).catch(err=>console.error("Image hydration:",err));
     }catch(err){
       console.error("Calendar refresh:",err);
@@ -1783,6 +1864,176 @@ window.handleFiles=function(files,target){
   }
 };
 
+/* ===== comments.js · V78 ===== */
+window.PACS = window.PACS || {};
+PACS.comments = {
+  clear(){
+    PACS.state.comments=[];
+    PACS.state.commentsPatientName="";
+    PACS.state.commentsLoading=false;
+    PACS.state.editingCommentId=null;
+  },
+  currentImageKey(){
+    const study=PACS.data.currentStudy();
+    const item=PACS.data.imageItems(study)[Math.max(0,(PACS.state.selectedImage||1)-1)];
+    return PACS.data.imagePath(item) || (study?.id ? `${study.id}#${PACS.state.selectedImage||0}` : "");
+  },
+  relevant(){
+    const p=PACS.state.selectedPatient, study=PACS.data.currentStudy();
+    if(!p) return [];
+    const studyId=study?.id!=null?String(study.id):"";
+    const imageKey=this.currentImageKey();
+    return (PACS.state.comments||[]).filter(c=>{
+      if(String(c.patient_name||"").trim().toUpperCase()!==String(p.name||"").trim().toUpperCase()) return false;
+      if(c.scope==="patient") return true;
+      if(c.scope==="image") return String(c.study_id||"")===studyId && String(c.image_key||"")===imageKey;
+      return false;
+    }).sort((a,b)=>new Date(a.created_at||0)-new Date(b.created_at||0));
+  },
+  formatDateTime(value){
+    if(!value) return "";
+    const d=new Date(value);
+    if(Number.isNaN(d.getTime())) return String(value);
+    return new Intl.DateTimeFormat("es-PE",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit",hour12:false}).format(d).replace(",","").toUpperCase();
+  },
+  escapeHtml(value){
+    return String(value??"").replace(/[&<>\"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+  },
+  async loadForCurrentPatient({rerender=false}={}){
+    const p=PACS.state.selectedPatient;
+    if(!PACS.state.client || !PACS.state.logged || !p){this.clear(); if(rerender)PACS.app.render(); return [];}
+    if(PACS.state.commentsLoading) return PACS.state.comments;
+    PACS.state.commentsLoading=true;
+    try{
+      const {data,error}=await PACS.state.client.from("comments").select("*").eq("patient_name",p.name).order("created_at",{ascending:true});
+      if(error) throw error;
+      // Evitar que una respuesta tardía de un paciente anterior contamine el actual.
+      if(PACS.state.selectedPatient?.name===p.name){
+        PACS.state.comments=Array.isArray(data)?data:[];
+        PACS.state.commentsPatientName=p.name;
+      }
+    }catch(err){
+      console.warn("Comentarios no disponibles:",err?.message||err);
+      if(PACS.state.selectedPatient?.name===p.name){
+        PACS.state.comments=[];
+        PACS.state.commentsPatientName=p.name;
+      }
+    }finally{
+      PACS.state.commentsLoading=false;
+    }
+    if(rerender && PACS.state.logged) PACS.app.render();
+    return PACS.state.comments;
+  },
+  summaryHtml(){
+    const rows=this.relevant();
+    if(!rows.length) return "";
+    const last=rows[rows.length-1];
+    return `<div class="comments-summary"><div class="comments-summary-title"><span>💬 COMENTARIOS (${rows.length})</span></div><div class="comments-summary-latest"><strong>ÚLTIMO · ${this.formatDateTime(last.created_at)}</strong><div class="comment-preview">${this.escapeHtml(last.comment_text)}</div></div><button class="secondary comment-action" data-action="comments-open">VER TODOS</button></div>`;
+  },
+  actionButtonHtml(){
+    const count=this.relevant().length;
+    return `<button class="action" data-action="comments-open">💬 COMENTARIOS${count?` (${count})`:""}</button>`;
+  },
+  mobileButtonHtml(){
+    const count=this.relevant().length;
+    const badge=count?`<small class="mobile-comment-badge">${count>99?"99+":count}</small>`:"";
+    return `<button data-mobile="comments" class="${count?"has-comments":""}"><span class="mobile-comment-icon">💬${badge}</span>Comentario</button>`;
+  },
+  async open(){
+    if(!PACS.state.selectedPatient) return PACS.ui.toast("Selecciona un paciente primero.");
+    await this.loadForCurrentPatient({rerender:false});
+    this.renderModal();
+    PACS.ui.openModal("commentsModal");
+  },
+  renderModal(){
+    const p=PACS.state.selectedPatient, study=PACS.data.currentStudy(), rows=this.relevant();
+    const title=document.getElementById("commentsTitle");
+    const ctx=document.getElementById("commentsContext");
+    const list=document.getElementById("commentsList");
+    const footer=document.getElementById("commentsFooter");
+    if(title) title.textContent=`💬 COMENTARIOS (${rows.length})`;
+    if(ctx) ctx.textContent=p?`${p.name}${study?` · ${study.study} · ${study.date}`:""}`:"";
+    if(list){
+      list.innerHTML=rows.length?rows.map(c=>`<article class="comment-item"><div class="comment-meta"><span><span class="comment-scope">${c.scope==="image"?"IMAGEN ACTUAL":"PACIENTE"}</span> · ${this.formatDateTime(c.created_at)}</span></div><div class="comment-text">${this.escapeHtml(c.comment_text)}</div>${PACS.state.role==="admin"?`<div class="comment-admin-actions"><button class="secondary" data-action="comment-edit" data-comment-id="${this.escapeHtml(c.id)}">EDITAR</button><button class="secondary" data-action="comment-delete" data-comment-id="${this.escapeHtml(c.id)}">ELIMINAR</button></div>`:""}</article>`).join(""):`<div class="comment-empty">Este estudio no tiene comentarios registrados.</div>`;
+    }
+    if(footer) footer.innerHTML=PACS.state.role==="admin"?`<button class="btn" data-action="comment-new">＋ NUEVO COMENTARIO</button><button class="secondary" data-action="close-comments-modal">CERRAR</button>`:`<button class="secondary" data-action="close-comments-modal">CERRAR</button>`;
+  },
+  openNew(){
+    if(PACS.state.role!=="admin") return PACS.ui.toast("Solo el Administrador puede agregar comentarios.");
+    const p=PACS.state.selectedPatient, study=PACS.data.currentStudy();
+    if(!p) return PACS.ui.toast("Selecciona un paciente primero.");
+    PACS.state.editingCommentId=null;
+    const hasImage=!!(study && PACS.data.studyCount(study) && this.currentImageKey());
+    document.getElementById("commentFormTitle").textContent="NUEVO COMENTARIO";
+    document.getElementById("commentScopeOptions").innerHTML=`<label><input type="radio" name="commentScope" value="image" ${hasImage?"checked":"disabled"}> IMAGEN ACTUAL${hasImage?"":" (NO DISPONIBLE)"}</label><label><input type="radio" name="commentScope" value="patient" ${hasImage?"":"checked"}> PACIENTE</label>`;
+    document.getElementById("commentText").value="";
+    document.getElementById("commentFormStatus").textContent="";
+    PACS.ui.openModal("commentFormModal");
+    setTimeout(()=>document.getElementById("commentText")?.focus(),0);
+  },
+  openEdit(id){
+    if(PACS.state.role!=="admin") return PACS.ui.toast("Solo el Administrador puede editar comentarios.");
+    const c=(PACS.state.comments||[]).find(x=>String(x.id)===String(id));
+    if(!c) return PACS.ui.toast("No se encontró el comentario.");
+    PACS.state.editingCommentId=c.id;
+    document.getElementById("commentFormTitle").textContent="EDITAR COMENTARIO";
+    document.getElementById("commentScopeOptions").innerHTML=`<div class="muted">ASOCIADO A: ${c.scope==="image"?"IMAGEN ACTUAL":"PACIENTE"}</div>`;
+    document.getElementById("commentText").value=c.comment_text||"";
+    document.getElementById("commentFormStatus").textContent="";
+    PACS.ui.openModal("commentFormModal");
+    setTimeout(()=>document.getElementById("commentText")?.focus(),0);
+  },
+  async save(){
+    if(PACS.state.role!=="admin") return PACS.ui.toast("Solo el Administrador puede modificar comentarios.");
+    const p=PACS.state.selectedPatient, study=PACS.data.currentStudy();
+    const text=(document.getElementById("commentText")?.value||"").trim();
+    const status=document.getElementById("commentFormStatus");
+    if(!text){if(status)status.textContent="Escribe un comentario antes de guardar.";return;}
+    try{
+      if(PACS.state.editingCommentId){
+        const {error}=await PACS.state.client.from("comments").update({comment_text:text,updated_at:new Date().toISOString()}).eq("id",PACS.state.editingCommentId);
+        if(error) throw error;
+      }else{
+        const scope=document.querySelector('input[name="commentScope"]:checked')?.value||"patient";
+        const payload={patient_name:p.name,scope,comment_text:text};
+        if(scope==="image"){
+          payload.study_id=study?.id!=null?String(study.id):null;
+          payload.image_key=this.currentImageKey()||null;
+        }
+        const {error}=await PACS.state.client.from("comments").insert(payload);
+        if(error) throw error;
+      }
+      PACS.ui.closeModal("commentFormModal");
+      PACS.state.editingCommentId=null;
+      await this.loadForCurrentPatient({rerender:false});
+      PACS.app.render();
+      this.renderModal();
+      PACS.ui.openModal("commentsModal");
+      PACS.ui.toast("Comentario guardado correctamente.");
+    }catch(err){if(status)status.textContent=err?.message||"No se pudo guardar el comentario.";}
+  },
+  askDelete(id){
+    if(PACS.state.role!=="admin") return PACS.ui.toast("Solo el Administrador puede eliminar comentarios.");
+    const c=(PACS.state.comments||[]).find(x=>String(x.id)===String(id));
+    if(!c) return;
+    PACS.ui.openModal("confirmModal");
+    document.getElementById("confirmTitle").textContent="ELIMINAR COMENTARIO";
+    document.getElementById("confirmText").textContent="¿Deseas eliminar este comentario? Esta acción no se puede deshacer.";
+    document.getElementById("confirmBtn").onclick=async()=>{
+      PACS.ui.closeModal("confirmModal");
+      try{
+        const {error}=await PACS.state.client.from("comments").delete().eq("id",id);
+        if(error) throw error;
+        await this.loadForCurrentPatient({rerender:false});
+        PACS.app.render();
+        this.renderModal();
+        PACS.ui.openModal("commentsModal");
+        PACS.ui.toast("Comentario eliminado.");
+      }catch(err){PACS.ui.toast(err?.message||"No se pudo eliminar el comentario.");}
+    };
+  }
+};
+
 /* ===== app.js ===== */
 window.PACS = window.PACS || {};
 PACS.app = {
@@ -1796,7 +2047,9 @@ PACS.app = {
       const restored=await PACS.auth.restore();
       if(restored){
         await this.sync();
+        await PACS.comments.loadForCurrentPatient({rerender:false});
         this.render();
+        this.openNotice();
       }
       // Signed URLs are temporary. Refresh only the study currently being viewed.
       if(!PACS.state._imageRefreshTimer){
@@ -1827,6 +2080,9 @@ PACS.app = {
       const status=document.getElementById("loginStatus");
       if(status)status.textContent="Conexión con Supabase pendiente. Puedes intentar iniciar sesión.";
     }
+  },
+  openNotice(){
+    if(PACS.state.logged) PACS.ui.openModal("noticeModal");
   },
   home(){
     document.getElementById("root").innerHTML=`<div class="screen"><div class="center"><img src="DXLOGO.png" class="logo-inicio" alt="Logo"><h1>HOSPITAL SAN MARTIN DE PANGOA</h1><p>DIAGNÓSTICO POR IMAGEN</p><button class="btn" data-action="login-open">Iniciar sesión</button></div></div>`;
@@ -1881,6 +2137,9 @@ PACS.app = {
     const thumb=PACS.view.renderThumbs(study);
     const mobileActions="";
     const mobileAdd=st.role==="admin"?`<button type="button" class="add" data-action="add-patient">＋ Agregar paciente</button>`:"";
+    const commentsSummary=PACS.comments.summaryHtml();
+    const commentsAction=PACS.comments.actionButtonHtml();
+    const mobileComments=PACS.comments.mobileButtonHtml();
 
     document.getElementById("root").innerHTML=`<header class="top">
       <div class="brand"><img src="DXLOGO.png" class="brand-logo" alt="Logo"><div class="brand-text"><b>HOSPITAL SAN MARTIN DE PANGOA</b><span>DIAGNÓSTICO POR IMAGEN</span></div></div>
@@ -1936,11 +2195,13 @@ PACS.app = {
           <button class="action" data-action="add-images">➕ Añadir imágenes</button>
           <button class="action" data-action="delete-image">🗑️ Eliminar imagen</button>
           <button class="action danger" data-action="delete-patient">🔴 ✕ Eliminar paciente</button>
-        </div>`:`<div class="muted">Modo visualización</div>`}
+          ${commentsAction}
+        </div>`:`<div class="actions"><div class="muted">Modo visualización</div>${commentsAction}</div>`}
+        ${commentsSummary}
       </aside>
     </main>
     <section class="history"><h2>HISTORIAL DEL PACIENTE · ${p?.name||"—"}</h2>${history}</section>
-    <nav class="mobile-nav"><button data-mobile="home"><span>🏠</span>Inicio</button><button data-mobile="patients"><span>👥</span>Pacientes</button><button data-mobile="viewer" class="active"><span>🩻</span>Visor</button></nav>
+    <nav class="mobile-nav"><button data-mobile="home"><span>🏠</span>Inicio</button><button data-mobile="patients"><span>👥</span>Pacientes</button>${mobileComments}<button data-mobile="viewer" class="active"><span>🩻</span>Visor</button></nav>
     <div id="overlay" class="overlay" data-action="side-close"></div>
     <aside id="side" class="side"><div style="display:flex;justify-content:space-between"><b>← PACIENTES</b><button class="close" data-action="side-close">×</button></div><div class="stats-row"><span class="stat-pill"><b>${dayPatients.length}</b> pacientes</span><span class="stat-pill"><b>${dayStudies}</b> estudios</span><span class="stat-pill"><b>${totalPatients}</b> total</span></div><input id="mobileSearch" placeholder="🔎 Nombre, estudio o fecha...">${mobileAdd}<div id="mobilePatients" class="patients">${list}</div></aside>`;
     this.renderThumbSync();
@@ -2281,7 +2542,7 @@ const calDate=e.target.closest?.("[data-calendar-date]")?.dataset?.calendarDate;
       document.getElementById("mobileMoreMenu")?.classList.toggle("show");
       return;
     }
-    if(action==="logout"){await PACS.auth.logout();return this.home();}
+    if(action==="logout"){PACS.comments.clear();await PACS.auth.logout();return this.home();}
     if(!e.target.closest?.(".mobile-admin-actions")){
       document.getElementById("mobileMoreMenu")?.classList.remove("show");
     }
@@ -2300,6 +2561,14 @@ const calDate=e.target.closest?.("[data-calendar-date]")?.dataset?.calendarDate;
     if(action==="delete-patient"){document.getElementById("mobileMoreMenu")?.classList.remove("show");return this.openDeletePatient();}
     if(action==="calendar-toggle")return this.toggleCalendar(e);
     if(action==="side-close")return this.closeSide();
+    if(action==="notice-close")return PACS.ui.closeModal("noticeModal");
+    if(action==="comments-open")return PACS.comments.open();
+    if(action==="close-comments-modal")return PACS.ui.closeModal("commentsModal");
+    if(action==="comment-new")return PACS.comments.openNew();
+    if(action==="comment-edit")return PACS.comments.openEdit(e.target.closest?.("[data-comment-id]")?.dataset?.commentId);
+    if(action==="comment-delete")return PACS.comments.askDelete(e.target.closest?.("[data-comment-id]")?.dataset?.commentId);
+    if(action==="close-comment-form"){PACS.state.editingCommentId=null;return PACS.ui.closeModal("commentFormModal");}
+    if(action==="comment-save")return PACS.comments.save();
     if(action==="close-patient-modal"){return PACS.ui.closeModal("patientModal");}
     if(action==="close-edit-modal"){return PACS.ui.closeModal("editModal");}
     if(action==="close-images-modal"){return PACS.ui.closeModal("imagesModal");}
@@ -2332,7 +2601,9 @@ const calDate=e.target.closest?.("[data-calendar-date]")?.dataset?.calendarDate;
       if(rememberPass) rememberPass.checked=false;
       PACS.ui.closeModal("loginModal");
       await this.sync();
+      await PACS.comments.loadForCurrentPatient({rerender:false});
       this.render();
+      this.openNotice();
     }catch(err){if(status)status.textContent=err.message||"No se pudo iniciar sesión.";}
     finally{if(btn)btn.disabled=false;}
   },
@@ -2714,6 +2985,12 @@ const calDate=e.target.closest?.("[data-calendar-date]")?.dataset?.calendarDate;
   mobileNavigate(which){
     document.querySelectorAll(".mobile-nav button").forEach(b=>b.classList.remove("active"));
     document.querySelector(`.mobile-nav button[data-mobile="${which}"]`)?.classList.add("active");
+
+    if(which==="comments"){
+      this.closeSide();
+      PACS.comments.open();
+      return;
+    }
 
     if(which==="patients"){
       const side=document.getElementById("side");
