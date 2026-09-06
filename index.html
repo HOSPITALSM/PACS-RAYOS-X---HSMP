@@ -915,6 +915,25 @@ n
     padding:0 !important;
   }
 }
+
+/* V82 · Control de dispositivos */
+.device-divider{height:1px;background:var(--line);margin:8px 0}
+.device-control-btn{position:relative}
+.device-badge{display:none;min-width:20px;height:20px;padding:0 6px;margin-left:auto;border-radius:999px;background:#e5484d;color:#fff;font-size:11px;font-weight:900;align-items:center;justify-content:center}
+.device-badge.show{display:inline-flex}
+.device-gate-modal{width:min(500px,calc(100vw - 26px))!important;max-width:500px!important}
+.device-gate-icon{font-size:36px;text-align:center;margin:6px 0 8px}
+.device-gate-text{text-align:center;color:var(--muted);line-height:1.55;margin:8px 0 14px}
+.device-panel{width:min(760px,calc(100vw - 26px))!important;max-width:760px!important}
+.device-summary{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 16px}
+.device-section-title{font-size:12px;font-weight:900;color:var(--cyan);letter-spacing:.05em;margin:16px 0 7px}
+.device-list{display:flex;flex-direction:column;gap:8px}
+.device-card{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#09171d}
+.device-card-main{min-width:0}.device-card-main b{display:block;font-size:14px}.device-card-main span{display:block;color:var(--muted);font-size:11px;margin-top:3px;line-height:1.45}
+.device-card-actions{display:flex;gap:6px;flex:0 0 auto}.device-card-actions button{padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:#0e1d24;color:var(--text);font-weight:700;font-size:12px}.device-card-actions .approve{border-color:#32634f;color:#8ee1b8}.device-card-actions .reject{border-color:#67383b;color:#ff9d9d}
+.device-empty{padding:12px;border:1px dashed var(--line);border-radius:9px;color:var(--muted);font-size:12px}
+@media(max-width:650px){.device-card{align-items:flex-start;flex-direction:column}.device-card-actions{width:100%}.device-card-actions button{flex:1}.device-panel{max-height:90vh;overflow:auto}}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style id="auth-boot-fix">
@@ -1105,6 +1124,28 @@ body.auth-booting{background:#061014}
 <div class="modal-actions"><button class="secondary" data-action="close-comment-form">CANCELAR</button><button class="btn" data-action="comment-save">GUARDAR</button></div>
 </div></div>
 
+
+<div id="deviceRequestModal" class="modal-bg"><div class="modal device-gate-modal">
+<div class="mh"><b>🔐 AUTORIZAR DISPOSITIVO</b></div>
+<div class="device-gate-icon">📱</div>
+<p class="device-gate-text">Este dispositivo todavía no está autorizado. Escribe tu nombre para enviar la solicitud al administrador.</p>
+<div class="field"><label>NOMBRE DEL MÉDICO</label><input id="deviceDoctorName" placeholder="Ej. Dr. Carlos Pérez" autocomplete="name"></div>
+<div id="deviceRequestStatus" aria-live="polite" style="text-align:center;color:var(--muted);font-size:12px;margin-top:8px"></div>
+<div class="modal-actions"><button class="secondary" data-action="device-logout">CERRAR SESIÓN</button><button class="btn" id="deviceRequestBtn" data-action="device-request-submit">ENVIAR SOLICITUD</button></div>
+</div></div>
+
+<div id="deviceStatusModal" class="modal-bg"><div class="modal device-gate-modal">
+<div class="mh"><b id="deviceStatusTitle">🔐 ACCESO AL PACS</b></div>
+<div id="deviceStatusIcon" class="device-gate-icon">⏳</div>
+<p id="deviceStatusText" class="device-gate-text"></p>
+<div class="modal-actions" style="justify-content:center"><button class="secondary" data-action="device-logout">CERRAR SESIÓN</button><button class="btn" id="deviceStatusRetry" data-action="device-status-retry">COMPROBAR DE NUEVO</button></div>
+</div></div>
+
+<div id="deviceControlModal" class="modal-bg"><div class="modal device-panel">
+<div class="mh"><b>🔐 CONTROL DE DISPOSITIVOS</b><button class="close" data-action="close-device-control">×</button></div>
+<div id="deviceControlBody"><div class="data-loading">Cargando dispositivos...</div></div>
+</div></div>
+
 <div id="toast" class="toast"></div>
 <div id="loginModal" class="modal-bg"><div class="modal">
 <div class="mh"><b>INICIAR SESIÓN</b><button class="close" data-action="close-login-modal" aria-label="Cerrar">×</button></div>
@@ -1119,7 +1160,7 @@ body.auth-booting{background:#061014}
 </div></div>
 
 <script>
-/* BUILD HSMP 2026-08-31 V81 · EDICIÓN/ELIMINACIÓN DE COMENTARIOS EN LA MISMA VENTANA */
+/* BUILD HSMP 2026-09-06 V82 · CONTROL DE DISPOSITIVOS */
 /* ===== config.js ===== */
 window.PACS = window.PACS || {};
 PACS.config = {
@@ -1139,6 +1180,8 @@ PACS.state = {
   client: null,
   logged: false,
   role: "",
+  deviceStatus: "",
+  deviceDoctorName: "",
   selectedPatient: null,
   selectedStudyIndex: 0,
   selectedImage: 0,
@@ -1480,30 +1523,171 @@ PACS.auth = {
     const {data,error}=await PACS.state.client.auth.signInWithPassword({email,password});
     if(error || !data?.user) throw new Error("Correo o contraseña incorrectos.");
     const uid=data.user.id;
-    if(uid===PACS.config.roles.admin) PACS.state.role="admin";
-    else if(uid===PACS.config.roles.viewer) PACS.state.role="viewer";
-    else {
-      await PACS.state.client.auth.signOut();
-      throw new Error("Este usuario no tiene acceso autorizado al PACS.");
+    if(uid===PACS.config.roles.admin){
+      PACS.state.role="admin";
+      PACS.state.logged=true;
+      PACS.state.deviceStatus="approved";
+      return {role:"admin",deviceStatus:"approved"};
     }
-    PACS.state.logged=true;
+    if(uid===PACS.config.roles.viewer){
+      PACS.state.role="viewer";
+      const check=await PACS.devices.checkAccess();
+      PACS.state.deviceStatus=check.status;
+      PACS.state.deviceDoctorName=check.doctorName||"";
+      PACS.state.logged=check.status==="approved";
+      return {role:"viewer",deviceStatus:check.status};
+    }
+    await PACS.state.client.auth.signOut();
+    throw new Error("Este usuario no tiene acceso autorizado al PACS.");
   },
   async restore(){
     const {data,error}=await PACS.state.client.auth.getSession();
     if(error || !data?.session?.user) return false;
     const uid=data.session.user.id;
-    if(uid===PACS.config.roles.admin) PACS.state.role="admin";
-    else if(uid===PACS.config.roles.viewer) PACS.state.role="viewer";
-    else { await PACS.state.client.auth.signOut(); return false; }
-    PACS.state.logged=true;
-    return true;
+    if(uid===PACS.config.roles.admin){
+      PACS.state.role="admin"; PACS.state.logged=true; PACS.state.deviceStatus="approved"; return true;
+    }
+    if(uid===PACS.config.roles.viewer){
+      PACS.state.role="viewer";
+      const check=await PACS.devices.checkAccess();
+      PACS.state.deviceStatus=check.status;
+      PACS.state.deviceDoctorName=check.doctorName||"";
+      PACS.state.logged=check.status==="approved";
+      if(!PACS.state.logged) setTimeout(()=>PACS.devices.showGate(check.status),0);
+      return PACS.state.logged;
+    }
+    await PACS.state.client.auth.signOut();
+    return false;
   },
   async logout(){
     await PACS.state.client.auth.signOut();
-    Object.assign(PACS.state,{logged:false,role:"",selectedPatient:null,selectedStudyIndex:0,selectedImage:0});
+    Object.assign(PACS.state,{logged:false,role:"",deviceStatus:"",deviceDoctorName:"",selectedPatient:null,selectedStudyIndex:0,selectedImage:0});
   }
 };
 
+/* ===== devices.js ===== */
+window.PACS = window.PACS || {};
+PACS.devices = {
+  keyId:"pacsDeviceIdV1",
+  keySecret:"pacsDeviceSecretV1",
+  ensureIdentity(){
+    let id=localStorage.getItem(this.keyId), secret=localStorage.getItem(this.keySecret);
+    if(!id){ id=(crypto.randomUUID?crypto.randomUUID():`${Date.now()}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`); localStorage.setItem(this.keyId,id); }
+    if(!secret){
+      const bytes=new Uint8Array(32); crypto.getRandomValues(bytes);
+      secret=Array.from(bytes,b=>b.toString(16).padStart(2,"0")).join("");
+      localStorage.setItem(this.keySecret,secret);
+    }
+    return {id,secret};
+  },
+  deviceType(){
+    const ua=navigator.userAgent||"";
+    if(/Android/i.test(ua)) return "Android";
+    if(/iPhone|iPad|iPod/i.test(ua)) return "iOS";
+    if(/Windows/i.test(ua)) return "Windows";
+    if(/Macintosh|Mac OS X/i.test(ua)) return "macOS";
+    return "Otro";
+  },
+  browser(){
+    const ua=navigator.userAgent||"";
+    if(/Edg\//i.test(ua)) return "Edge";
+    if(/CriOS/i.test(ua)) return "Chrome";
+    if(/Chrome\//i.test(ua)) return "Chrome";
+    if(/FxiOS|Firefox\//i.test(ua)) return "Firefox";
+    if(/Safari\//i.test(ua)) return "Safari";
+    return "Navegador";
+  },
+  async checkAccess(){
+    const {id,secret}=this.ensureIdentity();
+    const {data,error}=await PACS.state.client.rpc("check_device_access",{p_device_id:id,p_device_secret:secret});
+    if(error) throw new Error("No se pudo verificar este dispositivo.");
+    const row=Array.isArray(data)?data[0]:data;
+    return {status:row?.device_status||"unknown",approvedAt:row?.approved_at||null,doctorName:row?.doctor_name||""};
+  },
+  async requestAccess(name){
+    const clean=String(name||"").trim();
+    if(!clean) throw new Error("Escribe tu nombre.");
+    const {id,secret}=this.ensureIdentity();
+    const {data,error}=await PACS.state.client.rpc("request_device_access",{
+      p_device_id:id,p_device_secret:secret,p_doctor_name:clean,p_device_type:this.deviceType(),p_browser:this.browser()
+    });
+    if(error) throw new Error(error.message||"No se pudo enviar la solicitud.");
+    const row=Array.isArray(data)?data[0]:data;
+    return row?.device_status||"pending";
+  },
+  showGate(status){
+    PACS.ui.closeModal("deviceRequestModal"); PACS.ui.closeModal("deviceStatusModal");
+    if(status==="unknown"){
+      const input=document.getElementById("deviceDoctorName"); if(input) input.value="";
+      const st=document.getElementById("deviceRequestStatus"); if(st) st.textContent="";
+      PACS.ui.openModal("deviceRequestModal"); setTimeout(()=>input?.focus(),80); return;
+    }
+    const title=document.getElementById("deviceStatusTitle"), icon=document.getElementById("deviceStatusIcon"), text=document.getElementById("deviceStatusText"), retry=document.getElementById("deviceStatusRetry");
+    if(status==="pending"){
+      if(title)title.textContent="🔐 SOLICITUD PENDIENTE"; if(icon)icon.textContent="⏳";
+      if(text)text.textContent=`${PACS.state.deviceDoctorName||"Tu dispositivo"}: la solicitud fue enviada al administrador. Cuando sea aprobada podrás ingresar al PACS.`;
+      if(retry)retry.style.display="";
+    }else{
+      if(title)title.textContent="🔐 ACCESO BLOQUEADO"; if(icon)icon.textContent="🚫";
+      if(text)text.textContent=status==="revoked"?"La autorización de este dispositivo fue revocada por el administrador.":"La solicitud de este dispositivo fue rechazada por el administrador.";
+      if(retry)retry.style.display=status==="revoked"?"none":"";
+    }
+    PACS.ui.openModal("deviceStatusModal");
+  },
+  async submitRequest(){
+    const btn=document.getElementById("deviceRequestBtn"), status=document.getElementById("deviceRequestStatus"), name=document.getElementById("deviceDoctorName")?.value||"";
+    if(btn)btn.disabled=true; if(status)status.textContent="Enviando solicitud...";
+    try{
+      const result=await this.requestAccess(name); PACS.state.deviceStatus=result; PACS.state.deviceDoctorName=String(name).trim(); this.showGate(result);
+    }catch(err){if(status)status.textContent=err?.message||"No se pudo enviar la solicitud.";}
+    finally{if(btn)btn.disabled=false;}
+  },
+  async retry(){
+    const btn=document.getElementById("deviceStatusRetry"); if(btn)btn.disabled=true;
+    try{
+      const check=await this.checkAccess(); PACS.state.deviceStatus=check.status; PACS.state.deviceDoctorName=check.doctorName||PACS.state.deviceDoctorName;
+      if(check.status==="approved"){
+        PACS.state.logged=true; PACS.ui.closeModal("deviceStatusModal"); await PACS.app.sync(); await PACS.comments.loadForCurrentPatient({rerender:false}); PACS.app.render(); PACS.app.openNotice();
+      }else this.showGate(check.status);
+    }catch(err){PACS.ui.toast(err?.message||"No se pudo comprobar el dispositivo.");}
+    finally{if(btn)btn.disabled=false;}
+  },
+  async logoutGate(){ await PACS.auth.logout(); PACS.ui.closeModal("deviceRequestModal"); PACS.ui.closeModal("deviceStatusModal"); PACS.app.home(); },
+  fmtDate(v){ if(!v)return "—"; try{return new Intl.DateTimeFormat("es-PE",{dateStyle:"short",timeStyle:"short"}).format(new Date(v));}catch(_){return String(v);} },
+  async loadAdmin(){
+    if(PACS.state.role!=="admin") return [];
+    const {data,error}=await PACS.state.client.from("authorized_devices").select("id,created_at,doctor_name,device_type,browser,status,approved_at,last_seen_at").order("created_at",{ascending:false});
+    if(error) throw error; return data||[];
+  },
+  async pendingCount(){ const rows=await this.loadAdmin(); return rows.filter(x=>x.status==="pending").length; },
+  async refreshAdminBadge(){
+    if(PACS.state.role!=="admin")return;
+    try{const n=await this.pendingCount(); document.querySelectorAll("[data-device-badge]").forEach(x=>{x.textContent=n;x.classList.toggle("show",n>0);});}catch(err){console.error("Device badge:",err);}
+  },
+  card(row,kind){
+    const meta=`${row.device_type||"Dispositivo"} · ${row.browser||"Navegador"} · Solicitud ${this.fmtDate(row.created_at)}`;
+    const actions=kind==="pending"?`<div class="device-card-actions"><button class="reject" data-action="device-reject" data-device-row="${row.id}">RECHAZAR</button><button class="approve" data-action="device-approve" data-device-row="${row.id}">APROBAR</button></div>`:`<div class="device-card-actions"><button class="reject" data-action="device-revoke" data-device-row="${row.id}">REVOCAR</button></div>`;
+    return `<div class="device-card"><div class="device-card-main"><b>${PACS.view.esc(row.doctor_name||"Sin nombre")}</b><span>${PACS.view.esc(meta)}${row.approved_at?`<br>Aprobado ${PACS.view.esc(this.fmtDate(row.approved_at))}`:""}</span></div>${actions}</div>`;
+  },
+  async openAdmin(){
+    if(PACS.state.role!=="admin")return;
+    document.getElementById("mobileMoreMenu")?.classList.remove("show"); PACS.ui.openModal("deviceControlModal"); await this.renderAdmin();
+  },
+  async renderAdmin(){
+    const box=document.getElementById("deviceControlBody"); if(!box)return; box.innerHTML='<div class="data-loading">Cargando dispositivos...</div>';
+    try{
+      const rows=await this.loadAdmin(), pending=rows.filter(x=>x.status==="pending"), approved=rows.filter(x=>x.status==="approved");
+      box.innerHTML=`<div class="device-summary"><span class="stat-pill"><b>${pending.length}</b> solicitudes pendientes</span><span class="stat-pill"><b>${approved.length}</b> dispositivos aprobados</span></div><div class="device-section-title">PENDIENTES</div><div class="device-list">${pending.map(x=>this.card(x,"pending")).join("")||'<div class="device-empty">No hay solicitudes pendientes.</div>'}</div><div class="device-section-title">APROBADOS</div><div class="device-list">${approved.map(x=>this.card(x,"approved")).join("")||'<div class="device-empty">No hay dispositivos aprobados.</div>'}</div>`;
+      await this.refreshAdminBadge();
+    }catch(err){box.innerHTML=`<div class="device-empty">${PACS.view.esc(err?.message||"No se pudo cargar el control de dispositivos.")}</div>`;}
+  },
+  async setStatus(id,status){
+    if(PACS.state.role!=="admin")return;
+    const payload={status}; if(status==="approved")payload.approved_at=new Date().toISOString();
+    const {error}=await PACS.state.client.from("authorized_devices").update(payload).eq("id",id); if(error)throw error;
+    PACS.ui.toast(status==="approved"?"Dispositivo aprobado.":status==="rejected"?"Solicitud rechazada.":"Dispositivo revocado."); await this.renderAdmin();
+  }
+};
 
 /* ===== images.js ===== */
 window.PACS = window.PACS || {};
@@ -2219,6 +2403,8 @@ PACS.app = {
             <button data-action="delete-image">🗑️ <span>Eliminar imagen</span></button>
             <button data-action="comments-manage">💬 <span>Agregar comentario</span></button>
             <button class="danger" data-action="delete-patient">🔴 <span>Eliminar paciente</span></button>
+            <div class="device-divider"></div>
+            <button class="device-control-btn" data-action="device-control">🔐 <span>Control de dispositivos</span><span class="device-badge" data-device-badge>0</span></button>
           </div>
         </div>`:""}
       </div>
@@ -2260,6 +2446,8 @@ PACS.app = {
           <button class="action" data-action="delete-image">🗑️ Eliminar imagen</button>
           ${commentsAction}
           <button class="action danger" data-action="delete-patient">🔴 ✕ Eliminar paciente</button>
+          <div class="device-divider"></div>
+          <button class="action device-control-btn" data-action="device-control">🔐 Control de dispositivos <span class="device-badge" data-device-badge>0</span></button>
         </div>`:`<div class="actions"><div class="muted">Modo visualización</div>${commentsAction}</div>`}
         ${commentsSummary}
       </aside>
@@ -2269,6 +2457,7 @@ PACS.app = {
     <div id="overlay" class="overlay" data-action="side-close"></div>
     <aside id="side" class="side"><div style="display:flex;justify-content:space-between"><b>← PACIENTES</b><button class="close" data-action="side-close">×</button></div><div class="stats-row"><span class="stat-pill"><b>${dayPatients.length}</b> pacientes</span><span class="stat-pill"><b>${dayStudies}</b> estudios</span><span class="stat-pill"><b>${cycleTotal}</b> total</span></div><input id="mobileSearch" placeholder="🔎 Nombre, estudio o fecha...">${mobileAdd}<div id="mobilePatients" class="patients">${list}</div></aside>`;
     this.renderThumbSync();
+    if(st.role==="admin") setTimeout(()=>PACS.devices.refreshAdminBadge(),0);
     this.applyViewerTransform();
     this.bindMobileControls();
   },
@@ -2606,6 +2795,14 @@ const calDate=e.target.closest?.("[data-calendar-date]")?.dataset?.calendarDate;
       document.getElementById("mobileMoreMenu")?.classList.toggle("show");
       return;
     }
+    if(action==="device-control")return PACS.devices.openAdmin();
+    if(action==="close-device-control")return PACS.ui.closeModal("deviceControlModal");
+    if(action==="device-request-submit")return PACS.devices.submitRequest();
+    if(action==="device-status-retry")return PACS.devices.retry();
+    if(action==="device-logout")return PACS.devices.logoutGate();
+    if(action==="device-approve")return PACS.devices.setStatus(e.target.closest?.("[data-device-row]")?.dataset?.deviceRow,"approved");
+    if(action==="device-reject")return PACS.devices.setStatus(e.target.closest?.("[data-device-row]")?.dataset?.deviceRow,"rejected");
+    if(action==="device-revoke")return PACS.devices.setStatus(e.target.closest?.("[data-device-row]")?.dataset?.deviceRow,"revoked");
     if(action==="logout"){PACS.comments.clear();await PACS.auth.logout();return this.home();}
     if(!e.target.closest?.(".mobile-admin-actions")){
       document.getElementById("mobileMoreMenu")?.classList.remove("show");
@@ -2659,7 +2856,7 @@ const calDate=e.target.closest?.("[data-calendar-date]")?.dataset?.calendarDate;
     if(!pass){if(status)status.textContent="Escribe tu contraseña.";return;}
     const btn=document.getElementById("loginSubmit"); if(btn)btn.disabled=true;
     try{
-      await PACS.auth.login(email,pass);
+      const authResult=await PACS.auth.login(email,pass);
       const rememberUser=document.getElementById("rememberUser")?.checked;
       if(rememberUser) localStorage.setItem("pacsRememberEmail",email);
       else localStorage.removeItem("pacsRememberEmail");
@@ -2667,6 +2864,10 @@ const calDate=e.target.closest?.("[data-calendar-date]")?.dataset?.calendarDate;
       const rememberPass=document.getElementById("rememberPass");
       if(rememberPass) rememberPass.checked=false;
       PACS.ui.closeModal("loginModal");
+      if(authResult?.role==="viewer" && authResult.deviceStatus!=="approved"){
+        PACS.devices.showGate(authResult.deviceStatus);
+        return;
+      }
       await this.sync();
       await PACS.comments.loadForCurrentPatient({rerender:false});
       this.render();
