@@ -1,96 +1,3414 @@
--- V84 · Dispositivos revocados: solo el ADMIN puede habilitar una nueva solicitud.
--- Este cambio conserva el mismo device_id + secreto y NO permite que un revocado
--- se auto-reactive. Solo cuando el admin cambia el estado a request_allowed,
--- el mismo dispositivo puede volver a enviar una solicitud y pasar a pending.
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>PACS — Hospital San Martin de Pangoa</title>
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap");
+:root{--bg:#061015;--panel:#0b171d;--panel2:#102028;--line:#233943;--text:#eef8fa;--muted:#9cafb6;--blue:#168dcc;--cyan:#5ed2e5;--green:#62c79a;--danger:#ef6666}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Manrope,Arial,sans-serif;font-size:15px}
+button,input{font:inherit}
+button{cursor:pointer}
+.screen{min-height:100vh;display:grid;place-items:center;text-align:center;background:radial-gradient(circle at 50% 24%,#14313a,#061015 58%)}
+.center{padding:40px}
+.logo{font-size:62px}
+.logo-inicio{width:250px;height:250px;object-fit:contain;display:block;margin:0 auto 18px;opacity:.78}
+.center h1{font-size:28px;margin:12px 0 5px;font-weight:800}
+.center p{font-size:16px;color:var(--muted);margin:0 0 28px}
+.btn{background:linear-gradient(135deg,var(--blue),var(--cyan));color:#021017;border:0;border-radius:11px;padding:13px 26px;font-weight:800}
+.modal-bg{position:fixed;inset:0;background:#000b;display:none;place-items:center;z-index:100}
+.modal-bg.show{display:grid}
+.modal{width:min(440px,92vw);background:var(--panel2);border:1px solid #31515d;border-radius:17px;padding:23px;box-shadow:0 30px 90px #0009}
+.mh{display:flex;justify-content:space-between;align-items:center}
+.mh b{font-size:20px}
+.close{background:none;border:0;color:var(--muted);font-size:25px}
+.field{margin:14px 0;text-align:left}
+.field label{display:block;font-size:14px;font-weight:600;margin-bottom:7px;color:#d5e3e7}
+.field input{width:100%;padding:12px 13px;border-radius:9px;border:1px solid var(--line);background:#071116;color:var(--text);outline:none}
+.checks{display:flex;gap:18px;flex-wrap:wrap;font-size:14px;margin:15px 0;color:#c9d8dc}
+.modal .btn{width:100%}
+.top{height:76px;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 25px;gap:22px;background:#08141a}
+.brand{min-width:410px;display:flex;align-items:center;gap:14px}
+.brand-logo{width:74px;height:74px;object-fit:contain;display:block;flex:0 0 74px;opacity:.88}
+.brand-text{min-width:0}
+.brand b{display:block;font-size:20px;font-weight:800}
+.brand span{display:block;color:var(--cyan);font-size:14px;font-weight:600;margin-top:2px}
+.tr{margin-left:auto;display:flex;align-items:center;gap:10px}
+.search,.date{background:#071116;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:10px 12px}
+.search{width:310px}
+.user{position:relative}
+.user>button{background:transparent;border:1px solid var(--line);color:var(--text);border-radius:9px;padding:10px 12px}
+.menu{display:none;position:absolute;right:0;top:48px;width:200px;background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:8px;z-index:40;box-shadow:0 18px 50px #0007}
+.menu.show{display:block}
+.menu b{display:block;padding:9px;color:var(--cyan)}
+.menu button{width:100%;text-align:left;background:none;border:0;color:var(--text);padding:10px;border-radius:7px}
+.menu button:hover{background:#172b34}
+.layout{display:grid;grid-template-columns:minmax(275px,285px) minmax(0,1fr) minmax(245px,265px);min-width:0;min-height:calc(100vh - 76px)}
+.left,.right{background:var(--panel);padding:18px}
+.left{border-right:1px solid var(--line)}
+.right{border-left:1px solid var(--line)}
+.title{font-size:15px;font-weight:800;letter-spacing:.2px}
+.subhead{color:var(--cyan);font-size:14px;font-weight:700;margin-top:4px}
+.muted{color:var(--muted);font-size:14px}
+.add{width:100%;margin:13px 0;padding:10px;border-radius:9px;border:1px solid var(--blue);background:#0d2a38;color:#e8fbff;font-weight:700}
+.patients{display:flex;flex-direction:column;gap:7px}
+.patient{background:none;border:1px solid transparent;color:var(--text);padding:11px;border-radius:9px;text-align:left}
+.patient:hover,.patient.active{background:#11262f;border-color:#2a5262}
+.patient strong{display:flex;align-items:center;gap:4px;font-size:16px;font-weight:700;min-width:0}
+.patient-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.patient span{display:block;color:var(--muted);font-size:14px;margin-top:4px}
+.viewer{background:#040a0e;display:flex;flex-direction:column;min-width:0}
+.vh{height:50px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;padding:0 16px}
+.vh b{font-size:16px}
+.vh span{color:var(--cyan);font-size:14px;font-weight:700}
+.image{flex:1;min-height:calc(100vh - 76px - 50px - 44px - 64px);display:grid;place-items:center;overflow:hidden;background:radial-gradient(circle,#172c34,#040a0e 68%);touch-action:none}
+.xray{width:76%;height:84%;max-width:900px;border-radius:14px;object-fit:contain;background:#050b0f;box-shadow:0 0 60px #000}
+.tools{display:flex;justify-content:center;gap:6px;height:44px;padding:5px;border-top:1px solid var(--line);background:#071116}
+.tool{width:38px;height:34px;border:1px solid var(--line);border-radius:8px;background:#0e1d24;color:var(--text)}
+.tool:hover{border-color:var(--cyan);color:var(--cyan)}
+.thumbs{height:64px;display:flex;gap:8px;padding:9px 14px;overflow:hidden;border-top:1px solid var(--line);background:#081217;justify-content:flex-start}
+.thumb{min-width:70px;height:45px;background:#263940;color:var(--text);border:1px solid var(--line);border-radius:7px;font-size:13px}
+.thumb.active{border:2px solid var(--cyan);box-shadow:0 0 10px #5ed2e533}
+.info{padding:12px 0 16px;border-bottom:1px solid var(--line)}
+.info h2{font-size:18px;margin:7px 0 10px}
+.kv{font-size:14px;color:var(--muted);line-height:1.85}
+.ok{color:var(--green);font-weight:700}
+.actions{display:flex;flex-direction:column;gap:7px;margin-top:12px}
+.action{background:#0e1d24;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:10px;text-align:left}
+.action:hover{border-color:var(--cyan)}
+.danger{color:#ff9d9d;border-color:#5a3034}
+.history{padding:25px;max-width:1200px;margin:auto}
+.history h2{font-size:19px;margin:0 0 15px;color:var(--cyan)}
+.day{color:var(--cyan);font-weight:800;font-size:14px;margin:17px 0 8px}
+.study{width:100%;display:flex;justify-content:space-between;text-align:left;background:#0d1b21;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:12px;margin-bottom:7px}
+.study:hover{border-color:var(--blue)}
+.study span{color:var(--muted);font-size:14px}
+.mobile-nav,.side,.overlay{display:none}
+@media(max-width:850px){body{font-size:15px}.top{height:62px;padding:0 14px}.brand{min-width:0}.brand b{font-size:16px}.brand span{font-size:12px}.tr{display:none}.layout{display:block;min-height:calc(100vh - 62px);padding-bottom:64px}.left,.right{display:none}.viewer{min-height:calc(100vh - 62px)}.image{height:calc(100vh - 62px - 50px - 44px - 64px);min-height:400px}.xray{width:82%;height:62%;max-width:none}.tools{justify-content:flex-start;overflow:hidden}.history{padding:18px 14px}.mobile-nav{display:grid;grid-template-columns:repeat(3,1fr);position:fixed;bottom:0;left:0;right:0;height:64px;background:#0a151a;border-top:1px solid var(--line);z-index:50}.mobile-nav button{background:none;border:0;color:var(--muted);font-size:12px}.mobile-nav .active{color:var(--cyan)}.mobile-nav span{display:block;font-size:20px;margin-bottom:2px}.side{display:block;position:fixed;z-index:80;left:0;top:0;bottom:0;width:min(88vw,360px);background:var(--panel);border-right:1px solid var(--line);padding:16px;transform:translateX(-105%);transition:.22s;overflow:auto}.side.open{transform:translateX(0)}.side input{width:100%;padding:11px;background:#071116;border:1px solid var(--line);color:var(--text);border-radius:9px;margin:10px 0}.overlay.show{display:block;position:fixed;inset:0;background:#0008;z-index:70}}
+.search-wrap{position:relative}
+.search-wrap #searchResults{position:absolute;left:0;right:0;top:46px;z-index:60}
+.suggestions{background:var(--panel2);border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:0 18px 50px #0008}
+.suggestions button{display:block;width:100%;text-align:left;background:none;border:0;color:var(--text);padding:11px 13px;border-bottom:1px solid var(--line)}
+.suggestions button:hover{background:#172b34}
+.suggestions strong{display:block}
+.suggestions span{display:block;color:var(--muted);font-size:12px;margin-top:3px}
+.suggestions .empty{padding:12px;color:var(--muted);font-size:13px}
+.thumb{flex:1 1 0;min-width:0;max-width:110px;height:48px;padding:0;overflow:hidden;position:relative;background:#111d22;border:1px solid var(--line);border-radius:7px}
+.thumb img{width:100%;height:100%;display:block;object-fit:cover;opacity:.86}
+.thumb span{position:absolute;left:4px;bottom:3px;background:#061015cc;color:#fff;border-radius:4px;padding:1px 4px;font-size:10px}
+.thumb.active{border:2px solid var(--cyan);box-shadow:0 0 12px #5ed2e544}
+.date-wrap{position:relative}
+.date-field{min-width:190px;background:#071116;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:10px 12px;display:flex;align-items:center;gap:8px;font-weight:600}
+.date-field:hover{border-color:var(--cyan)}
+.date-chevron{margin-left:auto;color:var(--muted)}
+.calendar-popup{display:none;position:absolute;right:0;top:48px;width:315px;background:var(--panel2);border:1px solid #31515d;border-radius:14px;padding:14px;z-index:80;box-shadow:0 24px 70px #000b}
+.calendar-popup.show{display:block}
+.cal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.cal-title{font-weight:800;color:var(--text)}
+.cal-nav{background:#0d1d24;border:1px solid var(--line);color:var(--text);border-radius:7px;width:32px;height:30px}
+.cal-nav:hover{border-color:var(--cyan);color:var(--cyan)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-week{font-size:11px;color:var(--muted);text-align:center;padding:5px 0;font-weight:700}
+.cal-day{height:34px;border:0;background:transparent;color:var(--text);border-radius:7px}
+.cal-day:hover{background:#17313b}
+.cal-day.muted-day{color:#53676f}
+.cal-day.has-study{color:var(--cyan);font-weight:800;position:relative}
+.cal-day.has-study:after{content:"";position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--green)}
+.cal-day.selected{background:linear-gradient(135deg,var(--blue),var(--cyan));color:#031016}
+.cal-day.selected:after{background:#fff}
+.cal-note{margin-top:10px;padding-top:9px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+.cal-note b{color:var(--green)}
+@media(max-width:850px){.calendar-popup{position:fixed;top:70px;left:50%;right:auto;transform:translateX(-50%);width:min(315px,92vw)}.date-field{min-width:0}}
+.modal-bg{backdrop-filter:blur(3px)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-grid .full{grid-column:1/-1}
+.field textarea{width:100%;min-height:80px;padding:12px;border-radius:9px;border:1px solid var(--line);background:#071116;color:var(--text);resize:vertical}
+.field select{width:100%;padding:12px;border-radius:9px;border:1px solid var(--line);background:#071116;color:var(--text)}
+.optional{font-size:12px;color:var(--muted);font-weight:400}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+.secondary{background:#0e1d24;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:11px 16px;font-weight:700}
+.dropzone{border:1.5px dashed #3d6674;border-radius:12px;padding:22px;text-align:center;background:#09171d;color:var(--muted);transition:.15s}
+.dropzone.drag{border-color:var(--cyan);background:#0d2832}
+.dropzone b{display:block;color:var(--text);margin-bottom:5px}
+.file-list{margin-top:10px;max-height:130px;overflow:auto}
+.file-row{display:flex;justify-content:space-between;gap:10px;padding:7px 9px;background:#0d1b21;border:1px solid var(--line);border-radius:7px;margin-top:5px;font-size:13px}
+.file-row span:last-child{color:var(--muted)}
+.toast{position:fixed;right:22px;bottom:22px;z-index:200;background:#10252d;border:1px solid #376170;color:var(--text);padding:12px 16px;border-radius:10px;box-shadow:0 15px 40px #0008;display:none}
+.toast.show{display:block}
+.viewer-only .admin-action{display:none}
+@media(max-width:650px){.form-grid{grid-template-columns:1fr}.form-grid .full{grid-column:auto}.modal{max-height:90vh;overflow:auto}}
+.modal{width:min(920px,calc(100vw - 32px));max-width:920px}
+.modal-bg .modal{padding:20px}
+.modal-bg .form-grid{grid-template-columns:repeat(4,minmax(0,1fr));align-items:end}
+.modal-bg .form-grid .full{grid-column:1/-1}
+.modal-bg .field label{display:block;margin-bottom:6px}
+#patientModal .modal{width:min(860px,calc(100vw - 32px))}
+#patientModal .form-grid{grid-template-columns:1.15fr .85fr 1fr 1fr;gap:13px}
+#patientModal .field.name-field{grid-column:1/-1}
+#patientModal .field.study-field{grid-column:1/-1}
+#patientModal .dropzone{min-height:112px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:.18s ease}
+#patientModal .dropzone:hover{border-color:var(--cyan);background:#0d2832;box-shadow:0 0 0 2px #5ed2e51a,0 10px 28px #0006;transform:translateY(-1px)}
+#patientModal .study-search-wrap{position:relative}
+#patientModal .study-search{cursor:text;transition:.18s ease}
+#patientModal .study-search:hover,#patientModal .study-search:focus{border-color:var(--cyan);box-shadow:0 0 0 2px #5ed2e51a}
+#patientModal .study-search-wrap:after{content:"▾";position:absolute;right:13px;top:11px;color:var(--muted);pointer-events:none;font-size:15px}
+#patientModal .study-options button{cursor:pointer;transition:.12s ease}
+#patientModal .study-options button:hover{background:#17313b;box-shadow:inset 3px 0 0 var(--cyan)}
+#patientModal .modal-actions{margin-top:16px}
+.study-search-wrap{position:relative}
+.study-search{width:100%;padding:12px;border-radius:9px;border:1px solid var(--line);background:#071116;color:var(--text);text-transform:uppercase}
+.study-options{position:absolute;left:0;right:0;top:46px;z-index:120;background:var(--panel2);border:1px solid var(--line);border-radius:9px;max-height:220px;overflow:auto;display:none;box-shadow:0 15px 40px #0009}
+.study-options button{display:block;width:100%;text-align:left;border:0;background:none;color:var(--text);padding:10px 12px}
+.study-options button:hover{background:#17313b;color:var(--cyan)}
+.study-selected{margin-top:6px;font-size:12px;color:var(--muted)}
+@media(max-width:900px){.modal-bg .form-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:650px){.modal{width:calc(100vw - 20px)}.modal-bg .form-grid{grid-template-columns:1fr}}
+.dropzone{cursor:pointer;transition:.18s ease}
+.dropzone:hover{border-color:var(--cyan);background:#0d2832;box-shadow:0 0 0 2px #5ed2e51a,0 10px 28px #0006;transform:translateY(-1px)}
+.action,.btn,.secondary,.close,.date-field,.cal-nav{cursor:pointer}
+.study-search-wrap{position:relative;width:100%}
+.study-search{width:100%;padding:12px 38px 12px 12px;border-radius:9px;border:1px solid var(--line);background:#071116;color:var(--text);text-transform:uppercase;cursor:pointer;caret-color:var(--cyan);transition:.18s ease}
+.study-search:hover,.study-search:focus{border-color:var(--cyan);box-shadow:0 0 0 2px #5ed2e51a,0 8px 22px #0005;outline:none}
+.study-search-wrap:after{content:"▾";position:absolute;right:13px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none;font-size:15px}
+.study-options{position:absolute;left:0;right:0;top:48px;z-index:150;background:var(--panel2);border:1px solid var(--line);border-radius:9px;max-height:220px;overflow:auto;display:none;box-shadow:0 18px 45px #0009}
+.study-options.show{display:block}
+.study-options button{display:block;width:100%;text-align:left;border:0;background:none;color:var(--text);padding:10px 12px;cursor:pointer;transition:.12s ease}
+.study-options button:hover,.study-options button:focus{background:#17313b;color:var(--cyan);box-shadow:inset 3px 0 0 var(--cyan);outline:none}
+#confirmModal .modal,#loginModal .modal{width:min(420px,calc(100vw - 32px));max-width:420px}
+#confirmModal .modal{padding:18px}
+#confirmModal #confirmText{font-size:14px;margin:8px 0 4px}
+#confirmModal .btn,#confirmModal .secondary{padding:9px 14px}
+.email-field{display:flex;align-items:stretch}
+.email-field input{border-radius:9px;flex:1;min-width:0}
+.study-search-wrap{cursor:pointer}
+.study-search-wrap .study-search{cursor:pointer}
+.study-search-wrap .study-options button{cursor:pointer}
+.study-search-wrap:hover .study-search{border-color:var(--cyan);box-shadow:0 0 0 2px #5ed2e51a,0 8px 22px #0005}
+.study-search{cursor:pointer!important}
+.study-search-wrap,.study-search-wrap *{cursor:pointer}
+.study-search:focus{cursor:pointer!important}
+#imagesModal .study-search-wrap{width:100%;cursor:pointer}
+#imagesModal .study-search{cursor:pointer!important}
+#imagesModal .study-search-wrap:hover .study-search{border-color:var(--cyan);box-shadow:0 0 0 2px #5ed2e51a,0 8px 22px #0005}
+#imagesModal .study-options{max-height:240px}
+.modal-bg .modal{outline:none}
+.btn:disabled{opacity:.65;cursor:wait}
+.data-loading{padding:16px;color:var(--muted);text-align:center;font-size:13px}
+.study-option{width:100%;text-align:left;border:0;background:none;color:var(--text);padding:10px 12px;cursor:pointer}
+.study-option:hover,.study-option:focus{background:#17313b;color:var(--cyan);outline:none}
+.patient-empty{
+  padding:14px 8px;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.5;
+  border:1px dashed var(--line);
+  border-radius:9px;
+  margin-top:8px;
+}
+.study-options{max-height:260px;overflow-y:auto;z-index:1000}
+#patientModal .study-search-wrap,#imagesModal .study-search-wrap{z-index:1001}
+#patientModal .study-options,#imagesModal .study-options{z-index:1100}
+.mobile-actions{display:flex;flex-direction:column;gap:7px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+@media(max-width:850px){
+  .mobile-actions .admin-action{display:block}
+}
+@media(max-width:850px){
+  .mobile-actions{display:flex;flex-direction:column;gap:7px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+  .mobile-actions .action{display:block}
+}
+.xray{display:grid;place-items:center;overflow:hidden}
+.xray img{width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;display:block;border-radius:14px;user-select:none;-webkit-user-drag:none}
+.btn:disabled,.secondary:disabled,.action:disabled,.add:disabled{opacity:.6;cursor:wait}
+.app-loading{position:fixed;inset:0;display:grid;place-items:center;background:var(--bg);z-index:9999;color:var(--muted);font-size:14px}
+.viewer{height:calc(100vh - 76px);min-height:0;overflow:hidden}
+.viewer .image{height:calc(100% - 158px);min-height:0;flex:1 1 auto;position:relative}
+.viewer .xray{position:absolute;inset:0;width:100%;height:100%;max-width:none;display:grid;place-items:center;overflow:hidden;background:#050b0f}
+.viewer .xray img{width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;display:block}
+.thumbs{height:64px;min-height:64px;flex:0 0 64px;overflow-x:auto}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb-loading{display:grid;place-items:center;width:100%;height:100%;color:var(--muted);font-size:12px}
+.patient-empty{padding:14px 8px;color:var(--muted);font-size:13px;line-height:1.5;border:1px dashed var(--line);border-radius:9px;margin-top:8px}
+.study-picker-btn{width:100%;padding:12px 14px;border-radius:9px;border:1px solid var(--line);background:#071116;color:var(--text);display:flex;align-items:center;justify-content:space-between;text-align:left;cursor:pointer;transition:.18s ease}
+.study-picker-btn:hover,.study-picker-btn:focus{border-color:var(--cyan);box-shadow:0 0 0 2px #5ed2e51a,0 8px 22px #0005;outline:none}
+.study-picker-arrow{color:var(--muted);font-size:15px}
+.study-options{z-index:1100}
+.mobile-actions{display:flex;flex-direction:column;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+@media(max-width:850px){
+  .top{height:58px;padding:0 12px}
+  .layout{min-height:calc(100svh - 58px);height:calc(100svh - 58px);display:block;padding-bottom:64px}
+  .viewer{height:calc(100svh - 58px);min-height:0}
+  .viewer .image{height:calc(100svh - 58px - 50px - 44px - 64px)}
+  .mobile-nav{height:62px;box-sizing:content-box;padding-bottom:env(safe-area-inset-bottom)}
+  .side{width:min(92vw,380px);padding-top:max(16px,env(safe-area-inset-top));padding-bottom:80px}
+  .side .patient{padding:12px}
+  .mobile-actions .action,.mobile-actions .add{display:block;width:100%}
+}
+.app-loading{pointer-events:none}
+n.modal-bg{display:none !important}
+.modal-bg.show{display:grid !important}
+#confirmModal{z-index:180!important}
+n
 
-create or replace function public.request_device_access(
-  p_device_id text,
-  p_device_secret text,
-  p_doctor_name text,
-  p_device_type text,
-  p_browser text
-)
-returns table (
-  device_status text
-)
-language plpgsql
-security definer
-set search_path = public, extensions
-as $$
-declare
-  v_hash text;
-  v_existing_hash text;
-  v_status text;
-begin
+.viewer{height:calc(100vh - 76px);min-height:0;overflow:hidden}
+.viewer .image{flex:1 1 auto;min-height:0;position:relative;overflow:hidden;display:grid;place-items:center;background:#040a0e;touch-action:none;overscroll-behavior:contain}
+.viewer .xray{position:absolute;inset:0;width:100%;height:100%;max-width:none;max-height:none;margin:0;border-radius:14px;background:#050b0f;display:grid;place-items:center;overflow:hidden;box-shadow:none}
+.viewer .xray img{width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;display:block;transform-origin:center center;user-select:none;-webkit-user-drag:none;cursor:grab;will-change:transform,filter}
+.viewer .xray img:active{cursor:grabbing}
+.tools{height:44px;min-height:44px;display:flex;align-items:center;justify-content:center;gap:6px;padding:5px;border-top:1px solid var(--line);background:#071116;flex:0 0 44px}
+.tool{width:38px;height:34px;border:1px solid var(--line);border-radius:8px;background:#0e1d24;color:var(--text);font-weight:700}
+.tool:hover,.tool.active{border-color:var(--cyan);color:var(--cyan);background:#102932}
+@media(max-width:850px){
+  .viewer{height:calc(100svh - 62px);min-height:0}
+  .viewer .image{height:calc(100svh - 62px - 50px - 44px - 64px);min-height:0}
+  .tools{justify-content:flex-start;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
+  .tools::-webkit-scrollbar{display:none}
+}
+.patient{position:relative;transition:background .16s ease,border-color .16s ease,box-shadow .16s ease,transform .16s ease}
+.patient.active{
+  background:linear-gradient(90deg,#12323d,#0f2831);
+  border-color:#5ed2e566;
+  box-shadow:0 0 0 1px #5ed2e51a,0 6px 20px #0005, inset 3px 0 0 #5ed2e5;
+}
+.patient.active::after{
+  content:"";
+  position:absolute;
+  right:9px;
+  top:50%;
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:#5ed2e5;
+  box-shadow:0 0 8px #5ed2e5aa;
+  transform:translateY(-50%);
+}
+.patient.active strong{color:#e9fcff}
+.patient.active span{color:#9bd4df}
+.viewer .image{
+  position:relative;
+  width:100%;
+  flex:1 1 auto;
+  min-height:0;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#040a0e;
+  touch-action:none;
+  overscroll-behavior:contain;
+}
+.viewer .xray{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  max-width:none;
+  max-height:none;
+  margin:0;
+  padding:0;
+  border-radius:14px;
+  background:#050b0f;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  box-shadow:none;
+}
+.viewer .xray img{
+  display:block;
+  width:100%;
+  height:100%;
+  max-width:100%;
+  max-height:100%;
+  object-fit:contain;
+  object-position:center center;
+  margin:0;
+  padding:0;
+  user-select:none;
+  -webkit-user-drag:none;
+  transform-origin:center center;
+  will-change:transform,filter;
+}
+.viewer .image{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;touch-action:none;overscroll-behavior:contain}
+.viewer .xray{position:absolute;inset:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.viewer .xray img{width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;object-position:center center;display:block;margin:0;transform-origin:center center;user-select:none;-webkit-user-drag:none}
+.tools{gap:5px;flex-wrap:nowrap}
+.tool{min-width:38px}
+@media(max-width:850px){
+  .tools{gap:5px;overflow-x:auto;flex-wrap:nowrap}
+  .tool{min-width:38px}
+}
+.date-wrap{position:relative;z-index:200}
+.calendar-popup{z-index:1000;pointer-events:auto}
+.calendar-popup .cal-day,.calendar-popup .cal-nav{pointer-events:auto;cursor:pointer}
+.calendar-popup .cal-day:not(.muted-day){appearance:none;-webkit-appearance:none}
+@media(max-width:850px){
+  html,body{width:100%;height:auto;min-height:100%;overflow-x:hidden;overflow-y:auto}
+  .top{
+    position:relative !important;
+    top:auto;left:auto;right:auto;
+    height:auto;min-height:0;
+    padding:10px 12px 8px;
+    display:block;
+    box-shadow:none;
+    z-index:10;
+  }
+  .brand{min-width:0;max-width:100%;display:flex;align-items:center;justify-content:center;text-align:left;gap:10px}.brand-logo{width:76px;height:76px;flex:0 0 76px}.brand-text{min-width:0}
+  .brand b{font-size:14px;line-height:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .brand span{font-size:10px;line-height:14px}
+  .tr{
+    display:flex;
+    width:100%;
+    margin:8px 0 0;
+    justify-content:center;
+    align-items:center;
+    gap:8px;
+  }
+  .tr .search-wrap{display:none}
+  .tr .date-wrap{display:block}
+  .tr .date-field{
+    min-width:0;
+    width:auto;
+    padding:9px 14px;
+    border-radius:10px;
+    font-size:14px;
+    justify-content:center;
+  }
+  .tr .user{margin-left:auto}
+  .tr .user>button{
+    padding:9px 10px;
+    font-size:0;
+  }
+  .tr .user>button::before{content:"👤";font-size:19px}
+  .layout{
+    display:block;
+    min-height:auto;
+    height:auto;
+    padding:0 0 76px;
+  }
+  .viewer{
+    min-height:0;
+    height:auto;
+  }
+  .viewer .vh{
+    height:44px;min-height:44px;
+    padding:0 12px;
+  }
+  .viewer .image{
+    height:calc(100svh - 44px - 44px - 64px - 140px);
+    min-height:280px;
+  }
+  .mobile-nav{
+    position:fixed;
+    left:0;right:0;bottom:0;
+    height:64px;
+    z-index:90;
+  }
+  .side{
+    width:82vw;
+    max-width:340px;
+  }
+  .calendar-popup{
+    position:fixed;
+    top:105px;
+    left:50%;
+    right:auto;
+    transform:translateX(-50%);
+    width:min(320px,92vw);
+    z-index:200;
+  }
+}
+@media(max-width:850px){
+  html,body{height:auto;min-height:100%;overflow-x:hidden;overflow-y:auto}
+  .layout{height:auto;min-height:0;padding:0 0 78px}
+  .viewer{height:auto;min-height:0}
+  .viewer .image{height:clamp(280px,58svh,540px);min-height:280px}
+  .history{display:block;padding:18px 12px 28px;max-width:none}
+  .history h2{font-size:16px;line-height:1.35}
+  .history .study{padding:11px;font-size:13px}
+  .mobile-nav{position:fixed;left:0;right:0;bottom:0}
+  .side{z-index:130}
+  .overlay.show{z-index:120}
+}
+.overlay.show{cursor:pointer}
+n
+@media(max-width:850px){
+  .user .menu button{min-height:44px}
+}
+@media(min-width:851px){
+  html,body{overflow:hidden}
+  .layout{height:calc(100vh - 76px);min-height:0}
+  .left{height:calc(100vh - 76px);min-height:0;display:flex;flex-direction:column;overflow:hidden}
+  .left .patients{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;padding-right:4px;scrollbar-width:thin;scrollbar-color:#2b4854 transparent}
+  .left .patients::-webkit-scrollbar{width:8px}
+  .left .patients::-webkit-scrollbar-track{background:transparent}
+  .left .patients::-webkit-scrollbar-thumb{background:#2b4854;border-radius:8px}
+}
+@media(max-width:850px){
+  .mobile-nav{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    height:68px;
+    background:#071116;
+    border-top:1px solid var(--line);
+    box-shadow:0 -8px 24px #0005;
+    padding:4px 8px max(4px,env(safe-area-inset-bottom));
+    box-sizing:border-box;
+    gap:6px;
+  }
+  .mobile-nav button{
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:1px;
+    min-height:58px;
+    border:1px solid transparent;
+    border-radius:11px;
+    background:transparent;
+    color:var(--muted);
+    font-size:12px;
+    font-weight:600;
+    transition:.18s ease;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .mobile-nav button span{
+    display:block;
+    font-size:21px;
+    line-height:24px;
+    margin:0;
+    filter:grayscale(.15);
+  }
+  .mobile-nav button.active{
+    color:var(--cyan);
+    background:#102932;
+    border-color:#5ed2e533;
+    box-shadow:inset 0 2px 0 #5ed2e5,0 4px 14px #0003;
+  }
+  .mobile-nav button.active span{
+    filter:none;
+    transform:translateY(-1px);
+  }
+  .mobile-nav button:active{transform:scale(.97)}
+}
+@media(max-width:850px){
+  .mobile-nav{z-index:900!important}
+  #overlay{z-index:1000!important}
+  #side{display:block!important;visibility:visible!important;z-index:1100!important;transform:translate3d(-110%,0,0)!important}
+  #side.open{transform:translate3d(0,0,0)!important}
+  #side .patients{display:flex!important;flex-direction:column!important;gap:7px!important;overflow:visible!important;max-height:none!important}
+  #side .patient{display:block!important;width:100%!important;opacity:1!important}
+  #overlay.show{display:block!important;visibility:visible!important}
+}
+@media(max-width:850px){
+  body.drawer-open{overflow:hidden}
+}
+@media(max-width:850px){
+  #side{
+    touch-action:pan-y;
+    overflow-y:auto !important;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior:contain;
+  }
+  #side .patients{
+    touch-action:pan-y;
+    overflow:visible !important;
+  }
+}
+@media(max-width:850px){
+  html,body{overflow-x:hidden;overflow-y:auto;height:auto;min-height:100%}
+  .layout{height:auto;min-height:0;padding-bottom:78px}
+  .viewer{height:auto;min-height:0}
+  .viewer .image{height:clamp(280px,54svh,520px);min-height:280px}
+  .tools{height:44px;min-height:44px}
+  .thumbs{height:70px;min-height:70px;padding:9px 10px;overflow-x:auto;overflow-y:hidden}
+  .history{
+    display:block !important;
+    visibility:visible !important;
+    height:auto !important;
+    max-height:none !important;
+    overflow:visible !important;
+    margin:0 !important;
+    padding:14px 12px 88px !important;
+    border-top:1px solid var(--line);
+    background:var(--bg);
+  }
+  .history h2{margin:0 0 12px;font-size:15px;line-height:1.35}
+  .history .day{margin:12px 0 7px}
+  .history .study{margin-bottom:7px;padding:11px;min-height:58px}
+  #side{touch-action:pan-y;overflow-y:auto !important;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  #side .patient{touch-action:pan-y}
+}
+@media(min-width:851px){
+  html,body{overflow-y:auto;overflow-x:hidden}
+  .layout{height:auto;min-height:calc(100vh - 76px)}
+  .left{height:calc(100vh - 76px);min-height:0}
+  .viewer{min-height:calc(100vh - 76px)}
+}
+@media(max-width:850px){
+  .viewer .image{height:clamp(250px,48svh,470px);min-height:250px}
+  .history{margin-top:0!important;padding-top:10px!important}
+}
+@media(max-width:850px){
+  html,body{overflow-x:hidden;overflow-y:auto;height:auto;min-height:100%}
+  .layout{height:auto;min-height:0;padding-bottom:78px}
+  .viewer{height:auto!important;min-height:0!important}
+  .viewer .image{height:clamp(250px,48svh,470px)!important;min-height:250px!important}
+  .tools{height:44px!important;min-height:44px!important}
+  .thumbs{height:68px!important;min-height:68px!important;padding:8px 10px!important}
+  .history{
+    display:block!important;
+    visibility:visible!important;
+    height:auto!important;
+    max-height:none!important;
+    overflow:visible!important;
+    margin:0!important;
+    padding:10px 12px 88px!important;
+    border-top:1px solid var(--line);
+  }
+  .history h2{margin:0 0 10px!important}
+}
+@media(max-width:850px){
+  html,body{
+    height:auto !important;
+    min-height:100% !important;
+    overflow-x:hidden !important;
+    overflow-y:auto !important;
+  }
 
-  if auth.uid() <> '070c65c4-b499-4a45-ba7f-f2d5525a1d48'::uuid then
-    raise exception 'Usuario no autorizado';
-  end if;
+  .layout{
+    display:block !important;
+    height:auto !important;
+    min-height:0 !important;
+    padding:0 !important;
+  }
 
-  if nullif(trim(p_device_id), '') is null
-     or nullif(trim(p_device_secret), '') is null
-     or nullif(trim(p_doctor_name), '') is null then
-    raise exception 'Datos de dispositivo incompletos';
-  end if;
+  .viewer{
+    display:block !important;
+    height:auto !important;
+    min-height:0 !important;
+    overflow:visible !important;
+  }
 
-  v_hash := encode(digest(p_device_secret, 'sha256'), 'hex');
+  .viewer .vh{
+    height:44px !important;
+    min-height:44px !important;
+  }
 
-  select
-    ad.device_secret_hash,
-    ad.status
-  into
-    v_existing_hash,
-    v_status
-  from public.authorized_devices ad
-  where ad.device_id = p_device_id
-  limit 1;
+  .viewer .image{
+    display:grid !important;
+    height:clamp(250px,48svh,470px) !important;
+    min-height:250px !important;
+    flex:none !important;
+  }
 
-  if found then
-    if v_existing_hash is distinct from v_hash then
-      raise exception 'Dispositivo no válido';
-    end if;
+  .viewer .tools{
+    display:flex !important;
+    height:44px !important;
+    min-height:44px !important;
+    flex:none !important;
+  }
 
-    -- Un dispositivo revocado, rechazado, pendiente o aprobado NO puede
-    -- cambiar su estado por sí mismo. Solo request_allowed permite solicitar otra vez.
-    if v_status = 'request_allowed' then
-      update public.authorized_devices
-      set
-        doctor_name = trim(p_doctor_name),
-        device_type = p_device_type,
-        browser = p_browser,
-        status = 'pending',
-        created_at = now()
-      where device_id = p_device_id;
+  .viewer .thumbs{
+    display:flex !important;
+    height:68px !important;
+    min-height:68px !important;
+    flex:none !important;
+    margin:0 !important;
+    border-bottom:0 !important;
+  }
 
-      return query select 'pending'::text;
-      return;
-    end if;
+  .history{
+    display:block !important;
+    visibility:visible !important;
+    position:relative !important;
+    height:auto !important;
+    min-height:0 !important;
+    max-height:none !important;
+    overflow:visible !important;
+    margin:0 !important;
+    padding:0 12px 88px !important;
+    border-top:1px solid var(--line) !important;
+  }
 
-    return query select v_status;
+  .history h2{
+    margin:0 !important;
+    padding:10px 0 !important;
+  }
+}
+@media(max-width:850px){
+  .mobile-admin-actions{
+    position:relative;
+    flex:0 0 auto;
+    margin-left:auto;
+    align-self:flex-start;
+  }
+  .mobile-more-btn{
+    width:42px;
+    height:42px;
+    border:1px solid var(--line);
+    border-radius:10px;
+    background:#0e1d24;
+    color:var(--text);
+    font-size:27px;
+    line-height:1;
+    display:grid;
+    place-items:center;
+    cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .mobile-more-btn:active{
+    transform:scale(.96);
+    border-color:var(--cyan);
+  }
+  .mobile-more-menu{
+    display:none;
+    position:absolute;
+    top:48px;
+    right:0;
+    width:min(250px,78vw);
+    padding:8px;
+    background:#102027;
+    border:1px solid var(--line);
+    border-radius:12px;
+    box-shadow:0 18px 45px #0009;
+    z-index:1200;
+  }
+  .mobile-more-menu.show{display:block}
+  .mobile-more-menu b{
+    display:block;
+    padding:8px 10px 7px;
+    color:var(--cyan);
+    font-size:11px;
+    letter-spacing:.6px;
+  }
+  .mobile-more-menu button{
+    width:100%;
+    min-height:46px;
+    display:flex;
+    align-items:center;
+    gap:9px;
+    border:0;
+    border-radius:8px;
+    background:transparent;
+    color:var(--text);
+    padding:10px;
+    text-align:left;
+    font-size:14px;
+  }
+  .mobile-more-menu button:hover,
+  .mobile-more-menu button:active{background:#17313b}
+  .mobile-more-menu button.danger{color:#ff9d9d}
+}
+@media(min-width:851px){
+  .mobile-admin-actions{display:none!important}
+}
+.sex-symbol{display:inline-block;width:1.05em;margin-right:5px;font-weight:800;line-height:1;text-align:center}
+.sex-symbol.male{color:#4da3ff}
+.sex-symbol.female{color:#f58bb5}
+.sex-symbol.unknown{color:#7f9299;font-size:.72em}
+.sex-radio-group{display:flex;flex-direction:column;align-items:flex-start;gap:4px;margin-top:6px}
+.sex-radio-group label{display:flex;align-items:center;gap:6px;margin:0;cursor:pointer;white-space:nowrap}
+.sex-radio-group input[type="radio"]{width:15px;height:15px;margin:0;accent-color:#5ed2e5}
+@media(min-width:851px){
+  .left{width:auto!important;min-width:0!important}
+  .viewer{min-width:0!important;width:auto!important}
+  .right{min-width:0!important}
+}
+.sex-symbol{
+  display:inline-block !important;
+  width:1.15em;
+  margin-right:6px;
+  font-family:Arial,sans-serif;
+  font-size:1.15em;
+  font-weight:900;
+  line-height:1;
+  text-align:center;
+  vertical-align:-1px;
+}
+.patient strong .sex-symbol.male{color:#4da3ff !important}
+.patient strong .sex-symbol.female{color:#f58bb5 !important}
+.patient strong .sex-symbol.unknown{color:#7f9299 !important;font-size:.82em}
+@media(max-width:850px){
+  .tr .user{margin-left:auto;margin-right:0}
+  .tr .mobile-admin-actions{
+    margin-left:-4px !important;
+    margin-right:0 !important;
+  }
+  .tr .mobile-more-btn{
+    width:40px;
+    height:40px;
+  }
+}
+@media(max-width:850px){
+  #patientModal{z-index:2000!important}
+  #patientModal.show{z-index:2000!important}
+}
+.stats-row{display:flex;gap:6px;flex-wrap:wrap;margin:9px 0 4px}
+.stat-pill{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border:1px solid var(--line);border-radius:999px;background:#0b1b22;color:var(--muted);font-size:11px;line-height:1.2}
+.stat-pill b{color:var(--text);font-size:12px}
+.viewer-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;text-align:center;color:var(--muted);padding:24px;line-height:1.45}
+.viewer-empty strong{color:var(--text);font-size:14px}
+.viewer-spinner{width:24px;height:24px;border:2px solid #29444f;border-top-color:var(--cyan);border-radius:50%;animation:pacs-spin .8s linear infinite}
+@keyframes pacs-spin{to{transform:rotate(360deg)}}
+.mobile-patient-context{display:none}
+@media(max-width:850px){
+  .mobile-patient-context{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;background:#09181f;border-bottom:1px solid var(--line);min-width:0}
+  .mobile-patient-context .mp-main{min-width:0}
+  .mobile-patient-context .mp-name{display:flex;align-items:center;min-width:0;font-size:13px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mobile-patient-context .mp-sub{font-size:11px;color:var(--muted);margin-top:2px}
+  .mobile-patient-context .mp-count{flex:0 0 auto;color:var(--cyan);font-size:12px;font-weight:700}
+  .side .stats-row{margin:8px 0 10px}
+}
+@media(prefers-reduced-motion:reduce){.viewer-spinner{animation:none}}
+@media(max-width:850px){
+  .side{touch-action:pan-y}
+}
+.group-builder{grid-column:1/-1;border:1px solid var(--line);border-radius:12px;padding:12px;background:#09171d}
+.group-builder-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.group-builder-head b{font-size:13px;color:var(--cyan)}
+.group-summary{grid-column:1/-1;margin-top:4px}
+.group-summary-title{font-size:12px;color:var(--muted);font-weight:800;margin-bottom:6px}
+.group-card{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 10px;margin-top:6px;border:1px solid var(--line);border-radius:9px;background:#0d1b21}
+.group-card-main{min-width:0}
+.group-card-main b{display:block;color:var(--text);font-size:13px}
+.group-card-main span{display:block;color:var(--muted);font-size:11px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.group-remove{flex:0 0 auto;width:34px;height:34px;border:1px solid #5a3034;border-radius:8px;background:#231317;color:#ff9d9d;font-weight:800}
+.group-empty{padding:9px 10px;border:1px dashed var(--line);border-radius:9px;color:var(--muted);font-size:12px}
+@media(max-width:850px){
+  .viewer .image{
+    height:clamp(220px,36svh,350px)!important;
+    min-height:220px!important;
+  }
+  .viewer .xray{width:100%!important;height:100%!important}
+  .viewer .xray img{width:100%!important;height:100%!important;object-fit:contain!important}
+}
+@media(max-width:850px){
+
+  .top{
+    padding:6px 10px 5px !important;
+  }
+  .brand{
+    gap:8px !important;
+    justify-content:center !important;
+  }
+  .brand-logo{
+    width:60px !important;
+    height:60px !important;
+    flex:0 0 60px !important;
+  }
+  .brand b{
+    font-size:13px !important;
+    line-height:16px !important;
+  }
+  .brand span{
+    font-size:10px !important;
+    line-height:12px !important;
+    margin-top:1px !important;
+  }
+
+  .tr{
+    margin:3px 0 0 !important;
+    gap:7px !important;
+    min-height:38px !important;
+  }
+  .tr .date-field{
+    padding:7px 11px !important;
+    min-height:38px !important;
+    font-size:13px !important;
+    border-radius:9px !important;
+  }
+  .tr .user>button,
+  .tr .mobile-more-btn{
+    width:38px !important;
+    height:38px !important;
+    min-height:38px !important;
+    padding:6px !important;
+    border-radius:9px !important;
+  }
+  .tr .user>button::before{font-size:18px !important}
+  .tr .mobile-more-btn{font-size:24px !important}
+
+  .mobile-patient-context{
+    padding:6px 10px !important;
+    min-height:48px !important;
+  }
+  .mobile-patient-context .mp-name{
+    font-size:12px !important;
+    line-height:15px !important;
+  }
+  .mobile-patient-context .mp-sub{
+    font-size:10px !important;
+    margin-top:1px !important;
+  }
+  .mobile-patient-context .mp-count{font-size:11px !important}
+
+  .viewer .vh{
+    height:38px !important;
+    min-height:38px !important;
+    padding:0 10px !important;
+  }
+  .viewer .vh b{font-size:14px !important}
+  .viewer .vh span{font-size:12px !important}
+
+  .viewer .image{
+    height:clamp(315px,48svh,485px) !important;
+    min-height:315px !important;
+  }
+
+  .viewer .thumbs{
+    height:62px !important;
+    min-height:62px !important;
+    padding:7px 9px !important;
+  }
+
+  .mobile-nav{
+    height:58px !important;
+    padding:3px 7px max(3px,env(safe-area-inset-bottom)) !important;
+    gap:5px !important;
+  }
+  .mobile-nav button{
+    min-height:50px !important;
+    border-radius:10px !important;
+    font-size:11px !important;
+  }
+  .mobile-nav button span{
+    font-size:19px !important;
+    line-height:20px !important;
+  }
+
+  .layout{padding-bottom:0 !important}
+  .history{padding-bottom:74px !important}
+}
+
+/* V77 — móvil: ajustar por ALTURA sin recortar la imagen.
+   El ancho conserva su proporción natural y puede exceder el visor;
+   los laterales se consultan mediante el pan/arrastre existente. */
+@media(max-width:850px){
+  .viewer .xray{
+    position:absolute !important;
+    inset:0 !important;
+    width:100% !important;
+    height:100% !important;
+    max-width:none !important;
+    max-height:none !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    padding:0 !important;
+    margin:0 !important;
+    overflow:hidden !important;
+  }
+  .viewer .xray img{
+    display:block !important;
+    width:auto !important;
+    height:100% !important;
+    max-width:none !important;
+    max-height:none !important;
+    object-fit:fill !important;
+    object-position:center center !important;
+    flex:0 0 auto !important;
+    margin:0 !important;
+    padding:0 !important;
+  }
+}
+
+/* V82 · Control de dispositivos */
+.device-divider{height:1px;background:var(--line);margin:8px 0}
+.device-control-btn{position:relative}
+.device-badge{display:none;min-width:20px;height:20px;padding:0 6px;margin-left:auto;border-radius:999px;background:#e5484d;color:#fff;font-size:11px;font-weight:900;align-items:center;justify-content:center}
+.device-badge.show{display:inline-flex}
+.device-gate-modal{width:min(500px,calc(100vw - 26px))!important;max-width:500px!important}
+.device-gate-icon{font-size:36px;text-align:center;margin:6px 0 8px}
+.device-gate-text{text-align:center;color:var(--muted);line-height:1.55;margin:8px 0 14px}
+.device-panel{width:min(760px,calc(100vw - 26px))!important;max-width:760px!important}
+.device-summary{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 16px}
+.device-section-title{font-size:12px;font-weight:900;color:var(--cyan);letter-spacing:.05em;margin:16px 0 7px}
+.device-list{display:flex;flex-direction:column;gap:8px}
+.device-card{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#09171d}
+.device-card-main{min-width:0}.device-card-main b{display:block;font-size:14px}.device-card-main span{display:block;color:var(--muted);font-size:11px;margin-top:3px;line-height:1.45}
+.device-card-actions{display:flex;gap:6px;flex:0 0 auto}.device-card-actions button{padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:#0e1d24;color:var(--text);font-weight:700;font-size:12px}.device-card-actions .approve{border-color:#32634f;color:#8ee1b8}.device-card-actions .reject{border-color:#67383b;color:#ff9d9d}
+.device-empty{padding:12px;border:1px dashed var(--line);border-radius:9px;color:var(--muted);font-size:12px}
+@media(max-width:650px){.device-card{align-items:flex-start;flex-direction:column}.device-card-actions{width:100%}.device-card-actions button{flex:1}.device-panel{max-height:90vh;overflow:auto}}
+
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style id="auth-boot-fix">
+body.auth-booting #loginModal,
+body.auth-booting #root{visibility:hidden}
+body.auth-booting{background:#061014}
+</style>
+<style id="v68-mobile-brand-left">
+@media(max-width:850px){
+  .top .brand{
+    width:100% !important;
+    max-width:none !important;
+    justify-content:flex-start !important;
+    text-align:left !important;
+    margin:0 !important;
+    padding:0 !important;
+    gap:8px !important;
+  }
+  .top .brand-logo{
+    margin-left:0 !important;
+    margin-right:0 !important;
+  }
+  .top .brand-text{
+    margin:0 !important;
+    text-align:left !important;
+  }
+}
+</style>
+<style id="v78-comments-notice">
+/* V79 · Comentarios generales por paciente + IMPORTANTE */
+.notice-modal{width:min(540px,calc(100vw - 32px))!important;text-align:center}
+.notice-title{display:block;width:100%;text-align:center;color:#ff4d4f;font-size:22px;letter-spacing:.08em;font-weight:900}
+.notice-text{margin:20px 0 4px;color:var(--text);font-weight:700;line-height:1.7;text-align:center}
+.notice-thanks{margin:18px 0 4px;text-align:center;color:var(--text);font-weight:900;letter-spacing:.06em}
+.notice-actions{justify-content:center!important}
+.comments-summary{margin-top:14px;padding:13px;border:1px solid var(--line);border-radius:10px;background:#081319}
+.comments-summary-title{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;font-weight:800}
+.comments-summary-latest{margin-top:9px;color:var(--muted);font-size:12px;line-height:1.5}
+.comments-summary-latest strong{display:block;color:var(--text);font-size:12px;margin-bottom:3px}
+.comments-summary .comment-preview{color:var(--text);white-space:pre-wrap;overflow-wrap:anywhere}
+.comment-action{margin-top:10px;width:100%}
+.comment-modal{width:min(620px,calc(100vw - 26px))!important;max-width:620px!important}
+.comment-modal .mh{position:sticky;top:0;z-index:2;background:var(--panel)}
+.comment-context{padding:0 0 10px;color:var(--muted);font-size:12px;border-bottom:1px solid var(--line)}
+.comments-scroll{max-height:min(56vh,520px);overflow-y:auto;overscroll-behavior:contain;padding:10px 2px 4px;scrollbar-width:thin}
+.comment-item{padding:11px 3px 13px;border-bottom:1px solid var(--line)}
+.comment-item:last-child{border-bottom:0}
+.comment-meta{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;color:var(--muted);font-size:11px;margin-bottom:6px}
+.comment-scope{font-weight:800;color:var(--cyan)}
+.comment-text{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55;color:var(--text);font-size:14px;font-weight:800}
+.comment-edit-inline{width:100%;min-height:96px;resize:vertical;margin-top:8px;padding:11px 12px;border:1px solid var(--border);border-radius:10px;background:var(--panel2);color:var(--text);font:inherit;font-size:14px;font-weight:800;line-height:1.55;outline:none}
+.comment-edit-inline:focus{border-color:#777}
+.comment-item-editing{background:rgba(255,255,255,.015)}
+.comment-admin-actions{display:flex;justify-content:flex-end;gap:7px;margin-top:9px}
+.comment-admin-actions button{padding:7px 9px;font-size:11px}
+.comment-empty{padding:26px 8px;text-align:center;color:var(--muted)}
+.comment-footer{display:flex;justify-content:flex-end;gap:9px;padding-top:12px;border-top:1px solid var(--line);background:var(--panel)}
+.comment-compose{width:100%;display:grid;gap:9px}
+.comment-compose-label{font-size:12px;font-weight:900;color:var(--text);letter-spacing:.04em}
+.comment-compose textarea{width:100%;min-height:96px;max-height:180px;resize:vertical;background:#071116;border:1px solid var(--line);color:var(--text);border-radius:9px;padding:11px 12px;font:inherit;line-height:1.5}
+.comment-compose-actions{display:flex;justify-content:flex-end;gap:9px;flex-wrap:wrap}
+.comment-inline-status{min-height:16px;color:#ff7676;font-size:12px}
+.desktop-comment-icon{display:inline-block}
+.action.has-comments .desktop-comment-icon,.action.has-comments .comment-count{color:#ff4d4f!important}
+.comment-count{font-weight:900}
+.comment-form textarea{width:100%;min-height:130px;resize:vertical;background:#071116;border:1px solid var(--line);color:var(--text);border-radius:9px;padding:12px;font:inherit;line-height:1.5}
+.comment-scope-options{display:grid;gap:8px;margin:12px 0}
+.comment-scope-options label{display:flex;align-items:center;gap:8px;color:var(--text);font-size:13px}
+.comment-error{color:#ff7676;font-size:12px;margin-top:8px}
+.mobile-comment-icon{position:relative;display:inline-flex!important;align-items:center;justify-content:center;color:var(--muted)}
+.mobile-comment-icon svg{width:20px;height:20px;display:block;fill:currentColor}
+.mobile-comment-badge{position:absolute;top:-7px;right:-10px;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:#d9363e;color:#fff;font-size:10px;line-height:16px;font-weight:900;text-align:center}
+.mobile-nav button.has-comments .mobile-comment-icon{color:#ff4d4f!important}
+@media(max-width:850px){
+  .mobile-nav{grid-template-columns:repeat(4,1fr)!important}
+  .mobile-nav button{min-width:0;padding:4px 2px!important;font-size:10px!important}
+  .mobile-nav button span{font-size:19px!important}
+  .comment-modal{width:calc(100vw - 20px)!important;margin:10px!important}
+  #commentsTitle{font-size:16px!important;letter-spacing:.02em}
+  .comment-text{font-size:15px!important;font-weight:800!important;line-height:1.6}
+  .comments-scroll{max-height:52vh}
+  .comment-footer{position:sticky;bottom:0}
+  .comment-compose textarea{min-height:88px;max-height:150px}
+  .notice-modal{width:calc(100vw - 28px)!important}
+  .notice-title{font-size:20px}
+  .notice-text{font-size:14px}
+}
+</style>
+</head>
+<body class="auth-booting">
+
+<div id="appLoading" class="app-loading">Cargando PACS…</div>
+
+<div id="root"></div>
+
+<div id="patientModal" class="modal-bg"><div class="modal">
+<div class="mh"><b id="patientModalTitle">AGREGAR PACIENTE</b><button class="close" data-action="close-patient-modal">×</button></div>
+<div class="form-grid">
+<div class="field name-field"><label>NOMBRE COMPLETO</label><input id="pName" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()" placeholder="NOMBRE Y APELLIDOS" autocomplete="off"></div>
+<div class="field"><label>DNI <span class="optional">(OPCIONAL)</span></label><input id="pDni" inputmode="numeric" maxlength="8" placeholder="DNI"></div>
+<div class="field"><label>SEXO <span class="optional">(OPCIONAL)</span></label>
+<div class="sex-radio-group" role="radiogroup" aria-label="Sexo">
+<label><input type="radio" name="pSexChoice" value="M"> Masculino</label>
+<label><input type="radio" name="pSexChoice" value="F"> Femenino</label>
+</div>
+<input id="pSex" type="hidden" value="">
+</div>
+<div class="field"><label>FECHA DE NACIMIENTO <span class="optional">(OPCIONAL)</span></label><input id="pBirth" type="date"></div>
+<div class="field"><label>FECHA DEL ESTUDIO</label><div class="muted" id="pStudyDate">14 AGO 2026</div></div>
+<div class="field study-field"><label>ESTRUCTURA / ESTUDIO</label><div id="pStudyType"></div></div>
+<div class="field full"><label>IMÁGENES</label>
+<div class="dropzone" id="pDrop" onclick="document.getElementById('pFiles').click()"><b>📎 SELECCIONAR IMÁGENES</b><span>O ARRASTRA UNA O VARIAS IMÁGENES AQUÍ</span></div>
+<input id="pFiles" type="file" accept="image/*,.dcm" multiple hidden onchange="handleFiles(this.files,'patientFiles')"><div class="file-list" id="patientFiles"></div>
+</div>
+<div class="group-summary"><div class="group-summary-title">ESTRUCTURAS PREPARADAS</div><div id="patientGroups"></div></div>
+</div>
+<div class="modal-actions"><button class="secondary" data-action="close-patient-modal">CANCELAR</button><button class="btn" data-action="add-patient-save">AGREGAR PACIENTE</button></div>
+</div></div>
+
+<div id="editModal" class="modal-bg"><div class="modal">
+<div class="mh"><b>MODIFICAR PACIENTE</b><button class="close" data-action="close-edit-modal">×</button></div>
+<div class="form-grid">
+<div class="field full">
+<label>NOMBRE COMPLETO</label>
+<input id="eName" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()" autocomplete="off">
+</div>
+<div class="field">
+<label>DNI <span class="optional">(OPCIONAL)</span></label>
+<input id="eDni" inputmode="numeric" maxlength="8" placeholder="SIN MODIFICAR">
+</div>
+<div class="field">
+<label>SEXO <span class="optional">(OPCIONAL)</span></label>
+<select id="eSex">
+<option value="">NO MODIFICAR</option>
+<option value="M">MASCULINO</option>
+<option value="F">FEMENINO</option>
+</select>
+</div>
+<div class="field">
+<label>FECHA DE NACIMIENTO <span class="optional">(OPCIONAL)</span></label>
+<input id="eBirth" type="date">
+</div>
+</div>
+<div class="modal-actions">
+<button class="secondary" data-action="close-edit-modal">CANCELAR</button>
+<button class="btn" data-action="edit-save">GUARDAR CAMBIOS</button>
+</div>
+</div></div>
+
+<div id="imagesModal" class="modal-bg"><div class="modal">
+<div class="mh"><b>Añadir imágenes</b><button class="close" data-action="close-images-modal">×</button></div>
+<div class="field"><label>Paciente</label><input id="aPatient" readonly></div>
+<div class="field full"><label>ESTRUCTURA / ESTUDIO</label><div id="aStudyType" title="Haz clic para ver todas las estructuras"></div></div>
+<div class="field"><label>Fecha del estudio</label><input id="aStudyDate" readonly></div>
+<div class="field"><label>Imágenes <span class="optional">(puedes seleccionar varias)</span></label>
+<div class="dropzone" id="aDrop" onclick="document.getElementById('aFiles').click()"><b>📎 Seleccionar imágenes</b>o arrastra una o varias imágenes aquí</div>
+<input id="aFiles" type="file" accept="image/*,.dcm" multiple hidden onchange="handleFiles(this.files,'addFiles')"><div class="file-list" id="addFiles"></div>
+</div>
+<div class="group-summary"><div class="group-summary-title">ESTRUCTURAS PREPARADAS</div><div id="addGroups"></div></div>
+<div class="modal-actions"><button class="secondary" data-action="close-images-modal">Cancelar</button><button class="btn" data-action="images-save">GUARDAR IMÁGENES</button></div>
+</div></div>
+
+<div id="confirmModal" class="modal-bg"><div class="modal">
+<div class="mh"><b id="confirmTitle">Confirmar</b><button class="close" data-action="close-confirm-modal">×</button></div>
+<p id="confirmText" style="color:var(--muted);line-height:1.6"></p>
+<div class="modal-actions"><button class="secondary" data-action="close-confirm-modal">Cancelar</button><button class="btn" id="confirmBtn">Confirmar</button></div>
+</div></div>
+
+<div id="noticeModal" class="modal-bg"><div class="modal notice-modal" role="dialog" aria-modal="true" aria-labelledby="noticeTitle">
+<div class="mh" style="justify-content:center"><b id="noticeTitle" class="notice-title">⚠️ IMPORTANTE</b></div>
+<p class="notice-text">EN CASO DE OBSERVACIONES O SUGERENCIAS CON RESPECTO A LOS ESTUDIOS O LA PLATAFORMA, ACERCARSE AL ÁREA DE RAYOS X.</p>
+<p class="notice-thanks">GRACIAS</p>
+<div class="modal-actions notice-actions"><button class="btn" data-action="notice-close">ENTENDIDO</button></div>
+</div></div>
+
+<div id="commentsModal" class="modal-bg"><div class="modal comment-modal" role="dialog" aria-modal="true" aria-labelledby="commentsTitle">
+<div class="mh"><b id="commentsTitle">💬 COMENTARIOS</b><button class="close" data-action="close-comments-modal" aria-label="Cerrar">×</button></div>
+<div id="commentsContext" class="comment-context"></div>
+<div id="commentsList" class="comments-scroll"></div>
+<div id="commentsFooter" class="comment-footer"></div>
+</div></div>
+
+<div id="commentFormModal" class="modal-bg"><div class="modal comment-modal comment-form" role="dialog" aria-modal="true" aria-labelledby="commentFormTitle">
+<div class="mh"><b id="commentFormTitle">NUEVO COMENTARIO</b><button class="close" data-action="close-comment-form" aria-label="Cerrar">×</button></div>
+<div id="commentScopeOptions" class="comment-scope-options"></div>
+<textarea id="commentText" maxlength="2000" placeholder="Escribe el comentario..."></textarea>
+<div id="commentFormStatus" class="comment-error" aria-live="polite"></div>
+<div class="modal-actions"><button class="secondary" data-action="close-comment-form">CANCELAR</button><button class="btn" data-action="comment-save">GUARDAR</button></div>
+</div></div>
+
+
+<div id="deviceRequestModal" class="modal-bg"><div class="modal device-gate-modal">
+<div class="mh"><b>🔐 AUTORIZAR DISPOSITIVO</b></div>
+<div class="device-gate-icon">📱</div>
+<p class="device-gate-text">Este dispositivo todavía no está autorizado. Escribe tu nombre para enviar la solicitud al administrador.</p>
+<div class="field"><label>NOMBRE DEL MÉDICO</label><input id="deviceDoctorName" placeholder="Ej. Dr. Carlos Pérez" autocomplete="name"></div>
+<div id="deviceRequestStatus" aria-live="polite" style="text-align:center;color:var(--muted);font-size:12px;margin-top:8px"></div>
+<div class="modal-actions"><button class="secondary" data-action="device-logout">CERRAR SESIÓN</button><button class="btn" id="deviceRequestBtn" data-action="device-request-submit">ENVIAR SOLICITUD</button></div>
+</div></div>
+
+<div id="deviceStatusModal" class="modal-bg"><div class="modal device-gate-modal">
+<div class="mh"><b id="deviceStatusTitle">🔐 ACCESO AL PACS</b></div>
+<div id="deviceStatusIcon" class="device-gate-icon">⏳</div>
+<p id="deviceStatusText" class="device-gate-text"></p>
+<div class="modal-actions" style="justify-content:center"><button class="secondary" data-action="device-logout">CERRAR SESIÓN</button><button class="btn" id="deviceStatusRetry" data-action="device-status-retry">COMPROBAR DE NUEVO</button></div>
+</div></div>
+
+<div id="deviceControlModal" class="modal-bg"><div class="modal device-panel">
+<div class="mh"><b>🔐 CONTROL DE DISPOSITIVOS</b><button class="close" data-action="close-device-control">×</button></div>
+<div id="deviceControlBody"><div class="data-loading">Cargando dispositivos...</div></div>
+</div></div>
+
+<div id="toast" class="toast"></div>
+<div id="loginModal" class="modal-bg"><div class="modal">
+<div class="mh"><b>INICIAR SESIÓN</b><button class="close" data-action="close-login-modal" aria-label="Cerrar">×</button></div>
+<div class="field"><label>CORREO</label><input id="loginEmail" placeholder="CORREO ELECTRÓNICO" autocomplete="username" aria-label="Correo electrónico"></div>
+<div class="field" style="margin-top:10px"><label>CONTRASEÑA</label><input id="loginPass" type="password" placeholder="CONTRASEÑA" autocomplete="current-password" aria-label="Contraseña"></div>
+<div style="display:flex;flex-direction:column;gap:7px;margin-top:11px">
+<label style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px"><input id="rememberUser" type="checkbox"> RECORDAR USUARIO</label>
+<label style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px"><input id="rememberPass" type="checkbox"> RECORDAR CONTRASEÑA</label>
+</div>
+<div class="modal-actions"><button class="secondary" data-action="close-login-modal">CANCELAR</button><button class="btn" id="loginSubmit" data-action="login-submit">INICIAR SESIÓN</button></div>
+<div id="loginStatus" aria-live="polite" style="text-align:center;color:var(--muted);font-size:12px;margin-top:10px"></div>
+</div></div>
+
+<script>
+/* BUILD HSMP 2026-09-06 V84 · REVOCADOS + PERMITIR NUEVA SOLICITUD */
+/* ===== config.js ===== */
+window.PACS = window.PACS || {};
+PACS.config = {
+  supabaseUrl: "https://tapjgdzwmsfgthxncero.supabase.co",
+  publishableKey: "sb_publishable_5L4-txz5pZzI6dU6UAw86w_5gXbHZr0",
+  roles: {
+    admin: "622de888-2abd-4f4c-b1ba-488c7472b767",
+    viewer: "070c65c4-b499-4a45-ba7f-f2d5525a1d48"
+  },
+  storageBuckets: ["IMAGENES","imagenes","imágenes"]
+};
+
+
+/* ===== state.js ===== */
+window.PACS = window.PACS || {};
+PACS.state = {
+  client: null,
+  logged: false,
+  role: "",
+  deviceStatus: "",
+  deviceDoctorName: "",
+  selectedPatient: null,
+  selectedStudyIndex: 0,
+  selectedImage: 0,
+  selectedDate: (() => {
+    const d = new Date();
+    const months = ["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"];
+    return `${String(d.getDate()).padStart(2,"0")} ${months[d.getMonth()]} ${d.getFullYear()}`;
+  })(),
+  searchTerm: "",
+  patients: [],
+  patientFiles: [],
+  addFiles: [],
+  patientGroups: [],
+  addGroups: [],
+  scale: 1,
+  panX: 0,
+  panY: 0,
+  rotation: 0,
+  brightness: 100,
+  contrast: 100,
+  invert: false,
+  panMode: true,
+  windowLevel: 0,
+  isDraggingImage: false,
+  dragStartX: 0,
+  dragStartY: 0,
+  panStartX: 0,
+  panStartY: 0,
+  pinchActive: false,
+  pinchStartDistance: 0,
+  pinchStartScale: 1,
+  storageBucket: "IMAGENES",
+  _imageRefreshTimer: null,
+  comments: [],
+  commentsPatientName: "",
+  commentsLoading: false,
+  editingCommentId: null
+};
+
+
+/* ===== constants.js ===== */
+window.PACS = window.PACS || {};
+PACS.constants = {
+  months: ["ENERO","FEBRERO","MARZO","ABRIL","MAYO","JUNIO","JULIO","AGOSTO","SEPTIEMBRE","OCTUBRE","NOVIEMBRE","DICIEMBRE"],
+  weekdays: ["L","M","M","J","V","S","D"],
+  studies: [
+    "TÓRAX","ABDOMEN","PELVIS","CADERA",
+    "COLUMNA CERVICAL","COLUMNA DORSAL","COLUMNA LUMBAR","COLUMNA LUMBOSACRA","COLUMNA COMPLETA","ESCOLIOSIS",
+    "CRÁNEO","SENOS PARANASALES","HUESOS PROPIOS DE LA NARIZ","MACIZO FACIAL","MANDÍBULA","MASTOIDES","CUELLO",
+    "CLAVÍCULA","ACROMIOCLAVICULAR","ESCÁPULA","HOMBRO","HÚMERO","CODO","ANTEBRAZO","MUÑECA","MANO","DEDOS DE LA MANO","PULGAR",
+    "FÉMUR","RODILLA","RÓTULA","PIERNA","TOBILLO","PIE","CALCÁNEO","DEDOS DEL PIE",
+    "ESTERNÓN","COSTILLAS","SACRO","CÓCCIX","SACROCOCCÍGEA","SACROILÍACA","TEMPOROMANDIBULAR","DENTAL",
+    "TELEMETRÍA DE MIEMBROS INFERIORES","PARTES BLANDAS","CUERPO EXTRAÑO","OTRO"
+  ]
+};
+
+
+/* ===== supabase.js ===== */
+window.PACS = window.PACS || {};
+PACS.supabase = {
+  async init(){
+    if(!window.supabase) throw new Error("No se cargó la librería de Supabase.");
+    PACS.state.client = window.supabase.createClient(PACS.config.supabaseUrl, PACS.config.publishableKey);
+    return PACS.state.client;
+  },
+  async storageUpload(path, file, options={}){
+    const candidates = [PACS.state.storageBucket, ...PACS.config.storageBuckets.filter(x=>x!==PACS.state.storageBucket)];
+    let last = null;
+    for(const bucket of candidates){
+      // Los archivos usan nombres únicos y no se reemplazan. Un caché largo evita
+      // transferencias repetidas desde Storage/CDN sin modificar el archivo original.
+      const res = await PACS.state.client.storage.from(bucket).upload(path, file, {
+        upsert:false,
+        cacheControl: options.cacheControl || "31536000",
+        ...(options.contentType?{contentType:options.contentType}:{})
+      });
+      if(!res.error){ PACS.state.storageBucket = bucket; return res; }
+      last = res.error;
+    }
+    return {error:last || new Error("No se encontró el bucket de imágenes.")};
+  },
+  async signedUrl(path){
+    const candidates = [PACS.state.storageBucket, ...PACS.config.storageBuckets.filter(x=>x!==PACS.state.storageBucket)];
+    for(const bucket of candidates){
+      const res = await PACS.state.client.storage.from(bucket).createSignedUrl(path, 3600);
+      if(!res.error && res.data?.signedUrl){
+        PACS.state.storageBucket = bucket;
+        return res.data.signedUrl;
+      }
+    }
+    return "";
+  },
+  async remove(path){
+    if(!path) return {data:null,error:null};
+    const candidates = [PACS.state.storageBucket, ...PACS.config.storageBuckets.filter(x=>x!==PACS.state.storageBucket)];
+    let lastError=null;
+    for(const bucket of candidates){
+      const res = await PACS.state.client.storage.from(bucket).remove([path]);
+      if(!res.error){
+        PACS.state.storageBucket=bucket;
+        return res;
+      }
+      lastError=res.error;
+    }
+    return {data:null,error:lastError||new Error("No se pudo eliminar el archivo del Storage.")};
+  },
+  async removeItems(items){
+    const failures=[];
+    for(const item of (items||[])){
+      const path=PACS.data.imagePath(item);
+      if(!path) continue;
+      const res=await this.remove(path);
+      if(res.error) failures.push({item,path,error:res.error});
+    }
+    return failures;
+  }
+};
+
+
+/* ===== data.js ===== */
+window.PACS = window.PACS || {};
+
+/* ===== gender persistence fallback ===== */
+PACS.gender = {
+  key: "pacs_patient_gender_v1",
+  read(){
+    try { return JSON.parse(localStorage.getItem(this.key)||"{}"); }
+    catch(e){ return {}; }
+  },
+  write(name, sex){
+    if(!name || !sex) return;
+    try{
+      const data=this.read();
+      data[String(name).trim().toUpperCase()]=String(sex).trim().toUpperCase();
+      localStorage.setItem(this.key, JSON.stringify(data));
+    }catch(e){}
+  },
+  get(name){
+    const data=this.read();
+    return String(data[String(name).trim().toUpperCase()]||"").trim().toUpperCase();
+  }
+};
+
+PACS.data = {
+  dateLabel(value){
+    if(!value) return "";
+    const raw = String(value).trim();
+    const m = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if(m){
+      const mon = ["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"];
+      return `${m[3]} ${mon[Number(m[2])-1]} ${m[1]}`;
+    }
+    const d = new Date(raw);
+    if(Number.isNaN(d.getTime())) return raw.toUpperCase();
+    const mon = ["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"];
+    return `${String(d.getDate()).padStart(2,"0")} ${mon[d.getMonth()]} ${d.getFullYear()}`.toUpperCase();
+  },
+  dateISO(label){
+    const [d, mon, y] = String(label).split(" ");
+    const map={ENE:"01",FEB:"02",MAR:"03",ABR:"04",MAY:"05",JUN:"06",JUL:"07",AGO:"08",SEP:"09",OCT:"10",NOV:"11",DIC:"12"};
+    return `${y}-${map[mon]}-${String(d).padStart(2,"0")}`;
+  },
+  imageItems(study){ return Array.isArray(study?.images) ? study.images : []; },
+  imagePath(item){ return typeof item==="string" ? item : (item?.path || item?.storagePath || ""); },
+  imageUrl(item){ return typeof item==="string" ? "" : (item?.url || item?.publicUrl || item?.localUrl || ""); },
+  studyCount(study){ return this.imageItems(study).length || Number(study?.imageCount || 0) || 0; },
+  mapRows(rows){
+    const groups = new Map();
+    (rows||[]).forEach((r, idx)=>{
+      const name=String(r.patient||"").trim().toUpperCase();
+      if(!name) return;
+      const id=`patient-${encodeURIComponent(name)}`;
+      if(!groups.has(id)) groups.set(id,{id,name,sex:String((r.sex??r.gender??PACS.gender.get(name)??"")).trim().toUpperCase(),studies:[]});
+      groups.get(id).studies.push({
+        id:r.id,
+        date:this.dateLabel(r.date),
+        study:String(r.structure||r.study||r.modality||"ESTUDIO").trim().toUpperCase(),
+        modality:r.modality||"",
+        images:Array.isArray(r.images)?r.images:[],
+        createdAt:r.created_at||""
+      });
+    });
+    for(const p of groups.values()){
+      p.studies.sort((a,b)=>String(b.date).localeCompare(a.date)||String(b.createdAt).localeCompare(a.createdAt));
+    }
+    return [...groups.values()];
+  },
+  async loadStudies(){
+    const previous=new Map(
+      (PACS.state.patients||[]).map(p=>[
+        String(p.name||"").trim().toUpperCase(),
+        String(p.sex||"").trim().toUpperCase()
+      ])
+    );
+
+    const {data,error}=await PACS.state.client
+      .from("studies")
+      .select("*")
+      .order("date",{ascending:false})
+      .order("created_at",{ascending:false});
+
+    if(error) throw error;
+
+    const fresh=this.mapRows(data||[]);
+
+    // Supabase actualmente no tiene sex/gender en "studies".
+    // Conservamos el sexo que ya conocemos al reconstruir la lista.
+    fresh.forEach(p=>{
+      const previousSex=previous.get(String(p.name||"").trim().toUpperCase());
+      const storedSex=PACS.gender.get(p.name);
+      p.sex=String(p.sex||previousSex||storedSex||"").trim().toUpperCase();
+    });
+
+    PACS.state.patients=fresh;
+    return PACS.state.patients;
+  },
+  async hydrateImages(study=PACS.data.currentStudy()){
+    if(!study?.images?.length) return;
+    const selectedIndex=Math.max(0,Math.min(study.images.length-1,(PACS.state.selectedImage||1)-1));
+    const now=Date.now();
+    const refreshSoon=(expiresAt)=>!expiresAt || expiresAt-now<5*60*1000;
+
+    for(let i=0;i<study.images.length;i++){
+      let item=study.images[i];
+      const path=PACS.data.imagePath(item);
+      if(!path) continue;
+
+      // Compatibilidad con registros antiguos que guardaban solo el path como texto.
+      if(typeof item==="string"){
+        item=study.images[i]={path,name:`Imagen ${i+1}`,url:"",thumbUrl:""};
+      }
+
+      // La RX completa solo obtiene URL cuando es la imagen seleccionada.
+      // Así las demás imágenes del estudio no se descargan por anticipado.
+      if(i===selectedIndex && refreshSoon(item.urlExpiresAt)){
+        const url=await PACS.supabase.signedUrl(path);
+        if(url){
+          item.url=url;
+          item.urlExpiresAt=Date.now()+55*60*1000;
+          item.publicUrl="";
+          item.localUrl=item.pending?item.localUrl:"";
+        }
+      }
+
+      // Las miniaturas nuevas tienen un archivo pequeño independiente.
+      // Las imágenes antiguas sin thumbPath muestran un botón numerado y no
+      // vuelven a descargar la RX completa solo para dibujar la miniatura.
+      if(item.thumbPath && refreshSoon(item.thumbUrlExpiresAt)){
+        const thumbUrl=await PACS.supabase.signedUrl(item.thumbPath);
+        if(thumbUrl){
+          item.thumbUrl=thumbUrl;
+          item.thumbUrlExpiresAt=Date.now()+55*60*1000;
+        }
+      }
+    }
+  },
+  findPatient(id){ return PACS.state.patients.find(p=>p.id===id)||null; },
+  currentStudy(){
+    const p=PACS.state.selectedPatient;
+    return p?.studies?.[PACS.state.selectedStudyIndex]||null;
+  },
+  patientsForDate(date=PACS.state.selectedDate){
+    return PACS.state.patients.filter(p=>p.studies.some(s=>s.date===date));
+  },
+  cycleStudyTotal(date=PACS.state.selectedDate){
+    const iso=this.dateISO(date);
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return 0;
+    const year=Number(iso.slice(0,4));
+    // Ciclos operativos indicados para 2026. Las fechas son inclusivas.
+    const configured=year===2026?[
+      ["2026-08-23","2026-09-23"],
+      ["2026-09-24","2026-10-23"],
+      ["2026-10-24","2026-11-22"],
+      ["2026-11-23","2026-12-22"]
+    ]:[];
+    let range=configured.find(([start,end])=>iso>=start&&iso<=end);
+    // Fuera de los ciclos configurados, se usa el ciclo mensual 23→22 para no mezclar meses completos.
+    if(!range){
+      const d=new Date(`${iso}T12:00:00`);
+      let start,end;
+      if(d.getDate()>=23){
+        start=new Date(d.getFullYear(),d.getMonth(),23,12);
+        end=new Date(d.getFullYear(),d.getMonth()+1,22,12);
+      }else{
+        start=new Date(d.getFullYear(),d.getMonth()-1,23,12);
+        end=new Date(d.getFullYear(),d.getMonth(),22,12);
+      }
+      const f=x=>`${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,"0")}-${String(x.getDate()).padStart(2,"0")}`;
+      range=[f(start),f(end)];
+    }
+    const [start,end]=range;
+    return PACS.state.patients.reduce((total,p)=>total+(p.studies||[]).filter(st=>{
+      const stIso=this.dateISO(st.date);
+      return stIso>=start&&stIso<=end;
+    }).length,0);
+  },
+  async hydratePatientDateStudies(patient=PACS.state.selectedPatient,date=PACS.state.selectedDate){
+    const studies=(patient?.studies||[]).filter(s=>s.date===date);
+    for(const study of studies){
+      await this.hydrateImages(study);
+    }
+  }
+};
+
+
+/* ===== ui.js ===== */
+window.PACS = window.PACS || {};
+PACS.ui = {
+  toast(message){
+    const t=document.getElementById("toast");
+    if(!t) return;
+    t.textContent=message;
+    t.classList.add("show");
+    clearTimeout(this._toastTimer);
+    this._toastTimer=setTimeout(()=>t.classList.remove("show"),2600);
+  },
+  openModal(id){ document.getElementById(id)?.classList.add("show"); },
+  closeModal(id){ document.getElementById(id)?.classList.remove("show"); },
+  closeAll(){
+    document.querySelectorAll(".modal-bg.show").forEach(x=>x.classList.remove("show"));
+    document.querySelectorAll(".study-options.show").forEach(x=>x.classList.remove("show"));
+    document.getElementById("calendarPopup")?.classList.remove("show");
+    document.getElementById("menu")?.classList.remove("show");
+    document.getElementById("side")?.classList.remove("open");
+    document.getElementById("overlay")?.classList.remove("show");
+  },
+  loading(show=false){
+    const x=document.getElementById("appLoading");
+    if(x) x.style.display=show?"grid":"none";
+  }
+};
+
+
+/* ===== auth.js ===== */
+window.PACS = window.PACS || {};
+PACS.auth = {
+  async login(email,password){
+    if(!PACS.state.client) await PACS.supabase.init();
+    const {data,error}=await PACS.state.client.auth.signInWithPassword({email,password});
+    if(error || !data?.user) throw new Error("Correo o contraseña incorrectos.");
+    const uid=data.user.id;
+    if(uid===PACS.config.roles.admin){
+      PACS.state.role="admin";
+      PACS.state.logged=true;
+      PACS.state.deviceStatus="approved";
+      return {role:"admin",deviceStatus:"approved"};
+    }
+    if(uid===PACS.config.roles.viewer){
+      PACS.state.role="viewer";
+      const check=await PACS.devices.checkAccess();
+      PACS.state.deviceStatus=check.status;
+      PACS.state.deviceDoctorName=check.doctorName||"";
+      PACS.state.logged=check.status==="approved";
+      return {role:"viewer",deviceStatus:check.status};
+    }
+    await PACS.state.client.auth.signOut();
+    throw new Error("Este usuario no tiene acceso autorizado al PACS.");
+  },
+  async restore(){
+    let sessionResult;
+    try{
+      sessionResult=await PACS.state.client.auth.getSession();
+    }catch(err){
+      console.warn("PACS: no se pudo restaurar la sesión.",err);
+      try{ await PACS.state.client.auth.signOut({scope:"local"}); }catch(_){}
+      return false;
+    }
+    const {data,error}=sessionResult||{};
+    if(error){
+      // Si quedó un refresh token antiguo/inválido, limpiamos solo la sesión local
+      // para que no deje al PACS atrapado intentando renovarla repetidamente.
+      console.warn("PACS: sesión local inválida o vencida; se limpiará.",error);
+      try{ await PACS.state.client.auth.signOut({scope:"local"}); }catch(_){}
+      return false;
+    }
+    if(!data?.session?.user) return false;
+    const uid=data.session.user.id;
+    if(uid===PACS.config.roles.admin){
+      PACS.state.role="admin"; PACS.state.logged=true; PACS.state.deviceStatus="approved"; return true;
+    }
+    if(uid===PACS.config.roles.viewer){
+      PACS.state.role="viewer";
+      const check=await PACS.devices.checkAccess();
+      PACS.state.deviceStatus=check.status;
+      PACS.state.deviceDoctorName=check.doctorName||"";
+      PACS.state.logged=check.status==="approved";
+      if(!PACS.state.logged) setTimeout(()=>PACS.devices.showGate(check.status),0);
+      return PACS.state.logged;
+    }
+    await PACS.state.client.auth.signOut();
+    return false;
+  },
+  async logout(){
+    await PACS.state.client.auth.signOut();
+    Object.assign(PACS.state,{logged:false,role:"",deviceStatus:"",deviceDoctorName:"",selectedPatient:null,selectedStudyIndex:0,selectedImage:0});
+  }
+};
+
+/* ===== devices.js ===== */
+window.PACS = window.PACS || {};
+PACS.devices = {
+  keyId:"pacsDeviceIdV1",
+  keySecret:"pacsDeviceSecretV1",
+  ensureIdentity(){
+    let id=localStorage.getItem(this.keyId), secret=localStorage.getItem(this.keySecret);
+    if(!id){ id=(crypto.randomUUID?crypto.randomUUID():`${Date.now()}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`); localStorage.setItem(this.keyId,id); }
+    if(!secret){
+      const bytes=new Uint8Array(32); crypto.getRandomValues(bytes);
+      secret=Array.from(bytes,b=>b.toString(16).padStart(2,"0")).join("");
+      localStorage.setItem(this.keySecret,secret);
+    }
+    return {id,secret};
+  },
+  deviceType(){
+    const ua=navigator.userAgent||"";
+    if(/Android/i.test(ua)) return "Android";
+    if(/iPhone|iPad|iPod/i.test(ua)) return "iOS";
+    if(/Windows/i.test(ua)) return "Windows";
+    if(/Macintosh|Mac OS X/i.test(ua)) return "macOS";
+    return "Otro";
+  },
+  browser(){
+    const ua=navigator.userAgent||"";
+    if(/Edg\//i.test(ua)) return "Edge";
+    if(/CriOS/i.test(ua)) return "Chrome";
+    if(/Chrome\//i.test(ua)) return "Chrome";
+    if(/FxiOS|Firefox\//i.test(ua)) return "Firefox";
+    if(/Safari\//i.test(ua)) return "Safari";
+    return "Navegador";
+  },
+  async checkAccess(){
+    const {id,secret}=this.ensureIdentity();
+    const {data,error}=await PACS.state.client.rpc("check_device_access",{p_device_id:id,p_device_secret:secret});
+    if(error) throw new Error("No se pudo verificar este dispositivo.");
+    const row=Array.isArray(data)?data[0]:data;
+    return {status:row?.device_status||"unknown",approvedAt:row?.approved_at||null,doctorName:row?.doctor_name||""};
+  },
+  async requestAccess(name){
+    const clean=String(name||"").trim();
+    if(!clean) throw new Error("Escribe tu nombre.");
+    const {id,secret}=this.ensureIdentity();
+    const {data,error}=await PACS.state.client.rpc("request_device_access",{
+      p_device_id:id,p_device_secret:secret,p_doctor_name:clean,p_device_type:this.deviceType(),p_browser:this.browser()
+    });
+    if(error) throw new Error(error.message||"No se pudo enviar la solicitud.");
+    const row=Array.isArray(data)?data[0]:data;
+    return row?.device_status||"pending";
+  },
+  showGate(status){
+    PACS.ui.closeModal("deviceRequestModal"); PACS.ui.closeModal("deviceStatusModal");
+    if(status==="unknown" || status==="request_allowed"){
+      const input=document.getElementById("deviceDoctorName");
+      if(input) input.value=status==="request_allowed"?(PACS.state.deviceDoctorName||""):"";
+      const st=document.getElementById("deviceRequestStatus");
+      if(st) st.textContent=status==="request_allowed"?"El administrador habilitó este dispositivo para enviar una nueva solicitud.":"";
+      const gateText=document.querySelector("#deviceRequestModal .device-gate-text");
+      if(gateText) gateText.textContent=status==="request_allowed"
+        ?"Este dispositivo fue habilitado nuevamente por el administrador. Confirma tu nombre y envía una nueva solicitud."
+        :"Este dispositivo todavía no está autorizado. Escribe tu nombre para enviar la solicitud al administrador.";
+      PACS.ui.openModal("deviceRequestModal"); setTimeout(()=>input?.focus(),80); return;
+    }
+    const title=document.getElementById("deviceStatusTitle"), icon=document.getElementById("deviceStatusIcon"), text=document.getElementById("deviceStatusText"), retry=document.getElementById("deviceStatusRetry");
+    if(status==="pending"){
+      if(title)title.textContent="🔐 SOLICITUD PENDIENTE"; if(icon)icon.textContent="⏳";
+      if(text)text.textContent=`${PACS.state.deviceDoctorName||"Tu dispositivo"}: la solicitud fue enviada al administrador. Cuando sea aprobada podrás ingresar al PACS.`;
+      if(retry)retry.style.display="";
+    }else{
+      if(title)title.textContent="🔐 ACCESO BLOQUEADO"; if(icon)icon.textContent="🚫";
+      if(text)text.textContent=status==="revoked"
+        ?"Este dispositivo fue revocado por el administrador y no puede volver a solicitar acceso hasta que el administrador lo habilite."
+        :"La solicitud de este dispositivo fue rechazada por el administrador.";
+      if(retry)retry.style.display=status==="revoked"?"none":"";
+    }
+    PACS.ui.openModal("deviceStatusModal");
+  },
+  async submitRequest(){
+    const btn=document.getElementById("deviceRequestBtn"), status=document.getElementById("deviceRequestStatus"), name=document.getElementById("deviceDoctorName")?.value||"";
+    if(btn)btn.disabled=true; if(status)status.textContent="Enviando solicitud...";
+    try{
+      const result=await this.requestAccess(name); PACS.state.deviceStatus=result; PACS.state.deviceDoctorName=String(name).trim(); this.showGate(result);
+    }catch(err){if(status)status.textContent=err?.message||"No se pudo enviar la solicitud.";}
+    finally{if(btn)btn.disabled=false;}
+  },
+  async retry(){
+    const btn=document.getElementById("deviceStatusRetry"); if(btn)btn.disabled=true;
+    try{
+      const check=await this.checkAccess(); PACS.state.deviceStatus=check.status; PACS.state.deviceDoctorName=check.doctorName||PACS.state.deviceDoctorName;
+      if(check.status==="approved"){
+        PACS.state.logged=true; PACS.ui.closeModal("deviceStatusModal"); await PACS.app.sync(); await PACS.comments.loadForCurrentPatient({rerender:false}); PACS.app.render(); PACS.app.openNotice();
+      }else this.showGate(check.status);
+    }catch(err){PACS.ui.toast(err?.message||"No se pudo comprobar el dispositivo.");}
+    finally{if(btn)btn.disabled=false;}
+  },
+  async logoutGate(){ await PACS.auth.logout(); PACS.ui.closeModal("deviceRequestModal"); PACS.ui.closeModal("deviceStatusModal"); PACS.app.home(); },
+  fmtDate(v){ if(!v)return "—"; try{return new Intl.DateTimeFormat("es-PE",{dateStyle:"short",timeStyle:"short"}).format(new Date(v));}catch(_){return String(v);} },
+  escapeHtml(value){ return String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","\'":"&#39;"}[ch])); },
+  async loadAdmin(){
+    if(PACS.state.role!=="admin") return [];
+    const {data,error}=await PACS.state.client.from("authorized_devices").select("id,created_at,doctor_name,device_type,browser,status,approved_at,last_seen_at").order("created_at",{ascending:false});
+    if(error) throw error; return data||[];
+  },
+  async pendingCount(){ const rows=await this.loadAdmin(); return rows.filter(x=>x.status==="pending").length; },
+  async refreshAdminBadge(){
+    if(PACS.state.role!=="admin")return;
+    try{const n=await this.pendingCount(); document.querySelectorAll("[data-device-badge]").forEach(x=>{x.textContent=n;x.classList.toggle("show",n>0);});}catch(err){console.error("Device badge:",err);}
+  },
+  card(row,kind){
+    let meta=`${row.device_type||"Dispositivo"} · ${row.browser||"Navegador"}`;
+    if(kind==="pending") meta+=` · Solicitud ${this.fmtDate(row.created_at)}`;
+    if(kind==="approved") meta+=row.approved_at?` · Aprobado ${this.fmtDate(row.approved_at)}`:"";
+    if(kind==="revoked") meta+=row.approved_at?` · Aprobado anteriormente ${this.fmtDate(row.approved_at)}`:"";
+    if(kind==="request_allowed") meta+=" · Habilitado para volver a solicitar";
+
+    let actions="";
+    if(kind==="pending") actions=`<div class="device-card-actions"><button class="reject" data-action="device-reject" data-device-row="${row.id}">RECHAZAR</button><button class="approve" data-action="device-approve" data-device-row="${row.id}">APROBAR</button></div>`;
+    else if(kind==="approved") actions=`<div class="device-card-actions"><button class="reject" data-action="device-revoke" data-device-row="${row.id}">REVOCAR</button></div>`;
+    else if(kind==="revoked") actions=`<div class="device-card-actions"><button class="approve" data-action="device-allow-request" data-device-row="${row.id}">PERMITIR NUEVA SOLICITUD</button></div>`;
+    else if(kind==="request_allowed") actions=`<div class="device-card-actions"><button class="reject" data-action="device-revoke" data-device-row="${row.id}">CANCELAR PERMISO</button></div>`;
+
+    return `<div class="device-card"><div class="device-card-main"><b>${this.escapeHtml(row.doctor_name||"Sin nombre")}</b><span>${this.escapeHtml(meta)}</span></div>${actions}</div>`;
+  },
+  async openAdmin(){
+    if(PACS.state.role!=="admin")return;
+    document.getElementById("mobileMoreMenu")?.classList.remove("show"); PACS.ui.openModal("deviceControlModal"); await this.renderAdmin();
+  },
+  async renderAdmin(){
+    const box=document.getElementById("deviceControlBody"); if(!box)return; box.innerHTML='<div class="data-loading">Cargando dispositivos...</div>';
+    try{
+      const rows=await this.loadAdmin(),
+        pending=rows.filter(x=>x.status==="pending"),
+        approved=rows.filter(x=>x.status==="approved"),
+        revoked=rows.filter(x=>x.status==="revoked"),
+        requestAllowed=rows.filter(x=>x.status==="request_allowed");
+      box.innerHTML=`<div class="device-summary"><span class="stat-pill"><b>${pending.length}</b> solicitudes pendientes</span><span class="stat-pill"><b>${approved.length}</b> dispositivos aprobados</span><span class="stat-pill"><b>${revoked.length}</b> revocados</span></div>
+      <div class="device-section-title">PENDIENTES</div><div class="device-list">${pending.map(x=>this.card(x,"pending")).join("")||'<div class="device-empty">No hay solicitudes pendientes.</div>'}</div>
+      <div class="device-section-title">APROBADOS</div><div class="device-list">${approved.map(x=>this.card(x,"approved")).join("")||'<div class="device-empty">No hay dispositivos aprobados.</div>'}</div>
+      <div class="device-section-title">REVOCADOS</div><div class="device-list">${revoked.map(x=>this.card(x,"revoked")).join("")||'<div class="device-empty">No hay dispositivos revocados.</div>'}</div>
+      ${requestAllowed.length?`<div class="device-section-title">HABILITADOS PARA VOLVER A SOLICITAR</div><div class="device-list">${requestAllowed.map(x=>this.card(x,"request_allowed")).join("")}</div>`:""}`;
+      await this.refreshAdminBadge();
+    }catch(err){box.innerHTML=`<div class="device-empty">${this.escapeHtml(err?.message||"No se pudo cargar el control de dispositivos.")}</div>`;}
+  },
+  async setStatus(id,status){
+    if(PACS.state.role!=="admin")return;
+    const payload={status}; if(status==="approved")payload.approved_at=new Date().toISOString();
+    const {error}=await PACS.state.client.from("authorized_devices").update(payload).eq("id",id); if(error)throw error;
+    const msg=status==="approved"?"Dispositivo aprobado."
+      :status==="rejected"?"Solicitud rechazada."
+      :status==="request_allowed"?"El dispositivo ya puede enviar una nueva solicitud."
+      :"Dispositivo revocado.";
+    PACS.ui.toast(msg); await this.renderAdmin();
+  }
+};
+
+/* ===== images.js ===== */
+window.PACS = window.PACS || {};
+PACS.images = {
+  localPreview(file){
+    return {localUrl:URL.createObjectURL(file),name:file.name,path:"",url:"",thumbUrl:"",pending:true};
+  },
+  revoke(items){
+    (items||[]).forEach(x=>{ if(x?.localUrl) try{URL.revokeObjectURL(x.localUrl)}catch(_){}; });
+  },
+  async makeThumbnail(file){
+    // IMPORTANTE: esta función crea un archivo APARTE solo para la miniatura.
+    // El archivo radiográfico original se sube exactamente como fue seleccionado.
+    if(!file?.type?.startsWith("image/")) return null;
+    try{
+      const bitmap=await createImageBitmap(file);
+      const maxSide=240;
+      const ratio=Math.min(1,maxSide/Math.max(bitmap.width,bitmap.height));
+      const width=Math.max(1,Math.round(bitmap.width*ratio));
+      const height=Math.max(1,Math.round(bitmap.height*ratio));
+      const canvas=document.createElement("canvas");
+      canvas.width=width; canvas.height=height;
+      const ctx=canvas.getContext("2d",{alpha:false});
+      if(!ctx){ bitmap.close?.(); return null; }
+      ctx.drawImage(bitmap,0,0,width,height);
+      bitmap.close?.();
+      return await new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",0.72));
+    }catch(err){
+      console.warn("No se pudo crear miniatura local:",err);
+      return null;
+    }
+  },
+  async uploadForStudy(studyId, files){
+    const uploaded=[];
+    for(const file of files){
+      const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,"_");
+      const token=`${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
+      const path=`studies/${studyId}/${token}_${safe}`;
+
+      // RX ORIGINAL: se envía el mismo File recibido del equipo/PC.
+      // No hay canvas, resize, recompress ni conversión sobre este archivo.
+      const up=await PACS.supabase.storageUpload(path,file);
+      if(up.error) throw up.error;
+
+      let thumbPath="";
+      const thumb=await this.makeThumbnail(file);
+      if(thumb){
+        thumbPath=`studies/${studyId}/thumbs/${token}.jpg`;
+        const thumbUp=await PACS.supabase.storageUpload(thumbPath,thumb,{contentType:"image/jpeg"});
+        if(thumbUp.error){
+          console.warn("La RX se guardó, pero no se pudo guardar su miniatura:",thumbUp.error);
+          thumbPath="";
+        }
+      }
+      uploaded.push({path,thumbPath,name:file.name});
+    }
+    return uploaded;
+  },
+  async removeItem(item){
+    const paths=[PACS.data.imagePath(item),item?.thumbPath||""].filter(Boolean);
+    for(const path of paths){
+      const res=await PACS.supabase.remove(path);
+      if(res.error) throw res.error;
+    }
+  },
+  async removeItems(items){
+    const failures=[];
+    for(const item of (items||[])){
+      try{ await this.removeItem(item); }
+      catch(error){ failures.push({item,error}); }
+    }
+    return failures;
+  }
+};
+
+
+/* ===== patients.js ===== */
+window.PACS = window.PACS || {};
+PACS.patients = {
+  select(id){
+    const p=PACS.data.findPatient(id);
+    if(!p){PACS.ui.toast("No se encontró el paciente.");return;}
+    PACS.state.selectedPatient=p;
+    const idx=p.studies.findIndex(s=>s.date===PACS.state.selectedDate);
+    PACS.state.selectedStudyIndex=idx>=0?idx:0;
+    PACS.state.selectedImage=PACS.data.studyCount(PACS.data.currentStudy())>0?1:0;
+    PACS.app.resetViewer();
+    PACS.comments.clear();
+    PACS.app.render();
+    PACS.comments.loadForCurrentPatient({rerender:true}).catch(err=>console.error("Comments refresh:",err));
+    PACS.data.hydratePatientDateStudies(p,PACS.state.selectedDate).then(()=>PACS.app.render()).catch(err=>console.error("Image refresh:",err));
+    if(window.matchMedia?.("(max-width: 850px)").matches){
+      this.closeSide();
+      document.querySelectorAll(".mobile-nav button").forEach(b=>b.classList.remove("active"));
+      document.querySelector('.mobile-nav button[data-mobile="viewer"]')?.classList.add("active");
+    }
+  },
+  async add({name,study,date,files=[],sex=""}){
+    // El sexo se guarda en Supabase para que ♂/♀ sea consistente en cualquier dispositivo.
+    const selectedSex=String(sex||"").trim().toUpperCase();
+    const payload={
+      patient:name,
+      date:PACS.data.dateISO(date),
+      study,
+      structure:study,
+      modality:(["TC","RM","MAMOGRAFÍA","ECOGRAFÍA"].includes(study)?study:"RX"),
+      images:[],
+      sex:selectedSex||null
+    };
+
+    const {data,error}=await PACS.state.client
+      .from("studies")
+      .insert(payload)
+      .select("*")
+      .single();
+
+    if(error) throw error;
+
+    const localPreview=files.map(PACS.images.localPreview);
+    const pLocal={
+      id:`patient-${encodeURIComponent(name)}`,
+      name,
+      sex:selectedSex,
+      studies:[{
+        id:data.id,
+        date,
+        study,
+        modality:data.modality,
+        images:localPreview,
+        createdAt:data.created_at||""
+      }]
+    };
+
+    if(selectedSex) PACS.gender.write(name,selectedSex);
+
+    const existing=PACS.state.patients.find(p=>p.id===pLocal.id);
+    if(existing){
+      existing.studies.push(pLocal.studies[0]);
+      if(!existing.sex) existing.sex=selectedSex;
+    }else{
+      PACS.state.patients.push(pLocal);
+    }
+
+    PACS.state.selectedPatient=existing||pLocal;
+    PACS.state.selectedStudyIndex=(existing?existing:pLocal).studies.length-1;
+    PACS.state.selectedImage=files.length?1:0;
+    PACS.app.render();
+
+    try{
+      const uploaded=files.length?await PACS.images.uploadForStudy(data.id,files):[];
+      if(uploaded.length){
+        const {error:updateError}=await PACS.state.client
+          .from("studies")
+          .update({images:uploaded})
+          .eq("id",data.id);
+        if(updateError) throw updateError;
+        const studyRow=PACS.data.currentStudy();
+        if(studyRow) studyRow.images=uploaded;
+        PACS.images.revoke(localPreview);
+        await PACS.data.hydrateImages();
+      }
+      PACS.app.render();
+      PACS.ui.toast(files.length
+        ?`Paciente e ${files.length} imagen(es) guardados.`
+        :"Paciente agregado correctamente.");
+      return pLocal;
+    }catch(err){
+      const studyRow=PACS.data.currentStudy();
+      if(studyRow) studyRow.images=[];
+      PACS.images.revoke(localPreview);
+      PACS.app.render();
+      PACS.ui.toast(err?.message||"Paciente creado, pero no se pudieron guardar las imágenes.");
+    }
+  },
+  async updateName(newName,newSex=""){
+    const p=PACS.state.selectedPatient;
+    if(!p) throw new Error("Selecciona un paciente primero.");
+    const oldName=p.name;
+    const oldSex=String(p.sex||"").trim().toUpperCase();
+    const selectedSex=String(newSex||"").trim().toUpperCase();
+    const nameChanged=oldName!==newName;
+    const sexChanged=!!selectedSex && selectedSex!==oldSex;
+    if(!nameChanged && !sexChanged) return;
+
+    const updates={};
+    if(nameChanged) updates.patient=newName;
+    if(selectedSex) updates.sex=selectedSex;
+
+    // Actualización optimista de la interfaz.
+    p.name=newName;
+    if(selectedSex) p.sex=selectedSex;
+    PACS.app.render();
+    try{
+      const {error}=await PACS.state.client.from("studies").update(updates).eq("patient",oldName);
+      if(error) throw error;
+      if(nameChanged){
+        const {error:commentRenameError}=await PACS.state.client.from("comments").update({patient_name:newName,updated_at:new Date().toISOString()}).eq("patient_name",oldName);
+        if(commentRenameError) console.warn("No se pudieron renombrar los comentarios:",commentRenameError.message);
+        PACS.state.comments=(PACS.state.comments||[]).map(c=>({...c,patient_name:newName}));
+        PACS.state.commentsPatientName=newName;
+      }
+      if(selectedSex) PACS.gender.write(newName,selectedSex);
+      PACS.ui.toast("Paciente modificado correctamente.");
+    }catch(err){
+      p.name=oldName;
+      p.sex=oldSex;
+      PACS.app.render();
+      throw err;
+    }
+  },
+  async remove(){
+    const p=PACS.state.selectedPatient;
+    if(!p) throw new Error("Selecciona un paciente primero.");
+    const backup=[...PACS.state.patients];
+    PACS.state.patients=PACS.state.patients.filter(x=>x.id!==p.id);
+    PACS.state.selectedPatient=null;
+    PACS.state.selectedStudyIndex=0; PACS.state.selectedImage=0;
+    PACS.app.render();
+    const imageItems=p.studies.flatMap(s=>PACS.data.imageItems(s));
+    const {error}=await PACS.state.client.from("studies").delete().eq("patient",p.name);
+    if(error){
+      PACS.state.patients=backup;
+      PACS.state.selectedPatient=p;
+      PACS.app.render();
+      throw error;
+    }
+    const failures=await PACS.images.removeItems(imageItems);
+    if(failures.length){
+      console.warn("Archivos que no pudieron eliminarse de Storage:",failures);
+      PACS.ui.toast(`Paciente eliminado. ${failures.length} archivo(s) quedaron pendientes de limpieza en Storage.`);
+    }else{
+      PACS.ui.toast(imageItems.length?"Paciente y todas sus imágenes eliminados correctamente.":"Paciente eliminado correctamente.");
+    }
+    try{
+      await PACS.data.loadStudies();
+    }catch(err){
+      console.error("PACS: refresco posterior a eliminación:",err);
+      // La eliminación ya está confirmada en Supabase; no restauramos el paciente.
+    }
+    PACS.state.selectedPatient=null;
+    PACS.state.selectedStudyIndex=0;
+    PACS.state.selectedImage=0;
+    PACS.app.render();
+  }
+};
+
+
+/* ===== studies.js ===== */
+window.PACS = window.PACS || {};
+PACS.studies = {
+  select(index){
+    const p=PACS.state.selectedPatient;
+    if(!p?.studies?.[index]) return;
+    PACS.state.selectedStudyIndex=index;
+    PACS.state.selectedImage=PACS.data.studyCount(p.studies[index])>0?1:0;
+    PACS.app.resetViewer();
+    PACS.app.render();
+    PACS.data.hydratePatientDateStudies(p,p.studies[index].date).then(()=>PACS.app.render()).catch(err=>console.error("Image refresh:",err));
+  },
+  async chooseDate(label){
+    if(!label)return;
+    PACS.state.selectedDate=label;
+    document.getElementById("calendarPopup")?.classList.remove("show");
+    PACS.ui.toast(`Fecha seleccionada: ${label}`);
+
+    const available=PACS.data.patientsForDate(label);
+    const currentId=PACS.state.selectedPatient?.id;
+    PACS.state.selectedPatient=available.find(x=>x.id===currentId)||available[0]||null;
+    const idx=PACS.state.selectedPatient?.studies?.findIndex(s=>s.date===label) ?? -1;
+    PACS.state.selectedStudyIndex=idx>=0?idx:0;
+    PACS.state.selectedImage=PACS.data.studyCount(PACS.data.currentStudy())>0?1:0;
+    PACS.app.resetViewer();
+    PACS.comments.clear();
+    PACS.app.render();
+    PACS.comments.loadForCurrentPatient({rerender:true}).catch(err=>console.error("Comments refresh:",err));
+
+    try{
+      await PACS.data.loadStudies();
+      const refreshed=PACS.data.patientsForDate(label);
+      const keepId=PACS.state.selectedPatient?.id;
+      PACS.state.selectedPatient=refreshed.find(x=>x.id===keepId)||refreshed[0]||null;
+      const idx2=PACS.state.selectedPatient?.studies?.findIndex(s=>s.date===label) ?? -1;
+      PACS.state.selectedStudyIndex=idx2>=0?idx2:0;
+      PACS.state.selectedImage=PACS.data.studyCount(PACS.data.currentStudy())>0?1:0;
+      PACS.app.resetViewer();
+      PACS.comments.clear();
+      PACS.app.render();
+      PACS.comments.loadForCurrentPatient({rerender:true}).catch(err=>console.error("Comments refresh:",err));
+      PACS.data.hydrateImages(PACS.data.currentStudy()).then(()=>PACS.app.render()).catch(err=>console.error("Image hydration:",err));
+    }catch(err){
+      console.error("Calendar refresh:",err);
+      PACS.ui.toast("Se cambió la fecha, pero no se pudo actualizar el contenido remoto.");
+    }
+  }
+};
+
+
+/* ===== view.js ===== */
+window.PACS = window.PACS || {};
+PACS.view = {
+  patientIcon(sex){
+    const v=String(sex??"").trim().toUpperCase();
+    const male=["M","MALE","MASCULINO","HOMBRE","1"].includes(v);
+    const female=["F","FEMALE","FEMENINO","MUJER","2"].includes(v);
+    if(male) return '<span class="sex-symbol male" aria-label="Masculino" title="Masculino">♂</span>';
+    if(female) return '<span class="sex-symbol female" aria-label="Femenino" title="Femenino">♀</span>';
+    return '<span class="sex-symbol unknown" aria-label="Sexo no especificado" title="Sexo no especificado">•</span>';
+  },
+  patientList(){
+    const list=PACS.data.patientsForDate();
+    if(!list.length) return `<div class="patient-empty">No hay pacientes registrados en esta fecha.</div>`;
+    return list.map(p=>{
+      const active=PACS.state.selectedPatient?.id===p.id;
+      const dayStudies=p.studies.filter(x=>x.date===PACS.state.selectedDate);
+      const studies=dayStudies.length?dayStudies:p.studies.slice(0,1);
+      const imageCount=studies.reduce((n,x)=>n+PACS.data.studyCount(x),0);
+      const first=studies[0];
+      const studyLabel=studies.length>1?`${studies.length} estudios`:first?.study||"Ver historial";
+      return `<button type="button" class="patient ${active?"active":""}" data-patient="${encodeURIComponent(p.id)}"><strong class="patient-name">${this.patientIcon(p.sex)}${p.name}</strong><span>${studyLabel} · ${imageCount} imágenes</span></button>`;
+    }).join("");
+  },
+  history(){
+    const selected=PACS.state.selectedPatient;
+    const p=(selected && PACS.data.findPatient?.(selected.id)) || selected;
+    if(!p?.studies?.length) return `<div class="muted">No hay estudios registrados para este paciente.</div>`;
+
+    // Historial agrupado por FECHA: una sola entrada representa todas las
+    // estructuras e imágenes realizadas al paciente ese día.
+    const byDate=new Map();
+    p.studies.forEach((study,index)=>{
+      const date=study.date||"SIN FECHA";
+      if(!byDate.has(date)) byDate.set(date,{date,firstIndex:index,studies:[],images:0});
+      const group=byDate.get(date);
+      group.studies.push(study);
+      group.images+=PACS.data.studyCount(study);
+    });
+
+    const currentDate=PACS.data.currentStudy()?.date||"";
+    let out="";
+    for(const group of byDate.values()){
+      const structures=[...new Set(group.studies.map(s=>s.study).filter(Boolean))];
+      const summary=structures.length?structures.join(" · "):"ESTUDIOS DEL DÍA";
+      const active=currentDate===group.date;
+      out+=`<div class="day">${group.date}</div>`;
+      out+=`<button type="button" class="study ${active?"active-study":""}" data-study-index="${group.firstIndex}">
+        <div><b>🩻 </b><br><span>${summary} · <span class="ok">Disponible</span></span></div>
+        <span>${group.images} ${group.images===1?"imagen":"imágenes"} ›</span>
+      </button>`;
+    }
+    return out;
+  },
+  renderThumbs(study){
+    const p=PACS.state.selectedPatient;
+    const entries=[];
+    const displayDate=study?.date||PACS.state.selectedDate;
+    if(p?.studies?.length){
+      p.studies.forEach((s,studyIndex)=>{
+        if(s.date!==displayDate)return;
+        PACS.data.imageItems(s).forEach((item,imageIndex)=>entries.push({item,studyIndex,imageIndex,study:s}));
+      });
+    }
+    if(!entries.length && study){
+      const studyIndex=Math.max(0,PACS.state.selectedStudyIndex||0);
+      PACS.data.imageItems(study).forEach((item,imageIndex)=>entries.push({item,studyIndex,imageIndex,study}));
+    }
+    if(!entries.length)return "";
+    return entries.map((entry,globalIndex)=>{
+      const {item,studyIndex,imageIndex}=entry;
+      const thumbUrl=(typeof item==="object" && item)?(item.thumbUrl||item.localUrl||""):"";
+      const label=(typeof item==="object" && item?.name)?item.name:`Imagen ${globalIndex+1}`;
+      const active=PACS.state.selectedStudyIndex===studyIndex && PACS.state.selectedImage===imageIndex+1;
+      return `<button type="button" class="thumb ${active?"active":""}" data-image-index="${imageIndex+1}" data-thumb-study-index="${studyIndex}" title="${entry.study?.study||""}">
+        ${thumbUrl?`<img src="${thumbUrl}" alt="${label}" loading="lazy" decoding="async">`:`<span class="thumb-loading">IMG ${globalIndex+1}</span>`}<span>${globalIndex+1}</span>
+      </button>`;
+    }).join("");
+  }
+};
+
+
+
+/* ===== file helpers ===== */
+window.handleFiles=function(files,target){
+  const arr=Array.from(files||[]);
+  const state=window.PACS?.state;
+  if(!state || !arr.length)return;
+
+  const scope=target==="patientFiles"?"patient":"add";
+  const pickerId=scope==="patient"?"pStudyType":"aStudyType";
+  const study=(document.getElementById(pickerId+"Label")?.textContent||"").trim().toUpperCase();
+
+  // Primero debe elegirse la estructura. No dejamos imágenes sin clasificar.
+  if(!PACS.constants.studies.includes(study)){
+    const input=document.getElementById(scope==="patient"?"pFiles":"aFiles");
+    if(input)input.value="";
+    PACS.ui.toast("Selecciona primero una estructura / estudio.");
     return;
-  end if;
+  }
 
-  insert into public.authorized_devices (
-    doctor_name,
-    device_id,
-    device_type,
-    browser,
-    status,
-    device_secret_hash
-  )
-  values (
-    trim(p_doctor_name),
-    p_device_id,
-    p_device_type,
-    p_browser,
-    'pending',
-    v_hash
-  );
+  if(scope==="patient")state.patientFiles.push(...arr);
+  else state.addFiles.push(...arr);
 
-  return query select 'pending'::text;
+  // Al pulsar “Abrir” en el explorador, estructura + archivos se convierten
+  // inmediatamente en un grupo preparado. No existe un segundo botón intermedio.
+  const ok=PACS.app.commitGroup(scope,true);
+  if(ok){
+    PACS.app.renderGroups(scope);
+    PACS.ui.toast(`${study} · ${arr.length} imagen(es) preparada(s).`);
+  }
+};
 
-end;
-$$;
+/* ===== comments.js · V78 ===== */
+window.PACS = window.PACS || {};
+PACS.comments = {
+  clear(){
+    PACS.state.comments=[];
+    PACS.state.commentsPatientName="";
+    PACS.state.commentsLoading=false;
+    PACS.state.editingCommentId=null;
+  },
+  relevant(){
+    const p=PACS.state.selectedPatient;
+    if(!p) return [];
+    // V79: todos los comentarios pertenecen al paciente. Incluso comentarios
+    // antiguos que fueron guardados como "image" se muestran en todo su historial.
+    return (PACS.state.comments||[]).filter(c=>
+      String(c.patient_name||"").trim().toUpperCase()===String(p.name||"").trim().toUpperCase()
+    ).sort((a,b)=>new Date(a.created_at||0)-new Date(b.created_at||0));
+  },
+  formatDateTime(value){
+    if(!value) return "";
+    const d=new Date(value);
+    if(Number.isNaN(d.getTime())) return String(value);
+    return new Intl.DateTimeFormat("es-PE",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit",hour12:false}).format(d).replace(",","").toUpperCase();
+  },
+  escapeHtml(value){
+    return String(value??"").replace(/[&<>\"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+  },
+  async loadForCurrentPatient({rerender=false}={}){
+    const p=PACS.state.selectedPatient;
+    if(!PACS.state.client || !PACS.state.logged || !p){this.clear(); if(rerender)PACS.app.render(); return [];}
+    if(PACS.state.commentsLoading) return PACS.state.comments;
+    PACS.state.commentsLoading=true;
+    try{
+      const {data,error}=await PACS.state.client.from("comments").select("*").eq("patient_name",p.name).order("created_at",{ascending:true});
+      if(error) throw error;
+      if(PACS.state.selectedPatient?.name===p.name){
+        PACS.state.comments=Array.isArray(data)?data:[];
+        PACS.state.commentsPatientName=p.name;
+      }
+    }catch(err){
+      console.warn("Comentarios no disponibles:",err?.message||err);
+      if(PACS.state.selectedPatient?.name===p.name){
+        PACS.state.comments=[];
+        PACS.state.commentsPatientName=p.name;
+      }
+    }finally{
+      PACS.state.commentsLoading=false;
+    }
+    if(rerender && PACS.state.logged) PACS.app.render();
+    return PACS.state.comments;
+  },
+  summaryHtml(){
+    const rows=this.relevant();
+    if(!rows.length) return "";
+    const last=rows[rows.length-1];
+    return `<div class="comments-summary"><div class="comments-summary-title"><span>💬 COMENTARIOS (${rows.length})</span></div><div class="comments-summary-latest"><strong>ÚLTIMO · ${this.formatDateTime(last.created_at)}</strong><div class="comment-preview">${this.escapeHtml(last.comment_text)}</div></div><button class="secondary comment-action" data-action="comments-open">VER TODOS</button></div>`;
+  },
+  actionButtonHtml(){
+    const count=this.relevant().length;
+    return `<button class="action ${count?"has-comments":""}" data-action="comments-open"><span class="desktop-comment-icon">💬</span> COMENTARIOS${count?` <span class="comment-count">(${count})</span>`:""}</button>`;
+  },
+  mobileButtonHtml(){
+    const count=this.relevant().length;
+    const badge=count?`<small class="mobile-comment-badge">${count>99?"99+":count}</small>`:"";
+    const bubble=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3C6.49 3 2 6.81 2 11.5c0 2.63 1.42 5.02 3.85 6.61L5 22l4.18-2.08c.92.22 1.87.33 2.82.33 5.51 0 10-3.81 10-8.5S17.51 3 12 3z"/></svg>`;
+    return `<button data-mobile="comments" class="${count?"has-comments":""}"><span class="mobile-comment-icon">${bubble}${badge}</span>Comentario</button>`;
+  },
+  async open(options={}){
+    if(!PACS.state.selectedPatient) return PACS.ui.toast("Selecciona un paciente primero.");
+    await this.loadForCurrentPatient({rerender:false});
+    const mobile=window.matchMedia?.("(max-width: 850px)").matches;
+    const manage=options.manage===true || (!mobile && PACS.state.role==="admin");
+    this.renderModal({manage});
+    PACS.ui.openModal("commentsModal");
+    if(manage && PACS.state.role==="admin") setTimeout(()=>document.getElementById("commentInlineText")?.focus(),0);
+  },
+  renderModal({manage=false}={}){
+    const p=PACS.state.selectedPatient, rows=this.relevant();
+    const title=document.getElementById("commentsTitle");
+    const ctx=document.getElementById("commentsContext");
+    const list=document.getElementById("commentsList");
+    const footer=document.getElementById("commentsFooter");
+    if(title) title.textContent=`💬 COMENTARIOS (${rows.length})`;
+    if(ctx) ctx.textContent=p?`PACIENTE: ${p.name}`:"";
+    if(list){
+      list.innerHTML=rows.length?rows.slice().reverse().map(c=>{
+        const canManage=PACS.state.role==="admin"&&manage;
+        const editing=canManage&&String(PACS.state.editingCommentId||"")===String(c.id);
+        if(editing){
+          return `<article class="comment-item comment-item-editing"><div class="comment-meta"><span>${this.formatDateTime(c.created_at)}</span></div><textarea id="commentEditInlineText" class="comment-edit-inline" maxlength="2000">${this.escapeHtml(c.comment_text)}</textarea><div id="commentEditInlineStatus" class="comment-inline-status"></div><div class="comment-admin-actions"><button class="secondary" data-action="comment-edit-cancel">CANCELAR</button><button class="btn" data-action="comment-edit-save">GUARDAR</button></div></article>`;
+        }
+        return `<article class="comment-item"><div class="comment-meta"><span>${this.formatDateTime(c.created_at)}</span></div><div class="comment-text">${this.escapeHtml(c.comment_text)}</div>${canManage?`<div class="comment-admin-actions"><button class="secondary" data-action="comment-edit" data-comment-id="${this.escapeHtml(c.id)}">EDITAR</button><button class="secondary" data-action="comment-delete" data-comment-id="${this.escapeHtml(c.id)}">ELIMINAR</button></div>`:""}</article>`;
+      }).join(""):`<div class="comment-empty">Este paciente no tiene comentarios registrados.</div>`;
+    }
+    if(footer){
+      footer.innerHTML=PACS.state.role==="admin"&&manage?`<div class="comment-compose"><div class="comment-compose-label">AGREGAR COMENTARIO</div><textarea id="commentInlineText" placeholder="Escribir comentario..."></textarea><div id="commentInlineStatus" class="comment-inline-status"></div><div class="comment-compose-actions"><button class="secondary" data-action="close-comments-modal">CERRAR</button><button class="btn" data-action="comment-add-inline">AGREGAR</button></div></div>`:`<button class="secondary" data-action="close-comments-modal">CERRAR</button>`;
+    }
+  },
+  async addInline(){
+    if(PACS.state.role!=="admin") return PACS.ui.toast("Solo el Administrador puede agregar comentarios.");
+    const p=PACS.state.selectedPatient;
+    if(!p) return PACS.ui.toast("Selecciona un paciente primero.");
+    const textarea=document.getElementById("commentInlineText");
+    const status=document.getElementById("commentInlineStatus");
+    const text=(textarea?.value||"").trim();
+    if(!text){if(status)status.textContent="Escribe un comentario antes de agregar.";return;}
+    if(status)status.textContent="";
+    try{
+      // Desde V79, los nuevos comentarios siempre son generales del paciente.
+      const payload={patient_name:p.name,scope:"patient",study_id:null,image_key:null,comment_text:text};
+      const {error}=await PACS.state.client.from("comments").insert(payload);
+      if(error) throw error;
+      await this.loadForCurrentPatient({rerender:false});
+      PACS.app.render();
+      this.renderModal({manage:true});
+      PACS.ui.openModal("commentsModal");
+      const fresh=document.getElementById("commentInlineText");
+      if(fresh){fresh.value="";fresh.focus();}
+      PACS.ui.toast("Comentario agregado correctamente.");
+    }catch(err){
+      const currentStatus=document.getElementById("commentInlineStatus");
+      if(currentStatus)currentStatus.textContent=err?.message||"No se pudo agregar el comentario.";
+    }
+  },
+  openEdit(id){
+    if(PACS.state.role!=="admin") return PACS.ui.toast("Solo el Administrador puede editar comentarios.");
+    const c=(PACS.state.comments||[]).find(x=>String(x.id)===String(id));
+    if(!c) return PACS.ui.toast("No se encontró el comentario.");
+    PACS.state.editingCommentId=c.id;
+    // V81: edición dentro de la misma ventana de comentarios.
+    this.renderModal({manage:true});
+    PACS.ui.openModal("commentsModal");
+    setTimeout(()=>{
+      const ta=document.getElementById("commentEditInlineText");
+      if(ta){ta.focus();ta.setSelectionRange?.(ta.value.length,ta.value.length);}
+    },0);
+  },
+  cancelEdit(){
+    PACS.state.editingCommentId=null;
+    this.renderModal({manage:true});
+    PACS.ui.openModal("commentsModal");
+  },
+  async saveInlineEdit(){
+    if(PACS.state.role!=="admin") return PACS.ui.toast("Solo el Administrador puede modificar comentarios.");
+    const id=PACS.state.editingCommentId;
+    const textarea=document.getElementById("commentEditInlineText");
+    const status=document.getElementById("commentEditInlineStatus");
+    const text=(textarea?.value||"").trim();
+    if(!id){if(status)status.textContent="No se encontró el comentario a editar.";return;}
+    if(!text){if(status)status.textContent="El comentario no puede quedar vacío.";return;}
+    try{
+      const {error}=await PACS.state.client.from("comments").update({comment_text:text,scope:"patient",study_id:null,image_key:null,updated_at:new Date().toISOString()}).eq("id",id);
+      if(error) throw error;
+      PACS.state.editingCommentId=null;
+      await this.loadForCurrentPatient({rerender:false});
+      PACS.app.render();
+      this.renderModal({manage:true});
+      PACS.ui.openModal("commentsModal");
+      PACS.ui.toast("Comentario guardado correctamente.");
+    }catch(err){if(status)status.textContent=err?.message||"No se pudo guardar el comentario.";}
+  },
+  askDelete(id){
+    if(PACS.state.role!=="admin") return PACS.ui.toast("Solo el Administrador puede eliminar comentarios.");
+    const c=(PACS.state.comments||[]).find(x=>String(x.id)===String(id));
+    if(!c) return;
+    PACS.ui.openModal("confirmModal");
+    document.getElementById("confirmTitle").textContent="ELIMINAR COMENTARIO";
+    document.getElementById("confirmText").textContent="¿Deseas eliminar este comentario? Esta acción no se puede deshacer.";
+    document.getElementById("confirmBtn").onclick=async()=>{
+      PACS.ui.closeModal("confirmModal");
+      try{
+        const {error}=await PACS.state.client.from("comments").delete().eq("id",id);
+        if(error) throw error;
+        if(String(PACS.state.editingCommentId||"")===String(id)) PACS.state.editingCommentId=null;
+        await this.loadForCurrentPatient({rerender:false});
+        PACS.app.render();
+        this.renderModal({manage:true});
+        PACS.ui.openModal("commentsModal");
+        PACS.ui.toast("Comentario eliminado.");
+      }catch(err){PACS.ui.toast(err?.message||"No se pudo eliminar el comentario.");}
+    };
+  }
+};
 
-revoke all on function public.request_device_access(text,text,text,text,text) from public;
-grant execute on function public.request_device_access(text,text,text,text,text) to authenticated;
+/* ===== app.js ===== */
+window.PACS = window.PACS || {};
+PACS.app = {
+  async start(){
+    this.bindGlobalEvents();
+    this.home();
+    PACS.ui.loading(false);
+
+    try{
+      await PACS.supabase.init();
+      const restored=await PACS.auth.restore();
+      if(restored){
+        await this.sync();
+        await PACS.comments.loadForCurrentPatient({rerender:false});
+        this.render();
+        this.openNotice();
+      }
+      // Signed URLs are temporary. Refresh only the study currently being viewed.
+      if(!PACS.state._imageRefreshTimer){
+        const refreshCurrentImages=()=>{
+          if(!PACS.state.logged)return;
+          const study=PACS.data.currentStudy();
+          if(!study?.images?.length)return;
+          PACS.data.hydrateImages(study)
+            .then(()=>PACS.app.render())
+            .catch(err=>console.error("Automatic image refresh:",err));
+        };
+
+        // Renueva las URLs antes de que caduquen (1 hora) mientras la página
+        // permanece abierta.
+        PACS.state._imageRefreshTimer=setInterval(refreshCurrentImages,45*60*1000);
+
+        // Si el navegador suspende la pestaña/móvil y vuelve después de horas o días,
+        // renovar inmediatamente al regresar, sin F5.
+        if(!PACS.state._imageVisibilityHandler){
+          PACS.state._imageVisibilityHandler=()=>{
+            if(document.visibilityState==="visible") refreshCurrentImages();
+          };
+          document.addEventListener("visibilitychange",PACS.state._imageVisibilityHandler);
+        }
+      }
+    }catch(err){
+      console.error("PACS startup:",err);
+      const status=document.getElementById("loginStatus");
+      if(status)status.textContent="Conexión con Supabase pendiente. Puedes intentar iniciar sesión.";
+    }
+  },
+  openNotice(){
+    if(PACS.state.logged) PACS.ui.openModal("noticeModal");
+  },
+  home(){
+    document.getElementById("root").innerHTML=`<div class="screen"><div class="center"><img src="DXLOGO.png" class="logo-inicio" alt="Logo"><h1>HOSPITAL SAN MARTIN DE PANGOA</h1><p>DIAGNÓSTICO POR IMAGEN</p><button class="btn" data-action="login-open">Iniciar sesión</button></div></div>`;
+  },
+  async sync(){
+    await PACS.data.loadStudies();
+    const current=PACS.state.selectedPatient;
+    const same=current&&PACS.data.findPatient(current.id);
+    if(same){
+      PACS.state.selectedPatient=same;
+      const idx=same.studies.findIndex(s=>s.date===PACS.state.selectedDate);
+      PACS.state.selectedStudyIndex=idx>=0?idx:0;
+    }else{
+      const today=PACS.data.patientsForDate();
+      PACS.state.selectedPatient=today[0]||PACS.state.patients[0]||null;
+      PACS.state.selectedStudyIndex=0;
+    }
+    const study=PACS.data.currentStudy();
+    PACS.state.selectedImage=PACS.data.studyCount(study)>0?1:0;
+    PACS.data.hydratePatientDateStudies(PACS.state.selectedPatient,PACS.state.selectedDate).then(()=>this.render()).catch(err=>console.error("Image hydration:",err));
+  },
+  renderSearchResults(mobile=false){
+    const q=PACS.state.searchTerm;
+    const base=q?PACS.state.patients:PACS.data.patientsForDate();
+    const list=base.filter(p=>{
+      if(!q) return true;
+      const haystack=[p.name,...p.studies.flatMap(st=>[st.study,st.date,st.modality])].join(" ").toLowerCase();
+      return haystack.includes(q);
+    });
+    const html=list.map(p=>{
+      const matching=q?p.studies.filter(st=>[st.study,st.date,st.modality].join(" ").toLowerCase().includes(q)):p.studies.filter(st=>st.date===PACS.state.selectedDate);
+      const shown=matching[0]||p.studies[0];
+      const meta=shown?`${shown.study} · ${shown.date}`:"Ver historial";
+      return `<button type="button" class="patient ${PACS.state.selectedPatient?.id===p.id?"active":""}" data-patient="${encodeURIComponent(p.id)}"><strong class="patient-name">${PACS.view.patientIcon(p.sex)}${p.name}</strong><span>${meta}</span></button>`;
+    }).join("") || `<div class="patient-empty">No se encontraron pacientes.</div>`;
+    const box=document.getElementById(mobile?"mobilePatients":"searchResults");
+    if(box)box.innerHTML=mobile?html:`<div class="suggestions">${html}</div>`;
+  },
+  render(){
+    if(!PACS.state.logged){this.home();return;}
+    const st=PACS.state, p=st.selectedPatient, study=PACS.data.currentStudy();
+    const icon=PACS.view.patientIcon(p?.sex);
+    const currentItem=PACS.data.imageItems(study)[Math.max(0,(st.selectedImage||1)-1)];
+    const currentUrl=PACS.data.imageUrl(currentItem);
+    const dayPatients=PACS.data.patientsForDate();
+    const dayStudies=dayPatients.reduce((n,px)=>n+px.studies.filter(sx=>sx.date===st.selectedDate).length,0);
+    const cycleTotal=PACS.data.cycleStudyTotal(st.selectedDate);
+    const roleLabel=st.role==="admin"?"Administrador":"Visualizador";
+    const history=PACS.view.history();
+    const list=PACS.view.patientList();
+    const thumb=PACS.view.renderThumbs(study);
+    const mobileActions="";
+    const mobileAdd=st.role==="admin"?`<button type="button" class="add" data-action="add-patient">＋ Agregar paciente</button>`:"";
+    const commentsSummary=PACS.comments.summaryHtml();
+    const commentsAction=PACS.comments.actionButtonHtml();
+    const mobileComments=PACS.comments.mobileButtonHtml();
+
+    document.getElementById("root").innerHTML=`<header class="top">
+      <div class="brand"><img src="DXLOGO.png" class="brand-logo" alt="Logo"><div class="brand-text"><b>HOSPITAL SAN MARTIN DE PANGOA</b><span>DIAGNÓSTICO POR IMAGEN</span></div></div>
+      <div class="tr">
+        <div class="search-wrap"><input id="topSearch" class="search" placeholder="🔎 Nombre, estudio o fecha..."><div id="searchResults"></div></div>
+        <div class="date-wrap"><button class="date-field" data-action="calendar-toggle">📅 <span id="dateLabel">${st.selectedDate}</span><span class="date-chevron">▾</span></button><div id="calendarPopup" class="calendar-popup"></div></div>
+        <div class="user"><button id="userButton" data-action="menu-toggle">👤 ${roleLabel} ▾</button><div id="menu" class="menu"><b>${roleLabel}</b><button data-action="logout">🔐 Cerrar sesión</button></div></div>
+        ${st.role==="admin"?`<div class="mobile-admin-actions">
+          <button type="button" class="mobile-more-btn" data-action="mobile-more-toggle" aria-label="Más acciones" title="Más acciones">⋮</button>
+          <div id="mobileMoreMenu" class="mobile-more-menu">
+            <b>ACCIONES</b>
+            <button data-action="edit-patient">✏️ <span>Modificar paciente</span></button>
+            <button data-action="add-images">➕ <span>Añadir imágenes</span></button>
+            <button data-action="delete-image">🗑️ <span>Eliminar imagen</span></button>
+            <button data-action="comments-manage">💬 <span>Agregar comentario</span></button>
+            <button class="danger" data-action="delete-patient">🔴 <span>Eliminar paciente</span></button>
+            <div class="device-divider"></div>
+            <button class="device-control-btn" data-action="device-control">🔐 <span>Control de dispositivos</span><span class="device-badge" data-device-badge>0</span></button>
+          </div>
+        </div>`:""}
+      </div>
+    </header>
+    <main class="layout">
+      <aside class="left">
+        <div class="title">PACIENTES DEL DÍA</div><div class="subhead">${st.selectedDate}</div>
+        <div class="stats-row"><span class="stat-pill"><b>${dayPatients.length}</b> pacientes</span><span class="stat-pill"><b>${dayStudies}</b> estudios</span><span class="stat-pill"><b>${cycleTotal}</b> total</span></div>
+        ${st.role==="admin"?`<button type="button" class="add" data-action="add-patient">＋ Agregar paciente</button>`:""}
+        <div class="patients">${list}</div>
+      </aside>
+      <section class="viewer">
+        <div class="mobile-patient-context"><div class="mp-main"><div class="mp-name">${p?icon+" "+p.name:"Ningún paciente"}</div><div class="mp-sub">${study?`${study.study} · ${study.date}`:"Selecciona un paciente"}</div></div><div class="mp-count">${PACS.data.studyCount(study)?`${st.selectedImage}/${PACS.data.studyCount(study)}`:""}</div></div>
+        <div class="vh"><b>${study?.study||"VISOR DE IMÁGENES"}</b><span>${PACS.data.studyCount(study)?`${st.selectedImage} / ${PACS.data.studyCount(study)}`:""}</span></div>
+        <div class="image" id="image"><div class="xray">${currentUrl?`<img src="${currentUrl}" alt="Imagen médica" draggable="false" style="width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;object-position:center center;transform:translate(${st.panX}px,${st.panY}px) scale(${st.scale}) rotate(${st.rotation}deg);filter: brightness(${st.brightness/100}) contrast(${st.contrast/100});cursor:${st.panMode?"grab":"default"}">`:(study&&PACS.data.studyCount(study)?`<div class="viewer-empty"><div class="viewer-spinner"></div><strong>Cargando imagen</strong><span>La radiografía se solicita solo cuando la visualizas.</span></div>`:`<div class="viewer-empty"><strong>${p?"Selecciona un estudio":"Selecciona un paciente"}</strong><span>${p?"Elige un estudio del historial para visualizar sus imágenes.":"Busca o selecciona un paciente para comenzar."}</span></div>`)}</div></div>
+        <div class="tools" aria-label="Herramientas del visor">
+          <button type="button" class="tool" data-tool="zoom-out" title="Alejar">−</button>
+          <button type="button" class="tool" data-tool="zoom-in" title="Acercar">＋</button>
+          <button type="button" class="tool" data-tool="pan" title="Mano: mover imagen">✋</button>
+          <button type="button" class="tool" data-tool="rotate-left" title="Girar a la izquierda">↶</button>
+          <button type="button" class="tool" data-tool="rotate-right" title="Girar a la derecha">↷</button>
+          <button type="button" class="tool" data-tool="invert" title="Invertir / negativo">◐</button>
+          <button type="button" class="tool" data-tool="contrast-down" title="Bajar contraste">◒</button>
+          <button type="button" class="tool" data-tool="contrast-up" title="Subir contraste">◓</button>
+          <button type="button" class="tool" data-tool="window-down" title="Menos penetración / más clara">☼−</button>
+          <button type="button" class="tool" data-tool="window-up" title="Más penetración / más oscura">☼+</button>
+          <button type="button" class="tool" data-tool="reset" title="Imagen original / restablecer">↩</button>
+          <button type="button" class="tool" data-action="fullscreen" title="Pantalla completa">⛶</button>
+        </div>
+        <div class="thumbs">${thumb}</div>
+      </section>
+      <aside class="right">
+        <div class="title">PACIENTE SELECCIONADO</div>
+        <div class="info"><h2>${p?icon+" "+p.name:"Ninguno"}</h2><div class="kv">Estudio actual<br><b style="color:var(--text)">${study?.study||"—"}</b><br>📅 ${study?.date||"—"}<br>🖼️ ${PACS.data.studyCount(study)} imágenes</div></div>
+        <div class="title subhead" style="margin-top:18px">ACCIONES</div>
+        ${st.role==="admin"?`<div class="actions">
+          <button class="action" data-action="edit-patient">✏️ Modificar paciente</button>
+          <button class="action" data-action="add-images">➕ Añadir imágenes</button>
+          <button class="action" data-action="delete-image">🗑️ Eliminar imagen</button>
+          ${commentsAction}
+          <button class="action danger" data-action="delete-patient">🔴 ✕ Eliminar paciente</button>
+          <div class="device-divider"></div>
+          <button class="action device-control-btn" data-action="device-control">🔐 Control de dispositivos <span class="device-badge" data-device-badge>0</span></button>
+        </div>`:`<div class="actions"><div class="muted">Modo visualización</div>${commentsAction}</div>`}
+        ${commentsSummary}
+      </aside>
+    </main>
+    <section class="history"><h2>HISTORIAL DEL PACIENTE · ${p?.name||"—"}</h2>${history}</section>
+    <nav class="mobile-nav"><button data-mobile="home"><span>🏠</span>Inicio</button><button data-mobile="patients"><span>👥</span>Pacientes</button>${mobileComments}<button data-mobile="viewer" class="active"><span>🩻</span>Visor</button></nav>
+    <div id="overlay" class="overlay" data-action="side-close"></div>
+    <aside id="side" class="side"><div style="display:flex;justify-content:space-between"><b>← PACIENTES</b><button class="close" data-action="side-close">×</button></div><div class="stats-row"><span class="stat-pill"><b>${dayPatients.length}</b> pacientes</span><span class="stat-pill"><b>${dayStudies}</b> estudios</span><span class="stat-pill"><b>${cycleTotal}</b> total</span></div><input id="mobileSearch" placeholder="🔎 Nombre, estudio o fecha...">${mobileAdd}<div id="mobilePatients" class="patients">${list}</div></aside>`;
+    this.renderThumbSync();
+    if(st.role==="admin") setTimeout(()=>PACS.devices.refreshAdminBadge(),0);
+    this.applyViewerTransform();
+    this.bindMobileControls();
+  },
+  bindMobileControls(){
+    if(!window.matchMedia?.("(max-width: 850px)").matches)return;
+    document.querySelectorAll(".mobile-nav button").forEach(btn=>{
+      if(btn.dataset.mobileBound==="1")return;
+      btn.dataset.mobileBound="1";
+      btn.addEventListener("click",()=>{
+        this.mobileNavigate(btn.dataset.mobile);
+      });
+      btn.addEventListener("touchend",e=>{
+        e.preventDefault();
+        this.mobileNavigate(btn.dataset.mobile);
+      },{passive:false});
+    });
+
+    const side=document.getElementById("side");
+    const overlay=document.getElementById("overlay");
+    side?.querySelectorAll("[data-patient]").forEach(btn=>{
+      if(btn.dataset.mobilePatientBound==="1")return;
+      btn.dataset.mobilePatientBound="1";
+      const choose=ev=>{
+        ev.preventDefault();
+        PACS.patients.select(decodeURIComponent(btn.dataset.patient));
+      };
+      btn.addEventListener("click",choose);
+    });
+    const close=document.querySelector('#side [data-action="side-close"]');
+    if(side && !side.dataset.mobileBound){
+      side.dataset.mobileBound="1";
+      close?.addEventListener("click",e=>{e.preventDefault();this.closeSide();});
+      overlay?.addEventListener("click",()=>this.closeSide());
+    }
+  },
+  renderThumbSync(){
+    // No-op: thumbs are already part of the render() HTML.
+  },
+
+
+  rotateLeft(){
+    PACS.state.rotation=(PACS.state.rotation+270)%360;
+    this.applyViewerTransform();
+  },
+  rotateRight(){
+    PACS.state.rotation=(PACS.state.rotation+90)%360;
+    this.applyViewerTransform();
+  },
+  toggleInvert(){
+    PACS.state.invert=!PACS.state.invert;
+    this.applyViewerTransform();
+  },
+  adjustContrast(delta){
+    PACS.state.contrast=Math.max(40,Math.min(200,PACS.state.contrast+delta));
+    this.applyViewerTransform();
+  },
+  adjustWindow(delta){
+    // Controls "penetración" / window level without changing the viewer frame.
+    PACS.state.windowLevel=Math.max(-100,Math.min(100,PACS.state.windowLevel+delta));
+    PACS.state.brightness=Math.max(60,Math.min(160,100+PACS.state.windowLevel*0.4));
+    this.applyViewerTransform();
+  },
+  resetViewer(){
+    Object.assign(PACS.state,{
+      scale:1,panX:0,panY:0,rotation:0,
+      brightness:100,contrast:100,invert:false,windowLevel:0,
+      panMode:true,isDraggingImage:false
+    });
+    this.applyViewerTransform();
+  },
+  clampPan(){
+    const frame=document.getElementById("image");
+    if(!frame)return;
+    const maxX=frame.clientWidth*1.5;
+    const maxY=frame.clientHeight*1.5;
+    PACS.state.panX=Math.max(-maxX,Math.min(maxX,PACS.state.panX));
+    PACS.state.panY=Math.max(-maxY,Math.min(maxY,PACS.state.panY));
+  },
+  applyViewerTransform(){
+    const img=document.querySelector("#image .xray img");
+    if(!img)return;
+    this.clampPan();
+    const s=PACS.state;
+    img.style.transform=`translate(${s.panX}px, ${s.panY}px) scale(${s.scale}) rotate(${s.rotation}deg)`;
+    const invert=s.invert?1:0;
+    img.style.filter=` brightness(${s.brightness/100}) contrast(${s.contrast/100}) invert(${invert})`;
+    img.style.cursor=s.panMode?"grab":"default";
+    document.querySelectorAll(".tool[data-tool]").forEach(b=>{
+      const active =
+        (b.dataset.tool==="pan" && s.panMode) ||
+        (b.dataset.tool==="invert" && s.invert);
+      b.classList.toggle("active",active);
+    });
+  },
+  viewerZoom(factor,centerX=null,centerY=null){
+    const s=PACS.state, old=s.scale;
+    const next=Math.max(0.25,Math.min(6,old*factor));
+    if(Math.abs(next-old)<0.001)return;
+    if(centerX!=null&&centerY!=null){
+      const frame=document.getElementById("image");
+      const rect=frame?.getBoundingClientRect();
+      if(rect){
+        const cx=centerX-(rect.left+rect.width/2);
+        const cy=centerY-(rect.top+rect.height/2);
+        const ratio=(next/old)-1;
+        s.panX-=cx*ratio;
+        s.panY-=cy*ratio;
+      }
+    }
+    s.scale=next;
+    this.applyViewerTransform();
+  },
+  startImageDrag(e){
+    const img=e.target.closest?.("#image .xray img");
+    if(!img||!PACS.state.panMode||PACS.state.pinchActive)return;
+    e.preventDefault();
+    PACS.state.isDraggingImage=true;
+    PACS.state.dragStartX=e.clientX; PACS.state.dragStartY=e.clientY;
+    PACS.state.panStartX=PACS.state.panX; PACS.state.panStartY=PACS.state.panY;
+    try{img.setPointerCapture?.(e.pointerId);}catch(_){}
+  },
+  moveImageDrag(e){
+    if(!PACS.state.isDraggingImage)return;
+    const s=PACS.state;
+    s.panX=s.panStartX+(e.clientX-s.dragStartX);
+    s.panY=s.panStartY+(e.clientY-s.dragStartY);
+    this.applyViewerTransform();
+  },
+  endImageDrag(){PACS.state.isDraggingImage=false;},
+
+  mobileDrawerTouchStart(e){
+    if(!window.matchMedia?.("(max-width: 850px)").matches)return;
+    const side=document.getElementById("side");
+    if(!side?.classList.contains("open"))return;
+    const t=e.touches?.[0];
+    if(!t || !side.contains(e.target))return;
+
+    PACS.state._drawerSwipe={
+      startX:t.clientX,
+      startY:t.clientY,
+      active:true
+    };
+  },
+  mobileDrawerTouchEnd(e){
+    const swipe=PACS.state._drawerSwipe;
+    PACS.state._drawerSwipe=null;
+    if(!swipe?.active)return;
+    if(!window.matchMedia?.("(max-width: 850px)").matches)return;
+
+    const t=e.changedTouches?.[0];
+    if(!t)return;
+
+    const dx=t.clientX-swipe.startX;
+    const dy=t.clientY-swipe.startY;
+
+    // Solo cerrar con un gesto claramente horizontal hacia la izquierda.
+    // Un movimiento vertical normal dentro de la lista no cierra el panel.
+    if(dx < -60 && Math.abs(dx) > Math.abs(dy)*1.2){
+      this.closeSide();
+    }
+  },
+
+  touchDistance(touches){
+    const a=touches[0], b=touches[1];
+    return Math.hypot(a.clientX-b.clientX, a.clientY-b.clientY);
+  },
+  startPinch(e){
+    if(e.touches?.length!==2)return;
+    const image=e.target.closest?.("#image");
+    if(!image)return;
+    e.preventDefault();
+    PACS.state.pinchActive=true;
+    PACS.state.isDraggingImage=false;
+    PACS.state.pinchStartDistance=this.touchDistance(e.touches);
+    PACS.state.pinchStartScale=PACS.state.scale;
+  },
+  movePinch(e){
+    if(!PACS.state.pinchActive || e.touches?.length!==2)return;
+    e.preventDefault();
+
+    const start=PACS.state.pinchStartDistance||1;
+    const factor=this.touchDistance(e.touches)/start;
+    const old=PACS.state.scale;
+    const next=Math.max(0.25,Math.min(6,PACS.state.pinchStartScale*factor));
+    if(Math.abs(next-old)<0.002)return;
+
+    const centerX=(e.touches[0].clientX+e.touches[1].clientX)/2;
+    const centerY=(e.touches[0].clientY+e.touches[1].clientY)/2;
+    const frame=document.getElementById("image");
+    const rect=frame?.getBoundingClientRect();
+
+    if(rect){
+      const cx=centerX-(rect.left+rect.width/2);
+      const cy=centerY-(rect.top+rect.height/2);
+      const ratio=(next/old)-1;
+      PACS.state.panX-=cx*ratio;
+      PACS.state.panY-=cy*ratio;
+    }
+
+    PACS.state.scale=next;
+    this.applyViewerTransform();
+  },
+  endPinch(e){
+    if(!e.touches || e.touches.length<2){
+      PACS.state.pinchActive=false;
+    }
+  },
+  bindGlobalEvents(){
+    if(this._eventsBound)return;
+    this._eventsBound=true;
+    document.addEventListener("click", e=>this.onClick(e));
+    document.addEventListener("keydown", e=>this.onKey(e));
+    document.addEventListener("input", e=>{
+      if(e.target?.id==="topSearch" || e.target?.id==="mobileSearch"){
+        PACS.state.searchTerm=e.target.value.trim().toLowerCase();
+        document.getElementById("menu")?.classList.remove("show");
+        document.getElementById("mobileMoreMenu")?.classList.remove("show");
+        this.renderSearchResults(e.target.id==="mobileSearch");
+      }
+    });
+    document.addEventListener("wheel",e=>{
+      const image=e.target.closest?.("#image");
+      if(!image)return;
+      e.preventDefault();
+      this.viewerZoom(e.deltaY<0?1.12:0.89,e.clientX,e.clientY);
+    },{passive:false});
+
+    document.addEventListener("pointerdown",e=>this.startImageDrag(e));
+    document.addEventListener("pointermove",e=>this.moveImageDrag(e));
+    document.addEventListener("pointerup",()=>this.endImageDrag());
+    document.addEventListener("pointercancel",()=>this.endImageDrag());
+    document.addEventListener("touchstart",e=>this.startPinch(e),{passive:false});
+    document.addEventListener("touchmove",e=>this.movePinch(e),{passive:false});
+    document.addEventListener("touchend",e=>this.endPinch(e),{passive:false});
+    document.addEventListener("touchcancel",e=>this.endPinch(e),{passive:false});
+    document.addEventListener("touchstart",e=>this.mobileDrawerTouchStart(e),{passive:true});
+    document.addEventListener("touchend",e=>this.mobileDrawerTouchEnd(e),{passive:true});
+
+  },
+  async onClick(e){
+    const calendar=document.getElementById("calendarPopup");
+    const clickedInsideDate=e.target.closest?.(".date-wrap");
+    if(calendar?.classList.contains("show") && !clickedInsideDate){
+      calendar.classList.remove("show");
+    }
+
+    const action=e.target.closest?.("[data-action]")?.dataset?.action;
+    const patientBtn=e.target.closest?.("[data-patient]")?.dataset?.patient;
+    const studyBtn=e.target.closest?.("[data-study-index]");
+    const imageBtn=e.target.closest?.("[data-image-index]");
+    const tool=e.target.closest?.("[data-tool]")?.dataset?.tool;
+    const mobile=e.target.closest?.("[data-mobile]")?.dataset?.mobile;
+
+    // Cerrar desplegables al hacer clic fuera, tanto en PC como en móvil.
+    const userMenu=document.getElementById("menu");
+    const moreMenu=document.getElementById("mobileMoreMenu");
+    const searchResults=document.getElementById("searchResults");
+    if(userMenu?.classList.contains("show") && !e.target.closest?.("#menu") && !e.target.closest?.("#userButton")) userMenu.classList.remove("show");
+    if(moreMenu?.classList.contains("show") && !e.target.closest?.("#mobileMoreMenu") && !e.target.closest?.(".mobile-more-btn")) moreMenu.classList.remove("show");
+    if(searchResults?.innerHTML && !e.target.closest?.(".search-wrap")) searchResults.innerHTML="";
+    if(!e.target.closest?.(".study-search-wrap")) document.querySelectorAll(".study-options.show").forEach(x=>x.classList.remove("show"));
+
+    if(patientBtn){ e.preventDefault(); return PACS.patients.select(decodeURIComponent(patientBtn)); }
+    if(studyBtn){ e.preventDefault(); return PACS.studies.select(Number(studyBtn.dataset.studyIndex)); }
+    if(imageBtn){
+      e.preventDefault();
+      const thumbStudy=Number(imageBtn.dataset.thumbStudyIndex);
+      const oldStudy=PACS.state.selectedStudyIndex;
+      if(Number.isInteger(thumbStudy) && thumbStudy>=0)PACS.state.selectedStudyIndex=thumbStudy;
+      PACS.state.selectedImage=Number(imageBtn.dataset.imageIndex);
+      if(oldStudy!==PACS.state.selectedStudyIndex){
+        Object.assign(PACS.state,{scale:1,panX:0,panY:0,rotation:0,brightness:100,contrast:100,invert:false,windowLevel:0,panMode:true,isDraggingImage:false});
+      }
+      this.render();
+      PACS.data.hydrateImages(PACS.data.currentStudy())
+        .then(()=>this.render())
+        .catch(err=>console.error("Image hydration:",err));
+      return;
+    }
+    if(tool){
+      e.preventDefault();
+      if(tool==="zoom-out")this.viewerZoom(0.85);
+      else if(tool==="zoom-in")this.viewerZoom(1.18);
+      else if(tool==="pan"){PACS.state.panMode=!PACS.state.panMode;this.applyViewerTransform();}
+      else if(tool==="rotate-left")this.rotateLeft();
+      else if(tool==="rotate-right")this.rotateRight();
+      else if(tool==="invert")this.toggleInvert();
+      else if(tool==="contrast-down")this.adjustContrast(-10);
+      else if(tool==="contrast-up")this.adjustContrast(10);
+      else if(tool==="window-down")this.adjustWindow(-10);
+      else if(tool==="window-up")this.adjustWindow(10);
+      else if(tool==="reset")this.resetViewer();
+      return;
+    }
+
+    const picker=e.target.closest?.("[data-study-picker]")?.dataset?.studyPicker;
+    if(picker){
+      e.preventDefault();
+      const opts=document.getElementById(picker+"Options");
+      if(opts){
+        const wasOpen=opts.classList.contains("show");
+        document.querySelectorAll(".study-options.show").forEach(x=>{ if(x!==opts) x.classList.remove("show"); });
+        if(wasOpen){
+          opts.classList.remove("show");
+        }else{
+          opts.innerHTML=PACS.constants.studies.map(s=>`<button type="button" class="study-option" data-study-choice="${picker}" data-value="${s.replace(/"/g,"&quot;")}">${s}</button>`).join("");
+          opts.classList.add("show");
+        }
+      }
+      return;
+    }
+
+    const choice=e.target.closest?.("[data-study-choice]");
+    if(choice){
+      e.preventDefault();
+      return this.renderStudyChoice(choice.dataset.studyChoice,choice.dataset.value);
+    }
+
+const calDate=e.target.closest?.("[data-calendar-date]")?.dataset?.calendarDate;
+    if(calDate){ return PACS.studies.chooseDate(calDate); }
+    const step=e.target.closest?.("[data-calendar-step]")?.dataset?.calendarStep;
+    if(step){ e.preventDefault(); return this.moveCalendar(Number(step)); }
+
+    if(!action) return;
+
+    e.preventDefault();
+    if(action==="login-open")return this.openLogin();
+    if(action==="menu-toggle"){
+      document.getElementById("mobileMoreMenu")?.classList.remove("show");
+      const sr=document.getElementById("searchResults"); if(sr) sr.innerHTML="";
+      return document.getElementById("menu")?.classList.toggle("show");
+    }
+    if(action==="mobile-more-toggle"){
+      document.getElementById("menu")?.classList.remove("show");
+      document.getElementById("mobileMoreMenu")?.classList.toggle("show");
+      return;
+    }
+    if(action==="device-control")return PACS.devices.openAdmin();
+    if(action==="close-device-control")return PACS.ui.closeModal("deviceControlModal");
+    if(action==="device-request-submit")return PACS.devices.submitRequest();
+    if(action==="device-status-retry")return PACS.devices.retry();
+    if(action==="device-logout")return PACS.devices.logoutGate();
+    if(action==="device-approve")return PACS.devices.setStatus(e.target.closest?.("[data-device-row]")?.dataset?.deviceRow,"approved");
+    if(action==="device-reject")return PACS.devices.setStatus(e.target.closest?.("[data-device-row]")?.dataset?.deviceRow,"rejected");
+    if(action==="device-revoke")return PACS.devices.setStatus(e.target.closest?.("[data-device-row]")?.dataset?.deviceRow,"revoked");
+    if(action==="device-allow-request")return PACS.devices.setStatus(e.target.closest?.("[data-device-row]")?.dataset?.deviceRow,"request_allowed");
+    if(action==="logout"){PACS.comments.clear();await PACS.auth.logout();return this.home();}
+    if(!e.target.closest?.(".mobile-admin-actions")){
+      document.getElementById("mobileMoreMenu")?.classList.remove("show");
+    }
+    if(action==="fullscreen"){document.getElementById("image")?.requestFullscreen?.();return;}
+    if(action==="add-patient"){
+      // En móvil, cerrar primero el panel lateral de Pacientes para que
+      // la ventana "Agregar paciente" quede completamente visible.
+      if(window.matchMedia?.("(max-width: 850px)").matches){
+        this.closeSide();
+      }
+      return this.openAddPatient();
+    }
+    if(action==="edit-patient"){document.getElementById("mobileMoreMenu")?.classList.remove("show");return this.openEditPatient();}
+    if(action==="add-images"){document.getElementById("mobileMoreMenu")?.classList.remove("show");return this.openAddImages();}
+    if(action==="delete-image"){document.getElementById("mobileMoreMenu")?.classList.remove("show");return this.openDeleteImage();}
+    if(action==="delete-patient"){document.getElementById("mobileMoreMenu")?.classList.remove("show");return this.openDeletePatient();}
+    if(action==="calendar-toggle")return this.toggleCalendar(e);
+    if(action==="side-close")return this.closeSide();
+    if(action==="notice-close")return PACS.ui.closeModal("noticeModal");
+    if(action==="comments-open")return PACS.comments.open();
+    if(action==="comments-manage")return PACS.comments.open({manage:true});
+    if(action==="close-comments-modal")return PACS.ui.closeModal("commentsModal");
+    if(action==="comment-add-inline")return PACS.comments.addInline();
+    if(action==="comment-edit")return PACS.comments.openEdit(e.target.closest?.("[data-comment-id]")?.dataset?.commentId);
+    if(action==="comment-edit-cancel")return PACS.comments.cancelEdit();
+    if(action==="comment-edit-save")return PACS.comments.saveInlineEdit();
+    if(action==="comment-delete")return PACS.comments.askDelete(e.target.closest?.("[data-comment-id]")?.dataset?.commentId);
+    if(action==="close-comment-form"){PACS.state.editingCommentId=null;return PACS.ui.closeModal("commentFormModal");}
+    if(action==="comment-save")return PACS.comments.save();
+    if(action==="close-patient-modal"){return PACS.ui.closeModal("patientModal");}
+    if(action==="close-edit-modal"){return PACS.ui.closeModal("editModal");}
+    if(action==="close-images-modal"){return PACS.ui.closeModal("imagesModal");}
+    if(action==="close-confirm-modal"){return PACS.ui.closeModal("confirmModal");}
+    if(action==="close-login-modal"){return PACS.ui.closeModal("loginModal");}
+    if(action==="login-submit")return this.doLogin();
+    if(action==="group-remove"){
+      const scope=e.target.closest?.("[data-group-scope]")?.dataset?.groupScope;
+      const index=Number(e.target.closest?.("[data-group-index]")?.dataset?.groupIndex);
+      return this.removeGroup(scope,index);
+    }
+    if(action==="add-patient-save")return this.savePatient();
+    if(action==="edit-save")return this.saveEdit();
+    if(action==="images-save")return this.saveImages();
+  },
+  async doLogin(){
+    const email=(document.getElementById("loginEmail")?.value||"").trim();
+    const pass=(document.getElementById("loginPass")?.value||"").trim();
+    const status=document.getElementById("loginStatus");
+    if(!email){if(status)status.textContent="Escribe tu correo.";return;}
+    if(!pass){if(status)status.textContent="Escribe tu contraseña.";return;}
+    const btn=document.getElementById("loginSubmit"); if(btn)btn.disabled=true;
+    try{
+      const authResult=await PACS.auth.login(email,pass);
+      const rememberUser=document.getElementById("rememberUser")?.checked;
+      if(rememberUser) localStorage.setItem("pacsRememberEmail",email);
+      else localStorage.removeItem("pacsRememberEmail");
+      // Por seguridad, no guardamos la contraseña en localStorage.
+      const rememberPass=document.getElementById("rememberPass");
+      if(rememberPass) rememberPass.checked=false;
+      PACS.ui.closeModal("loginModal");
+      if(authResult?.role==="viewer" && authResult.deviceStatus!=="approved"){
+        PACS.devices.showGate(authResult.deviceStatus);
+        return;
+      }
+      await this.sync();
+      await PACS.comments.loadForCurrentPatient({rerender:false});
+      this.render();
+      this.openNotice();
+    }catch(err){if(status)status.textContent=err.message||"No se pudo iniciar sesión.";}
+    finally{if(btn)btn.disabled=false;}
+  },
+  openLogin(){
+    PACS.ui.openModal("loginModal");
+    document.getElementById("loginStatus").textContent="";
+    const savedEmail=localStorage.getItem("pacsRememberEmail")||"";
+    const email=document.getElementById("loginEmail");
+    const remember=document.getElementById("rememberUser");
+    if(email && savedEmail) email.value=savedEmail;
+    if(remember) remember.checked=!!savedEmail;
+    document.getElementById("loginPass")?.focus();
+  },
+  openAddPatient(){
+    if(PACS.state.role!=="admin"){return PACS.ui.toast("Solo el Administrador puede agregar pacientes.");}
+    document.getElementById("pName").value="";
+    document.getElementById("pDni").value="";
+    document.getElementById("pSex").value="";
+    document.querySelectorAll('input[name="pSexChoice"]').forEach(r=>r.checked=false);
+    document.getElementById("pBirth").value="";
+    document.getElementById("pStudyDate").textContent=PACS.state.selectedDate;
+    PACS.state.patientFiles=[];
+    PACS.state.patientGroups=[];
+    document.getElementById("patientFiles").innerHTML="";
+    this.openStudyPicker("pStudyType");
+    this.renderGroups("patient");
+    PACS.ui.openModal("patientModal");
+  },
+  openEditPatient(){
+    const p=PACS.state.selectedPatient;
+    if(PACS.state.role!=="admin")return PACS.ui.toast("Solo el Administrador puede modificar pacientes.");
+    if(!p)return PACS.ui.toast("Selecciona un paciente primero para realizar esta acción.");
+    document.getElementById("eName").value=p.name;
+    document.getElementById("eDni").value="";
+    document.getElementById("eSex").value=String(p.sex||"").trim().toUpperCase();
+    document.getElementById("eBirth").value="";
+    PACS.ui.openModal("editModal");
+  },
+  openAddImages(){
+    const p=PACS.state.selectedPatient;
+    if(PACS.state.role!=="admin")return PACS.ui.toast("Solo el Administrador puede añadir imágenes.");
+    if(!p)return PACS.ui.toast("Selecciona un paciente primero para realizar esta acción.");
+    const study=PACS.data.currentStudy();
+    if(!study)return PACS.ui.toast("Selecciona un estudio primero.");
+    document.getElementById("aPatient").value=p.name;
+    document.getElementById("aStudyDate").value=study.date;
+    PACS.state.addFiles=[];
+    PACS.state.addGroups=[];
+    document.getElementById("addFiles").innerHTML="";
+    this.openStudyPicker("aStudyType",study.study);
+    this.renderGroups("add");
+    PACS.ui.openModal("imagesModal");
+  },
+  openDeleteImage(){
+    const p=PACS.state.selectedPatient,study=PACS.data.currentStudy();
+    if(PACS.state.role!=="admin")return PACS.ui.toast("Solo el Administrador puede eliminar imágenes.");
+    if(!p)return PACS.ui.toast("Selecciona un paciente primero para realizar esta acción.");
+    if(!study||!study.images.length)return PACS.ui.toast("El estudio seleccionado no tiene imágenes.");
+    PACS.ui.openModal("confirmModal");
+    document.getElementById("confirmTitle").textContent="ELIMINAR IMAGEN";
+    document.getElementById("confirmText").textContent=`¿Deseas eliminar la imagen ${PACS.state.selectedImage||1} del estudio ${study.study}?`;
+    document.getElementById("confirmBtn").onclick=async()=>{
+      PACS.ui.closeModal("confirmModal");
+      const index=Math.max(0,Math.min(study.images.length-1,(PACS.state.selectedImage||1)-1));
+      const backup=study.images.slice();
+      const deleted=study.images.splice(index,1)[0];
+      PACS.state.selectedImage=study.images.length?Math.min(index+1,study.images.length):0;
+      this.render();
+      try{
+        // Primero actualizamos la BD para que nunca quede una referencia a un archivo ya borrado.
+        const {error}=await PACS.state.client.from("studies").update({images:study.images}).eq("id",study.id);
+        if(error)throw error;
+        try{
+          await PACS.images.removeItem(deleted);
+        }catch(storageErr){
+          // La referencia ya fue quitada de la BD; el archivo puede quedar como residuo en Storage.
+          PACS.images.revoke([deleted]);
+          PACS.ui.toast("Imagen quitada del estudio, pero no se pudo limpiar el archivo de Storage.");
+          console.error("Storage cleanup:",storageErr);
+          return;
+        }
+        PACS.images.revoke([deleted]);
+
+        // Re-sincronizar desde Supabase para que la interfaz quede inmediatamente
+        // alineada con la base de datos, sin necesidad de F5.
+        const patientId=p.id;
+        const studyId=study.id;
+        await PACS.data.loadStudies();
+        PACS.state.selectedPatient=PACS.data.findPatient(patientId)||null;
+        const refreshedStudy=PACS.state.selectedPatient?.studies?.findIndex(s=>s.id===studyId)??-1;
+        PACS.state.selectedStudyIndex=refreshedStudy>=0?refreshedStudy:0;
+        const refreshedCurrent=PACS.data.currentStudy();
+        PACS.state.selectedImage=PACS.data.studyCount(refreshedCurrent)>0
+          ?Math.min(Math.max(1,index+1),PACS.data.studyCount(refreshedCurrent)):0;
+        await PACS.data.hydrateImages(refreshedCurrent);
+        this.render();
+        PACS.ui.toast("Imagen eliminada correctamente.");
+      }catch(err){
+        study.images=backup; PACS.state.selectedImage=index+1; this.render();
+        PACS.ui.toast(err.message||"No se pudo eliminar la imagen.");
+      }
+    };
+  },
+  openDeletePatient(){
+    const p=PACS.state.selectedPatient;
+    if(PACS.state.role!=="admin")return PACS.ui.toast("Solo el Administrador puede eliminar pacientes.");
+    if(!p)return PACS.ui.toast("Selecciona un paciente primero para realizar esta acción.");
+
+    const selectedDate=PACS.state.selectedDate;
+    const targetStudies=(p.studies||[]).filter(s=>s.date===selectedDate);
+    if(!targetStudies.length)return PACS.ui.toast("Este paciente no tiene estudios en la fecha seleccionada.");
+
+    PACS.ui.openModal("confirmModal");
+    document.getElementById("confirmTitle").textContent="ELIMINAR PACIENTE";
+    document.getElementById("confirmText").textContent=`¿Deseas eliminar al paciente ${p.name}?`;
+    document.getElementById("confirmBtn").onclick=async()=>{
+      PACS.ui.closeModal("confirmModal");
+
+      const imageItems=targetStudies.flatMap(s=>PACS.data.imageItems(s));
+      const paths=imageItems.map(PACS.data.imagePath).filter(Boolean);
+      const dbDate=PACS.data.dateISO(selectedDate);
+      let deletedFromDatabase=false;
+
+      try{
+        // Elimina únicamente los estudios de ESTE paciente en la fecha seleccionada.
+        // El historial del mismo paciente en días anteriores/posteriores permanece intacto.
+        const {error}=await PACS.state.client
+          .from("studies")
+          .delete()
+          .eq("patient",p.name)
+          .eq("date",dbDate);
+        if(error)throw error;
+        deletedFromDatabase=true;
+
+        // Limpia de Storage solamente las imágenes pertenecientes a los estudios borrados de esta fecha.
+        const failures=await PACS.images.removeItems(imageItems);
+        if(failures.length){
+          console.warn("Archivos que no pudieron eliminarse de Storage:",failures);
+          PACS.ui.toast(`Paciente eliminado de ${selectedDate}. ${failures.length} archivo(s) quedaron pendientes de limpieza en Storage.`);
+        }else{
+          PACS.ui.toast(paths.length
+            ?`Paciente e imágenes de ${selectedDate} eliminados correctamente.`
+            :`Paciente de ${selectedDate} eliminado correctamente.`);
+        }
+
+        // Recargamos toda la base: si el paciente tiene estudios en otras fechas, seguirá existiendo en su historial.
+        await PACS.data.loadStudies();
+        const dayPatients=PACS.data.patientsForDate(selectedDate);
+        PACS.state.selectedPatient=dayPatients[0]||null;
+        PACS.state.selectedStudyIndex=0;
+        const current=PACS.data.currentStudy();
+        PACS.state.selectedImage=PACS.data.studyCount(current)>0?1:0;
+        PACS.comments.clear();
+        if(PACS.state.selectedPatient){
+          await PACS.comments.loadForCurrentPatient({rerender:false});
+          await PACS.data.hydratePatientDateStudies(PACS.state.selectedPatient,selectedDate);
+        }
+        this.render();
+      }catch(err){
+        console.error("PACS: error eliminando paciente por fecha:",err);
+        // Si la BD ya confirmó el borrado, no fingimos que sigue existiendo en esa fecha.
+        if(deletedFromDatabase){
+          try{
+            await PACS.data.loadStudies();
+            const dayPatients=PACS.data.patientsForDate(selectedDate);
+            PACS.state.selectedPatient=dayPatients[0]||null;
+            PACS.state.selectedStudyIndex=0;
+            PACS.state.selectedImage=PACS.data.studyCount(PACS.data.currentStudy())>0?1:0;
+            this.render();
+          }catch(_){}
+          PACS.ui.toast("Paciente eliminado de la fecha seleccionada, pero ocurrió un problema al actualizar la interfaz.");
+        }else{
+          PACS.ui.toast(err?.message||"No se pudo eliminar el paciente.");
+        }
+      }
+    };
+  },
+  openStudyPicker(id,selected=""){
+    const wrap=document.getElementById(id);
+    if(!wrap)return;
+    const value=selected||"";
+    wrap.innerHTML=`<div class="study-search-wrap"><button type="button" class="study-picker-btn" data-study-picker="${id}"><span id="${id}Label">${value||"SELECCIONA ESTRUCTURA / ESTUDIO"}</span><span class="study-picker-arrow">▾</span></button><div class="study-options" id="${id}Options"></div></div><div class="study-selected" id="${id}Selected">${value?"ESTRUCTURA SELECCIONADA: "+value:"SELECCIONAR ESTRUCTURA / ESTUDIO"}</div>`;
+  },
+  groupConfig(scope){
+    return scope==="patient"
+      ?{groups:"patientGroups",files:"patientFiles",picker:"pStudyType",list:"patientGroups",input:"pFiles"}
+      :{groups:"addGroups",files:"addFiles",picker:"aStudyType",list:"addGroups",input:"aFiles"};
+  },
+  renderPendingFiles(scope){
+    const c=this.groupConfig(scope), list=PACS.state[c.files]||[], el=document.getElementById(c.files);
+    if(el) el.innerHTML=list.map(f=>`<div class="file-row"><span>🖼️ ${String(f.name).replace(/</g,"&lt;")}</span><span>${Math.max(1,Math.round((f.size||0)/1024))} KB</span></div>`).join("");
+  },
+  renderGroups(scope){
+    const c=this.groupConfig(scope), groups=PACS.state[c.groups]||[], el=document.getElementById(c.list);
+    if(!el)return;
+    if(!groups.length){el.innerHTML='<div class="group-empty">Aún no hay estructuras preparadas.</div>';return;}
+    el.innerHTML=groups.map((g,i)=>`<div class="group-card" data-group-scope="${scope}" data-group-index="${i}"><div class="group-card-main"><b>${g.study}</b><span>${g.files.length} imagen(es) · ${g.files.map(f=>String(f.name)).join(", ")}</span></div><button type="button" class="group-remove" data-action="group-remove" title="Quitar grupo">×</button></div>`).join("");
+  },
+  commitGroup(scope,resetPicker=true){
+    const c=this.groupConfig(scope);
+    const study=(document.getElementById(c.picker+"Label")?.textContent||"").trim().toUpperCase();
+    const files=(PACS.state[c.files]||[]).slice();
+    if(!PACS.constants.studies.includes(study)){PACS.ui.toast("Selecciona una estructura / estudio.");return false;}
+    if(!files.length){PACS.ui.toast("Selecciona al menos una imagen para esta estructura.");return false;}
+    const groups=PACS.state[c.groups];
+    const existing=groups.find(g=>g.study===study);
+    if(existing)existing.files.push(...files); else groups.push({study,files});
+    PACS.state[c.files]=[];
+    const input=document.getElementById(c.input); if(input)input.value="";
+    this.renderPendingFiles(scope);
+    this.renderGroups(scope);
+    if(resetPicker)this.openStudyPicker(c.picker);
+    return true;
+  },
+  removeGroup(scope,index){
+    const c=this.groupConfig(scope);
+    if(!Number.isInteger(index)||index<0)return;
+    PACS.state[c.groups].splice(index,1);
+    this.renderGroups(scope);
+  },
+  commitPendingIfAny(scope){
+    const c=this.groupConfig(scope);
+    const files=PACS.state[c.files]||[];
+    if(!files.length)return true;
+    return this.commitGroup(scope,false);
+  },
+  async appendFilesToStudy(study,files){
+    const backup=study.images.slice();
+    const previews=files.map(PACS.images.localPreview);
+    study.images.push(...previews);
+    try{
+      const uploaded=await PACS.images.uploadForStudy(study.id,files);
+      const next=[...backup,...uploaded];
+      const {error}=await PACS.state.client.from("studies").update({images:next}).eq("id",study.id);
+      if(error)throw error;
+      PACS.images.revoke(previews);
+      study.images=next;
+    }catch(err){
+      PACS.images.revoke(previews);
+      study.images=backup;
+      throw err;
+    }
+  },
+  async savePatient(){
+    const name=document.getElementById("pName")?.value.trim().toUpperCase();
+    if(!name)return PACS.ui.toast("El nombre del paciente es obligatorio.");
+    if(!this.commitPendingIfAny("patient"))return;
+    const groups=PACS.state.patientGroups.slice();
+    if(!groups.length)return PACS.ui.toast("Agrega al menos una estructura con imágenes.");
+    const sex=document.getElementById("pSex")?.value||"";
+    const btn=document.querySelector('[data-action="add-patient-save"]');
+    if(btn)btn.disabled=true;
+    try{
+      let created=null;
+      for(const g of groups){
+        created=await PACS.patients.add({name,study:g.study,date:PACS.state.selectedDate,files:g.files,sex});
+      }
+      await PACS.data.loadStudies();
+      const refreshed=PACS.state.patients.find(p=>p.name===name)||created||null;
+      PACS.state.selectedPatient=refreshed;
+      if(refreshed){
+        const lastStudy=groups[groups.length-1].study;
+        const idx=refreshed.studies.findIndex(s=>s.date===PACS.state.selectedDate&&s.study===lastStudy);
+        PACS.state.selectedStudyIndex=idx>=0?idx:0;
+        PACS.state.selectedImage=PACS.data.studyCount(PACS.data.currentStudy())>0?1:0;
+        await PACS.data.hydratePatientDateStudies(refreshed,PACS.state.selectedDate);
+      }
+      PACS.state.patientGroups=[]; PACS.state.patientFiles=[];
+      this.render();
+      PACS.ui.closeModal("patientModal");
+      PACS.ui.toast(`${groups.length} estructura(s) guardadas correctamente.`);
+    }catch(err){
+      console.error("PACS: error al agregar paciente por estructuras:",err);
+      PACS.ui.toast(err?.message||"No se pudo completar el registro del paciente.");
+    }finally{if(btn)btn.disabled=false;}
+  },
+  async saveEdit(){
+    const newName=document.getElementById("eName").value.trim().toUpperCase();
+    const newSex=document.getElementById("eSex").value.trim().toUpperCase();
+    try{
+      await PACS.patients.updateName(newName,newSex);
+      PACS.ui.closeModal("editModal");
+    }catch(err){
+      PACS.ui.toast(err.message||"No se pudo modificar el paciente.");
+    }
+  },
+  async saveImages(){
+    const p=PACS.state.selectedPatient;
+    const current=PACS.data.currentStudy();
+    if(!p||!current)return PACS.ui.toast("Selecciona un paciente y estudio primero.");
+    if(!this.commitPendingIfAny("add"))return;
+    const groups=PACS.state.addGroups.slice();
+    if(!groups.length)return PACS.ui.toast("Agrega al menos una estructura con imágenes.");
+    const date=document.getElementById("aStudyDate")?.value||current.date;
+    const btn=document.querySelector('[data-action="images-save"]');
+    if(btn)btn.disabled=true;
+    try{
+      for(const g of groups){
+        let target=p.studies.find(s=>s.date===date&&String(s.study).toUpperCase()===g.study);
+        if(target){
+          await this.appendFilesToStudy(target,g.files);
+        }else{
+          await PACS.patients.add({name:p.name,study:g.study,date,files:g.files,sex:p.sex||""});
+          target=PACS.data.currentStudy();
+        }
+      }
+      const patientName=p.name;
+      await PACS.data.loadStudies();
+      const refreshed=PACS.state.patients.find(x=>x.name===patientName)||null;
+      PACS.state.selectedPatient=refreshed;
+      if(refreshed){
+        const last=groups[groups.length-1].study;
+        const idx=refreshed.studies.findIndex(s=>s.date===date&&String(s.study).toUpperCase()===last);
+        PACS.state.selectedStudyIndex=idx>=0?idx:0;
+        PACS.state.selectedImage=PACS.data.studyCount(PACS.data.currentStudy())>0?1:0;
+        await PACS.data.hydratePatientDateStudies(refreshed,date);
+      }
+      PACS.state.addGroups=[]; PACS.state.addFiles=[];
+      this.render();
+      PACS.ui.closeModal("imagesModal");
+      PACS.ui.toast(`${groups.length} estructura(s) actualizadas correctamente.`);
+    }catch(err){
+      console.error("PACS: error al guardar imágenes por estructuras:",err);
+      PACS.ui.toast(err?.message||"No se pudieron guardar todas las imágenes.");
+    }finally{if(btn)btn.disabled=false;}
+  },
+  renderStudyChoice(id,value){
+    const scope=id==="pStudyType"?"patient":(id==="aStudyType"?"add":"");
+    const c=scope?this.groupConfig(scope):null;
+    const oldValue=(document.getElementById(id+"Label")?.textContent||"").trim().toUpperCase();
+    if(scope && PACS.state[c.files]?.length && PACS.constants.studies.includes(oldValue) && oldValue!==String(value).toUpperCase()){
+      this.commitGroup(scope,false);
+    }
+    const label=document.getElementById(id+"Label");
+    if(label)label.textContent=value;
+    const s=document.getElementById(id+"Selected");
+    if(s)s.textContent="ESTRUCTURA SELECCIONADA: "+value;
+    document.getElementById(id+"Options")?.classList.remove("show");
+  },
+  toggleCalendar(e){
+    e?.stopPropagation();
+    const popup=document.getElementById("calendarPopup");
+    if(!popup)return;
+    popup.classList.toggle("show");
+    if(popup.classList.contains("show"))this.drawCalendar();
+  },
+  drawCalendar(){
+    const popup=document.getElementById("calendarPopup"); if(!popup)return;
+    const [d,mon,y]=PACS.state.selectedDate.split(" ");
+    let month=PACS.constants.months.findIndex(m=>m.startsWith(mon)); if(month<0)month=7;
+    const year=Number(y)||new Date().getFullYear();
+    const first=new Date(year,month,1), start=(first.getDay()+6)%7;
+    const days=new Date(year,month+1,0).getDate();
+    let html="";
+    PACS.constants.weekdays.forEach(w=>html+=`<div class="cal-week">${w}</div>`);
+    for(let i=0;i<42;i++){
+      const day=i-start+1; if(day<1||day>days){html+=`<div class="cal-day muted-day"></div>`;continue;}
+      const label=`${String(day).padStart(2,"0")} ${PACS.constants.months[month].slice(0,3)} ${year}`;
+      const selected=label===PACS.state.selectedDate;
+      const has=PACS.data.patientsForDate(label).length>0;
+      html+=`<button type="button" class="cal-day ${selected?"selected":""} ${has?"has-study":""}" data-calendar-date="${label}">${day}</button>`;
+    }
+    popup.innerHTML=`<div class="cal-head"><button class="cal-nav" data-calendar-step="-1">‹</button><div class="cal-title">${PACS.constants.months[month]} ${year}</div><button class="cal-nav" data-calendar-step="1">›</button></div><div class="cal-grid">${html}</div>`;
+  },
+  moveCalendar(delta){
+    const popup=document.getElementById("calendarPopup");
+    if(!popup)return;
+    const [d,mon,y]=PACS.state.selectedDate.split(" ");
+    let month=PACS.constants.months.findIndex(m=>m.startsWith(mon)); if(month<0)month=7;
+    let year=Number(y)||new Date().getFullYear();
+    month+=delta;
+    if(month<0){month=11;year--;} if(month>11){month=0;year++;}
+    const old=PACS.state.selectedDate;
+    const temp=`01 ${PACS.constants.months[month].slice(0,3)} ${year}`;
+    PACS.state.selectedDate=temp;
+    this.drawCalendar();
+    PACS.state.selectedDate=old;
+  },
+  mobileNavigate(which){
+    document.querySelectorAll(".mobile-nav button").forEach(b=>b.classList.remove("active"));
+    document.querySelector(`.mobile-nav button[data-mobile="${which}"]`)?.classList.add("active");
+
+    if(which==="comments"){
+      this.closeSide();
+      PACS.comments.open();
+      return;
+    }
+
+    if(which==="patients"){
+      const side=document.getElementById("side");
+      const overlay=document.getElementById("overlay");
+      side?.classList.add("open");
+      overlay?.classList.add("show");
+      document.body.classList.add("drawer-open");
+      return;
+    }
+
+    this.closeSide();
+    if(which==="viewer"){
+      document.getElementById("image")?.scrollIntoView({behavior:"smooth",block:"start"});
+      return;
+    }
+    window.scrollTo({top:0,behavior:"smooth"});
+  },
+  closeSide(){
+    document.getElementById("side")?.classList.remove("open");
+    document.getElementById("overlay")?.classList.remove("show");
+    document.body.classList.remove("drawer-open");
+  },
+  async onKey(e){
+    // Navegación rápida por teclado en los dos selectores de ESTRUCTURA / ESTUDIO.
+    // Funciona tanto en AGREGAR PACIENTE (pStudyType) como en AÑADIR IMÁGENES (aStudyType).
+    const openOpts=[...document.querySelectorAll(".study-options.show")].find(x=>x.offsetParent!==null);
+    const focusedPicker=e.target?.closest?.("[data-study-picker]");
+    const focusedOption=e.target?.closest?.("[data-study-choice]");
+    const pickerId=openOpts?.id?.replace(/Options$/,"") || focusedPicker?.dataset?.studyPicker || focusedOption?.dataset?.studyChoice || "";
+
+    if(pickerId && (openOpts || focusedPicker || focusedOption)){
+      let opts=document.getElementById(pickerId+"Options");
+
+      // Si el selector tiene el foco pero aún está cerrado, una letra, Flecha abajo/arriba
+      // o Enter lo abre para permitir búsqueda inmediata.
+      const shouldOpen=!opts?.classList.contains("show") &&
+        ((e.key?.length===1 && /[a-záéíóúüñ]/i.test(e.key)) || e.key==="ArrowDown" || e.key==="ArrowUp");
+      if(shouldOpen){
+        e.preventDefault();
+        if(opts){
+          opts.innerHTML=PACS.constants.studies.map(s=>`<button type="button" class="study-option" data-study-choice="${pickerId}" data-value="${s.replace(/"/g,"&quot;")}">${s}</button>`).join("");
+          document.querySelectorAll(".study-options.show").forEach(x=>{if(x!==opts)x.classList.remove("show");});
+          opts.classList.add("show");
+        }
+      }
+
+      opts=document.getElementById(pickerId+"Options");
+      if(opts?.classList.contains("show")){
+        const buttons=[...opts.querySelectorAll("[data-study-choice]")];
+        const current=Math.max(-1,buttons.indexOf(document.activeElement));
+
+        if(e.key==="ArrowDown" || e.key==="ArrowUp"){
+          e.preventDefault();
+          const delta=e.key==="ArrowDown"?1:-1;
+          const next=current<0?(delta>0?0:buttons.length-1):(current+delta+buttons.length)%buttons.length;
+          buttons[next]?.focus();
+          buttons[next]?.scrollIntoView({block:"nearest"});
+          return;
+        }
+
+        if(e.key==="Enter" && focusedOption){
+          e.preventDefault();
+          return this.renderStudyChoice(focusedOption.dataset.studyChoice,focusedOption.dataset.value);
+        }
+
+        if(e.key?.length===1 && /[a-záéíóúüñ]/i.test(e.key)){
+          e.preventDefault();
+          const normalize=v=>String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toUpperCase();
+          const letter=normalize(e.key);
+          const matches=buttons.filter(b=>normalize(b.dataset.value).startsWith(letter));
+          if(matches.length){
+            // Repetir la misma letra avanza al siguiente resultado de esa inicial.
+            const activeIndex=matches.indexOf(document.activeElement);
+            const next=matches[(activeIndex+1+matches.length)%matches.length];
+            next.focus();
+            next.scrollIntoView({block:"nearest"});
+          }
+          return;
+        }
+      }
+    }
+
+    if(e.key==="Escape"){PACS.ui.closeAll();return;}
+    if(e.key==="Enter" && document.getElementById("loginModal")?.classList.contains("show")){
+      if(e.target?.tagName?.toLowerCase()==="input"){e.preventDefault();await this.doLogin();}
+    }
+  }
+};
+
+
+</script>
+<script>
+Promise.resolve(window.PACS.app.start()).finally(()=>{
+  document.body.classList.remove("auth-booting");
+});
+</script>
+<script>
+document.addEventListener("change",function(e){
+  if(e.target && e.target.name==="pSexChoice"){
+    const target=document.getElementById("pSex");
+    if(target) target.value=e.target.value;
+  }
+});
+</script>
+</body>
+</html>
