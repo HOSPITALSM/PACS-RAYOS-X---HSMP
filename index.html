@@ -1160,7 +1160,7 @@ body.auth-booting{background:#061014}
 </div></div>
 
 <script>
-/* BUILD HSMP 2026-09-06 V82 · CONTROL DE DISPOSITIVOS */
+/* BUILD HSMP 2026-09-06 V84 · REVOCADOS + PERMITIR NUEVA SOLICITUD */
 /* ===== config.js ===== */
 window.PACS = window.PACS || {};
 PACS.config = {
@@ -1632,9 +1632,15 @@ PACS.devices = {
   },
   showGate(status){
     PACS.ui.closeModal("deviceRequestModal"); PACS.ui.closeModal("deviceStatusModal");
-    if(status==="unknown"){
-      const input=document.getElementById("deviceDoctorName"); if(input) input.value="";
-      const st=document.getElementById("deviceRequestStatus"); if(st) st.textContent="";
+    if(status==="unknown" || status==="request_allowed"){
+      const input=document.getElementById("deviceDoctorName");
+      if(input) input.value=status==="request_allowed"?(PACS.state.deviceDoctorName||""):"";
+      const st=document.getElementById("deviceRequestStatus");
+      if(st) st.textContent=status==="request_allowed"?"El administrador habilitó este dispositivo para enviar una nueva solicitud.":"";
+      const gateText=document.querySelector("#deviceRequestModal .device-gate-text");
+      if(gateText) gateText.textContent=status==="request_allowed"
+        ?"Este dispositivo fue habilitado nuevamente por el administrador. Confirma tu nombre y envía una nueva solicitud."
+        :"Este dispositivo todavía no está autorizado. Escribe tu nombre para enviar la solicitud al administrador.";
       PACS.ui.openModal("deviceRequestModal"); setTimeout(()=>input?.focus(),80); return;
     }
     const title=document.getElementById("deviceStatusTitle"), icon=document.getElementById("deviceStatusIcon"), text=document.getElementById("deviceStatusText"), retry=document.getElementById("deviceStatusRetry");
@@ -1644,7 +1650,9 @@ PACS.devices = {
       if(retry)retry.style.display="";
     }else{
       if(title)title.textContent="🔐 ACCESO BLOQUEADO"; if(icon)icon.textContent="🚫";
-      if(text)text.textContent=status==="revoked"?"La autorización de este dispositivo fue revocada por el administrador.":"La solicitud de este dispositivo fue rechazada por el administrador.";
+      if(text)text.textContent=status==="revoked"
+        ?"Este dispositivo fue revocado por el administrador y no puede volver a solicitar acceso hasta que el administrador lo habilite."
+        :"La solicitud de este dispositivo fue rechazada por el administrador.";
       if(retry)retry.style.display=status==="revoked"?"none":"";
     }
     PACS.ui.openModal("deviceStatusModal");
@@ -1681,9 +1689,19 @@ PACS.devices = {
     try{const n=await this.pendingCount(); document.querySelectorAll("[data-device-badge]").forEach(x=>{x.textContent=n;x.classList.toggle("show",n>0);});}catch(err){console.error("Device badge:",err);}
   },
   card(row,kind){
-    const meta=`${row.device_type||"Dispositivo"} · ${row.browser||"Navegador"} · Solicitud ${this.fmtDate(row.created_at)}`;
-    const actions=kind==="pending"?`<div class="device-card-actions"><button class="reject" data-action="device-reject" data-device-row="${row.id}">RECHAZAR</button><button class="approve" data-action="device-approve" data-device-row="${row.id}">APROBAR</button></div>`:`<div class="device-card-actions"><button class="reject" data-action="device-revoke" data-device-row="${row.id}">REVOCAR</button></div>`;
-    return `<div class="device-card"><div class="device-card-main"><b>${this.escapeHtml(row.doctor_name||"Sin nombre")}</b><span>${this.escapeHtml(meta)}${row.approved_at?`<br>Aprobado ${this.escapeHtml(this.fmtDate(row.approved_at))}`:""}</span></div>${actions}</div>`;
+    let meta=`${row.device_type||"Dispositivo"} · ${row.browser||"Navegador"}`;
+    if(kind==="pending") meta+=` · Solicitud ${this.fmtDate(row.created_at)}`;
+    if(kind==="approved") meta+=row.approved_at?` · Aprobado ${this.fmtDate(row.approved_at)}`:"";
+    if(kind==="revoked") meta+=row.approved_at?` · Aprobado anteriormente ${this.fmtDate(row.approved_at)}`:"";
+    if(kind==="request_allowed") meta+=" · Habilitado para volver a solicitar";
+
+    let actions="";
+    if(kind==="pending") actions=`<div class="device-card-actions"><button class="reject" data-action="device-reject" data-device-row="${row.id}">RECHAZAR</button><button class="approve" data-action="device-approve" data-device-row="${row.id}">APROBAR</button></div>`;
+    else if(kind==="approved") actions=`<div class="device-card-actions"><button class="reject" data-action="device-revoke" data-device-row="${row.id}">REVOCAR</button></div>`;
+    else if(kind==="revoked") actions=`<div class="device-card-actions"><button class="approve" data-action="device-allow-request" data-device-row="${row.id}">PERMITIR NUEVA SOLICITUD</button></div>`;
+    else if(kind==="request_allowed") actions=`<div class="device-card-actions"><button class="reject" data-action="device-revoke" data-device-row="${row.id}">CANCELAR PERMISO</button></div>`;
+
+    return `<div class="device-card"><div class="device-card-main"><b>${this.escapeHtml(row.doctor_name||"Sin nombre")}</b><span>${this.escapeHtml(meta)}</span></div>${actions}</div>`;
   },
   async openAdmin(){
     if(PACS.state.role!=="admin")return;
@@ -1692,8 +1710,16 @@ PACS.devices = {
   async renderAdmin(){
     const box=document.getElementById("deviceControlBody"); if(!box)return; box.innerHTML='<div class="data-loading">Cargando dispositivos...</div>';
     try{
-      const rows=await this.loadAdmin(), pending=rows.filter(x=>x.status==="pending"), approved=rows.filter(x=>x.status==="approved");
-      box.innerHTML=`<div class="device-summary"><span class="stat-pill"><b>${pending.length}</b> solicitudes pendientes</span><span class="stat-pill"><b>${approved.length}</b> dispositivos aprobados</span></div><div class="device-section-title">PENDIENTES</div><div class="device-list">${pending.map(x=>this.card(x,"pending")).join("")||'<div class="device-empty">No hay solicitudes pendientes.</div>'}</div><div class="device-section-title">APROBADOS</div><div class="device-list">${approved.map(x=>this.card(x,"approved")).join("")||'<div class="device-empty">No hay dispositivos aprobados.</div>'}</div>`;
+      const rows=await this.loadAdmin(),
+        pending=rows.filter(x=>x.status==="pending"),
+        approved=rows.filter(x=>x.status==="approved"),
+        revoked=rows.filter(x=>x.status==="revoked"),
+        requestAllowed=rows.filter(x=>x.status==="request_allowed");
+      box.innerHTML=`<div class="device-summary"><span class="stat-pill"><b>${pending.length}</b> solicitudes pendientes</span><span class="stat-pill"><b>${approved.length}</b> dispositivos aprobados</span><span class="stat-pill"><b>${revoked.length}</b> revocados</span></div>
+      <div class="device-section-title">PENDIENTES</div><div class="device-list">${pending.map(x=>this.card(x,"pending")).join("")||'<div class="device-empty">No hay solicitudes pendientes.</div>'}</div>
+      <div class="device-section-title">APROBADOS</div><div class="device-list">${approved.map(x=>this.card(x,"approved")).join("")||'<div class="device-empty">No hay dispositivos aprobados.</div>'}</div>
+      <div class="device-section-title">REVOCADOS</div><div class="device-list">${revoked.map(x=>this.card(x,"revoked")).join("")||'<div class="device-empty">No hay dispositivos revocados.</div>'}</div>
+      ${requestAllowed.length?`<div class="device-section-title">HABILITADOS PARA VOLVER A SOLICITAR</div><div class="device-list">${requestAllowed.map(x=>this.card(x,"request_allowed")).join("")}</div>`:""}`;
       await this.refreshAdminBadge();
     }catch(err){box.innerHTML=`<div class="device-empty">${this.escapeHtml(err?.message||"No se pudo cargar el control de dispositivos.")}</div>`;}
   },
@@ -1701,7 +1727,11 @@ PACS.devices = {
     if(PACS.state.role!=="admin")return;
     const payload={status}; if(status==="approved")payload.approved_at=new Date().toISOString();
     const {error}=await PACS.state.client.from("authorized_devices").update(payload).eq("id",id); if(error)throw error;
-    PACS.ui.toast(status==="approved"?"Dispositivo aprobado.":status==="rejected"?"Solicitud rechazada.":"Dispositivo revocado."); await this.renderAdmin();
+    const msg=status==="approved"?"Dispositivo aprobado."
+      :status==="rejected"?"Solicitud rechazada."
+      :status==="request_allowed"?"El dispositivo ya puede enviar una nueva solicitud."
+      :"Dispositivo revocado.";
+    PACS.ui.toast(msg); await this.renderAdmin();
   }
 };
 
@@ -2819,6 +2849,7 @@ const calDate=e.target.closest?.("[data-calendar-date]")?.dataset?.calendarDate;
     if(action==="device-approve")return PACS.devices.setStatus(e.target.closest?.("[data-device-row]")?.dataset?.deviceRow,"approved");
     if(action==="device-reject")return PACS.devices.setStatus(e.target.closest?.("[data-device-row]")?.dataset?.deviceRow,"rejected");
     if(action==="device-revoke")return PACS.devices.setStatus(e.target.closest?.("[data-device-row]")?.dataset?.deviceRow,"revoked");
+    if(action==="device-allow-request")return PACS.devices.setStatus(e.target.closest?.("[data-device-row]")?.dataset?.deviceRow,"request_allowed");
     if(action==="logout"){PACS.comments.clear();await PACS.auth.logout();return this.home();}
     if(!e.target.closest?.(".mobile-admin-actions")){
       document.getElementById("mobileMoreMenu")?.classList.remove("show");
