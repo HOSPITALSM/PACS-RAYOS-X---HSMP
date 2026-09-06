@@ -934,6 +934,40 @@ n
 .device-empty{padding:12px;border:1px dashed var(--line);border-radius:9px;color:var(--muted);font-size:12px}
 @media(max-width:650px){.device-card{align-items:flex-start;flex-direction:column}.device-card-actions{width:100%}.device-card-actions button{flex:1}.device-panel{max-height:90vh;overflow:auto}}
 
+/* V87 · Solo controles móviles nuevos; no modifica el layout de escritorio */
+.mobile-top-search,.mobile-logout-btn,.mobile-search-popover{display:none}
+.device-online-dot{display:inline-block!important;width:9px!important;height:9px!important;min-width:9px!important;border-radius:50%!important;background:#d94b4b!important;margin:0 7px 0 0!important;vertical-align:1px!important;box-shadow:0 0 0 2px rgba(217,75,75,.12)!important}
+.device-online-dot.online{background:#35c878!important;box-shadow:0 0 0 2px rgba(53,200,120,.14),0 0 8px rgba(53,200,120,.35)!important}
+.device-presence-label.online{color:#79e5ab!important;font-weight:800}
+.device-presence-label.offline{color:#ff9b9b!important;font-weight:800}
+@media(max-width:850px){
+  /* La fila existente conserva su altura. Solo añadimos iconos al costado de la fecha. */
+  .tr{position:relative!important;justify-content:center!important;flex-wrap:nowrap!important}
+  .tr .user{display:none!important}
+  .tr .date-wrap{flex:0 1 auto!important;min-width:0!important}
+  .tr .date-field{max-width:150px!important;white-space:nowrap!important}
+  .mobile-top-search,.mobile-logout-btn{
+    display:grid!important;place-items:center!important;flex:0 0 38px!important;width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important;
+    padding:0!important;border:1px solid var(--line)!important;border-radius:9px!important;background:#0e1d24!important;color:var(--text)!important;cursor:pointer!important;line-height:1!important
+  }
+  .mobile-top-search{font-size:18px!important}
+  .mobile-logout-btn{font-size:19px!important}
+  .tr .mobile-admin-actions{margin-left:0!important;margin-right:0!important;align-self:center!important}
+  .tr .mobile-more-btn{width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important}
+  .mobile-search-popover{
+    display:none;position:absolute;left:0;right:0;top:calc(100% + 5px);z-index:1500;padding:8px;background:#102027;border:1px solid var(--line);border-radius:11px;box-shadow:0 18px 45px #000a
+  }
+  .mobile-search-popover.show{display:block}
+  .mobile-search-row{display:flex;align-items:center;gap:7px}
+  .mobile-search-row input{flex:1;min-width:0;height:40px;padding:0 11px;border:1px solid var(--line);border-radius:9px;background:#071116;color:var(--text);font-size:14px;outline:none}
+  .mobile-search-row input:focus{border-color:var(--cyan)}
+  .mobile-search-clear{width:40px;height:40px;flex:0 0 40px;border:1px solid var(--line);border-radius:9px;background:#0e1d24;color:var(--text);font-size:23px}
+  .mobile-search-results{max-height:min(46vh,330px);overflow:auto;margin-top:7px}
+  .mobile-search-results .patient{width:100%;text-align:left;margin:0 0 5px}
+  .mobile-search-results .patient:last-child{margin-bottom:0}
+  .mobile-search-hint,.mobile-search-empty{padding:11px;color:var(--muted);font-size:12px;text-align:center}
+}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style id="auth-boot-fix">
@@ -1160,7 +1194,7 @@ body.auth-booting{background:#061014}
 </div></div>
 
 <script>
-/* BUILD HSMP 2026-09-06 V86 · BUSCADOR MÓVIL + PRESENCIA EN LÍNEA */
+/* BUILD HSMP 2026-09-06 V87 · MÓVIL BUSCADOR + PRESENCIA CORREGIDOS */
 /* ===== config.js ===== */
 window.PACS = window.PACS || {};
 PACS.config = {
@@ -1722,28 +1756,35 @@ PACS.devices = {
   escapeHtml(value){ return String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","\'":"&#39;"}[ch])); },
   isOnline(row){
     if(!row?.last_seen_at)return false;
-    return (Date.now()-new Date(row.last_seen_at).getTime()) <= 120000;
+    const t=new Date(row.last_seen_at).getTime();
+    return Number.isFinite(t) && (Date.now()-t)<=120000;
   },
   relativeSeen(v){
-    if(!v)return "sin actividad registrada";
-    const sec=Math.max(0,Math.floor((Date.now()-new Date(v).getTime())/1000));
+    if(!v)return "Sin actividad registrada";
+    const t=new Date(v).getTime();
+    if(!Number.isFinite(t))return this.fmtDate(v);
+    const sec=Math.max(0,Math.floor((Date.now()-t)/1000));
     if(sec<60)return `hace ${sec} s`;
     if(sec<3600)return `hace ${Math.floor(sec/60)} min`;
     return this.fmtDate(v);
   },
   async heartbeat(){
-    if(PACS.state.role!=="viewer" || PACS.state.deviceStatus!=="approved")return;
+    if(PACS.state.role!=="viewer" || PACS.state.deviceStatus!=="approved" || !PACS.state.client)return false;
     try{
       const {id,secret}=this.ensureIdentity();
-      const {error}=await PACS.state.client.rpc("device_heartbeat",{p_device_id:id,p_device_secret:secret});
+      const {data,error}=await PACS.state.client.rpc("device_heartbeat",{p_device_id:id,p_device_secret:secret});
       if(error)throw error;
-    }catch(err){console.warn("Device heartbeat:",err?.message||err);}
+      return data===true;
+    }catch(err){
+      console.warn("Device heartbeat:",err?.message||err);
+      return false;
+    }
   },
   startHeartbeat(){
     if(PACS.state._deviceHeartbeatTimer){clearInterval(PACS.state._deviceHeartbeatTimer);PACS.state._deviceHeartbeatTimer=null;}
     if(PACS.state.role!=="viewer" || PACS.state.deviceStatus!=="approved")return;
     this.heartbeat();
-    PACS.state._deviceHeartbeatTimer=setInterval(()=>this.heartbeat(),60000);
+    PACS.state._deviceHeartbeatTimer=setInterval(()=>this.heartbeat(),45000);
   },
   async loadAdmin(){
     if(PACS.state.role!=="admin") return [];
@@ -1760,7 +1801,7 @@ PACS.devices = {
     if(kind==="pending") meta+=` · Solicitud ${this.fmtDate(row.created_at)}`;
     if(kind==="approved"){
       const online=this.isOnline(row);
-      meta+=` · ${online?"EN LÍNEA":"Desconectado"} · Última actividad ${this.relativeSeen(row.last_seen_at)}`;
+      meta+=` · ${online?"EN LÍNEA":"DESCONECTADO"} · Última actividad: ${this.relativeSeen(row.last_seen_at)}`;
     }
     if(kind==="revoked") meta+=row.approved_at?` · Aprobado anteriormente ${this.fmtDate(row.approved_at)}`:"";
     if(kind==="request_allowed") meta+=" · Habilitado para volver a solicitar";
@@ -1771,7 +1812,9 @@ PACS.devices = {
     else if(kind==="revoked") actions=`<div class="device-card-actions"><button class="approve" data-action="device-allow-request" data-device-row="${row.id}">PERMITIR NUEVA SOLICITUD</button></div>`;
     else if(kind==="request_allowed") actions=`<div class="device-card-actions"><button class="reject" data-action="device-revoke" data-device-row="${row.id}">CANCELAR PERMISO</button></div>`;
 
-    const presence=kind==="approved"?`<span class="device-online-dot ${this.isOnline(row)?"online":""}"></span>`:"";
+    const presence=kind==="approved"
+      ?`<span class="device-online-dot ${this.isOnline(row)?"online":""}" aria-hidden="true"></span>`
+      :"";
     return `<div class="device-card"><div class="device-card-main"><b>${presence}${this.escapeHtml(row.doctor_name||"Sin nombre")}</b><span>${this.escapeHtml(meta)}</span></div>${actions}</div>`;
   },
   async openAdmin(){
@@ -2480,32 +2523,16 @@ PACS.app = {
     PACS.state.selectedImage=PACS.data.studyCount(study)>0?1:0;
     PACS.data.hydratePatientDateStudies(PACS.state.selectedPatient,PACS.state.selectedDate).then(()=>this.render()).catch(err=>console.error("Image hydration:",err));
   },
-  normalizeSearch(v){
-    return String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
+  normalizeMobileSearch(value){
+    return String(value||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
   },
-  searchMatches(qRaw){
-    const q=this.normalizeSearch(qRaw);
+  mobileSearchMatches(value){
+    const q=this.normalizeMobileSearch(value);
     if(!q)return [];
     return PACS.state.patients.filter(p=>{
       const haystack=[p.name,...p.studies.flatMap(st=>[st.study,st.date,st.modality])].join(" ");
-      return this.normalizeSearch(haystack).includes(q);
+      return this.normalizeMobileSearch(haystack).includes(q);
     });
-  },
-  patientSearchHtml(list,qRaw){
-    const q=this.normalizeSearch(qRaw);
-    return list.map(p=>{
-      const matching=q?p.studies.filter(st=>this.normalizeSearch([st.study,st.date,st.modality].join(" ")).includes(q)):p.studies.filter(st=>st.date===PACS.state.selectedDate);
-      const shown=matching[0]||p.studies.find(st=>st.date===PACS.state.selectedDate)||p.studies[0];
-      const meta=shown?`${shown.study} · ${shown.date}`:"Ver historial";
-      return `<button type="button" class="patient ${PACS.state.selectedPatient?.id===p.id?"active":""}" data-patient="${encodeURIComponent(p.id)}"><strong class="patient-name">${PACS.view.patientIcon(p.sex)}${p.name}</strong><span>${meta}</span></button>`;
-    }).join("") || `<div class="patient-empty">No se encontraron pacientes.</div>`;
-  },
-  renderSearchResults(mobile=false){
-    const q=PACS.state.searchTerm;
-    const list=q?this.searchMatches(q):PACS.data.patientsForDate();
-    const html=this.patientSearchHtml(list,q);
-    const box=document.getElementById(mobile?"mobilePatients":"searchResults");
-    if(box)box.innerHTML=mobile?html:`<div class="suggestions">${html}</div>`;
   },
   renderMobileTopSearch(){
     const input=document.getElementById("mobileTopSearch");
@@ -2513,7 +2540,12 @@ PACS.app = {
     if(!box)return;
     const q=input?.value||"";
     if(!q.trim()){box.innerHTML='<div class="mobile-search-hint">Escribe un nombre o apellido.</div>';return;}
-    box.innerHTML=this.patientSearchHtml(this.searchMatches(q),q);
+    const list=this.mobileSearchMatches(q);
+    box.innerHTML=list.map(p=>{
+      const shown=p.studies.find(st=>st.date===PACS.state.selectedDate)||p.studies[0];
+      const meta=shown?`${shown.study} · ${shown.date}`:"Ver historial";
+      return `<button type="button" class="patient ${PACS.state.selectedPatient?.id===p.id?"active":""}" data-patient="${encodeURIComponent(p.id)}"><strong class="patient-name">${PACS.view.patientIcon(p.sex)}${p.name}</strong><span>${meta}</span></button>`;
+    }).join("") || '<div class="mobile-search-empty">No se encontraron pacientes.</div>';
   },
   openMobileSearch(){
     document.getElementById("menu")?.classList.remove("show");
@@ -2521,12 +2553,30 @@ PACS.app = {
     const pop=document.getElementById("mobileSearchPopover");
     pop?.classList.add("show");
     const input=document.getElementById("mobileTopSearch");
-    if(input){input.value="";setTimeout(()=>input.focus(),50);}
+    if(input){input.value="";setTimeout(()=>input.focus(),30);}
     this.renderMobileTopSearch();
   },
   closeMobileSearch(){
     document.getElementById("mobileSearchPopover")?.classList.remove("show");
-    const input=document.getElementById("mobileTopSearch");if(input)input.value="";
+    const input=document.getElementById("mobileTopSearch");
+    if(input)input.value="";
+  },
+  renderSearchResults(mobile=false){
+    const q=PACS.state.searchTerm;
+    const base=q?PACS.state.patients:PACS.data.patientsForDate();
+    const list=base.filter(p=>{
+      if(!q) return true;
+      const haystack=[p.name,...p.studies.flatMap(st=>[st.study,st.date,st.modality])].join(" ").toLowerCase();
+      return haystack.includes(q);
+    });
+    const html=list.map(p=>{
+      const matching=q?p.studies.filter(st=>[st.study,st.date,st.modality].join(" ").toLowerCase().includes(q)):p.studies.filter(st=>st.date===PACS.state.selectedDate);
+      const shown=matching[0]||p.studies[0];
+      const meta=shown?`${shown.study} · ${shown.date}`:"Ver historial";
+      return `<button type="button" class="patient ${PACS.state.selectedPatient?.id===p.id?"active":""}" data-patient="${encodeURIComponent(p.id)}"><strong class="patient-name">${PACS.view.patientIcon(p.sex)}${p.name}</strong><span>${meta}</span></button>`;
+    }).join("") || `<div class="patient-empty">No se encontraron pacientes.</div>`;
+    const box=document.getElementById(mobile?"mobilePatients":"searchResults");
+    if(box)box.innerHTML=mobile?html:`<div class="suggestions">${html}</div>`;
   },
   render(){
     if(!PACS.state.logged){this.home();return;}
@@ -2838,14 +2888,12 @@ PACS.app = {
     document.addEventListener("keydown", e=>this.onKey(e));
     document.addEventListener("input", e=>{
       if(e.target?.id==="topSearch" || e.target?.id==="mobileSearch"){
-        PACS.state.searchTerm=e.target.value.trim();
+        PACS.state.searchTerm=e.target.value.trim().toLowerCase();
         document.getElementById("menu")?.classList.remove("show");
         document.getElementById("mobileMoreMenu")?.classList.remove("show");
         this.renderSearchResults(e.target.id==="mobileSearch");
       }
-      if(e.target?.id==="mobileTopSearch"){
-        this.renderMobileTopSearch();
-      }
+      if(e.target?.id==="mobileTopSearch") this.renderMobileTopSearch();
     });
     document.addEventListener("wheel",e=>{
       const image=e.target.closest?.("#image");
@@ -2891,11 +2939,7 @@ PACS.app = {
     if(searchResults?.innerHTML && !e.target.closest?.(".search-wrap")) searchResults.innerHTML="";
     if(!e.target.closest?.(".study-search-wrap")) document.querySelectorAll(".study-options.show").forEach(x=>x.classList.remove("show"));
 
-    if(patientBtn){
-      e.preventDefault();
-      this.closeMobileSearch();
-      return PACS.patients.select(decodeURIComponent(patientBtn));
-    }
+    if(patientBtn){ e.preventDefault(); this.closeMobileSearch(); return PACS.patients.select(decodeURIComponent(patientBtn)); }
     if(studyBtn){ e.preventDefault(); return PACS.studies.select(Number(studyBtn.dataset.studyIndex)); }
     if(imageBtn){
       e.preventDefault();
