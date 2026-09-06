@@ -1160,7 +1160,7 @@ body.auth-booting{background:#061014}
 </div></div>
 
 <script>
-/* BUILD HSMP 2026-09-06 V84 · REVOCADOS + PERMITIR NUEVA SOLICITUD */
+/* BUILD HSMP 2026-09-06 V85 · RE-SOLICITUD REVOCADOS + ESTADO PENDIENTE */
 /* ===== config.js ===== */
 window.PACS = window.PACS || {};
 PACS.config = {
@@ -1659,11 +1659,51 @@ PACS.devices = {
   },
   async submitRequest(){
     const btn=document.getElementById("deviceRequestBtn"), status=document.getElementById("deviceRequestStatus"), name=document.getElementById("deviceDoctorName")?.value||"";
-    if(btn)btn.disabled=true; if(status)status.textContent="Enviando solicitud...";
+    if(btn)btn.disabled=true;
+    if(status)status.textContent="Enviando solicitud...";
     try{
-      const result=await this.requestAccess(name); PACS.state.deviceStatus=result; PACS.state.deviceDoctorName=String(name).trim(); this.showGate(result);
-    }catch(err){if(status)status.textContent=err?.message||"No se pudo enviar la solicitud.";}
-    finally{if(btn)btn.disabled=false;}
+      const result=await this.requestAccess(name);
+      PACS.state.deviceDoctorName=String(name).trim();
+
+      // V85: después de enviar, verificamos el estado real guardado en Supabase.
+      // Esto evita que el formulario parezca haberse enviado si el RPC del servidor
+      // todavía no cambió request_allowed -> pending.
+      let finalStatus=result;
+      try{
+        const check=await this.checkAccess();
+        if(check?.status) finalStatus=check.status;
+        if(check?.doctorName) PACS.state.deviceDoctorName=check.doctorName;
+      }catch(_){ /* si falla la comprobación, conservamos el resultado del RPC */ }
+
+      PACS.state.deviceStatus=finalStatus;
+
+      if(finalStatus==="pending"){
+        this.showGate("pending");
+        return;
+      }
+
+      if(finalStatus==="approved"){
+        PACS.state.logged=true;
+        PACS.ui.closeModal("deviceRequestModal");
+        await PACS.app.sync();
+        await PACS.comments.loadForCurrentPatient({rerender:false});
+        PACS.app.render();
+        return;
+      }
+
+      if(finalStatus==="request_allowed"){
+        // No ocultamos el problema: si continúa request_allowed, el SQL de Supabase
+        // no está actualizado y la solicitud NO fue creada como pendiente.
+        if(status) status.textContent="No se creó la solicitud pendiente. Falta actualizar la función de Supabase para pasar de HABILITADO a PENDIENTE.";
+        return;
+      }
+
+      this.showGate(finalStatus);
+    }catch(err){
+      if(status)status.textContent=err?.message||"No se pudo enviar la solicitud.";
+    }finally{
+      if(btn)btn.disabled=false;
+    }
   },
   async retry(){
     const btn=document.getElementById("deviceStatusRetry"); if(btn)btn.disabled=true;
