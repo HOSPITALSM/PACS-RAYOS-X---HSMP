@@ -939,6 +939,7 @@ n
 .mobile-top-search,.mobile-search-popover{display:none}
 .device-online-dot{display:inline-block;width:9px;height:9px;min-width:9px;border-radius:50%;background:#d94b4b;margin-right:7px;vertical-align:1px;box-shadow:0 0 0 2px rgba(217,75,75,.12)}
 .device-online-dot.online{background:#35c878;box-shadow:0 0 0 2px rgba(53,200,120,.14),0 0 8px rgba(53,200,120,.35)}
+.device-name-line{display:flex;align-items:center;gap:0;min-width:0}
 @media(max-width:850px){
   /* Conserva fecha a la izquierda y el muñeco/usuario a la derecha. */
   .tr{position:relative!important}
@@ -1754,12 +1755,18 @@ PACS.devices = {
   },
   relativeSeen(v){
     if(!v)return "Sin actividad registrada";
-    const t=new Date(v).getTime();
-    if(!Number.isFinite(t))return this.fmtDate(v);
-    const sec=Math.max(0,Math.floor((Date.now()-t)/1000));
-    if(sec<60)return `hace ${sec} s`;
-    if(sec<3600)return `hace ${Math.floor(sec/60)} min`;
-    return this.fmtDate(v);
+    const d=new Date(v);
+    if(!Number.isFinite(d.getTime()))return this.fmtDate(v);
+    try{
+      return new Intl.DateTimeFormat("es-PE",{
+        hour:"2-digit",
+        minute:"2-digit",
+        hour12:false,
+        timeZone:"America/Lima"
+      }).format(d);
+    }catch(_){
+      return d.toLocaleTimeString("es-PE",{hour:"2-digit",minute:"2-digit",hour12:false});
+    }
   },
   async heartbeat(){
     if(PACS.state.role!=="viewer" || PACS.state.deviceStatus!=="approved" || !PACS.state.client)return false;
@@ -1806,7 +1813,7 @@ PACS.devices = {
     else if(kind==="request_allowed") actions=`<div class="device-card-actions"><button class="reject" data-action="device-revoke" data-device-row="${row.id}">CANCELAR PERMISO</button></div>`;
 
     const presence=kind==="approved"?`<span class="device-online-dot ${this.isOnline(row)?"online":""}" aria-hidden="true"></span>`:"";
-    return `<div class="device-card"><div class="device-card-main"><b>${presence}${this.escapeHtml(row.doctor_name||"Sin nombre")}</b><span>${this.escapeHtml(meta)}</span></div>${actions}</div>`;
+    return `<div class="device-card"><div class="device-card-main"><b class="device-name-line">${presence}<span>${this.escapeHtml(row.doctor_name||"Sin nombre")}</span></b><span>${this.escapeHtml(meta)}</span></div>${actions}</div>`;
   },
   async openAdmin(){
     if(PACS.state.role!=="admin")return;
