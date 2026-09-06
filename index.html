@@ -964,6 +964,48 @@ n
   .mobile-search-hint,.mobile-search-empty{padding:11px;color:var(--muted);font-size:12px;text-align:center}
 }
 
+
+/* V92 · MODO VISOR COMPLETO MÓVIL (iPhone + Android) */
+.viewer-fullscreen-close{display:none}
+body.pacs-viewer-fullscreen{overflow:hidden!important;overscroll-behavior:none}
+body.pacs-viewer-fullscreen .viewer{
+  position:fixed!important;inset:0!important;z-index:9999!important;
+  display:flex!important;flex-direction:column!important;
+  width:100vw!important;height:100dvh!important;min-height:0!important;
+  background:#000!important;overflow:hidden!important;
+}
+body.pacs-viewer-fullscreen .viewer .mobile-patient-context,
+body.pacs-viewer-fullscreen .viewer .vh,
+body.pacs-viewer-fullscreen .viewer .thumbs{display:none!important}
+body.pacs-viewer-fullscreen .viewer .image{
+  position:relative!important;display:grid!important;place-items:center!important;
+  flex:1 1 auto!important;width:100%!important;height:auto!important;min-height:0!important;
+  overflow:hidden!important;background:#000!important;margin:0!important;padding:0!important;
+}
+body.pacs-viewer-fullscreen .viewer .xray{
+  width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;overflow:hidden!important;
+}
+body.pacs-viewer-fullscreen .viewer .xray img{
+  width:auto!important;height:100%!important;max-width:none!important;max-height:none!important;
+  object-fit:contain!important;object-position:center center!important;touch-action:none!important;
+}
+body.pacs-viewer-fullscreen .viewer .tools{
+  position:relative!important;left:auto!important;right:auto!important;bottom:auto!important;
+  width:100%!important;height:50px!important;min-height:50px!important;flex:0 0 50px!important;
+  display:flex!important;align-items:center!important;justify-content:flex-start!important;
+  overflow-x:auto!important;overflow-y:hidden!important;padding:6px 8px calc(6px + env(safe-area-inset-bottom))!important;
+  background:#071116f2!important;border-top:1px solid var(--line)!important;z-index:10001!important;
+}
+body.pacs-viewer-fullscreen .viewer .viewer-fullscreen-close{
+  display:flex!important;position:absolute!important;top:calc(8px + env(safe-area-inset-top))!important;
+  right:10px!important;width:42px!important;height:42px!important;border-radius:50%!important;
+  align-items:center!important;justify-content:center!important;border:1px solid #ffffff55!important;
+  background:#0009!important;color:#fff!important;font-size:26px!important;font-weight:400!important;
+  line-height:1!important;z-index:10002!important;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+}
+body.pacs-viewer-fullscreen .viewer .viewer-fullscreen-close:active{transform:scale(.96)}
+@supports not (height:100dvh){body.pacs-viewer-fullscreen .viewer{height:100vh!important}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style id="auth-boot-fix">
@@ -2630,6 +2672,7 @@ PACS.app = {
         <div class="patients">${list}</div>
       </aside>
       <section class="viewer">
+        <button type="button" class="viewer-fullscreen-close" data-action="fullscreen-exit" aria-label="Salir de pantalla completa" title="Salir">×</button>
         <div class="mobile-patient-context"><div class="mp-main"><div class="mp-name">${p?icon+" "+p.name:"Ningún paciente"}</div><div class="mp-sub">${study?`${study.study} · ${study.date}`:"Selecciona un paciente"}</div></div><div class="mp-count">${PACS.data.studyCount(study)?`${st.selectedImage}/${PACS.data.studyCount(study)}`:""}</div></div>
         <div class="vh"><b>${study?.study||"VISOR DE IMÁGENES"}</b><span>${PACS.data.studyCount(study)?`${st.selectedImage} / ${PACS.data.studyCount(study)}`:""}</span></div>
         <div class="image" id="image"><div class="xray">${currentUrl?`<img src="${currentUrl}" alt="Imagen médica" draggable="false" style="width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;object-position:center center;transform:translate(${st.panX}px,${st.panY}px) scale(${st.scale}) rotate(${st.rotation}deg);filter: brightness(${st.brightness/100}) contrast(${st.contrast/100});cursor:${st.panMode?"grab":"default"}">`:(study&&PACS.data.studyCount(study)?`<div class="viewer-empty"><div class="viewer-spinner"></div><strong>Cargando imagen</strong><span>La radiografía se solicita solo cuando la visualizas.</span></div>`:`<div class="viewer-empty"><strong>${p?"Selecciona un estudio":"Selecciona un paciente"}</strong><span>${p?"Elige un estudio del historial para visualizar sus imágenes.":"Busca o selecciona un paciente para comenzar."}</span></div>`)}</div></div>
@@ -2910,6 +2953,7 @@ PACS.app = {
     document.addEventListener("touchcancel",e=>this.endPinch(e),{passive:false});
     document.addEventListener("touchstart",e=>this.mobileDrawerTouchStart(e),{passive:true});
     document.addEventListener("touchend",e=>this.mobileDrawerTouchEnd(e),{passive:true});
+    document.addEventListener("keydown",e=>{if(e.key==="Escape"&&document.body.classList.contains("pacs-viewer-fullscreen")){document.body.classList.remove("pacs-viewer-fullscreen");document.documentElement.classList.remove("pacs-viewer-fullscreen-html");setTimeout(()=>this.applyViewerTransform(),0);}});
 
   },
   async onClick(e){
@@ -3027,7 +3071,30 @@ const calDate=e.target.closest?.("[data-calendar-date]")?.dataset?.calendarDate;
     if(!e.target.closest?.(".mobile-admin-actions")){
       document.getElementById("mobileMoreMenu")?.classList.remove("show");
     }
-    if(action==="fullscreen"){document.getElementById("image")?.requestFullscreen?.();return;}
+    if(action==="fullscreen"){
+      if(window.matchMedia?.("(max-width: 850px)").matches){
+        document.body.classList.add("pacs-viewer-fullscreen");
+        document.documentElement.classList.add("pacs-viewer-fullscreen-html");
+        setTimeout(()=>this.applyViewerTransform(),0);
+        return;
+      }
+      const el=document.getElementById("image");
+      try{
+        if(el?.requestFullscreen) await el.requestFullscreen();
+        else if(el?.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      }catch(_){
+        document.body.classList.add("pacs-viewer-fullscreen");
+        document.documentElement.classList.add("pacs-viewer-fullscreen-html");
+        setTimeout(()=>this.applyViewerTransform(),0);
+      }
+      return;
+    }
+    if(action==="fullscreen-exit"){
+      document.body.classList.remove("pacs-viewer-fullscreen");
+      document.documentElement.classList.remove("pacs-viewer-fullscreen-html");
+      setTimeout(()=>this.applyViewerTransform(),0);
+      return;
+    }
     if(action==="add-patient"){
       // En móvil, cerrar primero el panel lateral de Pacientes para que
       // la ventana "Agregar paciente" quede completamente visible.
