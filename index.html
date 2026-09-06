@@ -1541,8 +1541,23 @@ PACS.auth = {
     throw new Error("Este usuario no tiene acceso autorizado al PACS.");
   },
   async restore(){
-    const {data,error}=await PACS.state.client.auth.getSession();
-    if(error || !data?.session?.user) return false;
+    let sessionResult;
+    try{
+      sessionResult=await PACS.state.client.auth.getSession();
+    }catch(err){
+      console.warn("PACS: no se pudo restaurar la sesión.",err);
+      try{ await PACS.state.client.auth.signOut({scope:"local"}); }catch(_){}
+      return false;
+    }
+    const {data,error}=sessionResult||{};
+    if(error){
+      // Si quedó un refresh token antiguo/inválido, limpiamos solo la sesión local
+      // para que no deje al PACS atrapado intentando renovarla repetidamente.
+      console.warn("PACS: sesión local inválida o vencida; se limpiará.",error);
+      try{ await PACS.state.client.auth.signOut({scope:"local"}); }catch(_){}
+      return false;
+    }
+    if(!data?.session?.user) return false;
     const uid=data.session.user.id;
     if(uid===PACS.config.roles.admin){
       PACS.state.role="admin"; PACS.state.logged=true; PACS.state.deviceStatus="approved"; return true;
@@ -1654,6 +1669,7 @@ PACS.devices = {
   },
   async logoutGate(){ await PACS.auth.logout(); PACS.ui.closeModal("deviceRequestModal"); PACS.ui.closeModal("deviceStatusModal"); PACS.app.home(); },
   fmtDate(v){ if(!v)return "—"; try{return new Intl.DateTimeFormat("es-PE",{dateStyle:"short",timeStyle:"short"}).format(new Date(v));}catch(_){return String(v);} },
+  escapeHtml(value){ return String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","\'":"&#39;"}[ch])); },
   async loadAdmin(){
     if(PACS.state.role!=="admin") return [];
     const {data,error}=await PACS.state.client.from("authorized_devices").select("id,created_at,doctor_name,device_type,browser,status,approved_at,last_seen_at").order("created_at",{ascending:false});
@@ -1667,7 +1683,7 @@ PACS.devices = {
   card(row,kind){
     const meta=`${row.device_type||"Dispositivo"} · ${row.browser||"Navegador"} · Solicitud ${this.fmtDate(row.created_at)}`;
     const actions=kind==="pending"?`<div class="device-card-actions"><button class="reject" data-action="device-reject" data-device-row="${row.id}">RECHAZAR</button><button class="approve" data-action="device-approve" data-device-row="${row.id}">APROBAR</button></div>`:`<div class="device-card-actions"><button class="reject" data-action="device-revoke" data-device-row="${row.id}">REVOCAR</button></div>`;
-    return `<div class="device-card"><div class="device-card-main"><b>${PACS.view.esc(row.doctor_name||"Sin nombre")}</b><span>${PACS.view.esc(meta)}${row.approved_at?`<br>Aprobado ${PACS.view.esc(this.fmtDate(row.approved_at))}`:""}</span></div>${actions}</div>`;
+    return `<div class="device-card"><div class="device-card-main"><b>${this.escapeHtml(row.doctor_name||"Sin nombre")}</b><span>${this.escapeHtml(meta)}${row.approved_at?`<br>Aprobado ${this.escapeHtml(this.fmtDate(row.approved_at))}`:""}</span></div>${actions}</div>`;
   },
   async openAdmin(){
     if(PACS.state.role!=="admin")return;
@@ -1679,7 +1695,7 @@ PACS.devices = {
       const rows=await this.loadAdmin(), pending=rows.filter(x=>x.status==="pending"), approved=rows.filter(x=>x.status==="approved");
       box.innerHTML=`<div class="device-summary"><span class="stat-pill"><b>${pending.length}</b> solicitudes pendientes</span><span class="stat-pill"><b>${approved.length}</b> dispositivos aprobados</span></div><div class="device-section-title">PENDIENTES</div><div class="device-list">${pending.map(x=>this.card(x,"pending")).join("")||'<div class="device-empty">No hay solicitudes pendientes.</div>'}</div><div class="device-section-title">APROBADOS</div><div class="device-list">${approved.map(x=>this.card(x,"approved")).join("")||'<div class="device-empty">No hay dispositivos aprobados.</div>'}</div>`;
       await this.refreshAdminBadge();
-    }catch(err){box.innerHTML=`<div class="device-empty">${PACS.view.esc(err?.message||"No se pudo cargar el control de dispositivos.")}</div>`;}
+    }catch(err){box.innerHTML=`<div class="device-empty">${this.escapeHtml(err?.message||"No se pudo cargar el control de dispositivos.")}</div>`;}
   },
   async setStatus(id,status){
     if(PACS.state.role!=="admin")return;
@@ -2979,72 +2995,72 @@ const calDate=e.target.closest?.("[data-calendar-date]")?.dataset?.calendarDate;
     const p=PACS.state.selectedPatient;
     if(PACS.state.role!=="admin")return PACS.ui.toast("Solo el Administrador puede eliminar pacientes.");
     if(!p)return PACS.ui.toast("Selecciona un paciente primero para realizar esta acción.");
+
+    const selectedDate=PACS.state.selectedDate;
+    const targetStudies=(p.studies||[]).filter(s=>s.date===selectedDate);
+    if(!targetStudies.length)return PACS.ui.toast("Este paciente no tiene estudios en la fecha seleccionada.");
+
     PACS.ui.openModal("confirmModal");
     document.getElementById("confirmTitle").textContent="ELIMINAR PACIENTE";
     document.getElementById("confirmText").textContent=`¿Deseas eliminar al paciente ${p.name}?`;
     document.getElementById("confirmBtn").onclick=async()=>{
       PACS.ui.closeModal("confirmModal");
-      const backup=PACS.state.patients.slice();
-      PACS.state.patients=PACS.state.patients.filter(x=>x.id!==p.id);
-      PACS.state.selectedPatient=null;
-      PACS.state.selectedStudyIndex=0;
-      PACS.state.selectedImage=0;
-      this.render();
 
-      // IMPORTANTE: desde aquí diferenciamos el resultado de la eliminación
-      // del refresco de la interfaz. Si la BD ya eliminó al paciente, un fallo
-      // posterior de Storage o de la recarga NO debe devolverlo a la pantalla.
+      const imageItems=targetStudies.flatMap(s=>PACS.data.imageItems(s));
+      const paths=imageItems.map(PACS.data.imagePath).filter(Boolean);
+      const dbDate=PACS.data.dateISO(selectedDate);
       let deletedFromDatabase=false;
-      try{
-        const imageItems=p.studies.flatMap(s=>PACS.data.imageItems(s));
-        const paths=imageItems.map(PACS.data.imagePath).filter(Boolean);
 
+      try{
+        // Elimina únicamente los estudios de ESTE paciente en la fecha seleccionada.
+        // El historial del mismo paciente en días anteriores/posteriores permanece intacto.
         const {error}=await PACS.state.client
           .from("studies")
           .delete()
-          .eq("patient",p.name);
+          .eq("patient",p.name)
+          .eq("date",dbDate);
         if(error)throw error;
         deletedFromDatabase=true;
 
-        // Storage es limpieza secundaria: un fallo aquí no revierte la eliminación
-        // de la base de datos ni vuelve a mostrar al paciente.
+        // Limpia de Storage solamente las imágenes pertenecientes a los estudios borrados de esta fecha.
         const failures=await PACS.images.removeItems(imageItems);
         if(failures.length){
           console.warn("Archivos que no pudieron eliminarse de Storage:",failures);
-          PACS.ui.toast(`Paciente eliminado. ${failures.length} archivo(s) quedaron pendientes de limpieza en Storage.`);
+          PACS.ui.toast(`Paciente eliminado de ${selectedDate}. ${failures.length} archivo(s) quedaron pendientes de limpieza en Storage.`);
         }else{
           PACS.ui.toast(paths.length
-            ?"Paciente y todas sus imágenes eliminados correctamente."
-            :"Paciente eliminado correctamente.");
+            ?`Paciente e imágenes de ${selectedDate} eliminados correctamente.`
+            :`Paciente de ${selectedDate} eliminado correctamente.`);
         }
 
-        // Refresco separado. Si falla, mantenemos la eliminación local ya aplicada.
-        try{
-          await PACS.data.loadStudies();
-          PACS.state.selectedPatient=null;
-          PACS.state.selectedStudyIndex=0;
-          PACS.state.selectedImage=0;
-          this.render();
-        }catch(refreshErr){
-          console.error("PACS: no se pudo refrescar la lista después de eliminar:",refreshErr);
-          // No restauramos al paciente: ya fue eliminado de Supabase.
-          PACS.state.selectedPatient=null;
-          PACS.state.selectedStudyIndex=0;
-          PACS.state.selectedImage=0;
-          this.render();
-          PACS.ui.toast("Paciente eliminado. La lista se actualizará al volver a cargar.");
+        // Recargamos toda la base: si el paciente tiene estudios en otras fechas, seguirá existiendo en su historial.
+        await PACS.data.loadStudies();
+        const dayPatients=PACS.data.patientsForDate(selectedDate);
+        PACS.state.selectedPatient=dayPatients[0]||null;
+        PACS.state.selectedStudyIndex=0;
+        const current=PACS.data.currentStudy();
+        PACS.state.selectedImage=PACS.data.studyCount(current)>0?1:0;
+        PACS.comments.clear();
+        if(PACS.state.selectedPatient){
+          await PACS.comments.loadForCurrentPatient({rerender:false});
+          await PACS.data.hydratePatientDateStudies(PACS.state.selectedPatient,selectedDate);
         }
+        this.render();
       }catch(err){
-        if(!deletedFromDatabase){
-          PACS.state.patients=backup;
-          PACS.state.selectedPatient=p;
-          this.render();
-          PACS.ui.toast(err.message||"No se pudo eliminar el paciente.");
+        console.error("PACS: error eliminando paciente por fecha:",err);
+        // Si la BD ya confirmó el borrado, no fingimos que sigue existiendo en esa fecha.
+        if(deletedFromDatabase){
+          try{
+            await PACS.data.loadStudies();
+            const dayPatients=PACS.data.patientsForDate(selectedDate);
+            PACS.state.selectedPatient=dayPatients[0]||null;
+            PACS.state.selectedStudyIndex=0;
+            PACS.state.selectedImage=PACS.data.studyCount(PACS.data.currentStudy())>0?1:0;
+            this.render();
+          }catch(_){}
+          PACS.ui.toast("Paciente eliminado de la fecha seleccionada, pero ocurrió un problema al actualizar la interfaz.");
         }else{
-          // Seguridad: si la BD confirmó la eliminación, nunca restauramos el paciente.
-          PACS.state.selectedPatient=null;
-          this.render();
-          PACS.ui.toast("Paciente eliminado, pero ocurrió un problema al actualizar la interfaz.");
+          PACS.ui.toast(err?.message||"No se pudo eliminar el paciente.");
         }
       }
     };
