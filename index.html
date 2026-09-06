@@ -1160,7 +1160,7 @@ body.auth-booting{background:#061014}
 </div></div>
 
 <script>
-/* BUILD HSMP 2026-09-06 V85 · RE-SOLICITUD REVOCADOS + ESTADO PENDIENTE */
+/* BUILD HSMP 2026-09-06 V86 · BUSCADOR MÓVIL + PRESENCIA EN LÍNEA */
 /* ===== config.js ===== */
 window.PACS = window.PACS || {};
 PACS.config = {
@@ -1575,6 +1575,8 @@ PACS.auth = {
     return false;
   },
   async logout(){
+    if(PACS.state._deviceHeartbeatTimer){clearInterval(PACS.state._deviceHeartbeatTimer);PACS.state._deviceHeartbeatTimer=null;}
+    if(PACS.state._deviceAdminRefreshTimer){clearInterval(PACS.state._deviceAdminRefreshTimer);PACS.state._deviceAdminRefreshTimer=null;}
     await PACS.state.client.auth.signOut();
     Object.assign(PACS.state,{logged:false,role:"",deviceStatus:"",deviceDoctorName:"",selectedPatient:null,selectedStudyIndex:0,selectedImage:0});
   }
@@ -1718,6 +1720,31 @@ PACS.devices = {
   async logoutGate(){ await PACS.auth.logout(); PACS.ui.closeModal("deviceRequestModal"); PACS.ui.closeModal("deviceStatusModal"); PACS.app.home(); },
   fmtDate(v){ if(!v)return "—"; try{return new Intl.DateTimeFormat("es-PE",{dateStyle:"short",timeStyle:"short"}).format(new Date(v));}catch(_){return String(v);} },
   escapeHtml(value){ return String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","\'":"&#39;"}[ch])); },
+  isOnline(row){
+    if(!row?.last_seen_at)return false;
+    return (Date.now()-new Date(row.last_seen_at).getTime()) <= 120000;
+  },
+  relativeSeen(v){
+    if(!v)return "sin actividad registrada";
+    const sec=Math.max(0,Math.floor((Date.now()-new Date(v).getTime())/1000));
+    if(sec<60)return `hace ${sec} s`;
+    if(sec<3600)return `hace ${Math.floor(sec/60)} min`;
+    return this.fmtDate(v);
+  },
+  async heartbeat(){
+    if(PACS.state.role!=="viewer" || PACS.state.deviceStatus!=="approved")return;
+    try{
+      const {id,secret}=this.ensureIdentity();
+      const {error}=await PACS.state.client.rpc("device_heartbeat",{p_device_id:id,p_device_secret:secret});
+      if(error)throw error;
+    }catch(err){console.warn("Device heartbeat:",err?.message||err);}
+  },
+  startHeartbeat(){
+    if(PACS.state._deviceHeartbeatTimer){clearInterval(PACS.state._deviceHeartbeatTimer);PACS.state._deviceHeartbeatTimer=null;}
+    if(PACS.state.role!=="viewer" || PACS.state.deviceStatus!=="approved")return;
+    this.heartbeat();
+    PACS.state._deviceHeartbeatTimer=setInterval(()=>this.heartbeat(),60000);
+  },
   async loadAdmin(){
     if(PACS.state.role!=="admin") return [];
     const {data,error}=await PACS.state.client.from("authorized_devices").select("id,created_at,doctor_name,device_type,browser,status,approved_at,last_seen_at").order("created_at",{ascending:false});
@@ -1731,7 +1758,10 @@ PACS.devices = {
   card(row,kind){
     let meta=`${row.device_type||"Dispositivo"} · ${row.browser||"Navegador"}`;
     if(kind==="pending") meta+=` · Solicitud ${this.fmtDate(row.created_at)}`;
-    if(kind==="approved") meta+=row.approved_at?` · Aprobado ${this.fmtDate(row.approved_at)}`:"";
+    if(kind==="approved"){
+      const online=this.isOnline(row);
+      meta+=` · ${online?"EN LÍNEA":"Desconectado"} · Última actividad ${this.relativeSeen(row.last_seen_at)}`;
+    }
     if(kind==="revoked") meta+=row.approved_at?` · Aprobado anteriormente ${this.fmtDate(row.approved_at)}`:"";
     if(kind==="request_allowed") meta+=" · Habilitado para volver a solicitar";
 
@@ -1741,21 +1771,33 @@ PACS.devices = {
     else if(kind==="revoked") actions=`<div class="device-card-actions"><button class="approve" data-action="device-allow-request" data-device-row="${row.id}">PERMITIR NUEVA SOLICITUD</button></div>`;
     else if(kind==="request_allowed") actions=`<div class="device-card-actions"><button class="reject" data-action="device-revoke" data-device-row="${row.id}">CANCELAR PERMISO</button></div>`;
 
-    return `<div class="device-card"><div class="device-card-main"><b>${this.escapeHtml(row.doctor_name||"Sin nombre")}</b><span>${this.escapeHtml(meta)}</span></div>${actions}</div>`;
+    const presence=kind==="approved"?`<span class="device-online-dot ${this.isOnline(row)?"online":""}"></span>`:"";
+    return `<div class="device-card"><div class="device-card-main"><b>${presence}${this.escapeHtml(row.doctor_name||"Sin nombre")}</b><span>${this.escapeHtml(meta)}</span></div>${actions}</div>`;
   },
   async openAdmin(){
     if(PACS.state.role!=="admin")return;
-    document.getElementById("mobileMoreMenu")?.classList.remove("show"); PACS.ui.openModal("deviceControlModal"); await this.renderAdmin();
+    document.getElementById("mobileMoreMenu")?.classList.remove("show");
+    PACS.ui.openModal("deviceControlModal");
+    await this.renderAdmin();
+    if(PACS.state._deviceAdminRefreshTimer)clearInterval(PACS.state._deviceAdminRefreshTimer);
+    PACS.state._deviceAdminRefreshTimer=setInterval(()=>{
+      if(document.getElementById("deviceControlModal")?.classList.contains("show")) this.renderAdmin();
+    },30000);
+  },
+  closeAdmin(){
+    if(PACS.state._deviceAdminRefreshTimer){clearInterval(PACS.state._deviceAdminRefreshTimer);PACS.state._deviceAdminRefreshTimer=null;}
+    PACS.ui.closeModal("deviceControlModal");
   },
   async renderAdmin(){
     const box=document.getElementById("deviceControlBody"); if(!box)return; box.innerHTML='<div class="data-loading">Cargando dispositivos...</div>';
     try{
       const rows=await this.loadAdmin(),
         pending=rows.filter(x=>x.status==="pending"),
-        approved=rows.filter(x=>x.status==="approved"),
+        approved=rows.filter(x=>x.status==="approved").sort((a,b)=>Number(this.isOnline(b))-Number(this.isOnline(a)) || String(b.last_seen_at||"").localeCompare(String(a.last_seen_at||""))),
         revoked=rows.filter(x=>x.status==="revoked"),
         requestAllowed=rows.filter(x=>x.status==="request_allowed");
-      box.innerHTML=`<div class="device-summary"><span class="stat-pill"><b>${pending.length}</b> solicitudes pendientes</span><span class="stat-pill"><b>${approved.length}</b> dispositivos aprobados</span><span class="stat-pill"><b>${revoked.length}</b> revocados</span></div>
+      const onlineCount=approved.filter(x=>this.isOnline(x)).length;
+      box.innerHTML=`<div class="device-summary"><span class="stat-pill"><b>${onlineCount}</b> en línea</span><span class="stat-pill"><b>${pending.length}</b> solicitudes pendientes</span><span class="stat-pill"><b>${approved.length}</b> dispositivos aprobados</span><span class="stat-pill"><b>${revoked.length}</b> revocados</span></div>
       <div class="device-section-title">PENDIENTES</div><div class="device-list">${pending.map(x=>this.card(x,"pending")).join("")||'<div class="device-empty">No hay solicitudes pendientes.</div>'}</div>
       <div class="device-section-title">APROBADOS</div><div class="device-list">${approved.map(x=>this.card(x,"approved")).join("")||'<div class="device-empty">No hay dispositivos aprobados.</div>'}</div>
       <div class="device-section-title">REVOCADOS</div><div class="device-list">${revoked.map(x=>this.card(x,"revoked")).join("")||'<div class="device-empty">No hay dispositivos revocados.</div>'}</div>
@@ -2438,22 +2480,53 @@ PACS.app = {
     PACS.state.selectedImage=PACS.data.studyCount(study)>0?1:0;
     PACS.data.hydratePatientDateStudies(PACS.state.selectedPatient,PACS.state.selectedDate).then(()=>this.render()).catch(err=>console.error("Image hydration:",err));
   },
-  renderSearchResults(mobile=false){
-    const q=PACS.state.searchTerm;
-    const base=q?PACS.state.patients:PACS.data.patientsForDate();
-    const list=base.filter(p=>{
-      if(!q) return true;
-      const haystack=[p.name,...p.studies.flatMap(st=>[st.study,st.date,st.modality])].join(" ").toLowerCase();
-      return haystack.includes(q);
+  normalizeSearch(v){
+    return String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
+  },
+  searchMatches(qRaw){
+    const q=this.normalizeSearch(qRaw);
+    if(!q)return [];
+    return PACS.state.patients.filter(p=>{
+      const haystack=[p.name,...p.studies.flatMap(st=>[st.study,st.date,st.modality])].join(" ");
+      return this.normalizeSearch(haystack).includes(q);
     });
-    const html=list.map(p=>{
-      const matching=q?p.studies.filter(st=>[st.study,st.date,st.modality].join(" ").toLowerCase().includes(q)):p.studies.filter(st=>st.date===PACS.state.selectedDate);
-      const shown=matching[0]||p.studies[0];
+  },
+  patientSearchHtml(list,qRaw){
+    const q=this.normalizeSearch(qRaw);
+    return list.map(p=>{
+      const matching=q?p.studies.filter(st=>this.normalizeSearch([st.study,st.date,st.modality].join(" ")).includes(q)):p.studies.filter(st=>st.date===PACS.state.selectedDate);
+      const shown=matching[0]||p.studies.find(st=>st.date===PACS.state.selectedDate)||p.studies[0];
       const meta=shown?`${shown.study} · ${shown.date}`:"Ver historial";
       return `<button type="button" class="patient ${PACS.state.selectedPatient?.id===p.id?"active":""}" data-patient="${encodeURIComponent(p.id)}"><strong class="patient-name">${PACS.view.patientIcon(p.sex)}${p.name}</strong><span>${meta}</span></button>`;
     }).join("") || `<div class="patient-empty">No se encontraron pacientes.</div>`;
+  },
+  renderSearchResults(mobile=false){
+    const q=PACS.state.searchTerm;
+    const list=q?this.searchMatches(q):PACS.data.patientsForDate();
+    const html=this.patientSearchHtml(list,q);
     const box=document.getElementById(mobile?"mobilePatients":"searchResults");
     if(box)box.innerHTML=mobile?html:`<div class="suggestions">${html}</div>`;
+  },
+  renderMobileTopSearch(){
+    const input=document.getElementById("mobileTopSearch");
+    const box=document.getElementById("mobileTopSearchResults");
+    if(!box)return;
+    const q=input?.value||"";
+    if(!q.trim()){box.innerHTML='<div class="mobile-search-hint">Escribe un nombre o apellido.</div>';return;}
+    box.innerHTML=this.patientSearchHtml(this.searchMatches(q),q);
+  },
+  openMobileSearch(){
+    document.getElementById("menu")?.classList.remove("show");
+    document.getElementById("mobileMoreMenu")?.classList.remove("show");
+    const pop=document.getElementById("mobileSearchPopover");
+    pop?.classList.add("show");
+    const input=document.getElementById("mobileTopSearch");
+    if(input){input.value="";setTimeout(()=>input.focus(),50);}
+    this.renderMobileTopSearch();
+  },
+  closeMobileSearch(){
+    document.getElementById("mobileSearchPopover")?.classList.remove("show");
+    const input=document.getElementById("mobileTopSearch");if(input)input.value="";
   },
   render(){
     if(!PACS.state.logged){this.home();return;}
@@ -2479,6 +2552,7 @@ PACS.app = {
       <div class="tr">
         <div class="search-wrap"><input id="topSearch" class="search" placeholder="🔎 Nombre, estudio o fecha..."><div id="searchResults"></div></div>
         <div class="date-wrap"><button class="date-field" data-action="calendar-toggle">📅 <span id="dateLabel">${st.selectedDate}</span><span class="date-chevron">▾</span></button><div id="calendarPopup" class="calendar-popup"></div></div>
+        <button type="button" class="mobile-top-search" data-action="mobile-search-toggle" aria-label="Buscar paciente" title="Buscar paciente">🔍</button>
         <div class="user"><button id="userButton" data-action="menu-toggle">👤 ${roleLabel} ▾</button><div id="menu" class="menu"><b>${roleLabel}</b><button data-action="logout">🔐 Cerrar sesión</button></div></div>
         ${st.role==="admin"?`<div class="mobile-admin-actions">
           <button type="button" class="mobile-more-btn" data-action="mobile-more-toggle" aria-label="Más acciones" title="Más acciones">⋮</button>
@@ -2493,6 +2567,11 @@ PACS.app = {
             <button class="device-control-btn" data-action="device-control">🔐 <span>Control de dispositivos</span><span class="device-badge" data-device-badge>0</span></button>
           </div>
         </div>`:""}
+        <button type="button" class="mobile-logout-btn" data-action="logout" aria-label="Cerrar sesión" title="Cerrar sesión">↪</button>
+        <div id="mobileSearchPopover" class="mobile-search-popover">
+          <div class="mobile-search-row"><input id="mobileTopSearch" placeholder="Buscar paciente..." autocomplete="off" inputmode="search"><button type="button" class="mobile-search-clear" data-action="mobile-search-close" aria-label="Cerrar búsqueda">×</button></div>
+          <div id="mobileTopSearchResults" class="mobile-search-results"><div class="mobile-search-hint">Escribe un nombre o apellido.</div></div>
+        </div>
       </div>
     </header>
     <main class="layout">
@@ -2546,6 +2625,7 @@ PACS.app = {
     if(st.role==="admin") setTimeout(()=>PACS.devices.refreshAdminBadge(),0);
     this.applyViewerTransform();
     this.bindMobileControls();
+    if(st.role==="viewer" && st.deviceStatus==="approved") PACS.devices.startHeartbeat();
   },
   bindMobileControls(){
     if(!window.matchMedia?.("(max-width: 850px)").matches)return;
@@ -2758,10 +2838,13 @@ PACS.app = {
     document.addEventListener("keydown", e=>this.onKey(e));
     document.addEventListener("input", e=>{
       if(e.target?.id==="topSearch" || e.target?.id==="mobileSearch"){
-        PACS.state.searchTerm=e.target.value.trim().toLowerCase();
+        PACS.state.searchTerm=e.target.value.trim();
         document.getElementById("menu")?.classList.remove("show");
         document.getElementById("mobileMoreMenu")?.classList.remove("show");
         this.renderSearchResults(e.target.id==="mobileSearch");
+      }
+      if(e.target?.id==="mobileTopSearch"){
+        this.renderMobileTopSearch();
       }
     });
     document.addEventListener("wheel",e=>{
@@ -2801,12 +2884,18 @@ PACS.app = {
     const userMenu=document.getElementById("menu");
     const moreMenu=document.getElementById("mobileMoreMenu");
     const searchResults=document.getElementById("searchResults");
+    const mobileSearchPopover=document.getElementById("mobileSearchPopover");
+    if(mobileSearchPopover?.classList.contains("show") && !e.target.closest?.("#mobileSearchPopover") && !e.target.closest?.(".mobile-top-search")) mobileSearchPopover.classList.remove("show");
     if(userMenu?.classList.contains("show") && !e.target.closest?.("#menu") && !e.target.closest?.("#userButton")) userMenu.classList.remove("show");
     if(moreMenu?.classList.contains("show") && !e.target.closest?.("#mobileMoreMenu") && !e.target.closest?.(".mobile-more-btn")) moreMenu.classList.remove("show");
     if(searchResults?.innerHTML && !e.target.closest?.(".search-wrap")) searchResults.innerHTML="";
     if(!e.target.closest?.(".study-search-wrap")) document.querySelectorAll(".study-options.show").forEach(x=>x.classList.remove("show"));
 
-    if(patientBtn){ e.preventDefault(); return PACS.patients.select(decodeURIComponent(patientBtn)); }
+    if(patientBtn){
+      e.preventDefault();
+      this.closeMobileSearch();
+      return PACS.patients.select(decodeURIComponent(patientBtn));
+    }
     if(studyBtn){ e.preventDefault(); return PACS.studies.select(Number(studyBtn.dataset.studyIndex)); }
     if(imageBtn){
       e.preventDefault();
@@ -2881,8 +2970,10 @@ const calDate=e.target.closest?.("[data-calendar-date]")?.dataset?.calendarDate;
       document.getElementById("mobileMoreMenu")?.classList.toggle("show");
       return;
     }
+    if(action==="mobile-search-toggle")return this.openMobileSearch();
+    if(action==="mobile-search-close")return this.closeMobileSearch();
     if(action==="device-control")return PACS.devices.openAdmin();
-    if(action==="close-device-control")return PACS.ui.closeModal("deviceControlModal");
+    if(action==="close-device-control")return PACS.devices.closeAdmin();
     if(action==="device-request-submit")return PACS.devices.submitRequest();
     if(action==="device-status-retry")return PACS.devices.retry();
     if(action==="device-logout")return PACS.devices.logoutGate();
