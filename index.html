@@ -934,28 +934,23 @@ n
 .device-empty{padding:12px;border:1px dashed var(--line);border-radius:9px;color:var(--muted);font-size:12px}
 @media(max-width:650px){.device-card{align-items:flex-start;flex-direction:column}.device-card-actions{width:100%}.device-card-actions button{flex:1}.device-panel{max-height:90vh;overflow:auto}}
 
-/* V87 · Solo controles móviles nuevos; no modifica el layout de escritorio */
-.mobile-top-search,.mobile-logout-btn,.mobile-search-popover{display:none}
-.device-online-dot{display:inline-block!important;width:9px!important;height:9px!important;min-width:9px!important;border-radius:50%!important;background:#d94b4b!important;margin:0 7px 0 0!important;vertical-align:1px!important;box-shadow:0 0 0 2px rgba(217,75,75,.12)!important}
-.device-online-dot.online{background:#35c878!important;box-shadow:0 0 0 2px rgba(53,200,120,.14),0 0 8px rgba(53,200,120,.35)!important}
-.device-presence-label.online{color:#79e5ab!important;font-weight:800}
-.device-presence-label.offline{color:#ff9b9b!important;font-weight:800}
+
+/* V88 · PRESENCIA + BUSCADOR EXCLUSIVAMENTE MÓVIL. No cambia el layout existente. */
+.mobile-top-search,.mobile-search-popover{display:none}
+.device-online-dot{display:inline-block;width:9px;height:9px;min-width:9px;border-radius:50%;background:#d94b4b;margin-right:7px;vertical-align:1px;box-shadow:0 0 0 2px rgba(217,75,75,.12)}
+.device-online-dot.online{background:#35c878;box-shadow:0 0 0 2px rgba(53,200,120,.14),0 0 8px rgba(53,200,120,.35)}
 @media(max-width:850px){
-  /* La fila existente conserva su altura. Solo añadimos iconos al costado de la fecha. */
-  .tr{position:relative!important;justify-content:center!important;flex-wrap:nowrap!important}
-  .tr .user{display:none!important}
-  .tr .date-wrap{flex:0 1 auto!important;min-width:0!important}
-  .tr .date-field{max-width:150px!important;white-space:nowrap!important}
-  .mobile-top-search,.mobile-logout-btn{
-    display:grid!important;place-items:center!important;flex:0 0 38px!important;width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important;
-    padding:0!important;border:1px solid var(--line)!important;border-radius:9px!important;background:#0e1d24!important;color:var(--text)!important;cursor:pointer!important;line-height:1!important
+  /* Conserva fecha a la izquierda y el muñeco/usuario a la derecha. */
+  .tr{position:relative!important}
+  .mobile-top-search{
+    display:grid!important;place-items:center!important;position:absolute!important;left:50%!important;top:50%!important;
+    transform:translate(-50%,-50%)!important;width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important;
+    padding:0!important;border:1px solid var(--line)!important;border-radius:9px!important;background:#0e1d24!important;color:var(--text)!important;
+    font-size:18px!important;line-height:1!important;cursor:pointer!important;z-index:3!important
   }
-  .mobile-top-search{font-size:18px!important}
-  .mobile-logout-btn{font-size:19px!important}
-  .tr .mobile-admin-actions{margin-left:0!important;margin-right:0!important;align-self:center!important}
-  .tr .mobile-more-btn{width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important}
   .mobile-search-popover{
-    display:none;position:absolute;left:0;right:0;top:calc(100% + 5px);z-index:1500;padding:8px;background:#102027;border:1px solid var(--line);border-radius:11px;box-shadow:0 18px 45px #000a
+    display:none;position:absolute;left:50%;top:calc(100% + 5px);transform:translateX(-50%);z-index:1500;
+    width:min(94vw,390px);padding:8px;background:#102027;border:1px solid var(--line);border-radius:11px;box-shadow:0 18px 45px #000a
   }
   .mobile-search-popover.show{display:block}
   .mobile-search-row{display:flex;align-items:center;gap:7px}
@@ -1194,7 +1189,7 @@ body.auth-booting{background:#061014}
 </div></div>
 
 <script>
-/* BUILD HSMP 2026-09-06 V87 · MÓVIL BUSCADOR + PRESENCIA CORREGIDOS */
+/* BUILD HSMP 2026-09-06 V88 · RE-SOLICITUD REVOCADOS + ESTADO PENDIENTE */
 /* ===== config.js ===== */
 window.PACS = window.PACS || {};
 PACS.config = {
@@ -1609,8 +1604,6 @@ PACS.auth = {
     return false;
   },
   async logout(){
-    if(PACS.state._deviceHeartbeatTimer){clearInterval(PACS.state._deviceHeartbeatTimer);PACS.state._deviceHeartbeatTimer=null;}
-    if(PACS.state._deviceAdminRefreshTimer){clearInterval(PACS.state._deviceAdminRefreshTimer);PACS.state._deviceAdminRefreshTimer=null;}
     await PACS.state.client.auth.signOut();
     Object.assign(PACS.state,{logged:false,role:"",deviceStatus:"",deviceDoctorName:"",selectedPatient:null,selectedStudyIndex:0,selectedImage:0});
   }
@@ -1784,7 +1777,7 @@ PACS.devices = {
     if(PACS.state._deviceHeartbeatTimer){clearInterval(PACS.state._deviceHeartbeatTimer);PACS.state._deviceHeartbeatTimer=null;}
     if(PACS.state.role!=="viewer" || PACS.state.deviceStatus!=="approved")return;
     this.heartbeat();
-    PACS.state._deviceHeartbeatTimer=setInterval(()=>this.heartbeat(),45000);
+    PACS.state._deviceHeartbeatTimer=setInterval(()=>this.heartbeat(),30000);
   },
   async loadAdmin(){
     if(PACS.state.role!=="admin") return [];
@@ -1799,7 +1792,7 @@ PACS.devices = {
   card(row,kind){
     let meta=`${row.device_type||"Dispositivo"} · ${row.browser||"Navegador"}`;
     if(kind==="pending") meta+=` · Solicitud ${this.fmtDate(row.created_at)}`;
-    if(kind==="approved"){
+    if(kind==="approved") {
       const online=this.isOnline(row);
       meta+=` · ${online?"EN LÍNEA":"DESCONECTADO"} · Última actividad: ${this.relativeSeen(row.last_seen_at)}`;
     }
@@ -1812,9 +1805,7 @@ PACS.devices = {
     else if(kind==="revoked") actions=`<div class="device-card-actions"><button class="approve" data-action="device-allow-request" data-device-row="${row.id}">PERMITIR NUEVA SOLICITUD</button></div>`;
     else if(kind==="request_allowed") actions=`<div class="device-card-actions"><button class="reject" data-action="device-revoke" data-device-row="${row.id}">CANCELAR PERMISO</button></div>`;
 
-    const presence=kind==="approved"
-      ?`<span class="device-online-dot ${this.isOnline(row)?"online":""}" aria-hidden="true"></span>`
-      :"";
+    const presence=kind==="approved"?`<span class="device-online-dot ${this.isOnline(row)?"online":""}" aria-hidden="true"></span>`:"";
     return `<div class="device-card"><div class="device-card-main"><b>${presence}${this.escapeHtml(row.doctor_name||"Sin nombre")}</b><span>${this.escapeHtml(meta)}</span></div>${actions}</div>`;
   },
   async openAdmin(){
@@ -2529,9 +2520,10 @@ PACS.app = {
   mobileSearchMatches(value){
     const q=this.normalizeMobileSearch(value);
     if(!q)return [];
+    const terms=q.split(/\s+/).filter(Boolean);
     return PACS.state.patients.filter(p=>{
-      const haystack=[p.name,...p.studies.flatMap(st=>[st.study,st.date,st.modality])].join(" ");
-      return this.normalizeMobileSearch(haystack).includes(q);
+      const haystack=this.normalizeMobileSearch([p.name,...p.studies.flatMap(st=>[st.study,st.date,st.modality])].join(" "));
+      return terms.every(term=>haystack.includes(term));
     });
   },
   renderMobileTopSearch(){
@@ -2617,7 +2609,6 @@ PACS.app = {
             <button class="device-control-btn" data-action="device-control">🔐 <span>Control de dispositivos</span><span class="device-badge" data-device-badge>0</span></button>
           </div>
         </div>`:""}
-        <button type="button" class="mobile-logout-btn" data-action="logout" aria-label="Cerrar sesión" title="Cerrar sesión">↪</button>
         <div id="mobileSearchPopover" class="mobile-search-popover">
           <div class="mobile-search-row"><input id="mobileTopSearch" placeholder="Buscar paciente..." autocomplete="off" inputmode="search"><button type="button" class="mobile-search-clear" data-action="mobile-search-close" aria-label="Cerrar búsqueda">×</button></div>
           <div id="mobileTopSearchResults" class="mobile-search-results"><div class="mobile-search-hint">Escribe un nombre o apellido.</div></div>
@@ -2672,10 +2663,10 @@ PACS.app = {
     <div id="overlay" class="overlay" data-action="side-close"></div>
     <aside id="side" class="side"><div style="display:flex;justify-content:space-between"><b>← PACIENTES</b><button class="close" data-action="side-close">×</button></div><div class="stats-row"><span class="stat-pill"><b>${dayPatients.length}</b> pacientes</span><span class="stat-pill"><b>${dayStudies}</b> estudios</span><span class="stat-pill"><b>${cycleTotal}</b> total</span></div><input id="mobileSearch" placeholder="🔎 Nombre, estudio o fecha...">${mobileAdd}<div id="mobilePatients" class="patients">${list}</div></aside>`;
     this.renderThumbSync();
+    if(st.role==="viewer" && st.deviceStatus==="approved") PACS.devices.startHeartbeat();
     if(st.role==="admin") setTimeout(()=>PACS.devices.refreshAdminBadge(),0);
     this.applyViewerTransform();
     this.bindMobileControls();
-    if(st.role==="viewer" && st.deviceStatus==="approved") PACS.devices.startHeartbeat();
   },
   bindMobileControls(){
     if(!window.matchMedia?.("(max-width: 850px)").matches)return;
@@ -2932,11 +2923,11 @@ PACS.app = {
     const userMenu=document.getElementById("menu");
     const moreMenu=document.getElementById("mobileMoreMenu");
     const searchResults=document.getElementById("searchResults");
-    const mobileSearchPopover=document.getElementById("mobileSearchPopover");
-    if(mobileSearchPopover?.classList.contains("show") && !e.target.closest?.("#mobileSearchPopover") && !e.target.closest?.(".mobile-top-search")) mobileSearchPopover.classList.remove("show");
     if(userMenu?.classList.contains("show") && !e.target.closest?.("#menu") && !e.target.closest?.("#userButton")) userMenu.classList.remove("show");
     if(moreMenu?.classList.contains("show") && !e.target.closest?.("#mobileMoreMenu") && !e.target.closest?.(".mobile-more-btn")) moreMenu.classList.remove("show");
     if(searchResults?.innerHTML && !e.target.closest?.(".search-wrap")) searchResults.innerHTML="";
+    const mobileSearchPopover=document.getElementById("mobileSearchPopover");
+    if(mobileSearchPopover?.classList.contains("show") && !e.target.closest?.("#mobileSearchPopover") && !e.target.closest?.(".mobile-top-search")) mobileSearchPopover.classList.remove("show");
     if(!e.target.closest?.(".study-search-wrap")) document.querySelectorAll(".study-options.show").forEach(x=>x.classList.remove("show"));
 
     if(patientBtn){ e.preventDefault(); this.closeMobileSearch(); return PACS.patients.select(decodeURIComponent(patientBtn)); }
