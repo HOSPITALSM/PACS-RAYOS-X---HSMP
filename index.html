@@ -3652,3 +3652,18 @@ document.addEventListener("change",function(e){
 </script>
 </body>
 </html>
+
+<style>
+/* PC — scroll vertical en Control de dispositivos */
+@media(min-width:851px){
+  .device-panel{
+    max-height:85vh !important;
+    overflow-y:auto !important;
+    overflow-x:hidden !important;
+    scrollbar-width:thin;
+  }
+  .device-panel::-webkit-scrollbar{width:8px}
+  .device-panel::-webkit-scrollbar-thumb{background:#2b4854;border-radius:8px}
+  .device-panel::-webkit-scrollbar-track{background:transparent}
+}
+</style>
