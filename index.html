@@ -3667,13 +3667,7 @@ const calDate=e.target.closest?.("[data-calendar-date]")?.dataset?.calendarDate;
 @media(max-width:850px){
  .mobile-nav{grid-template-columns:repeat(3,minmax(0,1fr))!important}
  .mobile-nav button{font-size:12px!important;min-height:54px}
- .layout{padding-bottom:0!important;min-height:0!important}
- .viewer{height:calc(100dvh - 62px - 64px - env(safe-area-inset-bottom))!important;min-height:0!important}
- .viewer .image{min-height:0!important;height:auto!important;flex:1 1 auto!important}
- .viewer .tools{overflow-x:auto!important;flex-shrink:0}
- .viewer .thumbs{height:58px!important;min-height:58px!important;flex-basis:58px!important}
  .history{display:none}
- .pacs-viewer-fullscreen .viewer{height:100dvh!important}
  #patientHistoryModal{bottom:calc(64px + env(safe-area-inset-bottom));padding:10px}
  #patientHistoryModal .modal{width:100%;max-height:100%;padding:16px}
 }
