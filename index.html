@@ -1449,13 +1449,18 @@ PACS.data = {
       ])
     );
 
-    const {data,error}=await PACS.state.client
-      .from("studies")
-      .select("*")
-      .order("date",{ascending:false})
-      .order("created_at",{ascending:false});
-
-    if(error) throw error;
+    // Leer páginas hasta una respuesta vacía: también funciona con límites del servidor inferiores a 500.
+    const data=[];
+    let offset=0;
+    while(true){
+      const {data:page,error}=await PACS.state.client.from("studies").select("*")
+        .order("date",{ascending:false}).order("created_at",{ascending:false})
+        .order("id",{ascending:false}).range(offset,offset+499);
+      if(error)throw error;
+      if(!page?.length)break;
+      data.push(...page);
+      offset+=page.length;
+    }
 
     const fresh=this.mapRows(data||[]);
 
@@ -2712,7 +2717,7 @@ PACS.app = {
       </aside>
     </main>
     <section class="history"><h2>HISTORIAL DEL PACIENTE · ${p?.name||"—"}</h2>${history}</section>
-    <nav class="mobile-nav"><button data-mobile="home"><span>🏠</span>Inicio</button><button data-mobile="patients"><span>👥</span>Pacientes</button>${mobileComments}<button data-mobile="viewer" class="active"><span>🩻</span>Visor</button></nav>
+    <nav class="mobile-nav"><button data-mobile="patients"><span>👥</span>Pacientes</button>${mobileComments}<button data-mobile="history"><span>◷</span>Historial</button></nav>
     <div id="overlay" class="overlay" data-action="side-close"></div>
     <aside id="side" class="side"><div style="display:flex;justify-content:space-between"><b>← PACIENTES</b><button class="close" data-action="side-close">×</button></div><div class="stats-row"><span class="stat-pill"><b>${dayPatients.length}</b> pacientes</span><span class="stat-pill"><b>${dayStudies}</b> estudios</span><span class="stat-pill"><b>${cycleTotal}</b> total</span></div><input id="mobileSearch" placeholder="🔎 Nombre, estudio o fecha...">${mobileAdd}<div id="mobilePatients" class="patients">${list}</div></aside>`;
     this.renderThumbSync();
@@ -3640,6 +3645,174 @@ const calDate=e.target.closest?.("[data-calendar-date]")?.dataset?.calendarDate;
 
 
 </script>
+
+<style>
+/* V86: navegación e historial; los gestos y herramientas originales no se modifican. */
+#patientModal .name-field{position:relative}
+#patientNameSuggestions{margin-top:6px;max-height:210px;overflow:auto;border-radius:9px;background:var(--panel);border:1px solid var(--line)}
+#patientNameSuggestions:empty{display:none}
+#patientNameSuggestions button{display:block;width:100%;text-align:left;background:transparent;border:0;border-bottom:1px solid var(--line);padding:11px;color:var(--text)}
+#patientNameSuggestions button:hover,#patientNameSuggestions button:focus{background:#17313b;outline:2px solid var(--cyan);outline-offset:-2px}
+#patientNameSuggestions small{display:block;color:var(--muted);margin-top:4px}
+#patientHistoryModal{z-index:950}
+#patientHistoryModal .modal{width:min(760px,94vw);max-height:88dvh;overflow:auto}
+.history-filters{display:flex;gap:8px;overflow-x:auto;padding:12px 2px}
+.history-filters button{flex-shrink:0;background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:20px;padding:9px 14px}
+.history-filters button.active{background:var(--cyan);color:var(--bg)}
+.history-study{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px;border:1px solid var(--line);border-radius:10px;margin:8px 0;background:var(--panel)}
+.history-study small{display:block;color:var(--muted);margin-top:5px}
+.history-study button{background:#0d2a38;border:1px solid var(--cyan);color:var(--cyan);border-radius:8px;padding:10px 16px;flex-shrink:0}
+.history-study.current{border-color:var(--cyan)}
+.history-patient-name{color:var(--cyan);margin-top:10px}
+@media(max-width:850px){
+ .mobile-nav{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+ .mobile-nav button{font-size:12px!important;min-height:54px}
+ .layout{padding-bottom:0!important;min-height:0!important}
+ .viewer{height:calc(100dvh - 62px - 64px - env(safe-area-inset-bottom))!important;min-height:0!important}
+ .viewer .image{min-height:0!important;height:auto!important;flex:1 1 auto!important}
+ .viewer .tools{overflow-x:auto!important;flex-shrink:0}
+ .viewer .thumbs{height:58px!important;min-height:58px!important;flex-basis:58px!important}
+ .history{display:none}
+ .pacs-viewer-fullscreen .viewer{height:100dvh!important}
+ #patientHistoryModal{bottom:calc(64px + env(safe-area-inset-bottom));padding:10px}
+ #patientHistoryModal .modal{width:100%;max-height:100%;padding:16px}
+}
+</style>
+<script>
+/* V86 — mejoras de interfaz y calendario, sin modificar datos ni autorización. */
+(function(){
+ const app=PACS.app, esc=v=>PACS.devices.escapeHtml(v);
+ let calendarView=null, historyFilter="", historyPatient="";
+ app.calendarBase=function(){
+   const [,mon,y]=PACS.state.selectedDate.split(" ");
+   const month=PACS.constants.months.findIndex(m=>m.startsWith(mon));
+   return {month:month<0?new Date().getMonth():month,year:Number(y)||new Date().getFullYear()};
+ };
+ app.toggleCalendar=function(e){
+   e?.stopPropagation();
+   const popup=document.getElementById("calendarPopup");if(!popup)return;
+   popup.classList.toggle("show");
+   if(popup.classList.contains("show")){calendarView=this.calendarBase();this.drawCalendar();}
+ };
+ app.drawCalendar=function(){
+   const popup=document.getElementById("calendarPopup");if(!popup)return;
+   const {month,year}=calendarView||(calendarView=this.calendarBase());
+   const start=(new Date(year,month,1).getDay()+6)%7,days=new Date(year,month+1,0).getDate();
+   let html=PACS.constants.weekdays.map(w=>`<div class="cal-week">${w}</div>`).join("");
+   for(let i=0;i<42;i++){
+     const day=i-start+1;
+     if(day<1||day>days){html+='<div class="cal-day muted-day"></div>';continue;}
+     const label=`${String(day).padStart(2,"0")} ${PACS.constants.months[month].slice(0,3)} ${year}`;
+     html+=`<button type="button" class="cal-day ${label===PACS.state.selectedDate?"selected":""} ${PACS.data.patientsForDate(label).length?"has-study":""}" data-calendar-date="${label}">${day}</button>`;
+   }
+   popup.innerHTML=`<div class="cal-head"><button type="button" aria-label="Mes anterior" class="cal-nav" data-calendar-step="-1">‹</button><div class="cal-title">${PACS.constants.months[month]} ${year}</div><button type="button" aria-label="Mes siguiente" class="cal-nav" data-calendar-step="1">›</button></div><div class="cal-grid">${html}</div>`;
+ };
+ app.moveCalendar=function(delta){
+   if(!Number.isInteger(delta))return;
+   const view=calendarView||this.calendarBase();
+   const d=new Date(view.year,view.month+delta,1);
+   calendarView={year:d.getFullYear(),month:d.getMonth()};this.drawCalendar();
+ };
+ app.closeHistory=function(){
+   PACS.ui.closeModal("patientHistoryModal");
+   document.querySelector('[data-mobile="history"]')?.classList.remove("active");
+ };
+ app.historyContent=function(){
+   const p=PACS.state.selectedPatient;
+   if(!p?.studies?.length)return '<div class="muted">Selecciona un paciente para consultar su historial.</div>';
+   const structures=[...new Set(p.studies.map(s=>s.study).filter(Boolean))].sort();
+   if(!structures.includes(historyFilter))historyFilter="";
+   let html=`<div class="history-patient-name">${esc(p.name)}</div><div class="history-filters">${["",...structures].map(v=>`<button type="button" data-history-filter="${esc(v)}" class="${v===historyFilter?"active":""}" aria-pressed="${v===historyFilter}">${esc(v||"Todos")}</button>`).join("")}</div>`;
+   const entries=p.studies.map((study,index)=>({study,index})).filter(x=>!historyFilter||x.study.study===historyFilter)
+     .sort((a,b)=>PACS.data.dateISO(b.study.date).localeCompare(PACS.data.dateISO(a.study.date))||a.index-b.index);
+   let date=null;
+   for(const {study,index} of entries){
+     if(date!==study.date){date=study.date;html+=`<div class="day">${esc(date)}</div>`;}
+     const current=index===PACS.state.selectedStudyIndex;
+     html+=`<div class="history-study ${current?"current":""}"><div><b>${esc(study.study||"ESTUDIO")}</b><small>${PACS.data.studyCount(study)} imágenes${current?" · Estudio actual":""}</small></div><button type="button" data-history-open="${index}">Abrir</button></div>`;
+   }
+   return html;
+ };
+ app.openHistory=function(){
+   if(!PACS.state.logged)return;
+   if(!PACS.state.selectedPatient)return PACS.ui.toast("Selecciona un paciente primero.");
+   this.closeSide();
+   if(historyPatient!==PACS.state.selectedPatient.id){historyPatient=PACS.state.selectedPatient.id;historyFilter="";}
+   let modal=document.getElementById("patientHistoryModal");
+   if(!modal){
+     modal=document.createElement("div");modal.id="patientHistoryModal";modal.className="modal-bg";
+     modal.setAttribute("role","dialog");modal.setAttribute("aria-modal","true");modal.setAttribute("aria-labelledby","patientHistoryTitle");
+     modal.innerHTML='<div class="modal"><div class="mh"><b id="patientHistoryTitle">HISTORIAL DEL PACIENTE</b><button type="button" class="close" data-history-close aria-label="Cerrar historial">×</button></div><div id="patientHistoryBody"></div></div>';
+     document.body.appendChild(modal);
+   }
+   document.getElementById("patientHistoryBody").innerHTML=this.historyContent();
+   PACS.ui.openModal("patientHistoryModal");
+   modal.querySelector("[data-history-close]").focus({preventScroll:true});
+ };
+ const oldMobile=app.mobileNavigate;
+ app.mobileNavigate=function(which){
+   if(which==="history"){
+     this.openHistory();
+     document.querySelectorAll(".mobile-nav button").forEach(b=>b.classList.toggle("active",b.dataset.mobile==="history"));return;
+   }
+   this.closeHistory();return oldMobile.call(this,which);
+ };
+ const oldHome=app.home;
+ app.home=function(){this.closeHistory();return oldHome.call(this);};
+ const oldOpen=app.openAddPatient;
+ app.openAddPatient=function(){
+   oldOpen.call(this);
+   if(PACS.state.role!=="admin")return;
+   const input=document.getElementById("pName");
+   let box=document.getElementById("patientNameSuggestions");
+   if(!box){box=document.createElement("div");box.id="patientNameSuggestions";box.setAttribute("aria-label","Pacientes registrados");input.after(box);}
+   box.innerHTML="";input.setAttribute("aria-controls",box.id);input.setAttribute("aria-expanded","false");
+   input.focus({preventScroll:true});
+ };
+ const normalize=v=>String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toUpperCase().trim();
+ let suggestions=[];
+ app.suggestPatientNames=function(){
+   const input=document.getElementById("pName"),box=document.getElementById("patientNameSuggestions");if(!input||!box)return;
+   const words=normalize(input.value).split(/\s+/).filter(Boolean);
+   suggestions=words.length?(PACS.state.patients||[]).filter(p=>words.every(w=>normalize(p.name).includes(w))).slice(0,12):[];
+   box.innerHTML=suggestions.map((p,i)=>`<button type="button" data-name-suggestion="${i}"><b>${esc(p.name)}</b><small>Paciente registrado · Último estudio: ${esc(p.studies?.[0]?.date||"—")}</small></button>`).join("");
+   input.setAttribute("aria-expanded",String(suggestions.length>0));
+ };
+ document.addEventListener("input",e=>{if(e.target.id==="pName"&&!e.isComposing)app.suggestPatientNames();});
+ document.addEventListener("compositionend",e=>{if(e.target.id==="pName")app.suggestPatientNames();});
+ document.addEventListener("click",e=>{
+   const suggestion=e.target.closest?.("[data-name-suggestion]");
+   if(suggestion){
+     const p=suggestions[Number(suggestion.dataset.nameSuggestion)];if(!p)return;
+     document.getElementById("pName").value=p.name;
+     const sex=String(p.sex||"").toUpperCase();document.getElementById("pSex").value=sex;
+     document.querySelectorAll('input[name="pSexChoice"]').forEach(r=>r.checked=r.value===sex);
+     document.getElementById("patientNameSuggestions").innerHTML="";
+     document.getElementById("pName").setAttribute("aria-expanded","false");return;
+   }
+   if(!e.target.closest?.("#patientModal .name-field")){
+     const box=document.getElementById("patientNameSuggestions");if(box)box.innerHTML="";
+     document.getElementById("pName")?.setAttribute("aria-expanded","false");
+   }
+   if(e.target.closest?.("[data-history-close]")||e.target.id==="patientHistoryModal"){app.closeHistory();return;}
+   const filter=e.target.closest?.("[data-history-filter]");
+   if(filter){historyFilter=filter.dataset.historyFilter;document.getElementById("patientHistoryBody").innerHTML=app.historyContent();return;}
+   const open=e.target.closest?.("[data-history-open]");
+   if(open){app.closeHistory();PACS.studies.select(Number(open.dataset.historyOpen));}
+ });
+ document.addEventListener("keydown",e=>{
+   const box=document.getElementById("patientNameSuggestions");
+   if(e.key==="Escape"){app.closeHistory();if(box)box.innerHTML="";return;}
+   if(!box?.children.length)return;
+   if(e.target.id!=="pName"&&!e.target.closest?.("#patientNameSuggestions"))return;
+   const buttons=[...box.querySelectorAll("button")],index=buttons.indexOf(document.activeElement);
+   if(e.key==="ArrowDown"||e.key==="ArrowUp"){
+     e.preventDefault();const next=index<0?(e.key==="ArrowDown"?0:buttons.length-1):(index+(e.key==="ArrowDown"?1:-1)+buttons.length)%buttons.length;buttons[next].focus();
+   }
+ });
+})();
+</script>
+
 <script>
 Promise.resolve(window.PACS.app.start()).finally(()=>{
   document.body.classList.remove("auth-booting");
