@@ -1,15 +1,17 @@
 'use strict';
 (()=>{
  let promptEvent=null;
- const standalone=()=>window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+ let installedThisSession=false;
+ const standalone=()=>['standalone','fullscreen','minimal-ui','window-controls-overlay'].some(mode=>window.matchMedia('(display-mode: '+mode+')').matches)||navigator.standalone===true;
  const style=document.createElement('style');style.textContent=`
+ .pacs-install[hidden]{display:none!important}
  .pacs-install{display:block;margin:14px auto 0;padding:10px 16px;background:#102028;color:#5ed2e5;border:1px solid #31515d;border-radius:9px;font:inherit;cursor:pointer}
  #pwaHelp,#pwaAccess{position:fixed;inset:0;z-index:20000;display:grid;place-items:center;background:#061015;color:#eef8fa;font:16px system-ui;padding:24px;text-align:center}
  #pwaHelp>div,#pwaAccess>div{max-width:430px}#pwaHelp button,#pwaAccess button{padding:12px 20px;margin:12px;background:#5ed2e5;border:0;border-radius:9px;font:inherit}
  `;document.head.appendChild(style);
  const button=document.createElement('button');button.type='button';button.className='pacs-install';button.textContent='Instalar aplicación';
  function mount(){
-  button.hidden=standalone();
+  button.hidden=standalone()||installedThisSession;
   const host=document.querySelector('#root .center')||document.getElementById('menu');
   if(host&&!host.contains(button))host.appendChild(button);
  }
@@ -27,7 +29,12 @@
   try{await e.prompt();await e.userChoice;}catch(_){help();}
  };
  window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();promptEvent=e;mount()});
- window.addEventListener('appinstalled',()=>{promptEvent=null;button.hidden=true});
+ window.addEventListener('appinstalled',()=>{promptEvent=null;installedThisSession=true;mount()});
+ for(const mode of ['standalone','fullscreen','minimal-ui','window-controls-overlay']){
+  const media=window.matchMedia('(display-mode: '+mode+')');
+  if(media.addEventListener)media.addEventListener('change',mount);
+ }
+ window.addEventListener('pageshow',mount);
  const observer=new MutationObserver(mount);observer.observe(document.getElementById('root')||document.body,{subtree:true,childList:true});mount();
  if('serviceWorker' in navigator&&window.isSecureContext&&/^https?:$/.test(location.protocol)){
   window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js',{scope:'./',updateViaCache:'none'}).catch(err=>console.warn('No se pudo activar la instalación:',err)));
