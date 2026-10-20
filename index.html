@@ -1094,6 +1094,25 @@ body.auth-booting{background:#061014}
   .notice-text{font-size:14px}
 }
 </style>
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="theme-color" content="#061015">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PACS HSMP">
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+<script src="./pwa.js" defer></script>
+<style>
+.patient-avatar{display:inline-flex!important;align-items:center;justify-content:center;width:28px;height:28px;min-width:28px;flex:0 0 28px;margin:0 6px 0 0!important;vertical-align:middle;border:1px solid currentColor;border-radius:50%;background:#183146;color:#4da8f5}
+.patient-avatar.female{color:#f38cb8;background:#392532}
+.patient-avatar.unknown{color:#a8b3bd;background:#26313a}
+/* Prioridad explícita: las reglas de texto secundario .patient span no deben volver grises los avatares. */
+.patient-avatar.male,.patient .patient-avatar.male{color:#59baff!important;background:#123a57!important;border-color:#438fc5!important}
+.patient-avatar.female,.patient .patient-avatar.female{color:#ff9bc8!important;background:#48283d!important;border-color:#bd6a95!important}
+.patient-avatar.unknown,.patient .patient-avatar.unknown{color:#c3ccd4!important;background:#2c3943!important;border-color:#7e909e!important}
+.patient-avatar svg{display:block;width:24px;height:24px;flex-shrink:0}
+.mobile-patient-context .patient-avatar{width:25px;height:25px;min-width:25px;flex-basis:25px}
+</style>
 </head>
 <body class="auth-booting">
 
@@ -2208,12 +2227,15 @@ PACS.studies = {
 window.PACS = window.PACS || {};
 PACS.view = {
   patientIcon(sex){
-    const v=String(sex??"").trim().toUpperCase();
-    const male=["M","MALE","MASCULINO","HOMBRE","1"].includes(v);
-    const female=["F","FEMALE","FEMENINO","MUJER","2"].includes(v);
-    if(male) return '<span class="sex-symbol male" aria-label="Masculino" title="Masculino">♂</span>';
-    if(female) return '<span class="sex-symbol female" aria-label="Femenino" title="Femenino">♀</span>';
-    return '<span class="sex-symbol unknown" aria-label="Sexo no especificado" title="Sexo no especificado">•</span>';
+    const value=String(sex??"").trim().toUpperCase();
+    const male=["M","MALE","MASCULINO","HOMBRE","1"].includes(value);
+    const female=["F","FEMALE","FEMENINO","MUJER","2"].includes(value);
+    const kind=male?"male":female?"female":"unknown";
+    const label=male?"Masculino":female?"Femenino":"Sexo no especificado";
+    const hair=male
+      ?'<path d="M8 11V9a4 4 0 0 1 8 0v2M8 9c2 1 4 1 6-1l2 2"/>'
+      :female?'<path d="M7.5 16V9a4.5 4.5 0 0 1 9 0v7M8.5 10c2-.4 3.5-1.4 4.5-3 1 1.8 2 2.5 3 3"/>':'';
+    return `<span class="patient-avatar ${kind}" role="img" aria-label="${label}" title="${label}"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">${hair}<path d="M8.5 10v2.5a3.5 3.5 0 0 0 7 0V10M10 16v1m4-1v1M4.5 21v-1c0-2 2-3 5.5-3l2 1.5 2-1.5c3.5 0 5.5 1 5.5 3v1z"/>${!male&&!female?'<path d="M8.5 10a3.5 3.5 0 0 1 7 0"/>':''}</svg></span>`;
   },
   patientList(){
     const list=PACS.data.patientsForDate();
