@@ -1,7 +1,7 @@
 'use strict';
 // Solo se almacena la pantalla pública sin conexión y los iconos. Nunca el visor ni Supabase.
-const CACHE='pacs-hsmp-public-v1';
-const PUBLIC=['offline.html','icons/icon-192.png','icons/icon-512.png','icons/icon-maskable-512.png','icons/apple-touch-icon.png'];
+const CACHE='pacs-hsmp-public-v2';
+const PUBLIC=['offline.html','icons/icon-logo-192.png','icons/icon-logo-512.png','icons/icon-logo-maskable-512.png','icons/apple-logo-180.png'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(PUBLIC.map(p=>new URL(p,self.registration.scope).href)))));
 self.addEventListener('activate',event=>event.waitUntil((async()=>{
  for(const key of await caches.keys())if(key.startsWith('pacs-hsmp-public-')&&key!==CACHE)await caches.delete(key);
